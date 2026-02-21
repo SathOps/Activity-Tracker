@@ -55,6 +55,9 @@ const mockInternById: Record<string, InternSummary> = {
   INT001: { id: "INT001", name: "Aarav Reddy" },
   INT002: { id: "INT002", name: "Saanvi Nair" },
   INT003: { id: "INT003", name: "Vihaan Kumar" },
+  INT004: { id: "INT004", name: "Ananya Sharma" },
+  INT005: { id: "INT005", name: "Rohan Reddy" },
+  INT006: { id: "INT006", name: "Priya Nair" },
 };
 
 const mockAudiosByInternId: Record<string, InternAudioMetadata[]> = {
@@ -162,6 +165,30 @@ export async function searchInternById(internId: string): Promise<InternSummary>
   return parseInternSummary(payload, normalizedInternId);
 }
 
+export async function searchInternsByName(
+  query: string
+): Promise<InternSummary[]> {
+  const trimmed = query.trim();
+
+  if (!trimmed) {
+    return [];
+  }
+
+  if (runtimeConfig.useMock) {
+    return getMockInternsByName(trimmed);
+  }
+
+  const payload = await requestCorpusApi(
+    `/api/v1/users/search?query=${encodeURIComponent(trimmed)}`
+  );
+
+  if (!payload) {
+    return [];
+  }
+
+  return parseInternList(payload);
+}
+
 export async function getInternAudios(
   internId: string
 ): Promise<InternAudioMetadata[]> {
@@ -204,6 +231,29 @@ function normalizeInternId(internId: string): string {
 
 function getMockIntern(internId: string): InternSummary {
   return mockInternById[internId.toUpperCase()] ?? { id: internId };
+}
+
+function getMockInternsByName(query: string): InternSummary[] {
+  const lowerQuery = query.toLowerCase();
+
+  return Object.values(mockInternById).filter((intern) =>
+    intern.name?.toLowerCase().includes(lowerQuery)
+  );
+}
+
+function parseInternList(payload: unknown): InternSummary[] {
+  const items = resolveArray(payload);
+
+  return items
+    .map((item) => {
+      if (!isRecord(item)) {
+        return null;
+      }
+      return parseInternSummary(item, "");
+    })
+    .filter(
+      (item): item is InternSummary => item !== null && item.id !== ""
+    );
 }
 
 function getMockAudios(internId: string): InternAudioMetadata[] {
