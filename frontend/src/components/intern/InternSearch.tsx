@@ -1,7 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 
 const DEBOUNCE_MS = 300;
-const CORPUS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzE3NTA2MDYsInN1YiI6IjdmNjk0ODkwLWMzZTEtNGFiNC04NWI1LTBjMGZiMjhkOTFiNSJ9.r6JIHRIchboImWJRxYZ3zFWG6O8lRhUHLg3XQ5loG84";
 
 export interface Intern {
     id: string;
@@ -9,8 +8,8 @@ export interface Intern {
 }
 
 /**
- * Calls GET /api/v1/users/search?query=... via the Vite proxy
- * to fetch real users from the Swecha Corpus backend.
+ * Calls GET /api/v1/users/search?query=... via the Vite proxy.
+ * Auth token is injected server-side by the proxy (from .env CORPUS_TOKEN).
  */
 async function searchUsersFromCorpus(query: string): Promise<Intern[]> {
     const url = `/api/v1/users/search?query=${encodeURIComponent(query)}`;
@@ -19,7 +18,6 @@ async function searchUsersFromCorpus(query: string): Promise<Intern[]> {
         method: "GET",
         headers: {
             Accept: "application/json",
-            Authorization: `Bearer ${CORPUS_TOKEN}`,
         },
     });
 
