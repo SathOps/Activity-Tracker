@@ -52,16 +52,26 @@ async function searchUsersFromCorpus(query: string): Promise<Intern[]> {
         .filter((intern): intern is Intern => intern !== null && intern.id !== "");
 }
 
+export interface InternSearchProps {
+    /** When provided, use parent-controlled interns list instead of local state */
+    addedInterns?: Intern[];
+    /** Called when an intern is added; required when addedInterns is provided */
+    onInternsChange?: (interns: Intern[]) => void;
+}
+
 /**
  * Standalone search-and-add component.
  * Searches users from real Corpus API and allows
  * adding them to a local interns list.
  */
-const InternSearch: React.FC = () => {
+const InternSearch: React.FC<InternSearchProps> = ({ addedInterns, onInternsChange }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<Intern[]>([]);
-    const [internsList, setInternsList] = useState<Intern[]>([]);
+    const [localInternsList, setLocalInternsList] = useState<Intern[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+
+    // Use parent-controlled list when provided, otherwise use local state
+    const internsList = addedInterns ?? localInternsList;
 
     const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -131,7 +141,12 @@ const InternSearch: React.FC = () => {
             return;
         }
 
-        setInternsList((prev) => [...prev, intern]);
+        const updated = [...internsList, intern];
+        if (onInternsChange) {
+            onInternsChange(updated);
+        } else {
+            setLocalInternsList(updated);
+        }
     };
 
     return (
