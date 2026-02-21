@@ -182,7 +182,7 @@ async function requestCorpusApi(path: string): Promise<unknown | undefined> {
   const fetcher = runtimeConfig.fetcher;
   const baseUrl = trimTrailingSlash(runtimeConfig.baseUrl);
 
-  if (!fetcher || !baseUrl) {
+  if (!fetcher) {
     return undefined;
   }
 
@@ -192,7 +192,8 @@ async function requestCorpusApi(path: string): Promise<unknown | undefined> {
     headers.Authorization = `Bearer ${runtimeConfig.authToken}`;
   }
 
-  const response = await fetcher(`${baseUrl}${path}`, {
+  const requestUrl = baseUrl ? `${baseUrl}${path}` : path;
+  const response = await fetcher(requestUrl, {
     method: "GET",
     headers,
   });

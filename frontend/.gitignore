@@ -26,8 +26,3 @@ pnpm-debug.log*
 .vscode/
 .idea/
 *.swp
-
-# Build artifacts
-*.tsbuildinfo
-vite.config.d.ts
-vite.config.js
