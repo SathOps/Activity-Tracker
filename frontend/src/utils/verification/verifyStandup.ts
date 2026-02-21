@@ -7,11 +7,6 @@ export interface StandupVerificationResult {
   internId: string;
   validCount: number;
   status: SubmissionStatus;
-  checkedDate?: string;
-}
-
-export interface StandupVerificationOptions {
-  uploadedOnDate?: string;
 }
 
 const TARGET_CATEGORY = "standup";
@@ -22,22 +17,17 @@ const STANDUP_ALIAS_ENV_KEY = "STANDUP_LABEL_ALIASES";
 const INTERNSHIP_ALIAS_ENV_KEY = "INTERNSHIP_LABEL_ALIASES";
 
 export async function verifyStandupSubmission(
-  internId: string,
-  options: StandupVerificationOptions = {}
+  internId: string
 ): Promise<StandupVerificationResult> {
   const normalizedInternId = normalizeInternId(internId);
-  const checkedDate = normalizeFilterDate(options.uploadedOnDate);
   const audios = await getInternAudios(normalizedInternId);
 
-  const validCount = audios.filter((audio) =>
-    isValidStandupSubmissionAudio(audio) && matchesUploadedDate(audio, checkedDate)
-  ).length;
+  const validCount = audios.filter(isValidStandupSubmissionAudio).length;
 
   return {
     internId: normalizedInternId,
     validCount,
     status: validCount > 0 ? "COMPLETED" : "PENDING",
-    checkedDate,
   };
 }
 
@@ -62,47 +52,6 @@ function normalizeInternId(internId: string): string {
   }
 
   return normalizedInternId;
-}
-
-function normalizeFilterDate(rawDate: string | undefined): string | undefined {
-  if (!rawDate) {
-    return undefined;
-  }
-
-  const trimmed = rawDate.trim();
-
-  if (!trimmed) {
-    return undefined;
-  }
-
-  const parsedDate = new Date(trimmed);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    throw new Error("uploadedOnDate must be a valid date (recommended: YYYY-MM-DD).");
-  }
-
-  return parsedDate.toISOString().slice(0, 10);
-}
-
-function matchesUploadedDate(
-  audio: Pick<InternAudioMetadata, "uploadedAt">,
-  expectedDate: string | undefined
-): boolean {
-  if (!expectedDate) {
-    return true;
-  }
-
-  if (!audio.uploadedAt) {
-    return false;
-  }
-
-  const parsedDate = new Date(audio.uploadedAt);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return false;
-  }
-
-  return parsedDate.toISOString().slice(0, 10) === expectedDate;
 }
 
 function normalizeComparableValue(value: string): string {
@@ -141,9 +90,12 @@ function resolveSubmissionCriteria(): {
   internshipAliases: Set<string>;
 } {
   return {
-    standupAliases: buildAliasSet(getEnvValue(STANDUP_ALIAS_ENV_KEY), DEFAULT_STANDUP_ALIASES),
+    standupAliases: buildAliasSet(
+      process.env[STANDUP_ALIAS_ENV_KEY],
+      DEFAULT_STANDUP_ALIASES
+    ),
     internshipAliases: buildAliasSet(
-      getEnvValue(INTERNSHIP_ALIAS_ENV_KEY),
+      process.env[INTERNSHIP_ALIAS_ENV_KEY],
       DEFAULT_INTERNSHIP_ALIASES
     ),
   };
@@ -175,14 +127,4 @@ function hasAnyLabelMatch(
   }
 
   return false;
-}
-
-function getEnvValue(key: string): string | undefined {
-  const globalScope = globalThis as {
-    process?: {
-      env?: Record<string, string | undefined>;
-    };
-  };
-
-  return globalScope.process?.env?.[key];
 }

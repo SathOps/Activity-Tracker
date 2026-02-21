@@ -4,11 +4,8 @@ export type SubmissionStatus = "COMPLETED" | "PENDING";
 
 export interface InternCardProps {
   internId: string;
-  internName?: string;
   status: SubmissionStatus;
   onVerifySubmission?: (internId: string) => void;
-  onDeleteIntern?: (internId: string) => void;
-  onUpdateIntern?: (internId: string, newName: string) => void;
 }
 
 export interface StatusBadgeProps {
@@ -23,65 +20,12 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
 
 export const InternCard: React.FC<InternCardProps> = ({
   internId,
-  internName,
   status,
   onVerifySubmission,
-  onDeleteIntern,
-  onUpdateIntern,
 }) => {
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [editedName, setEditedName] = React.useState(internName ?? internId);
-
-  React.useEffect(() => {
-    setEditedName(internName ?? internId);
-  }, [internId, internName]);
-
-  const handleSave = () => {
-    const nextName = editedName.trim();
-    if (!nextName || !onUpdateIntern) {
-      setIsEditing(false);
-      return;
-    }
-
-    onUpdateIntern(internId, nextName);
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setEditedName(internName ?? internId);
-    setIsEditing(false);
-  };
-
   return (
     <article className="intern-card">
-      <div style={{ display: "grid", gap: 4 }}>
-        <div className="intern-id">{internId}</div>
-        {isEditing ? (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <input
-              aria-label={`Edit intern name for ${internId}`}
-              onChange={(event) => setEditedName(event.target.value)}
-              style={{
-                border: "1px solid #d1d5db",
-                borderRadius: 6,
-                fontSize: 12,
-                minWidth: 180,
-                padding: "6px 8px",
-              }}
-              type="text"
-              value={editedName}
-            />
-            <button className="ghost-button" onClick={handleSave} type="button">
-              Save
-            </button>
-            <button className="ghost-button" onClick={handleCancel} type="button">
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <div style={{ color: "#4b5563", fontSize: 13 }}>{internName ?? internId}</div>
-        )}
-      </div>
+      <div className="intern-id">{internId}</div>
 
       <div className="intern-actions">
         <StatusBadge status={status} />
@@ -92,28 +36,6 @@ export const InternCard: React.FC<InternCardProps> = ({
             type="button"
           >
             Verify
-          </button>
-        ) : null}
-        {onUpdateIntern ? (
-          <button
-            aria-label={`Edit ${internName ?? internId}`}
-            className="ghost-button"
-            onClick={() => setIsEditing(true)}
-            title="Edit"
-            type="button"
-          >
-            ✎
-          </button>
-        ) : null}
-        {onDeleteIntern ? (
-          <button
-            aria-label={`Delete ${internName ?? internId}`}
-            className="ghost-button"
-            onClick={() => onDeleteIntern(internId)}
-            title="Delete"
-            type="button"
-          >
-            🗑
           </button>
         ) : null}
       </div>
