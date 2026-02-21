@@ -12,6 +12,13 @@ export interface StandupVerificationResult {
 
 export interface StandupVerificationOptions {
   uploadedOnDate?: string;
+  standupAliases?: string | string[];
+  internshipAliases?: string | string[];
+}
+
+interface SubmissionCriteria {
+  standupAliases: Set<string>;
+  internshipAliases: Set<string>;
 }
 
 const TARGET_CATEGORY = "standup";
@@ -27,10 +34,12 @@ export async function verifyStandupSubmission(
 ): Promise<StandupVerificationResult> {
   const normalizedInternId = normalizeInternId(internId);
   const checkedDate = normalizeFilterDate(options.uploadedOnDate);
+  const criteria = resolveSubmissionCriteria(options);
   const audios = await getInternAudios(normalizedInternId);
 
   const validCount = audios.filter((audio) =>
-    isValidStandupSubmissionAudio(audio) && matchesUploadedDate(audio, checkedDate)
+    isValidStandupSubmissionAudio(audio, criteria) &&
+    matchesUploadedDate(audio, checkedDate)
   ).length;
 
   return {
@@ -43,14 +52,16 @@ export async function verifyStandupSubmission(
 
 export function isValidStandupSubmissionAudio(
   audio: Pick<InternAudioMetadata, "category" | "tag"> &
-    Partial<Pick<InternAudioMetadata, "labels">>
+    Partial<Pick<InternAudioMetadata, "labels">>,
+  criteriaOverride?: SubmissionCriteria
 ): boolean {
   const availableLabels = collectComparableLabels(audio);
-  const criteria = resolveSubmissionCriteria();
+  const criteria = criteriaOverride ?? resolveSubmissionCriteria();
 
-  return (
-    hasAnyLabelMatch(availableLabels, criteria.standupAliases) &&
-    hasAnyLabelMatch(availableLabels, criteria.internshipAliases)
+  return hasDistinctCriteriaMatch(
+    availableLabels,
+    criteria.standupAliases,
+    criteria.internshipAliases
   );
 }
 
@@ -81,7 +92,7 @@ function normalizeFilterDate(rawDate: string | undefined): string | undefined {
     throw new Error("uploadedOnDate must be a valid date (recommended: YYYY-MM-DD).");
   }
 
-  return parsedDate.toISOString().slice(0, 10);
+  return toLocalDateKey(parsedDate);
 }
 
 function matchesUploadedDate(
@@ -102,7 +113,7 @@ function matchesUploadedDate(
     return false;
   }
 
-  return parsedDate.toISOString().slice(0, 10) === expectedDate;
+  return toLocalDateKey(parsedDate) === expectedDate;
 }
 
 function normalizeComparableValue(value: string): string {
@@ -136,22 +147,42 @@ function splitCandidateLabel(value: string): string[] {
     .filter((segment) => segment.length > 0);
 }
 
-function resolveSubmissionCriteria(): {
-  standupAliases: Set<string>;
-  internshipAliases: Set<string>;
-} {
+function resolveSubmissionCriteria(
+  options: Pick<StandupVerificationOptions, "standupAliases" | "internshipAliases"> = {}
+): SubmissionCriteria {
   return {
-    standupAliases: buildAliasSet(getEnvValue(STANDUP_ALIAS_ENV_KEY), DEFAULT_STANDUP_ALIASES),
-    internshipAliases: buildAliasSet(
+    standupAliases: buildAliasSet(DEFAULT_STANDUP_ALIASES, [
+      getEnvValue(STANDUP_ALIAS_ENV_KEY),
+      options.standupAliases,
+    ]),
+    internshipAliases: buildAliasSet(DEFAULT_INTERNSHIP_ALIASES, [
       getEnvValue(INTERNSHIP_ALIAS_ENV_KEY),
-      DEFAULT_INTERNSHIP_ALIASES
-    ),
+      options.internshipAliases,
+    ]),
   };
 }
 
-function buildAliasSet(rawAliases: string | undefined, defaults: string[]): Set<string> {
+function buildAliasSet(
+  defaults: string[],
+  sources: Array<string | string[] | undefined>
+): Set<string> {
   const aliases = new Set<string>();
-  const candidates = [...defaults, ...(rawAliases ? splitCandidateLabel(rawAliases) : [])];
+  const candidates = [...defaults];
+
+  for (const source of sources) {
+    if (!source) {
+      continue;
+    }
+
+    if (Array.isArray(source)) {
+      for (const value of source) {
+        candidates.push(...splitCandidateLabel(value));
+      }
+      continue;
+    }
+
+    candidates.push(...splitCandidateLabel(source));
+  }
 
   for (const candidate of candidates) {
     const normalized = normalizeComparableValue(candidate);
@@ -164,17 +195,42 @@ function buildAliasSet(rawAliases: string | undefined, defaults: string[]): Set<
   return aliases;
 }
 
-function hasAnyLabelMatch(
+function hasDistinctCriteriaMatch(
   availableLabels: Set<string>,
-  expectedAliases: Set<string>
+  standupAliases: Set<string>,
+  internshipAliases: Set<string>
 ): boolean {
-  for (const expectedAlias of expectedAliases) {
-    if (availableLabels.has(expectedAlias)) {
-      return true;
+  const matchedStandupAliases = getMatchedAliases(availableLabels, standupAliases);
+  const matchedInternshipAliases = getMatchedAliases(availableLabels, internshipAliases);
+
+  if (matchedStandupAliases.length === 0 || matchedInternshipAliases.length === 0) {
+    return false;
+  }
+
+  for (const standupAlias of matchedStandupAliases) {
+    for (const internshipAlias of matchedInternshipAliases) {
+      if (standupAlias !== internshipAlias) {
+        return true;
+      }
     }
   }
 
   return false;
+}
+
+function getMatchedAliases(
+  availableLabels: Set<string>,
+  expectedAliases: Set<string>
+): string[] {
+  const matchedAliases: string[] = [];
+
+  for (const expectedAlias of expectedAliases) {
+    if (availableLabels.has(expectedAlias)) {
+      matchedAliases.push(expectedAlias);
+    }
+  }
+
+  return matchedAliases;
 }
 
 function getEnvValue(key: string): string | undefined {
@@ -185,4 +241,12 @@ function getEnvValue(key: string): string | undefined {
   };
 
   return globalScope.process?.env?.[key];
+}
+
+function toLocalDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
