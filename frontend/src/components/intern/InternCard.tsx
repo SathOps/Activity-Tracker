@@ -6,6 +6,7 @@ export interface InternCardProps {
   internId: string;
   internName?: string;
   status: SubmissionStatus;
+  todayValidCount?: number;
   onVerifySubmission?: (internId: string) => void;
   onDeleteIntern?: (internId: string) => void;
   onUpdateIntern?: (internId: string, newName: string) => void;
@@ -25,6 +26,7 @@ export const InternCard: React.FC<InternCardProps> = ({
   internId,
   internName,
   status,
+  todayValidCount,
   onVerifySubmission,
   onDeleteIntern,
   onUpdateIntern,
@@ -80,7 +82,9 @@ export const InternCard: React.FC<InternCardProps> = ({
             </button>
           </div>
         ) : (
-          <div style={{ color: "#4b5563", fontSize: 13 }}>Status: {status}</div>
+          <div style={{ color: "#4b5563", fontSize: 13 }}>
+            Today qualified uploads: {todayValidCount ?? 0}
+          </div>
         )}
       </div>
 

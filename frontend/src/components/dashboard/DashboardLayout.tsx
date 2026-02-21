@@ -2,41 +2,35 @@ import React from "react";
 import TeamList, { Team } from "./TeamList";
 import InternCard from "../intern/InternCard";
 import type { Intern } from "../intern/InternSearch";
+import { verifyStandupSubmission } from "../../utils/verification";
 
 type DashboardView = "TEAMS" | "INTERNS" | "COMPLETED";
 
 export interface DashboardLayoutProps {
   teams?: Team[];
   addedInterns?: Intern[];
-  onCreateTeam?: () => void;
-  onAddInternToTeam?: (teamId: string) => void;
-  onVerifySubmission?: (internId: string) => void;
   title?: string;
-  verifyStandupSubmission?: (internId: string) => void;
-  createTeam?: (teamName: string) => void;
-  addInternToTeam?: (teamId: string, internName: string) => void;
-  deleteIntern?: (internId: string) => void;
-  updateIntern?: (internId: string, newName: string) => void;
-  deleteTeam?: (teamId: string) => void;
-  updateTeamName?: (teamId: string, newName: string) => void;
 }
 
 const DEFAULT_VIEW: DashboardView = "TEAMS";
 const EMPTY_TEAMS: Team[] = [];
+const REQUIRED_TEAM_STANDUPS = 4;
+const REQUIRED_CATEGORY_UUID_ALIASES = [
+  "c81f5d73-9090-453e-bb08-c2f46453e0bd",
+  "4dd053f4-6323-43d4-87a3-ce1816bd9459",
+];
+const STANDUP_ALIAS_OVERRIDE = mergeAliases(
+  ["Stand-Up", ...REQUIRED_CATEGORY_UUID_ALIASES],
+  parseAliasEnv(import.meta.env.VITE_STANDUP_LABEL_ALIASES)
+);
+const INTERNSHIP_ALIAS_OVERRIDE = mergeAliases(
+  ["Internship", ...REQUIRED_CATEGORY_UUID_ALIASES],
+  parseAliasEnv(import.meta.env.VITE_INTERNSHIP_LABEL_ALIASES)
+);
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-  teams = EMPTY_TEAMS,
+  teams,
   addedInterns,
-  onCreateTeam,
-  onAddInternToTeam,
-  onVerifySubmission,
-  verifyStandupSubmission,
-  createTeam,
-  addInternToTeam,
-  deleteIntern,
-  updateIntern,
-  deleteTeam,
-  updateTeamName,
   title = "Team-wise Standup Submission Dashboard",
 }) => {
   const [managedTeams, setManagedTeams] = React.useState<Team[]>(() => teams ?? EMPTY_TEAMS);
@@ -45,6 +39,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [newTeamName, setNewTeamName] = React.useState("");
   const [activeView, setActiveView] = React.useState<DashboardView>(DEFAULT_VIEW);
   const [hoveredBox, setHoveredBox] = React.useState<DashboardView | null>(null);
+  const [verifyingTeamId, setVerifyingTeamId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (teams) {
@@ -107,66 +102,164 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         teamId: buildTeamId(teamName, prev),
         teamName,
         interns: [],
+        teamStatus: "PENDING",
+        todayStandupCount: 0,
+        requiredStandupCount: REQUIRED_TEAM_STANDUPS,
       },
     ]);
-
-    createTeam?.(teamName);
 
     setNewTeamName("");
     setIsCreatingTeam(false);
   };
 
-  const handleAddInternToTeam = (teamId: string, internName: string) => {
-    const trimmedName = internName.trim();
+  const handleAddInternToTeam = (teamId: string, intern: Intern) => {
+    const trimmedName = intern.name.trim();
 
     if (!trimmedName) {
       return;
     }
 
     setManagedTeams((prev) =>
-      prev.map((team) =>
-        team.teamId === teamId
-          ? {
-            ...team,
-            interns: [
-              ...team.interns,
-              { internId: buildInternId(teamId, trimmedName, team.interns), internName: trimmedName, status: "PENDING" },
-            ],
-          }
-          : team
-      )
-    );
+      prev.map((team) => {
+        if (team.teamId !== teamId) {
+          return team;
+        }
 
-    addInternToTeam?.(teamId, trimmedName);
+        const duplicateExists = team.interns.some(
+          (existingIntern) =>
+            existingIntern.corpusUserId === intern.id || existingIntern.internId === intern.id
+        );
+
+        if (duplicateExists) {
+          return team;
+        }
+
+        return {
+          ...team,
+          teamStatus: "PENDING",
+          todayStandupCount: 0,
+          verifiedDate: undefined,
+          requiredStandupCount: REQUIRED_TEAM_STANDUPS,
+          interns: [
+            ...team.interns,
+            {
+              internId: intern.id,
+              corpusUserId: intern.id,
+              internName: trimmedName,
+              status: "PENDING",
+              todayValidCount: 0,
+            },
+          ],
+        };
+      })
+    );
+  };
+
+  const handleVerifyTeam = async (teamId: string) => {
+    const team = managedTeams.find((candidateTeam) => candidateTeam.teamId === teamId);
+
+    if (!team || team.interns.length === 0) {
+      return;
+    }
+
+    const todayDateKey = getLocalDateKey(new Date());
+    setVerifyingTeamId(teamId);
+
+    try {
+      const verificationResults = await Promise.all(
+        team.interns.map(async (intern) => {
+          const corpusUserId = intern.corpusUserId || intern.internId;
+
+          try {
+            return await verifyStandupSubmission(corpusUserId, {
+              uploadedOnDate: todayDateKey,
+              standupAliases: STANDUP_ALIAS_OVERRIDE,
+              internshipAliases: INTERNSHIP_ALIAS_OVERRIDE,
+            });
+          } catch (error) {
+            console.error(
+              `Team verification failed for user "${corpusUserId}" (${teamId})`,
+              error
+            );
+
+            return {
+              internId: corpusUserId,
+              validCount: 0,
+              status: "PENDING" as const,
+              checkedDate: todayDateKey,
+            };
+          }
+        })
+      );
+
+      const countByInternId = new Map(
+        verificationResults.map((result) => [result.internId, result.validCount])
+      );
+      const teamTodayStandupCount = verificationResults.reduce(
+        (total, result) => total + result.validCount,
+        0
+      );
+
+      setManagedTeams((prev) =>
+        prev.map((candidateTeam) => {
+          if (candidateTeam.teamId !== teamId) {
+            return candidateTeam;
+          }
+
+          return {
+            ...candidateTeam,
+            teamStatus:
+              teamTodayStandupCount >= REQUIRED_TEAM_STANDUPS ? "COMPLETED" : "PENDING",
+            todayStandupCount: teamTodayStandupCount,
+            verifiedDate: todayDateKey,
+            requiredStandupCount: REQUIRED_TEAM_STANDUPS,
+            interns: candidateTeam.interns.map((intern) => {
+              const corpusUserId = intern.corpusUserId || intern.internId;
+              const todayValidCount = countByInternId.get(corpusUserId) ?? 0;
+
+              return {
+                ...intern,
+                todayValidCount,
+                status: todayValidCount > 0 ? "COMPLETED" : "PENDING",
+              };
+            }),
+          };
+        })
+      );
+    } finally {
+      setVerifyingTeamId(null);
+    }
   };
 
   const handleVerifySubmission = (internId: string) => {
-    setManagedTeams((prev) =>
-      prev.map((team) => ({
-        ...team,
-        interns: team.interns.map((intern) =>
-          intern.internId === internId
-            ? {
-              ...intern,
-              status: intern.status === "COMPLETED" ? "PENDING" : "COMPLETED",
-            }
-            : intern
-        ),
-      }))
+    const team = managedTeams.find((candidateTeam) =>
+      candidateTeam.interns.some((intern) => intern.internId === internId)
     );
 
-    verifyStandupSubmission?.(internId);
+    if (!team) {
+      return;
+    }
+
+    void handleVerifyTeam(team.teamId);
   };
 
   const handleDeleteIntern = (internId: string) => {
     setManagedTeams((prev) =>
-      prev.map((team) => ({
-        ...team,
-        interns: team.interns.filter((intern) => intern.internId !== internId),
-      }))
-    );
+      prev.map((team) => {
+        if (!team.interns.some((intern) => intern.internId === internId)) {
+          return team;
+        }
 
-    deleteIntern?.(internId);
+        return {
+          ...team,
+          teamStatus: "PENDING",
+          todayStandupCount: 0,
+          verifiedDate: undefined,
+          requiredStandupCount: REQUIRED_TEAM_STANDUPS,
+          interns: team.interns.filter((intern) => intern.internId !== internId),
+        };
+      })
+    );
   };
 
   const handleUpdateIntern = (internId: string, newName: string) => {
@@ -184,13 +277,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         ),
       }))
     );
-
-    updateIntern?.(internId, trimmedName);
   };
 
   const handleDeleteTeam = (teamId: string) => {
     setManagedTeams((prev) => prev.filter((team) => team.teamId !== teamId));
-    deleteTeam?.(teamId);
   };
 
   const handleUpdateTeamName = (teamId: string, newName: string) => {
@@ -203,8 +293,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     setManagedTeams((prev) =>
       prev.map((team) => (team.teamId === teamId ? { ...team, teamName: trimmedName } : team))
     );
-
-    updateTeamName?.(teamId, trimmedName);
   };
 
   return (
@@ -322,6 +410,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           onUpdateIntern={handleUpdateIntern}
           onUpdateTeamName={handleUpdateTeamName}
           onVerifySubmission={handleVerifySubmission}
+          onVerifyTeam={(teamId) => {
+            void handleVerifyTeam(teamId);
+          }}
+          verifyingTeamId={verifyingTeamId}
           teams={filteredTeams}
         />
       ) : null}
@@ -349,6 +441,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   onUpdateIntern={handleUpdateIntern}
                   onVerifySubmission={handleVerifySubmission}
                   status={intern.status}
+                  todayValidCount={intern.todayValidCount}
                 />
               </article>
             ))
@@ -373,30 +466,41 @@ function buildTeamId(teamName: string, existingTeams: Team[]): string {
   return candidate;
 }
 
-function buildInternId(
-  teamId: string,
-  internName: string,
-  existingInterns: Team["interns"]
-): string {
-  const base = `${teamId}:${normalizeIdentifier(internName) || "intern"}`;
-  const existingIds = new Set(existingInterns.map((intern) => intern.internId));
-  let candidate = base;
-  let suffix = 2;
-
-  while (existingIds.has(candidate)) {
-    candidate = `${base}-${suffix}`;
-    suffix += 1;
-  }
-
-  return candidate;
-}
-
 function normalizeIdentifier(value: string): string {
   return value
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function parseAliasEnv(rawAliases: string | undefined): string[] | undefined {
+  if (!rawAliases) {
+    return undefined;
+  }
+
+  const aliases = rawAliases
+    .split(/[|,;/]+/g)
+    .map((alias) => alias.trim())
+    .filter((alias) => alias.length > 0);
+
+  if (aliases.length === 0) {
+    return undefined;
+  }
+
+  return Array.from(new Set(aliases));
+}
+
+function mergeAliases(baseAliases: string[], extraAliases: string[] | undefined): string[] {
+  return Array.from(new Set([...(baseAliases ?? []), ...(extraAliases ?? [])]));
+}
+
+function getLocalDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 export default DashboardLayout;

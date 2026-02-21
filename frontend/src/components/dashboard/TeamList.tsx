@@ -4,21 +4,29 @@ import type { Intern } from "../intern/InternSearch";
 
 export interface TeamIntern {
   internId: string;
+  corpusUserId: string;
   internName?: string;
   status: SubmissionStatus;
+  todayValidCount?: number;
 }
 
 export interface Team {
   teamId: string;
   teamName: string;
   interns: TeamIntern[];
+  todayStandupCount?: number;
+  requiredStandupCount?: number;
+  verifiedDate?: string;
+  teamStatus?: SubmissionStatus;
 }
 
 export interface TeamListProps {
   teams: Team[];
   addedInterns?: Intern[];
   onVerifySubmission?: (internId: string) => void;
-  onAddInternToTeam?: (teamId: string, internName: string) => void;
+  onVerifyTeam?: (teamId: string) => void;
+  verifyingTeamId?: string | null;
+  onAddInternToTeam?: (teamId: string, intern: Intern) => void;
   onDeleteIntern?: (internId: string) => void;
   onUpdateIntern?: (internId: string, newName: string) => void;
   onDeleteTeam?: (teamId: string) => void;
@@ -41,6 +49,8 @@ export const TeamList: React.FC<TeamListProps> = ({
   teams,
   addedInterns = [],
   onVerifySubmission,
+  onVerifyTeam,
+  verifyingTeamId,
   onAddInternToTeam,
   onDeleteIntern,
   onUpdateIntern,
@@ -62,7 +72,6 @@ export const TeamList: React.FC<TeamListProps> = ({
     }));
   };
 
-  // Clean up blur timeouts on unmount
   React.useEffect(() => {
     return () => {
       Object.values(blurTimeoutRef.current).forEach(clearTimeout);
@@ -72,11 +81,11 @@ export const TeamList: React.FC<TeamListProps> = ({
   const isInternInAnyTeam = (internId: string): boolean =>
     teams.some((team) =>
       team.interns.some(
-        (i) => i.internId === internId || (i.internName ?? "").toLowerCase() === internId.toLowerCase()
+        (intern) => intern.corpusUserId === internId || intern.internId === internId
       )
     );
 
-  const getFilteredInterns = (teamId: string): (Intern & { alreadyInTeam: boolean })[] => {
+  const getFilteredInterns = (teamId: string): Array<Intern & { alreadyInTeam: boolean }> => {
     const { inputValue } = getState(teamId);
     const query = inputValue.trim().toLowerCase();
 
@@ -97,15 +106,14 @@ export const TeamList: React.FC<TeamListProps> = ({
   };
 
   const handleFocus = (teamId: string) => {
-    // Clear any pending blur timeout
     if (blurTimeoutRef.current[teamId]) {
       clearTimeout(blurTimeoutRef.current[teamId]);
     }
+
     patchState(teamId, { showDropdown: true });
   };
 
   const handleBlur = (teamId: string) => {
-    // Delay closing so click events on dropdown items fire first
     blurTimeoutRef.current[teamId] = setTimeout(() => {
       patchState(teamId, { showDropdown: false });
     }, 200);
@@ -125,17 +133,28 @@ export const TeamList: React.FC<TeamListProps> = ({
     }
 
     const state = getState(teamId);
-    const name = state.inputValue.trim();
-    if (!name) {
+    const trimmedName = state.inputValue.trim();
+
+    if (!trimmedName) {
       return;
     }
 
-    // Prevent adding if the intern is already in any team
-    if (state.selectedInternId && isInternInAnyTeam(state.selectedInternId)) {
+    const selectedIntern =
+      addedInterns.find((intern) => intern.id === state.selectedInternId) ??
+      addedInterns.find(
+        (intern) => intern.name.toLowerCase() === trimmedName.toLowerCase()
+      );
+
+    if (!selectedIntern) {
       return;
     }
 
-    onAddInternToTeam(teamId, name);
+    if (isInternInAnyTeam(selectedIntern.id)) {
+      return;
+    }
+
+    onAddInternToTeam(teamId, selectedIntern);
+
     patchState(teamId, {
       inputValue: "",
       selectedInternId: null,
@@ -177,23 +196,86 @@ export const TeamList: React.FC<TeamListProps> = ({
       {teams.map((team) => {
         const state = getState(team.teamId);
         const filtered = getFilteredInterns(team.teamId);
+        const requiredCount = team.requiredStandupCount ?? 4;
+        const standupCount = team.todayStandupCount ?? 0;
+        const teamStatus = team.teamStatus ?? "PENDING";
 
         return (
           <article className="team-card" key={team.teamId}>
             <header className="team-header">
-              <div>
-                <h3 className="team-name">{team.teamName}</h3>
-                <p className="team-id">teamId: {team.teamId}</p>
+              <div style={{ display: "grid", gap: 4 }}>
+                {editingTeamId === team.teamId ? (
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <input
+                      aria-label={`Edit team name for ${team.teamName}`}
+                      onChange={(event) =>
+                        setTeamNameDraftById((prev) => ({
+                          ...prev,
+                          [team.teamId]: event.target.value,
+                        }))
+                      }
+                      style={{
+                        border: "1px solid #d1d5db",
+                        borderRadius: 6,
+                        fontSize: 13,
+                        minWidth: 220,
+                        padding: "6px 8px",
+                      }}
+                      type="text"
+                      value={teamNameDraftById[team.teamId] ?? team.teamName}
+                    />
+                    <button
+                      className="ghost-button"
+                      onClick={() => handleSaveTeamRename(team.teamId)}
+                      type="button"
+                    >
+                      Save
+                    </button>
+                    <button className="ghost-button" onClick={handleCancelTeamRename} type="button">
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <h3 className="team-name">{team.teamName}</h3>
+                )}
+
+                <div className="team-id">
+                  Today qualified standups: {standupCount}/{requiredCount} | {teamStatus}
+                </div>
+                {team.verifiedDate ? (
+                  <div className="team-id">Verified date: {team.verifiedDate}</div>
+                ) : null}
               </div>
-              {onDeleteTeam ? (
-                <button
-                  className="secondary-button"
-                  onClick={() => onDeleteTeam(team.teamId)}
-                  type="button"
-                >
-                  Delete Team
-                </button>
-              ) : null}
+
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {onVerifyTeam ? (
+                  <button
+                    className="secondary-button"
+                    onClick={() => onVerifyTeam(team.teamId)}
+                    type="button"
+                  >
+                    {verifyingTeamId === team.teamId ? "Verifying..." : "Verify Team"}
+                  </button>
+                ) : null}
+                {onUpdateTeamName && editingTeamId !== team.teamId ? (
+                  <button
+                    className="secondary-button"
+                    onClick={() => handleStartTeamRename(team.teamId, team.teamName)}
+                    type="button"
+                  >
+                    Edit Team
+                  </button>
+                ) : null}
+                {onDeleteTeam ? (
+                  <button
+                    className="secondary-button"
+                    onClick={() => onDeleteTeam(team.teamId)}
+                    type="button"
+                  >
+                    Delete Team
+                  </button>
+                ) : null}
+              </div>
             </header>
 
             {onAddInternToTeam ? (
@@ -201,10 +283,10 @@ export const TeamList: React.FC<TeamListProps> = ({
                 <div style={{ position: "relative", flex: 1, minWidth: 220 }}>
                   <input
                     aria-label={`Add intern to ${team.teamName}`}
-                    onChange={(e) => handleInputChange(team.teamId, e.target.value)}
+                    onChange={(event) => handleInputChange(team.teamId, event.target.value)}
                     onFocus={() => handleFocus(team.teamId)}
                     onBlur={() => handleBlur(team.teamId)}
-                    placeholder="Enter intern name"
+                    placeholder="Select intern from added list"
                     style={{
                       border: "1px solid #d1d5db",
                       borderRadius: 6,
@@ -230,9 +312,8 @@ export const TeamList: React.FC<TeamListProps> = ({
                             aria-selected={state.selectedInternId === intern.id}
                             aria-disabled={intern.alreadyInTeam}
                             className={`intern-dropdown-item${intern.alreadyInTeam ? " disabled" : ""}`}
-                            onMouseDown={(e) => {
-                              // Prevent blur from firing before click
-                              e.preventDefault();
+                            onMouseDown={(event) => {
+                              event.preventDefault();
                             }}
                             onClick={() => {
                               if (!intern.alreadyInTeam) {
@@ -272,6 +353,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                   onUpdateIntern={onUpdateIntern}
                   onVerifySubmission={onVerifySubmission}
                   status={intern.status}
+                  todayValidCount={intern.todayValidCount}
                 />
               ))}
             </div>
