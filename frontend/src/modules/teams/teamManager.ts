@@ -19,10 +19,11 @@ export type { Team };
 // ── Helpers ─────────────────────────────────────
 
 /** Generate a simple unique ID (no external dependency). */
+let teamCounter = 0;
+
 function generateId(): string {
-    return `team-${Date.now().toString(36)}-${Math.random()
-        .toString(36)
-        .substring(2, 8)}`;
+    teamCounter += 1;
+    return `team-${teamCounter}`;
 }
 
 // ── Public API ──────────────────────────────────

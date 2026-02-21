@@ -41,24 +41,9 @@ export function resetStore(): void {
     teamMap.clear();
 }
 
-// ── Mock / Seed Data ────────────────────────
+// ── Seed Hook (No Default Data) ─────────────
 
-/** Pre-seed the store with sample teams so UI devs have data to work with. */
+/** Keeps compatibility for callers that expect a seeding hook. */
 export function seedMockData(): void {
-    const mockTeams: Team[] = [
-        {
-            id: "team-001",
-            name: "Alpha Squad",
-            members: ["intern-101", "intern-102", "intern-103"],
-        },
-        {
-            id: "team-002",
-            name: "Beta Builders",
-            members: ["intern-201", "intern-202"],
-        },
-    ];
-
-    for (const team of mockTeams) {
-        setTeam(team);
-    }
+    resetStore();
 }

@@ -35,8 +35,8 @@ resetStore();
 
 // ── Test: seedMockData ──
 seedMockData();
-assert(getAllTeams().length === 2, "seedMockData should create 2 teams");
-console.log("✅ seedMockData works");
+assert(getAllTeams().length === 0, "seedMockData should not prefill teams");
+console.log("✅ seedMockData keeps store empty");
 
 // ── Test: createTeam ──
 resetStore();
