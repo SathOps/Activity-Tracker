@@ -1,0 +1,190 @@
+:root {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.4;
+  color: #111827;
+  background: #f4f7fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.app-shell {
+  margin: 0 auto;
+  max-width: 1100px;
+  padding: 24px 16px 32px;
+}
+
+.summary-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  margin-bottom: 16px;
+}
+
+.summary-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+}
+
+.summary-label {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.summary-value {
+  font-size: 20px;
+}
+
+.dashboard-container {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.dashboard-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dashboard-title {
+  font-size: 22px;
+  margin: 0;
+}
+
+.primary-button,
+.secondary-button,
+.ghost-button {
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 12px;
+}
+
+.primary-button {
+  background: #111827;
+  border: 1px solid #111827;
+  color: #ffffff;
+}
+
+.secondary-button {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #111827;
+}
+
+.ghost-button {
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  color: #111827;
+  font-size: 12px;
+  padding: 6px 10px;
+}
+
+.team-list {
+  display: grid;
+  gap: 16px;
+}
+
+.team-empty {
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+  color: #4b5563;
+  font-size: 14px;
+  margin: 0;
+  padding: 16px;
+}
+
+.team-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.team-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.team-name {
+  font-size: 16px;
+  margin: 0;
+}
+
+.team-id {
+  color: #6b7280;
+  font-size: 12px;
+  margin: 2px 0 0;
+}
+
+.team-interns {
+  display: grid;
+  gap: 10px;
+}
+
+.intern-card {
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.intern-id {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.intern-actions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.status-badge {
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+}
+
+.status-badge.completed {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.status-badge.pending {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+@media (max-width: 720px) {
+  .dashboard-header,
+  .team-header,
+  .intern-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
