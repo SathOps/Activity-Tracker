@@ -7,6 +7,7 @@ export interface InternAudioMetadata {
   id: string;
   category: string;
   tag: string;
+  labels?: string[];
 }
 
 interface FetchRequestInit {
@@ -242,45 +243,152 @@ function parseAudioItem(
     pickString(item, ["id", "_id", "record_id", "recordId", "uuid"]) ??
     `audio-${index + 1}`;
 
-  const category = parseTextField(item.category);
-  const tag =
-    parseTextField(item.tag) ||
-    parseTextField(item.domain) ||
-    parseTagCollection(item.tags);
+  const categoryValues = extractFieldTextValues(item, ["category", "categories"]);
+  const tagValues = extractFieldTextValues(item, [
+    "tag",
+    "tags",
+    "domain",
+    "domains",
+    "label",
+    "labels",
+  ]);
+  const contextualValues = extractTextValuesByKeyPattern(
+    item,
+    /(category|categories|tag|tags|domain|domains|label|labels)/i
+  );
+  const labels = uniqueNonEmptyStrings([
+    ...categoryValues,
+    ...tagValues,
+    ...contextualValues,
+  ]);
 
   return {
     id,
-    category,
-    tag,
+    category: categoryValues[0] ?? "",
+    tag: tagValues[0] ?? "",
+    labels,
   };
 }
 
-function parseTagCollection(value: unknown): string {
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      const parsed = parseTextField(item);
+function extractFieldTextValues(
+  source: UnknownRecord,
+  keys: readonly string[]
+): string[] {
+  const values: string[] = [];
 
-      if (parsed) {
-        return parsed;
-      }
-    }
+  for (const key of keys) {
+    values.push(...parseTextValues(source[key]));
   }
 
-  return parseTextField(value);
+  return uniqueNonEmptyStrings(values);
 }
 
-function parseTextField(value: unknown): string {
-  if (typeof value === "string") {
-    return value;
+function parseTextValues(value: unknown, depth = 0): string[] {
+  if (depth > 6 || value === null || value === undefined) {
+    return [];
   }
 
-  if (isRecord(value)) {
-    return (
-      pickString(value, ["name", "slug", "title", "value", "label"]) ?? ""
+  if (typeof value === "string") {
+    return splitLabelText(value);
+  }
+
+  if (Array.isArray(value)) {
+    return uniqueNonEmptyStrings(
+      value.flatMap((entry) => parseTextValues(entry, depth + 1))
     );
   }
 
-  return "";
+  if (isRecord(value)) {
+    const directValues = pickStrings(value, [
+      "name",
+      "slug",
+      "title",
+      "value",
+      "label",
+    ]).flatMap(splitLabelText);
+
+    if (directValues.length > 0) {
+      return uniqueNonEmptyStrings(directValues);
+    }
+
+    return uniqueNonEmptyStrings(
+      Object.values(value).flatMap((entry) => parseTextValues(entry, depth + 1))
+    );
+  }
+
+  return [];
+}
+
+function extractTextValuesByKeyPattern(
+  value: unknown,
+  keyPattern: RegExp,
+  depth = 0
+): string[] {
+  if (depth > 6 || value === null || value === undefined) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    return uniqueNonEmptyStrings(
+      value.flatMap((item) =>
+        extractTextValuesByKeyPattern(item, keyPattern, depth + 1)
+      )
+    );
+  }
+
+  if (!isRecord(value)) {
+    return [];
+  }
+
+  const collectedValues: string[] = [];
+
+  for (const [key, itemValue] of Object.entries(value)) {
+    if (keyPattern.test(key)) {
+      collectedValues.push(...parseTextValues(itemValue, depth + 1));
+    }
+
+    if (isRecord(itemValue) || Array.isArray(itemValue)) {
+      collectedValues.push(
+        ...extractTextValuesByKeyPattern(itemValue, keyPattern, depth + 1)
+      );
+    }
+  }
+
+  return uniqueNonEmptyStrings(collectedValues);
+}
+
+function splitLabelText(value: string): string[] {
+  const cleaned = value.trim();
+
+  if (!cleaned) {
+    return [];
+  }
+
+  return cleaned
+    .split(/[|,;/]+/g)
+    .map((part) =>
+      part
+        .replace(/^[\[\(\{'"`]+/, "")
+        .replace(/[\]\)\}'"`]+$/, "")
+        .trim()
+    )
+    .filter((part) => part.length > 0);
+}
+
+function uniqueNonEmptyStrings(values: readonly string[]): string[] {
+  const uniqueValues = new Set<string>();
+
+  for (const value of values) {
+    const normalized = value.trim();
+
+    if (!normalized) {
+      continue;
+    }
+
+    uniqueValues.add(normalized);
+  }
+
+  return Array.from(uniqueValues);
 }
 
 function resolveArray(payload: unknown): unknown[] {
@@ -346,15 +454,23 @@ function pickString(
   source: UnknownRecord,
   keys: readonly string[]
 ): string | undefined {
+  const values = pickStrings(source, keys);
+
+  return values[0];
+}
+
+function pickStrings(source: UnknownRecord, keys: readonly string[]): string[] {
+  const values: string[] = [];
+
   for (const key of keys) {
     const value = source[key];
 
     if (typeof value === "string" && value.trim()) {
-      return value.trim();
+      values.push(value.trim());
     }
   }
 
-  return undefined;
+  return values;
 }
 
 function isRecord(value: unknown): value is UnknownRecord {
