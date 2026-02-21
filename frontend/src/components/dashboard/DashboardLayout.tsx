@@ -2,11 +2,10 @@ import React from "react";
 import TeamList, { Team } from "./TeamList";
 import InternCard from "../intern/InternCard";
 
+type DashboardView = "TEAMS" | "INTERNS" | "COMPLETED";
+
 export interface DashboardLayoutProps {
   teams?: Team[];
-  onCreateTeam?: () => void;
-  onAddInternToTeam?: (teamId: string) => void;
-  onVerifySubmission?: (internId: string) => void;
   title?: string;
   verifyStandupSubmission?: (internId: string) => void;
   createTeam?: (teamName: string) => void;
@@ -14,50 +13,35 @@ export interface DashboardLayoutProps {
   deleteIntern?: (internId: string) => void;
   updateIntern?: (internId: string, newName: string) => void;
   deleteTeam?: (teamId: string) => void;
+  updateTeamName?: (teamId: string, newName: string) => void;
 }
 
-const mockTeams: Team[] = [
-  {
-    teamId: "team-1",
-    teamName: "Alpha Team",
-    interns: [
-      { internId: "INT-1001", internName: "Asha", status: "COMPLETED" },
-      { internId: "INT-1002", internName: "Rahul", status: "PENDING" },
-    ],
-  },
-  {
-    teamId: "team-2",
-    teamName: "Beta Team",
-    interns: [
-      { internId: "INT-1003", internName: "Meena", status: "COMPLETED" },
-      { internId: "INT-1004", internName: "Kiran", status: "PENDING" },
-    ],
-  },
-];
+const DEFAULT_VIEW: DashboardView = "TEAMS";
+const EMPTY_TEAMS: Team[] = [];
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-  teams = mockTeams,
-  onCreateTeam,
-  onAddInternToTeam,
-  onVerifySubmission,
+  teams,
   verifyStandupSubmission,
   createTeam,
   addInternToTeam,
   deleteIntern,
   updateIntern,
   deleteTeam,
+  updateTeamName,
   title = "Team-wise Standup Submission Dashboard",
 }) => {
-  const [managedTeams, setManagedTeams] = React.useState<Team[]>(() => teams);
+  const [managedTeams, setManagedTeams] = React.useState<Team[]>(() => teams ?? EMPTY_TEAMS);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [isCreatingTeam, setIsCreatingTeam] = React.useState(false);
   const [newTeamName, setNewTeamName] = React.useState("");
-  const [activeView, setActiveView] = React.useState<"TEAMS" | "INTERNS" | "COMPLETED">(
-    "TEAMS"
-  );
-  const [hoveredBox, setHoveredBox] = React.useState<"TEAMS" | "INTERNS" | "COMPLETED" | null>(
-    null
-  );
+  const [activeView, setActiveView] = React.useState<DashboardView>(DEFAULT_VIEW);
+  const [hoveredBox, setHoveredBox] = React.useState<DashboardView | null>(null);
+
+  React.useEffect(() => {
+    if (teams) {
+      setManagedTeams(teams);
+    }
+  }, [teams]);
 
   const totalTeams = managedTeams.length;
   const allInternRows = React.useMemo(
@@ -80,6 +64,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     if (!normalizedQuery) {
       return managedTeams;
     }
+
     return managedTeams.filter((team) => team.teamName.toLowerCase().includes(normalizedQuery));
   }, [managedTeams, normalizedQuery]);
 
@@ -96,24 +81,27 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     return source.filter(
       (intern) =>
         (intern.internName ?? "").toLowerCase().includes(normalizedQuery) ||
-        intern.internId.toLowerCase().includes(normalizedQuery) ||
         intern.teamName.toLowerCase().includes(normalizedQuery)
     );
   }, [activeView, allInternRows, normalizedQuery]);
 
   const handleCreateTeam = () => {
     const teamName = newTeamName.trim();
+
     if (!teamName) {
       return;
     }
 
-    const nextTeamId = `team-${Date.now()}`;
-    const nextTeam: Team = { teamId: nextTeamId, teamName, interns: [] };
+    setManagedTeams((prev) => [
+      ...prev,
+      {
+        teamId: buildTeamId(teamName, prev),
+        teamName,
+        interns: [],
+      },
+    ]);
 
-    setManagedTeams((prev) => [...prev, nextTeam]);
-    if (createTeam) {
-      createTeam(teamName);
-    }
+    createTeam?.(teamName);
 
     setNewTeamName("");
     setIsCreatingTeam(false);
@@ -121,28 +109,41 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   const handleAddInternToTeam = (teamId: string, internName: string) => {
     const trimmedName = internName.trim();
+
     if (!trimmedName) {
       return;
     }
 
-    const nextInternId = `INT-${Math.floor(100000 + Math.random() * 900000)}`;
     setManagedTeams((prev) =>
-      prev.map((team) =>
-        team.teamId === teamId
-          ? {
-              ...team,
-              interns: [
-                ...team.interns,
-                { internId: nextInternId, internName: trimmedName, status: "PENDING" },
-              ],
-            }
-          : team
-      )
+      prev.map((team) => {
+        if (team.teamId !== teamId) {
+          return team;
+        }
+
+        const duplicateExists = team.interns.some(
+          (intern) =>
+            (intern.internName ?? "").trim().toLowerCase() === trimmedName.toLowerCase()
+        );
+
+        if (duplicateExists) {
+          return team;
+        }
+
+        return {
+          ...team,
+          interns: [
+            ...team.interns,
+            {
+              internId: buildInternId(teamId, trimmedName, team.interns),
+              internName: trimmedName,
+              status: "PENDING",
+            },
+          ],
+        };
+      })
     );
 
-    if (addInternToTeam) {
-      addInternToTeam(teamId, trimmedName);
-    }
+    addInternToTeam?.(teamId, trimmedName);
   };
 
   const handleVerifySubmission = (internId: string) => {
@@ -160,9 +161,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       }))
     );
 
-    if (verifyStandupSubmission) {
-      verifyStandupSubmission(internId);
-    }
+    verifyStandupSubmission?.(internId);
   };
 
   const handleDeleteIntern = (internId: string) => {
@@ -172,35 +171,50 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         interns: team.interns.filter((intern) => intern.internId !== internId),
       }))
     );
-    if (deleteIntern) {
-      deleteIntern(internId);
-    }
+
+    deleteIntern?.(internId);
   };
 
   const handleUpdateIntern = (internId: string, newName: string) => {
+    const trimmedName = newName.trim();
+
+    if (!trimmedName) {
+      return;
+    }
+
     setManagedTeams((prev) =>
       prev.map((team) => ({
         ...team,
         interns: team.interns.map((intern) =>
-          intern.internId === internId ? { ...intern, internName: newName } : intern
+          intern.internId === internId ? { ...intern, internName: trimmedName } : intern
         ),
       }))
     );
-    if (updateIntern) {
-      updateIntern(internId, newName);
-    }
+
+    updateIntern?.(internId, trimmedName);
   };
 
   const handleDeleteTeam = (teamId: string) => {
     setManagedTeams((prev) => prev.filter((team) => team.teamId !== teamId));
-    if (deleteTeam) {
-      deleteTeam(teamId);
+    deleteTeam?.(teamId);
+  };
+
+  const handleUpdateTeamName = (teamId: string, newName: string) => {
+    const trimmedName = newName.trim();
+
+    if (!trimmedName) {
+      return;
     }
+
+    setManagedTeams((prev) =>
+      prev.map((team) => (team.teamId === teamId ? { ...team, teamName: trimmedName } : team))
+    );
+
+    updateTeamName?.(teamId, trimmedName);
   };
 
   return (
     <main className="dashboard-container">
-      <style>{`.summary-row { display: none !important; }`}</style>
       <header className="dashboard-header">
         <h1 className="dashboard-title">{title}</h1>
         <button
@@ -291,7 +305,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           placeholder={
             activeView === "TEAMS"
               ? "Search by team name..."
-              : "Search by intern, internId, or team..."
+              : "Search by intern name or team name..."
           }
           style={{
             border: "1px solid #d1d5db",
@@ -311,10 +325,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           onDeleteIntern={handleDeleteIntern}
           onDeleteTeam={handleDeleteTeam}
           onUpdateIntern={handleUpdateIntern}
+          onUpdateTeamName={handleUpdateTeamName}
           onVerifySubmission={handleVerifySubmission}
           teams={filteredTeams}
         />
       ) : null}
+
       {activeView !== "TEAMS" ? (
         <section className="team-list">
           {filteredInternRows.length === 0 ? (
@@ -329,7 +345,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 <header className="team-header">
                   <div>
                     <h3 className="team-name">{intern.teamName}</h3>
-                    <p className="team-id">teamId: {intern.teamId}</p>
                   </div>
                 </header>
                 <InternCard
@@ -348,5 +363,45 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     </main>
   );
 };
+
+function buildTeamId(teamName: string, existingTeams: Team[]): string {
+  const base = normalizeIdentifier(teamName) || "team";
+  const existingIds = new Set(existingTeams.map((team) => team.teamId));
+  let candidate = base;
+  let suffix = 2;
+
+  while (existingIds.has(candidate)) {
+    candidate = `${base}-${suffix}`;
+    suffix += 1;
+  }
+
+  return candidate;
+}
+
+function buildInternId(
+  teamId: string,
+  internName: string,
+  existingInterns: Team["interns"]
+): string {
+  const base = `${teamId}:${normalizeIdentifier(internName) || "intern"}`;
+  const existingIds = new Set(existingInterns.map((intern) => intern.internId));
+  let candidate = base;
+  let suffix = 2;
+
+  while (existingIds.has(candidate)) {
+    candidate = `${base}-${suffix}`;
+    suffix += 1;
+  }
+
+  return candidate;
+}
+
+function normalizeIdentifier(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
 export default DashboardLayout;

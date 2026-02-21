@@ -20,6 +20,7 @@ export interface TeamListProps {
   onDeleteIntern?: (internId: string) => void;
   onUpdateIntern?: (internId: string, newName: string) => void;
   onDeleteTeam?: (teamId: string) => void;
+  onUpdateTeamName?: (teamId: string, newName: string) => void;
 }
 
 export const TeamList: React.FC<TeamListProps> = ({
@@ -29,8 +30,11 @@ export const TeamList: React.FC<TeamListProps> = ({
   onDeleteIntern,
   onUpdateIntern,
   onDeleteTeam,
+  onUpdateTeamName,
 }) => {
   const [draftByTeam, setDraftByTeam] = React.useState<Record<string, string>>({});
+  const [editingTeamId, setEditingTeamId] = React.useState<string | null>(null);
+  const [teamNameDraftById, setTeamNameDraftById] = React.useState<Record<string, string>>({});
 
   const handleInternDraftChange = (teamId: string, internName: string) => {
     setDraftByTeam((prev) => ({ ...prev, [teamId]: internName }));
@@ -50,6 +54,31 @@ export const TeamList: React.FC<TeamListProps> = ({
     setDraftByTeam((prev) => ({ ...prev, [teamId]: "" }));
   };
 
+  const handleStartTeamRename = (teamId: string, currentName: string) => {
+    setEditingTeamId(teamId);
+    setTeamNameDraftById((prev) => ({ ...prev, [teamId]: currentName }));
+  };
+
+  const handleCancelTeamRename = () => {
+    setEditingTeamId(null);
+  };
+
+  const handleSaveTeamRename = (teamId: string) => {
+    if (!onUpdateTeamName) {
+      setEditingTeamId(null);
+      return;
+    }
+
+    const nextName = (teamNameDraftById[teamId] ?? "").trim();
+
+    if (!nextName) {
+      return;
+    }
+
+    onUpdateTeamName(teamId, nextName);
+    setEditingTeamId(null);
+  };
+
   if (teams.length === 0) {
     return <p className="team-empty">No teams available.</p>;
   }
@@ -60,18 +89,62 @@ export const TeamList: React.FC<TeamListProps> = ({
         <article className="team-card" key={team.teamId}>
           <header className="team-header">
             <div>
-              <h3 className="team-name">{team.teamName}</h3>
-              <p className="team-id">teamId: {team.teamId}</p>
+              {editingTeamId === team.teamId ? (
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <input
+                    aria-label={`Edit team name for ${team.teamName}`}
+                    onChange={(event) =>
+                      setTeamNameDraftById((prev) => ({
+                        ...prev,
+                        [team.teamId]: event.target.value,
+                      }))
+                    }
+                    style={{
+                      border: "1px solid #d1d5db",
+                      borderRadius: 6,
+                      fontSize: 13,
+                      minWidth: 220,
+                      padding: "6px 8px",
+                    }}
+                    type="text"
+                    value={teamNameDraftById[team.teamId] ?? team.teamName}
+                  />
+                  <button
+                    className="ghost-button"
+                    onClick={() => handleSaveTeamRename(team.teamId)}
+                    type="button"
+                  >
+                    Save
+                  </button>
+                  <button className="ghost-button" onClick={handleCancelTeamRename} type="button">
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <h3 className="team-name">{team.teamName}</h3>
+              )}
             </div>
-            {onDeleteTeam ? (
-              <button
-                className="secondary-button"
-                onClick={() => onDeleteTeam(team.teamId)}
-                type="button"
-              >
-                Delete Team
-              </button>
-            ) : null}
+
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {onUpdateTeamName && editingTeamId !== team.teamId ? (
+                <button
+                  className="secondary-button"
+                  onClick={() => handleStartTeamRename(team.teamId, team.teamName)}
+                  type="button"
+                >
+                  Edit Team
+                </button>
+              ) : null}
+              {onDeleteTeam ? (
+                <button
+                  className="secondary-button"
+                  onClick={() => onDeleteTeam(team.teamId)}
+                  type="button"
+                >
+                  Delete Team
+                </button>
+              ) : null}
+            </div>
           </header>
 
           {onAddInternToTeam ? (

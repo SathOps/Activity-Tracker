@@ -29,12 +29,13 @@ export const InternCard: React.FC<InternCardProps> = ({
   onDeleteIntern,
   onUpdateIntern,
 }) => {
+  const displayName = (internName ?? "").trim() || "Unnamed Intern";
   const [isEditing, setIsEditing] = React.useState(false);
-  const [editedName, setEditedName] = React.useState(internName ?? internId);
+  const [editedName, setEditedName] = React.useState(displayName);
 
   React.useEffect(() => {
-    setEditedName(internName ?? internId);
-  }, [internId, internName]);
+    setEditedName(displayName);
+  }, [displayName]);
 
   const handleSave = () => {
     const nextName = editedName.trim();
@@ -48,18 +49,18 @@ export const InternCard: React.FC<InternCardProps> = ({
   };
 
   const handleCancel = () => {
-    setEditedName(internName ?? internId);
+    setEditedName(displayName);
     setIsEditing(false);
   };
 
   return (
     <article className="intern-card">
       <div style={{ display: "grid", gap: 4 }}>
-        <div className="intern-id">{internId}</div>
+        <div className="intern-id">{displayName}</div>
         {isEditing ? (
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <input
-              aria-label={`Edit intern name for ${internId}`}
+              aria-label={`Edit intern name for ${displayName}`}
               onChange={(event) => setEditedName(event.target.value)}
               style={{
                 border: "1px solid #d1d5db",
@@ -79,7 +80,7 @@ export const InternCard: React.FC<InternCardProps> = ({
             </button>
           </div>
         ) : (
-          <div style={{ color: "#4b5563", fontSize: 13 }}>{internName ?? internId}</div>
+          <div style={{ color: "#4b5563", fontSize: 13 }}>Status: {status}</div>
         )}
       </div>
 
@@ -96,7 +97,7 @@ export const InternCard: React.FC<InternCardProps> = ({
         ) : null}
         {onUpdateIntern ? (
           <button
-            aria-label={`Edit ${internName ?? internId}`}
+            aria-label={`Edit ${displayName}`}
             className="ghost-button"
             onClick={() => setIsEditing(true)}
             title="Edit"
@@ -107,7 +108,7 @@ export const InternCard: React.FC<InternCardProps> = ({
         ) : null}
         {onDeleteIntern ? (
           <button
-            aria-label={`Delete ${internName ?? internId}`}
+            aria-label={`Delete ${displayName}`}
             className="ghost-button"
             onClick={() => onDeleteIntern(internId)}
             title="Delete"
