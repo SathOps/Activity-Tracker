@@ -25,7 +25,7 @@ const DEFAULT_VIEW: DashboardView = "TEAMS";
 const EMPTY_TEAMS: Team[] = [];
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-  teams = [],
+  teams = EMPTY_TEAMS,
   addedInterns,
   onCreateTeam,
   onAddInternToTeam,
