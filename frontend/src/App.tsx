@@ -1,13 +1,14 @@
+import { useState } from "react";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
-import InternSearch from "./components/intern/InternSearch";
-import { Team } from "./components/dashboard/TeamList";
-import { SubmissionStatus } from "./components/intern/InternCard";
+import InternSearch, { Intern } from "./components/intern/InternSearch";
 
 export default function App() {
+  const [addedInterns, setAddedInterns] = useState<Intern[]>([]);
+
   return (
     <div className="app-shell">
-      <InternSearch />
-      <DashboardLayout />
+      <InternSearch addedInterns={addedInterns} onInternsChange={setAddedInterns} />
+      <DashboardLayout addedInterns={addedInterns} />
     </div>
   );
 }

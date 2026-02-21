@@ -48,6 +48,8 @@ export const TeamList: React.FC<TeamListProps> = ({
   onUpdateTeamName,
 }) => {
   const [dropdownByTeam, setDropdownByTeam] = React.useState<Record<string, DropdownState>>({});
+  const [editingTeamId, setEditingTeamId] = React.useState<string | null>(null);
+  const [teamNameDraftById, setTeamNameDraftById] = React.useState<Record<string, string>>({});
   const blurTimeoutRef = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const getState = (teamId: string): DropdownState =>

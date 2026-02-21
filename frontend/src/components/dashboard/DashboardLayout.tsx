@@ -25,7 +25,7 @@ const DEFAULT_VIEW: DashboardView = "TEAMS";
 const EMPTY_TEAMS: Team[] = [];
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-  teams = mockTeams,
+  teams = [],
   addedInterns,
   onCreateTeam,
   onAddInternToTeam,
@@ -130,7 +130,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             ...team,
             interns: [
               ...team.interns,
-              { internId: nextInternId, internName: trimmedName, status: "PENDING" },
+              { internId: buildInternId(teamId, trimmedName, team.interns), internName: trimmedName, status: "PENDING" },
             ],
           }
           : team
