@@ -1,11 +1,16 @@
 import React from "react";
 import TeamList, { Team } from "./TeamList";
 import InternCard from "../intern/InternCard";
+import type { Intern } from "../intern/InternSearch";
 
 type DashboardView = "TEAMS" | "INTERNS" | "COMPLETED";
 
 export interface DashboardLayoutProps {
   teams?: Team[];
+  addedInterns?: Intern[];
+  onCreateTeam?: () => void;
+  onAddInternToTeam?: (teamId: string) => void;
+  onVerifySubmission?: (internId: string) => void;
   title?: string;
   verifyStandupSubmission?: (internId: string) => void;
   createTeam?: (teamName: string) => void;
@@ -20,7 +25,11 @@ const DEFAULT_VIEW: DashboardView = "TEAMS";
 const EMPTY_TEAMS: Team[] = [];
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-  teams,
+  teams = mockTeams,
+  addedInterns,
+  onCreateTeam,
+  onAddInternToTeam,
+  onVerifySubmission,
   verifyStandupSubmission,
   createTeam,
   addInternToTeam,
@@ -115,32 +124,17 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     }
 
     setManagedTeams((prev) =>
-      prev.map((team) => {
-        if (team.teamId !== teamId) {
-          return team;
-        }
-
-        const duplicateExists = team.interns.some(
-          (intern) =>
-            (intern.internName ?? "").trim().toLowerCase() === trimmedName.toLowerCase()
-        );
-
-        if (duplicateExists) {
-          return team;
-        }
-
-        return {
-          ...team,
-          interns: [
-            ...team.interns,
-            {
-              internId: buildInternId(teamId, trimmedName, team.interns),
-              internName: trimmedName,
-              status: "PENDING",
-            },
-          ],
-        };
-      })
+      prev.map((team) =>
+        team.teamId === teamId
+          ? {
+            ...team,
+            interns: [
+              ...team.interns,
+              { internId: nextInternId, internName: trimmedName, status: "PENDING" },
+            ],
+          }
+          : team
+      )
     );
 
     addInternToTeam?.(teamId, trimmedName);
@@ -153,9 +147,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         interns: team.interns.map((intern) =>
           intern.internId === internId
             ? {
-                ...intern,
-                status: intern.status === "COMPLETED" ? "PENDING" : "COMPLETED",
-              }
+              ...intern,
+              status: intern.status === "COMPLETED" ? "PENDING" : "COMPLETED",
+            }
             : intern
         ),
       }))
@@ -321,6 +315,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       {activeView === "TEAMS" ? (
         <TeamList
+          addedInterns={addedInterns}
           onAddInternToTeam={handleAddInternToTeam}
           onDeleteIntern={handleDeleteIntern}
           onDeleteTeam={handleDeleteTeam}
