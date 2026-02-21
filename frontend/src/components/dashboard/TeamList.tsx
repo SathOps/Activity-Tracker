@@ -1,5 +1,6 @@
 import React from "react";
 import InternCard, { SubmissionStatus } from "../intern/InternCard";
+import type { Intern } from "../intern/InternSearch";
 
 export interface TeamIntern {
   internId: string;
@@ -15,6 +16,7 @@ export interface Team {
 
 export interface TeamListProps {
   teams: Team[];
+  addedInterns?: Intern[];
   onVerifySubmission?: (internId: string) => void;
   onAddInternToTeam?: (teamId: string, internName: string) => void;
   onDeleteIntern?: (internId: string) => void;
@@ -23,8 +25,21 @@ export interface TeamListProps {
   onUpdateTeamName?: (teamId: string, newName: string) => void;
 }
 
+interface DropdownState {
+  inputValue: string;
+  showDropdown: boolean;
+  selectedInternId: string | null;
+}
+
+const emptyDropdownState: DropdownState = {
+  inputValue: "",
+  showDropdown: false,
+  selectedInternId: null,
+};
+
 export const TeamList: React.FC<TeamListProps> = ({
   teams,
+  addedInterns = [],
   onVerifySubmission,
   onAddInternToTeam,
   onDeleteIntern,
@@ -32,12 +47,74 @@ export const TeamList: React.FC<TeamListProps> = ({
   onDeleteTeam,
   onUpdateTeamName,
 }) => {
-  const [draftByTeam, setDraftByTeam] = React.useState<Record<string, string>>({});
-  const [editingTeamId, setEditingTeamId] = React.useState<string | null>(null);
-  const [teamNameDraftById, setTeamNameDraftById] = React.useState<Record<string, string>>({});
+  const [dropdownByTeam, setDropdownByTeam] = React.useState<Record<string, DropdownState>>({});
+  const blurTimeoutRef = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
-  const handleInternDraftChange = (teamId: string, internName: string) => {
-    setDraftByTeam((prev) => ({ ...prev, [teamId]: internName }));
+  const getState = (teamId: string): DropdownState =>
+    dropdownByTeam[teamId] ?? emptyDropdownState;
+
+  const patchState = (teamId: string, patch: Partial<DropdownState>) => {
+    setDropdownByTeam((prev) => ({
+      ...prev,
+      [teamId]: { ...getState(teamId), ...patch },
+    }));
+  };
+
+  // Clean up blur timeouts on unmount
+  React.useEffect(() => {
+    return () => {
+      Object.values(blurTimeoutRef.current).forEach(clearTimeout);
+    };
+  }, []);
+
+  const isInternInAnyTeam = (internId: string): boolean =>
+    teams.some((team) =>
+      team.interns.some(
+        (i) => i.internId === internId || (i.internName ?? "").toLowerCase() === internId.toLowerCase()
+      )
+    );
+
+  const getFilteredInterns = (teamId: string): (Intern & { alreadyInTeam: boolean })[] => {
+    const { inputValue } = getState(teamId);
+    const query = inputValue.trim().toLowerCase();
+
+    return addedInterns
+      .filter((intern) => !query || intern.name.toLowerCase().includes(query))
+      .map((intern) => ({
+        ...intern,
+        alreadyInTeam: isInternInAnyTeam(intern.id),
+      }));
+  };
+
+  const handleInputChange = (teamId: string, value: string) => {
+    patchState(teamId, {
+      inputValue: value,
+      showDropdown: true,
+      selectedInternId: null,
+    });
+  };
+
+  const handleFocus = (teamId: string) => {
+    // Clear any pending blur timeout
+    if (blurTimeoutRef.current[teamId]) {
+      clearTimeout(blurTimeoutRef.current[teamId]);
+    }
+    patchState(teamId, { showDropdown: true });
+  };
+
+  const handleBlur = (teamId: string) => {
+    // Delay closing so click events on dropdown items fire first
+    blurTimeoutRef.current[teamId] = setTimeout(() => {
+      patchState(teamId, { showDropdown: false });
+    }, 200);
+  };
+
+  const handleSelectIntern = (teamId: string, intern: Intern) => {
+    patchState(teamId, {
+      inputValue: intern.name,
+      selectedInternId: intern.id,
+      showDropdown: false,
+    });
   };
 
   const handleAddIntern = (teamId: string) => {
@@ -45,13 +122,23 @@ export const TeamList: React.FC<TeamListProps> = ({
       return;
     }
 
-    const name = (draftByTeam[teamId] ?? "").trim();
+    const state = getState(teamId);
+    const name = state.inputValue.trim();
     if (!name) {
       return;
     }
 
+    // Prevent adding if the intern is already in any team
+    if (state.selectedInternId && isInternInAnyTeam(state.selectedInternId)) {
+      return;
+    }
+
     onAddInternToTeam(teamId, name);
-    setDraftByTeam((prev) => ({ ...prev, [teamId]: "" }));
+    patchState(teamId, {
+      inputValue: "",
+      selectedInternId: null,
+      showDropdown: false,
+    });
   };
 
   const handleStartTeamRename = (teamId: string, currentName: string) => {
@@ -85,56 +172,17 @@ export const TeamList: React.FC<TeamListProps> = ({
 
   return (
     <section className="team-list">
-      {teams.map((team) => (
-        <article className="team-card" key={team.teamId}>
-          <header className="team-header">
-            <div>
-              {editingTeamId === team.teamId ? (
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <input
-                    aria-label={`Edit team name for ${team.teamName}`}
-                    onChange={(event) =>
-                      setTeamNameDraftById((prev) => ({
-                        ...prev,
-                        [team.teamId]: event.target.value,
-                      }))
-                    }
-                    style={{
-                      border: "1px solid #d1d5db",
-                      borderRadius: 6,
-                      fontSize: 13,
-                      minWidth: 220,
-                      padding: "6px 8px",
-                    }}
-                    type="text"
-                    value={teamNameDraftById[team.teamId] ?? team.teamName}
-                  />
-                  <button
-                    className="ghost-button"
-                    onClick={() => handleSaveTeamRename(team.teamId)}
-                    type="button"
-                  >
-                    Save
-                  </button>
-                  <button className="ghost-button" onClick={handleCancelTeamRename} type="button">
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <h3 className="team-name">{team.teamName}</h3>
-              )}
-            </div>
+      {teams.map((team) => {
+        const state = getState(team.teamId);
+        const filtered = getFilteredInterns(team.teamId);
 
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {onUpdateTeamName && editingTeamId !== team.teamId ? (
-                <button
-                  className="secondary-button"
-                  onClick={() => handleStartTeamRename(team.teamId, team.teamName)}
-                  type="button"
-                >
-                  Edit Team
-                </button>
-              ) : null}
+        return (
+          <article className="team-card" key={team.teamId}>
+            <header className="team-header">
+              <div>
+                <h3 className="team-name">{team.teamName}</h3>
+                <p className="team-id">teamId: {team.teamId}</p>
+              </div>
               {onDeleteTeam ? (
                 <button
                   className="secondary-button"
@@ -144,50 +192,90 @@ export const TeamList: React.FC<TeamListProps> = ({
                   Delete Team
                 </button>
               ) : null}
-            </div>
-          </header>
+            </header>
 
-          {onAddInternToTeam ? (
-            <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-              <input
-                aria-label={`Add intern to ${team.teamName}`}
-                onChange={(event) => handleInternDraftChange(team.teamId, event.target.value)}
-                placeholder="Enter intern name"
-                style={{
-                  border: "1px solid #d1d5db",
-                  borderRadius: 6,
-                  fontSize: 13,
-                  minWidth: 220,
-                  padding: "8px 10px",
-                }}
-                type="text"
-                value={draftByTeam[team.teamId] ?? ""}
-              />
-              <button
-                className="secondary-button"
-                onClick={() => handleAddIntern(team.teamId)}
-                type="button"
-              >
-                Add Intern
-              </button>
-            </div>
-          ) : null}
+            {onAddInternToTeam ? (
+              <div className="intern-dropdown-wrapper">
+                <div style={{ position: "relative", flex: 1, minWidth: 220 }}>
+                  <input
+                    aria-label={`Add intern to ${team.teamName}`}
+                    onChange={(e) => handleInputChange(team.teamId, e.target.value)}
+                    onFocus={() => handleFocus(team.teamId)}
+                    onBlur={() => handleBlur(team.teamId)}
+                    placeholder="Enter intern name"
+                    style={{
+                      border: "1px solid #d1d5db",
+                      borderRadius: 6,
+                      fontSize: 13,
+                      padding: "8px 10px",
+                      width: "100%",
+                    }}
+                    type="text"
+                    value={state.inputValue}
+                  />
 
-          <div className="team-interns">
-            {team.interns.map((intern) => (
-              <InternCard
-                key={intern.internId}
-                internId={intern.internId}
-                internName={intern.internName}
-                onDeleteIntern={onDeleteIntern}
-                onUpdateIntern={onUpdateIntern}
-                onVerifySubmission={onVerifySubmission}
-                status={intern.status}
-              />
-            ))}
-          </div>
-        </article>
-      ))}
+                  {state.showDropdown ? (
+                    <ul className="intern-dropdown" role="listbox">
+                      {addedInterns.length === 0 ? (
+                        <li className="intern-dropdown-empty">No interns available</li>
+                      ) : filtered.length === 0 ? (
+                        <li className="intern-dropdown-empty">No matching interns</li>
+                      ) : (
+                        filtered.map((intern) => (
+                          <li
+                            key={intern.id}
+                            role="option"
+                            aria-selected={state.selectedInternId === intern.id}
+                            aria-disabled={intern.alreadyInTeam}
+                            className={`intern-dropdown-item${intern.alreadyInTeam ? " disabled" : ""}`}
+                            onMouseDown={(e) => {
+                              // Prevent blur from firing before click
+                              e.preventDefault();
+                            }}
+                            onClick={() => {
+                              if (!intern.alreadyInTeam) {
+                                handleSelectIntern(team.teamId, intern);
+                              }
+                            }}
+                          >
+                            <span className="intern-dropdown-name">{intern.name}</span>
+                            <span className="intern-dropdown-id">{intern.id}</span>
+                            {intern.alreadyInTeam ? (
+                              <span className="intern-dropdown-badge">Already in a team</span>
+                            ) : null}
+                          </li>
+                        ))
+                      )}
+                    </ul>
+                  ) : null}
+                </div>
+
+                <button
+                  className="secondary-button"
+                  onClick={() => handleAddIntern(team.teamId)}
+                  type="button"
+                >
+                  Add Intern
+                </button>
+              </div>
+            ) : null}
+
+            <div className="team-interns">
+              {team.interns.map((intern) => (
+                <InternCard
+                  key={intern.internId}
+                  internId={intern.internId}
+                  internName={intern.internName}
+                  onDeleteIntern={onDeleteIntern}
+                  onUpdateIntern={onUpdateIntern}
+                  onVerifySubmission={onVerifySubmission}
+                  status={intern.status}
+                />
+              ))}
+            </div>
+          </article>
+        );
+      })}
     </section>
   );
 };
