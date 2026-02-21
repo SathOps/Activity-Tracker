@@ -47,86 +47,8 @@ type UnknownRecord = Record<string, unknown>;
 const runtimeConfig: RuntimeConfig = {
   baseUrl: "",
   authToken: "",
-  useMock: true,
+  useMock: false,
   fetcher: resolveGlobalFetch(),
-};
-
-const mockInternById: Record<string, InternSummary> = {
-  INT001: { id: "INT001", name: "Aarav Reddy" },
-  INT002: { id: "INT002", name: "Saanvi Nair" },
-  INT003: { id: "INT003", name: "Vihaan Kumar" },
-  INT004: { id: "INT004", name: "Ananya Sharma" },
-  INT005: { id: "INT005", name: "Rohan Reddy" },
-  INT006: { id: "INT006", name: "Priya Nair" },
-};
-
-const mockAudiosByInternId: Record<string, InternAudioMetadata[]> = {
-  INT001: [
-    {
-      id: "rec-101",
-      category: "standup",
-      tag: "internship",
-      uploadedAt: "2026-02-20T09:15:00.000Z",
-    },
-    {
-      id: "rec-102",
-      category: "standup",
-      tag: "internship",
-      uploadedAt: "2026-02-20T12:30:00.000Z",
-    },
-    {
-      id: "rec-103",
-      category: "standup",
-      tag: "internship",
-      uploadedAt: "2026-02-21T10:00:00.000Z",
-    },
-    {
-      id: "rec-104",
-      category: "standup",
-      tag: "internship",
-      uploadedAt: "2026-02-21T13:45:00.000Z",
-    },
-    {
-      id: "rec-105",
-      category: "read",
-      tag: "internship",
-      uploadedAt: "2026-02-21T15:10:00.000Z",
-    },
-  ],
-  INT002: [
-    {
-      id: "rec-201",
-      category: "standup",
-      tag: "internship",
-      uploadedAt: "2026-02-21T08:25:00.000Z",
-    },
-    {
-      id: "rec-202",
-      category: "standup",
-      tag: "internship",
-      uploadedAt: "2026-02-22T08:25:00.000Z",
-    },
-    {
-      id: "rec-203",
-      category: "standup",
-      tag: "general",
-      uploadedAt: "2026-02-22T10:55:00.000Z",
-    },
-  ],
-  INT003: [
-    {
-      id: "rec-301",
-      category: "standup",
-      tag: "internship",
-      uploadedAt: "2026-02-21T11:00:00.000Z",
-    },
-    {
-      id: "rec-302",
-      category: "pronunciation",
-      tag: "internship",
-      uploadedAt: "2026-02-21T11:35:00.000Z",
-    },
-  ],
 };
 
 export function configureCorpusService(config: CorpusServiceConfig = {}): void {
@@ -230,15 +152,11 @@ function normalizeInternId(internId: string): string {
 }
 
 function getMockIntern(internId: string): InternSummary {
-  return mockInternById[internId.toUpperCase()] ?? { id: internId };
+  return { id: internId };
 }
 
 function getMockInternsByName(query: string): InternSummary[] {
-  const lowerQuery = query.toLowerCase();
-
-  return Object.values(mockInternById).filter((intern) =>
-    intern.name?.toLowerCase().includes(lowerQuery)
-  );
+  return [];
 }
 
 function parseInternList(payload: unknown): InternSummary[] {
@@ -257,9 +175,7 @@ function parseInternList(payload: unknown): InternSummary[] {
 }
 
 function getMockAudios(internId: string): InternAudioMetadata[] {
-  const audios = mockAudiosByInternId[internId.toUpperCase()] ?? [];
-
-  return audios.map((audio) => ({ ...audio }));
+  return [];
 }
 
 async function requestCorpusApi(path: string): Promise<unknown | undefined> {
