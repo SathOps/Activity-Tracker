@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 import { Team } from "./components/dashboard/TeamList";
 import { SubmissionStatus } from "./components/intern/InternCard";
-import InternSearch from "./components/intern/InternSearch";
 
 const getNextStatus = (status: SubmissionStatus): SubmissionStatus =>
   status === "PENDING" ? "COMPLETED" : "PENDING";
@@ -107,8 +106,6 @@ export default function App() {
           <strong className="summary-value">{completedCount}</strong>
         </div>
       </section>
-
-      <InternSearch />
 
       <DashboardLayout
         teams={teams}

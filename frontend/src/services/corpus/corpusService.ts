@@ -8,7 +8,6 @@ export interface InternAudioMetadata {
   category: string;
   tag: string;
   labels?: string[];
-  uploadedAt?: string;
 }
 
 interface FetchRequestInit {
@@ -62,70 +61,20 @@ const mockInternById: Record<string, InternSummary> = {
 
 const mockAudiosByInternId: Record<string, InternAudioMetadata[]> = {
   INT001: [
-    {
-      id: "rec-101",
-      category: "standup",
-      tag: "internship",
-      uploadedAt: "2026-02-20T09:15:00.000Z",
-    },
-    {
-      id: "rec-102",
-      category: "standup",
-      tag: "internship",
-      uploadedAt: "2026-02-20T12:30:00.000Z",
-    },
-    {
-      id: "rec-103",
-      category: "standup",
-      tag: "internship",
-      uploadedAt: "2026-02-21T10:00:00.000Z",
-    },
-    {
-      id: "rec-104",
-      category: "standup",
-      tag: "internship",
-      uploadedAt: "2026-02-21T13:45:00.000Z",
-    },
-    {
-      id: "rec-105",
-      category: "read",
-      tag: "internship",
-      uploadedAt: "2026-02-21T15:10:00.000Z",
-    },
+    { id: "rec-101", category: "standup", tag: "internship" },
+    { id: "rec-102", category: "standup", tag: "internship" },
+    { id: "rec-103", category: "standup", tag: "internship" },
+    { id: "rec-104", category: "standup", tag: "internship" },
+    { id: "rec-105", category: "read", tag: "internship" },
   ],
   INT002: [
-    {
-      id: "rec-201",
-      category: "standup",
-      tag: "internship",
-      uploadedAt: "2026-02-21T08:25:00.000Z",
-    },
-    {
-      id: "rec-202",
-      category: "standup",
-      tag: "internship",
-      uploadedAt: "2026-02-22T08:25:00.000Z",
-    },
-    {
-      id: "rec-203",
-      category: "standup",
-      tag: "general",
-      uploadedAt: "2026-02-22T10:55:00.000Z",
-    },
+    { id: "rec-201", category: "standup", tag: "internship" },
+    { id: "rec-202", category: "standup", tag: "internship" },
+    { id: "rec-203", category: "standup", tag: "general" },
   ],
   INT003: [
-    {
-      id: "rec-301",
-      category: "standup",
-      tag: "internship",
-      uploadedAt: "2026-02-21T11:00:00.000Z",
-    },
-    {
-      id: "rec-302",
-      category: "pronunciation",
-      tag: "internship",
-      uploadedAt: "2026-02-21T11:35:00.000Z",
-    },
+    { id: "rec-301", category: "standup", tag: "internship" },
+    { id: "rec-302", category: "pronunciation", tag: "internship" },
   ],
 };
 
@@ -362,14 +311,12 @@ function parseAudioItem(
     ...tagValues,
     ...contextualValues,
   ]);
-  const uploadedAt = parseUploadedAt(item);
 
   return {
     id,
     category: categoryValues[0] ?? "",
     tag: tagValues[0] ?? "",
     labels,
-    uploadedAt,
   };
 }
 
@@ -458,95 +405,6 @@ function extractTextValuesByKeyPattern(
   }
 
   return uniqueNonEmptyStrings(collectedValues);
-}
-
-function parseUploadedAt(source: UnknownRecord): string | undefined {
-  const directFieldCandidates = [
-    source.uploaded_at,
-    source.uploadedAt,
-    source.created_at,
-    source.createdAt,
-    source.submitted_at,
-    source.submittedAt,
-    source.recorded_at,
-    source.recordedAt,
-    source.date,
-    source.datetime,
-    source.timestamp,
-  ];
-
-  for (const candidate of directFieldCandidates) {
-    const resolved = resolveDateCandidate(candidate);
-
-    if (resolved) {
-      return resolved;
-    }
-  }
-
-  const nestedDateCandidates = extractTextValuesByKeyPattern(
-    source,
-    /(uploaded|created|submitted|recorded|timestamp|date|datetime)/i
-  );
-
-  for (const candidate of nestedDateCandidates) {
-    const resolved = resolveDateCandidate(candidate);
-
-    if (resolved) {
-      return resolved;
-    }
-  }
-
-  return undefined;
-}
-
-function resolveDateCandidate(value: unknown): string | undefined {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    const milliseconds = value > 9999999999 ? value : value * 1000;
-    const parsed = new Date(milliseconds);
-
-    if (!Number.isNaN(parsed.getTime())) {
-      return parsed.toISOString();
-    }
-
-    return undefined;
-  }
-
-  if (typeof value === "string" && value.trim()) {
-    const parsed = new Date(value);
-
-    if (!Number.isNaN(parsed.getTime())) {
-      return parsed.toISOString();
-    }
-
-    return undefined;
-  }
-
-  if (!isRecord(value)) {
-    return undefined;
-  }
-
-  const nestedValues = [
-    value.date,
-    value.datetime,
-    value.timestamp,
-    value.created_at,
-    value.createdAt,
-    value.uploaded_at,
-    value.uploadedAt,
-    value.submitted_at,
-    value.submittedAt,
-    value.value,
-  ];
-
-  for (const nestedValue of nestedValues) {
-    const resolved = resolveDateCandidate(nestedValue);
-
-    if (resolved) {
-      return resolved;
-    }
-  }
-
-  return undefined;
 }
 
 function splitLabelText(value: string): string[] {

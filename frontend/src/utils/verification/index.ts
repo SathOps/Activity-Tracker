@@ -3,8 +3,4 @@ export {
   verifyStandupSubmission,
 } from "./verifyStandup";
 
-export type {
-  StandupVerificationOptions,
-  StandupVerificationResult,
-  SubmissionStatus,
-} from "./verifyStandup";
+export type { StandupVerificationResult, SubmissionStatus } from "./verifyStandup";
