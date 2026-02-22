@@ -71,7 +71,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     [managedTeams]
   );
   const totalInterns = allInternRows.length;
-  const completedCount = allInternRows.filter((intern) => intern.status === "COMPLETED").length;
   const selectedDateLabel = React.useMemo(
     () => formatDateForDisplay(selectedDateKey),
     [selectedDateKey]
@@ -336,15 +335,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       <section
         style={{
           display: "grid",
-          gap: 12,
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: 10,
+          gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
           marginBottom: 14,
         }}
       >
         {[
           { key: "TEAMS" as const, label: "Teams", value: totalTeams },
           { key: "INTERNS" as const, label: "Interns", value: totalInterns },
-          { key: "COMPLETED" as const, label: "Completed", value: completedCount },
         ].map((item) => {
           const isActive = activeView === item.key;
           const isHovered = hoveredBox === item.key;
@@ -361,15 +359,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 borderRadius: 12,
                 boxShadow: isActive || isHovered ? "0 0 0 3px rgba(147, 197, 253, 0.35)" : "none",
                 cursor: "pointer",
-                minHeight: 110,
-                padding: "14px 16px",
+                minHeight: 88,
+                padding: "10px 12px",
                 textAlign: "left",
                 transition: "box-shadow 180ms ease, background-color 180ms ease",
               }}
               type="button"
             >
-              <div style={{ color: "#1d4ed8", fontSize: 14, marginBottom: 8 }}>{item.label}</div>
-              <strong style={{ color: "#0f172a", fontSize: 34, lineHeight: 1 }}>{item.value}</strong>
+              <div style={{ color: "#1d4ed8", fontSize: 13, marginBottom: 6 }}>{item.label}</div>
+              <strong style={{ color: "#0f172a", fontSize: 22, lineHeight: 1 }}>{item.value}</strong>
             </button>
           );
         })}
