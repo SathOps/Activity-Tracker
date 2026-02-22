@@ -92,16 +92,6 @@ export const InternCard: React.FC<InternCardProps> = ({
       </div>
 
       <div className="intern-actions">
-        <StatusBadge status={status} />
-        {onVerifySubmission ? (
-          <button
-            className="ghost-button"
-            onClick={() => onVerifySubmission(internId)}
-            type="button"
-          >
-            Verify
-          </button>
-        ) : null}
         {onUpdateIntern ? (
           <button
             aria-label={`Edit ${displayName}`}
