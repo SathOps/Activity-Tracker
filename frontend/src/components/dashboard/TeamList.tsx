@@ -70,7 +70,7 @@ export const TeamList: React.FC<TeamListProps> = ({
   const patchState = (teamId: string, patch: Partial<DropdownState>) => {
     setDropdownByTeam((prev) => ({
       ...prev,
-      [teamId]: { ...getState(teamId), ...patch },
+      [teamId]: { ...(prev[teamId] ?? emptyDropdownState), ...patch },
     }));
   };
 
@@ -153,6 +153,11 @@ export const TeamList: React.FC<TeamListProps> = ({
 
     if (isInternInAnyTeam(selectedIntern.id)) {
       return;
+    }
+
+    if (blurTimeoutRef.current[teamId]) {
+      clearTimeout(blurTimeoutRef.current[teamId]);
+      delete blurTimeoutRef.current[teamId];
     }
 
     onAddInternToTeam(teamId, selectedIntern);

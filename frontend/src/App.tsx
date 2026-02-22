@@ -6,15 +6,17 @@ import InternsModal from "./components/intern/InternsModal";
 import { configureCorpusService } from "./services/corpus";
 
 const ACCESS_TOKEN_STORAGE_KEY = "corpus_access_token";
+const USERNAME_STORAGE_KEY = "corpus_username";
 
 export default function App() {
   const [addedInterns, setAddedInterns] = useState<Intern[]>([]);
   const [authToken, setAuthToken] = useState(() => readStoredAccessToken());
+  const [username, setUsername] = useState(() => readStoredUsername());
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
-  const [showInternsModal, setShowInternsModal] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   useEffect(() => {
     // Browser requests use relative /api/v1 routes via Vite proxy.
@@ -24,6 +26,9 @@ export default function App() {
   useEffect(() => {
     persistAccessToken(authToken);
   }, [authToken]);
+  useEffect(() => {
+    persistUsername(username);
+  }, [username]);
 
   const handleRemoveIntern = (internId: string) => {
     setAddedInterns((prev) => prev.filter((i) => i.id !== internId));
@@ -71,6 +76,7 @@ export default function App() {
       }
 
       setAuthToken(accessToken);
+      setUsername(trimmedPhone);
       setPassword("");
       setLoginError(null);
     } catch (error) {
@@ -83,10 +89,27 @@ export default function App() {
 
   const handleLogout = () => {
     setAuthToken("");
+    setUsername("");
     setAddedInterns([]);
     setPassword("");
     setLoginError(null);
+    setIsProfileMenuOpen(false);
   };
+
+  useEffect(() => {
+    if (!isProfileMenuOpen) {
+      return;
+    }
+
+    const handleDocumentClick = () => {
+      setIsProfileMenuOpen(false);
+    };
+
+    document.addEventListener("click", handleDocumentClick);
+    return () => {
+      document.removeEventListener("click", handleDocumentClick);
+    };
+  }, [isProfileMenuOpen]);
 
   if (!authToken) {
     return (
@@ -130,9 +153,33 @@ export default function App() {
   return (
     <div className="app-shell">
       <div className="app-toolbar">
-        <button className="secondary-button" onClick={handleLogout} type="button">
-          Logout
-        </button>
+        <div className="profile-menu-container">
+          <button
+            aria-label="Open profile menu"
+            className="profile-icon-button"
+            onClick={(event) => {
+              event.stopPropagation();
+              setIsProfileMenuOpen((prev) => !prev);
+            }}
+            type="button"
+          >
+            <span aria-hidden="true">👤</span>
+          </button>
+
+          {isProfileMenuOpen ? (
+            <div
+              className="profile-menu-dropdown"
+              onClick={(event) => event.stopPropagation()}
+              role="dialog"
+            >
+              <div className="profile-menu-label">User Number</div>
+              <div className="profile-menu-id">{username || "Unavailable"}</div>
+              <button className="secondary-button profile-menu-logout" onClick={handleLogout} type="button">
+                Logout
+              </button>
+            </div>
+          ) : null}
+        </div>
       </div>
       <InternSearch
         addedInterns={addedInterns}
@@ -174,6 +221,27 @@ function persistAccessToken(token: string): void {
   }
 
   window.localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
+}
+
+function readStoredUsername(): string {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  return window.localStorage.getItem(USERNAME_STORAGE_KEY) ?? "";
+}
+
+function persistUsername(username: string): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (!username) {
+    window.localStorage.removeItem(USERNAME_STORAGE_KEY);
+    return;
+  }
+
+  window.localStorage.setItem(USERNAME_STORAGE_KEY, username);
 }
 
 function readAccessToken(payload: unknown): string {

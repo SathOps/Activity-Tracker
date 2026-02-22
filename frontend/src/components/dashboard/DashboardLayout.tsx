@@ -3,44 +3,8 @@ import TeamList, { Team } from "./TeamList";
 import InternCard from "../intern/InternCard";
 import type { Intern } from "../intern/InternSearch";
 import { verifyStandupSubmission } from "../../utils/verification";
-import { getInternAudios } from "../../services/corpus";
-import type { InternAudioMetadata } from "../../services/corpus";
 
 type DashboardView = "TEAMS" | "INTERNS" | "COMPLETED";
-type StatusView = "DAILY" | "WEEKLY";
-
-interface TeamDailyStatusRow {
-  teamId: string;
-  teamName: string;
-  standupCount: number;
-  requiredStandupCount: number;
-  remainingStandupCount: number;
-  isCompleted: boolean;
-}
-
-interface WeeklyDayStatus {
-  dateKey: string;
-  dayLabel: string;
-  fullDateLabel: string;
-  standupCount: number;
-  requiredStandupCount: number;
-  remainingStandupCount: number;
-  isCompleted: boolean;
-}
-
-interface TeamWeeklyStatusRow {
-  teamId: string;
-  teamName: string;
-  dayStatuses: WeeklyDayStatus[];
-  completedDaysCount: number;
-  pendingDayDetails: string[];
-  totalRemainingStandups: number;
-}
-
-interface SubmissionAliasCriteria {
-  standupAliases: Set<string>;
-  internshipAliases: Set<string>;
-}
 
 export interface DashboardLayoutProps {
   teams?: Team[];
@@ -77,16 +41,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [activeView, setActiveView] = React.useState<DashboardView>(DEFAULT_VIEW);
   const [hoveredBox, setHoveredBox] = React.useState<DashboardView | null>(null);
   const [verifyingTeamId, setVerifyingTeamId] = React.useState<string | null>(null);
-  const [isStatusModalOpen, setIsStatusModalOpen] = React.useState(false);
-  const [statusView, setStatusView] = React.useState<StatusView>("DAILY");
-  const [statusLoading, setStatusLoading] = React.useState(false);
-  const [statusError, setStatusError] = React.useState<string | null>(null);
-  const [teamDailyStatusRows, setTeamDailyStatusRows] = React.useState<TeamDailyStatusRow[]>([]);
-  const [teamWeeklyStatusRows, setTeamWeeklyStatusRows] = React.useState<TeamWeeklyStatusRow[]>(
-    []
-  );
   const hasInitializedDateSelection = React.useRef(false);
-  const statusLoadRequestId = React.useRef(0);
 
   React.useEffect(() => {
     if (teams) {
@@ -116,26 +71,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     [managedTeams]
   );
   const totalInterns = allInternRows.length;
-  const completedCount = allInternRows.filter((intern) => intern.status === "COMPLETED").length;
   const selectedDateLabel = React.useMemo(
     () => formatDateForDisplay(selectedDateKey),
     [selectedDateKey]
-  );
-  const selectedWeekDateKeys = React.useMemo(
-    () => getWeekDateKeys(selectedDateKey),
-    [selectedDateKey]
-  );
-  const selectedWeekLabel = React.useMemo(
-    () => formatWeekRangeLabel(selectedWeekDateKeys),
-    [selectedWeekDateKeys]
-  );
-  const pendingDailyRows = React.useMemo(
-    () => teamDailyStatusRows.filter((row) => !row.isCompleted),
-    [teamDailyStatusRows]
-  );
-  const pendingWeeklyRows = React.useMemo(
-    () => teamWeeklyStatusRows.filter((row) => row.pendingDayDetails.length > 0),
-    [teamWeeklyStatusRows]
   );
 
   const normalizedQuery = searchTerm.trim().toLowerCase();
@@ -381,130 +319,30 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     );
   };
 
-  const loadStatusSummaries = React.useCallback(async () => {
-    const requestId = statusLoadRequestId.current + 1;
-    statusLoadRequestId.current = requestId;
-
-    if (managedTeams.length === 0) {
-      setTeamDailyStatusRows([]);
-      setTeamWeeklyStatusRows([]);
-      setStatusError(null);
-      setStatusLoading(false);
-      return;
-    }
-
-    setStatusLoading(true);
-    setStatusError(null);
-
-    try {
-      const aliasCriteria = buildSubmissionAliasCriteria(
-        STANDUP_ALIAS_OVERRIDE,
-        INTERNSHIP_ALIAS_OVERRIDE
-      );
-      const relevantDateKeys = new Set<string>(selectedWeekDateKeys);
-      relevantDateKeys.add(selectedDateKey);
-      const uniqueInternIds = collectUniqueTeamInternIds(managedTeams);
-      const countsByInternByDate = await buildInternDateCountMap(
-        uniqueInternIds,
-        relevantDateKeys,
-        aliasCriteria
-      );
-
-      if (statusLoadRequestId.current !== requestId) {
-        return;
-      }
-
-      setTeamDailyStatusRows(
-        managedTeams.map((team) =>
-          buildTeamDailyStatusRow(team, selectedDateKey, countsByInternByDate)
-        )
-      );
-      setTeamWeeklyStatusRows(
-        managedTeams.map((team) =>
-          buildTeamWeeklyStatusRow(team, selectedWeekDateKeys, countsByInternByDate)
-        )
-      );
-    } catch (error) {
-      if (statusLoadRequestId.current !== requestId) {
-        return;
-      }
-
-      console.error("Unable to load team status summary", error);
-      setStatusError("Unable to load team status summary right now. Please try again.");
-      setTeamDailyStatusRows([]);
-      setTeamWeeklyStatusRows([]);
-    } finally {
-      if (statusLoadRequestId.current === requestId) {
-        setStatusLoading(false);
-      }
-    }
-  }, [managedTeams, selectedDateKey, selectedWeekDateKeys]);
-
-  React.useEffect(() => {
-    if (!isStatusModalOpen) {
-      return;
-    }
-
-    void loadStatusSummaries();
-  }, [isStatusModalOpen, loadStatusSummaries]);
-
-  React.useEffect(() => {
-    if (!isStatusModalOpen) {
-      return;
-    }
-
-    const handleEscapeClose = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsStatusModalOpen(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleEscapeClose);
-
-    return () => {
-      window.removeEventListener("keydown", handleEscapeClose);
-    };
-  }, [isStatusModalOpen]);
-
-  const handleOpenStatusModal = () => {
-    setStatusView("DAILY");
-    setIsStatusModalOpen(true);
-  };
-
-  const handleCloseStatusModal = () => {
-    setIsStatusModalOpen(false);
-  };
-
   return (
     <main className="dashboard-container">
       <header className="dashboard-header">
         <h1 className="dashboard-title">{title}</h1>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button className="secondary-button" onClick={handleOpenStatusModal} type="button">
-            Status
-          </button>
-          <button
-            className="primary-button"
-            onClick={() => setIsCreatingTeam((prev) => !prev)}
-            type="button"
-          >
-            {isCreatingTeam ? "Cancel" : "Create Team"}
-          </button>
-        </div>
+        <button
+          className="primary-button"
+          onClick={() => setIsCreatingTeam((prev) => !prev)}
+          type="button"
+        >
+          {isCreatingTeam ? "Cancel" : "Create Team"}
+        </button>
       </header>
 
       <section
         style={{
           display: "grid",
-          gap: 12,
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: 10,
+          gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
           marginBottom: 14,
         }}
       >
         {[
           { key: "TEAMS" as const, label: "Teams", value: totalTeams },
           { key: "INTERNS" as const, label: "Interns", value: totalInterns },
-          { key: "COMPLETED" as const, label: "Completed", value: completedCount },
         ].map((item) => {
           const isActive = activeView === item.key;
           const isHovered = hoveredBox === item.key;
@@ -521,15 +359,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 borderRadius: 12,
                 boxShadow: isActive || isHovered ? "0 0 0 3px rgba(147, 197, 253, 0.35)" : "none",
                 cursor: "pointer",
-                minHeight: 110,
-                padding: "14px 16px",
+                minHeight: 88,
+                padding: "10px 12px",
                 textAlign: "left",
                 transition: "box-shadow 180ms ease, background-color 180ms ease",
               }}
               type="button"
             >
-              <div style={{ color: "#1d4ed8", fontSize: 14, marginBottom: 8 }}>{item.label}</div>
-              <strong style={{ color: "#0f172a", fontSize: 34, lineHeight: 1 }}>{item.value}</strong>
+              <div style={{ color: "#1d4ed8", fontSize: 13, marginBottom: 6 }}>{item.label}</div>
+              <strong style={{ color: "#0f172a", fontSize: 22, lineHeight: 1 }}>{item.value}</strong>
             </button>
           );
         })}
@@ -661,244 +499,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           )}
         </section>
       ) : null}
-
-      {isStatusModalOpen ? (
-        <div
-          aria-modal="true"
-          onClick={handleCloseStatusModal}
-          role="dialog"
-          style={{
-            backgroundColor: "rgba(15, 23, 42, 0.45)",
-            display: "flex",
-            inset: 0,
-            justifyContent: "center",
-            padding: "24px 14px",
-            position: "fixed",
-            zIndex: 80,
-          }}
-        >
-          <section
-            onClick={(event) => event.stopPropagation()}
-            style={{
-              backgroundColor: "#ffffff",
-              borderRadius: 12,
-              display: "grid",
-              gap: 14,
-              maxHeight: "100%",
-              maxWidth: 980,
-              overflowY: "auto",
-              padding: 16,
-              width: "100%",
-            }}
-          >
-            <header
-              style={{
-                alignItems: "center",
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 12,
-                justifyContent: "space-between",
-              }}
-            >
-              <div style={{ display: "grid", gap: 4 }}>
-                <h2 style={{ color: "#0f172a", fontSize: 20, margin: 0 }}>Team Status Dashboard</h2>
-                <p style={{ color: "#475569", fontSize: 13, margin: 0 }}>
-                  Daily date: {selectedDateLabel} | Weekly range: {selectedWeekLabel}
-                </p>
-              </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <button
-                  className="ghost-button"
-                  disabled={statusLoading}
-                  onClick={() => {
-                    void loadStatusSummaries();
-                  }}
-                  type="button"
-                >
-                  {statusLoading ? "Refreshing..." : "Refresh"}
-                </button>
-                <button className="ghost-button" onClick={handleCloseStatusModal} type="button">
-                  Close
-                </button>
-              </div>
-            </header>
-
-            <section style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {(["DAILY", "WEEKLY"] as const).map((viewKey) => {
-                const isActive = statusView === viewKey;
-
-                return (
-                  <button
-                    key={viewKey}
-                    onClick={() => setStatusView(viewKey)}
-                    style={{
-                      backgroundColor: isActive ? "#1d4ed8" : "#f8fafc",
-                      border: "1px solid #bfdbfe",
-                      borderRadius: 8,
-                      color: isActive ? "#ffffff" : "#1e293b",
-                      cursor: "pointer",
-                      fontSize: 13,
-                      fontWeight: 600,
-                      padding: "8px 12px",
-                    }}
-                    type="button"
-                  >
-                    {viewKey === "DAILY" ? "Daily Standup Status" : "Weekly Standup Status"}
-                  </button>
-                );
-              })}
-            </section>
-
-            {statusLoading ? <p className="team-empty">Loading team status...</p> : null}
-            {!statusLoading && statusError ? <p className="team-empty">{statusError}</p> : null}
-
-            {!statusLoading && !statusError && statusView === "DAILY" ? (
-              <section style={{ display: "grid", gap: 14 }}>
-                {teamDailyStatusRows.length === 0 ? (
-                  <p className="team-empty">No teams available for status tracking.</p>
-                ) : (
-                  <section className="team-list">
-                    {teamDailyStatusRows.map((row) => (
-                      <article className="team-card" key={row.teamId}>
-                        <header
-                          style={{
-                            alignItems: "center",
-                            display: "flex",
-                            gap: 8,
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <div style={{ display: "grid", gap: 3 }}>
-                            <h3 className="team-name">{row.teamName}</h3>
-                            <div className="team-id">
-                              Progress: {row.standupCount}/{row.requiredStandupCount}
-                            </div>
-                          </div>
-                          <span
-                            style={{
-                              alignItems: "center",
-                              backgroundColor: row.isCompleted ? "#dcfce7" : "#e5e7eb",
-                              border: `1px solid ${row.isCompleted ? "#86efac" : "#cbd5e1"}`,
-                              borderRadius: "9999px",
-                              color: row.isCompleted ? "#166534" : "#64748b",
-                              display: "inline-flex",
-                              fontSize: 16,
-                              height: 34,
-                              justifyContent: "center",
-                              width: 34,
-                            }}
-                            title={row.isCompleted ? "Completed" : "Pending"}
-                          >
-                            ✓
-                          </span>
-                        </header>
-                      </article>
-                    ))}
-                  </section>
-                )}
-
-                <section className="team-card" style={{ backgroundColor: "#f8fafc" }}>
-                  <h3 className="team-name" style={{ marginBottom: 8 }}>
-                    Daily Pending Summary
-                  </h3>
-                  {pendingDailyRows.length === 0 ? (
-                    <p className="team-id">All teams completed required daily standups.</p>
-                  ) : (
-                    <ul style={{ display: "grid", gap: 6, margin: 0, paddingLeft: 18 }}>
-                      {pendingDailyRows.map((row) => (
-                        <li key={row.teamId} style={{ color: "#334155", fontSize: 13 }}>
-                          {row.teamName}: {row.remainingStandupCount} standup(s) pending
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </section>
-              </section>
-            ) : null}
-
-            {!statusLoading && !statusError && statusView === "WEEKLY" ? (
-              <section style={{ display: "grid", gap: 14 }}>
-                {teamWeeklyStatusRows.length === 0 ? (
-                  <p className="team-empty">No teams available for weekly status tracking.</p>
-                ) : (
-                  <section className="team-list">
-                    {teamWeeklyStatusRows.map((row) => (
-                      <article className="team-card" key={row.teamId}>
-                        <header style={{ marginBottom: 10 }}>
-                          <h3 className="team-name">{row.teamName}</h3>
-                          <div className="team-id">
-                            Completed days: {row.completedDaysCount}/{row.dayStatuses.length}
-                          </div>
-                        </header>
-
-                        <section
-                          style={{
-                            display: "grid",
-                            gap: 8,
-                            gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))",
-                          }}
-                        >
-                          {row.dayStatuses.map((dayStatus) => (
-                            <article
-                              key={dayStatus.dateKey}
-                              style={{
-                                backgroundColor: dayStatus.isCompleted ? "#f0fdf4" : "#f8fafc",
-                                border: `1px solid ${dayStatus.isCompleted ? "#86efac" : "#cbd5e1"}`,
-                                borderRadius: 8,
-                                display: "grid",
-                                gap: 4,
-                                padding: "8px 9px",
-                              }}
-                            >
-                              <strong style={{ color: "#0f172a", fontSize: 12 }}>
-                                {dayStatus.dayLabel}
-                              </strong>
-                              <span style={{ color: "#64748b", fontSize: 11 }}>
-                                {dayStatus.fullDateLabel}
-                              </span>
-                              <span style={{ color: "#1e293b", fontSize: 12 }}>
-                                {dayStatus.standupCount}/{dayStatus.requiredStandupCount}
-                              </span>
-                            </article>
-                          ))}
-                        </section>
-
-                        <section style={{ marginTop: 10 }}>
-                          {row.pendingDayDetails.length === 0 ? (
-                            <p className="team-id">No pending days for this week.</p>
-                          ) : (
-                            <p className="team-id">
-                              Pending days: {row.pendingDayDetails.join(", ")}
-                            </p>
-                          )}
-                        </section>
-                      </article>
-                    ))}
-                  </section>
-                )}
-
-                <section className="team-card" style={{ backgroundColor: "#f8fafc" }}>
-                  <h3 className="team-name" style={{ marginBottom: 8 }}>
-                    Weekly Pending Summary
-                  </h3>
-                  {pendingWeeklyRows.length === 0 ? (
-                    <p className="team-id">All teams completed weekly standups for every day.</p>
-                  ) : (
-                    <ul style={{ display: "grid", gap: 6, margin: 0, paddingLeft: 18 }}>
-                      {pendingWeeklyRows.map((row) => (
-                        <li key={row.teamId} style={{ color: "#334155", fontSize: 13 }}>
-                          {row.teamName}: {row.pendingDayDetails.join(", ")} | Remaining:{" "}
-                          {row.totalRemainingStandups}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </section>
-              </section>
-            ) : null}
-          </section>
-        </div>
-      ) : null}
     </main>
   );
 };
@@ -981,308 +581,6 @@ function formatDateForDisplay(dateKey: string): string {
     month: "short",
     day: "numeric",
   }).format(parsedDate);
-}
-
-function collectUniqueTeamInternIds(teams: Team[]): string[] {
-  const uniqueIds = new Set<string>();
-
-  for (const team of teams) {
-    for (const intern of team.interns) {
-      const corpusUserId = (intern.corpusUserId || intern.internId || "").trim();
-
-      if (corpusUserId) {
-        uniqueIds.add(corpusUserId);
-      }
-    }
-  }
-
-  return Array.from(uniqueIds);
-}
-
-async function buildInternDateCountMap(
-  internIds: string[],
-  targetDateKeys: Set<string>,
-  criteria: SubmissionAliasCriteria
-): Promise<Map<string, Map<string, number>>> {
-  const entries = await Promise.all(
-    internIds.map(async (internId) => {
-      try {
-        const audios = await getInternAudios(internId);
-        const dateCounts = new Map<string, number>();
-
-        for (const audio of audios) {
-          if (!audioMatchesSubmissionCriteria(audio, criteria)) {
-            continue;
-          }
-
-          const uploadedDateKey = resolveUploadedDateKey(audio.uploadedAt);
-
-          if (!uploadedDateKey || !targetDateKeys.has(uploadedDateKey)) {
-            continue;
-          }
-
-          dateCounts.set(uploadedDateKey, (dateCounts.get(uploadedDateKey) ?? 0) + 1);
-        }
-
-        return [internId, dateCounts] as const;
-      } catch (error) {
-        console.error(`Unable to load contributions for "${internId}"`, error);
-        return [internId, new Map<string, number>()] as const;
-      }
-    })
-  );
-
-  return new Map(entries);
-}
-
-function buildTeamDailyStatusRow(
-  team: Team,
-  dateKey: string,
-  countsByInternByDate: Map<string, Map<string, number>>
-): TeamDailyStatusRow {
-  const requiredStandupCount = team.requiredStandupCount ?? REQUIRED_TEAM_STANDUPS;
-  const totalStandupCount = sumTeamStandupsForDate(team, dateKey, countsByInternByDate);
-  const cappedStandupCount = Math.min(totalStandupCount, requiredStandupCount);
-  const remainingStandupCount = Math.max(requiredStandupCount - totalStandupCount, 0);
-
-  return {
-    teamId: team.teamId,
-    teamName: team.teamName,
-    standupCount: cappedStandupCount,
-    requiredStandupCount,
-    remainingStandupCount,
-    isCompleted: totalStandupCount >= requiredStandupCount,
-  };
-}
-
-function buildTeamWeeklyStatusRow(
-  team: Team,
-  weekDateKeys: string[],
-  countsByInternByDate: Map<string, Map<string, number>>
-): TeamWeeklyStatusRow {
-  const requiredStandupCount = team.requiredStandupCount ?? REQUIRED_TEAM_STANDUPS;
-  const dayStatuses = weekDateKeys.map((dateKey) => {
-    const totalStandupCount = sumTeamStandupsForDate(team, dateKey, countsByInternByDate);
-    const cappedStandupCount = Math.min(totalStandupCount, requiredStandupCount);
-    const remainingStandupCount = Math.max(requiredStandupCount - totalStandupCount, 0);
-
-    return {
-      dateKey,
-      dayLabel: formatWeekdayShort(dateKey),
-      fullDateLabel: formatMonthDay(dateKey),
-      standupCount: cappedStandupCount,
-      requiredStandupCount,
-      remainingStandupCount,
-      isCompleted: totalStandupCount >= requiredStandupCount,
-    };
-  });
-  const completedDaysCount = dayStatuses.filter((status) => status.isCompleted).length;
-  const pendingDayDetails = dayStatuses
-    .filter((status) => !status.isCompleted)
-    .map((status) => `${status.dayLabel} (${status.remainingStandupCount} pending)`);
-  const totalRemainingStandups = dayStatuses.reduce(
-    (total, status) => total + status.remainingStandupCount,
-    0
-  );
-
-  return {
-    teamId: team.teamId,
-    teamName: team.teamName,
-    dayStatuses,
-    completedDaysCount,
-    pendingDayDetails,
-    totalRemainingStandups,
-  };
-}
-
-function sumTeamStandupsForDate(
-  team: Team,
-  dateKey: string,
-  countsByInternByDate: Map<string, Map<string, number>>
-): number {
-  return getTeamInternIds(team).reduce((total, internId) => {
-    return total + (countsByInternByDate.get(internId)?.get(dateKey) ?? 0);
-  }, 0);
-}
-
-function getTeamInternIds(team: Team): string[] {
-  return team.interns
-    .map((intern) => (intern.corpusUserId || intern.internId || "").trim())
-    .filter((value) => value.length > 0);
-}
-
-function getWeekDateKeys(anchorDateKey: string): string[] {
-  const anchorDate = new Date(`${anchorDateKey}T00:00:00`);
-
-  if (Number.isNaN(anchorDate.getTime())) {
-    return [];
-  }
-
-  const anchorWeekday = anchorDate.getDay();
-  const daysSinceMonday = (anchorWeekday + 6) % 7;
-  const weekStart = new Date(anchorDate);
-  weekStart.setDate(anchorDate.getDate() - daysSinceMonday);
-
-  const weekDateKeys: string[] = [];
-
-  for (let offset = 0; offset < 7; offset += 1) {
-    const day = new Date(weekStart);
-    day.setDate(weekStart.getDate() + offset);
-    weekDateKeys.push(getLocalDateKey(day));
-  }
-
-  return weekDateKeys;
-}
-
-function formatWeekRangeLabel(weekDateKeys: string[]): string {
-  if (weekDateKeys.length === 0) {
-    return "Invalid week";
-  }
-
-  const start = formatMonthDay(weekDateKeys[0]);
-  const end = formatMonthDay(weekDateKeys[weekDateKeys.length - 1]);
-
-  return `${start} - ${end}`;
-}
-
-function formatWeekdayShort(dateKey: string): string {
-  const parsedDate = new Date(`${dateKey}T00:00:00`);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return dateKey;
-  }
-
-  return new Intl.DateTimeFormat(undefined, { weekday: "short" }).format(parsedDate);
-}
-
-function formatMonthDay(dateKey: string): string {
-  const parsedDate = new Date(`${dateKey}T00:00:00`);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return dateKey;
-  }
-
-  return new Intl.DateTimeFormat(undefined, { month: "short", day: "2-digit" }).format(parsedDate);
-}
-
-function buildSubmissionAliasCriteria(
-  standupAliases: string[],
-  internshipAliases: string[]
-): SubmissionAliasCriteria {
-  return {
-    standupAliases: toComparableAliasSet(standupAliases),
-    internshipAliases: toComparableAliasSet(internshipAliases),
-  };
-}
-
-function toComparableAliasSet(aliases: string[]): Set<string> {
-  const comparableAliases = new Set<string>();
-
-  for (const alias of aliases) {
-    for (const token of splitAliasTokens(alias)) {
-      const normalizedAlias = normalizeComparableText(token);
-
-      if (normalizedAlias) {
-        comparableAliases.add(normalizedAlias);
-      }
-    }
-  }
-
-  return comparableAliases;
-}
-
-function audioMatchesSubmissionCriteria(
-  audio: Pick<InternAudioMetadata, "category" | "tag"> &
-    Partial<Pick<InternAudioMetadata, "labels">>,
-  criteria: SubmissionAliasCriteria
-): boolean {
-  const availableLabels = collectComparableAudioLabels(audio);
-
-  return hasDistinctCriteriaMatch(
-    availableLabels,
-    criteria.standupAliases,
-    criteria.internshipAliases
-  );
-}
-
-function collectComparableAudioLabels(
-  audio: Pick<InternAudioMetadata, "category" | "tag"> &
-    Partial<Pick<InternAudioMetadata, "labels">>
-): Set<string> {
-  const candidates = [audio.category, audio.tag, ...(audio.labels ?? [])];
-  const labels = new Set<string>();
-
-  for (const candidate of candidates) {
-    for (const token of splitAliasTokens(candidate)) {
-      const normalized = normalizeComparableText(token);
-
-      if (normalized) {
-        labels.add(normalized);
-      }
-    }
-  }
-
-  return labels;
-}
-
-function splitAliasTokens(value: string): string[] {
-  return value
-    .split(/[|,;/]+/g)
-    .map((segment) => segment.trim())
-    .filter((segment) => segment.length > 0);
-}
-
-function normalizeComparableText(value: string): string {
-  return value.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
-}
-
-function hasDistinctCriteriaMatch(
-  availableLabels: Set<string>,
-  standupAliases: Set<string>,
-  internshipAliases: Set<string>
-): boolean {
-  const matchedStandupAliases = getMatchedAliases(availableLabels, standupAliases);
-  const matchedInternshipAliases = getMatchedAliases(availableLabels, internshipAliases);
-
-  if (matchedStandupAliases.length === 0 || matchedInternshipAliases.length === 0) {
-    return false;
-  }
-
-  for (const standupAlias of matchedStandupAliases) {
-    for (const internshipAlias of matchedInternshipAliases) {
-      if (standupAlias !== internshipAlias) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-function getMatchedAliases(availableLabels: Set<string>, expectedAliases: Set<string>): string[] {
-  const matchedAliases: string[] = [];
-
-  for (const expectedAlias of expectedAliases) {
-    if (availableLabels.has(expectedAlias)) {
-      matchedAliases.push(expectedAlias);
-    }
-  }
-
-  return matchedAliases;
-}
-
-function resolveUploadedDateKey(uploadedAt: string | undefined): string | undefined {
-  if (!uploadedAt) {
-    return undefined;
-  }
-
-  const parsedDate = new Date(uploadedAt);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return undefined;
-  }
-
-  return getLocalDateKey(parsedDate);
 }
 
 export default DashboardLayout;

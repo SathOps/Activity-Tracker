@@ -173,6 +173,14 @@ const InternSearch: React.FC<InternSearchProps> = ({ authToken, addedInterns, on
             setLocalInternsList(updated);
         }
 
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+        }
+
         setSearchQuery("");
         setSearchResults([]);
         setShowDropdown(false);
