@@ -322,18 +322,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     }
   };
 
-  const handleVerifySubmission = (internId: string) => {
-    const team = managedTeams.find((candidateTeam) =>
-      candidateTeam.interns.some((intern) => intern.internId === internId)
-    );
-
-    if (!team) {
-      return;
-    }
-
-    void handleVerifyTeam(team.teamId);
-  };
-
   const handleDeleteIntern = (internId: string) => {
     setManagedTeams((prev) =>
       prev.map((team) => {
@@ -480,11 +468,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       window.removeEventListener("keydown", handleEscapeClose);
     };
   }, [isStatusModalOpen]);
-
-  const handleOpenStatusModal = () => {
-    setStatusView("DAILY");
-    setIsStatusModalOpen(true);
-  };
 
   const handleCloseStatusModal = () => {
     setIsStatusModalOpen(false);
@@ -850,7 +833,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               onDeleteTeam={handleDeleteTeam}
               onUpdateIntern={handleUpdateIntern}
               onUpdateTeamName={handleUpdateTeamName}
-              onVerifySubmission={handleVerifySubmission}
               onVerifyTeam={(teamId) => {
                 void handleVerifyTeam(teamId);
               }}
@@ -884,8 +866,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       internName={intern.internName}
                       onDeleteIntern={handleDeleteIntern}
                       onUpdateIntern={handleUpdateIntern}
-                      onVerifySubmission={handleVerifySubmission}
-                      status={intern.status}
                       standupDateLabel={selectedDateLabel}
                       todayValidCount={intern.todayValidCount}
                       audios={intern.audios}

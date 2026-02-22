@@ -183,7 +183,7 @@ function getMockIntern(internId: string): InternSummary {
   return { id: internId };
 }
 
-function getMockInternsByName(query: string): InternSummary[] {
+function getMockInternsByName(_query: string): InternSummary[] {
   return [];
 }
 
@@ -202,7 +202,7 @@ function parseInternList(payload: unknown): InternSummary[] {
     );
 }
 
-function getMockAudios(internId: string): InternAudioMetadata[] {
+function getMockAudios(_internId: string): InternAudioMetadata[] {
   return [];
 }
 

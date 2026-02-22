@@ -30,7 +30,6 @@ export interface TeamListProps {
   activeAudioId?: string | null;
   onPlay?: (internId: string, audioId: string) => void;
   onPause?: () => void;
-  onVerifySubmission?: (internId: string) => void;
   onVerifyTeam?: (teamId: string) => void;
   verifyingTeamId?: string | null;
   onAddInternToTeam?: (teamId: string, intern: Intern) => void;
@@ -56,7 +55,6 @@ export const TeamList: React.FC<TeamListProps> = ({
   teams,
   addedInterns = [],
   selectedDateLabel,
-  onVerifySubmission,
   onVerifyTeam,
   verifyingTeamId,
   activeAudioId,
@@ -367,8 +365,6 @@ export const TeamList: React.FC<TeamListProps> = ({
                   internName={intern.internName}
                   onDeleteIntern={onDeleteIntern}
                   onUpdateIntern={onUpdateIntern}
-                  onVerifySubmission={onVerifySubmission}
-                  status={intern.status}
                   standupDateLabel={selectedDateLabel}
                   todayValidCount={intern.todayValidCount}
                   audios={intern.audios}

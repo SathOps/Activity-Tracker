@@ -1,46 +1,31 @@
 import React from "react";
 import type { InternAudioMetadata } from "../../services/corpus/corpusService";
 import { getAudioRecordUrl } from "../../services/corpus/corpusService";
-import StandupAudioPlayer from "../audio/StandupAudioPlayer";
 
 export type SubmissionStatus = "COMPLETED" | "PENDING";
 
 export interface InternCardProps {
   internId: string;
   internName?: string;
-  status: SubmissionStatus;
   todayValidCount?: number;
   standupDateLabel?: string;
   audios?: InternAudioMetadata[];
   activeAudioId?: string | null;
   onPlay?: (internId: string, audioId: string) => void;
   onPause?: () => void;
-  onVerifySubmission?: (internId: string) => void;
   onDeleteIntern?: (internId: string) => void;
   onUpdateIntern?: (internId: string, newName: string) => void;
 }
 
-export interface StatusBadgeProps {
-  status: SubmissionStatus;
-}
-
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
-  const statusClass = status === "COMPLETED" ? "completed" : "pending";
-
-  return <span className={`status-badge ${statusClass}`}>{status}</span>;
-};
-
 export const InternCard: React.FC<InternCardProps> = ({
   internId,
   internName,
-  status,
   todayValidCount,
   standupDateLabel,
   audios = [],
   activeAudioId,
   onPlay,
   onPause,
-  onVerifySubmission,
   onDeleteIntern,
   onUpdateIntern,
 }) => {
@@ -230,26 +215,18 @@ export const InternCard: React.FC<InternCardProps> = ({
 
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         {isPlaying && (resolvedUrls[audio.id] || audio.audioUrl) ? (
-                          <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", maxWidth: 300 }}>
-                            <StandupAudioPlayer
-                              audioUrl={resolvedUrls[audio.id] || audio.audioUrl || ""}
-                              label={`Standup ${index + 1}`}
-                              onPause={() => onPause?.()}
+                          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            <audio
+                              autoPlay
+                              controls
+                              src={resolvedUrls[audio.id] || audio.audioUrl}
+                              style={{ height: 24, maxWidth: 150 }}
+                              onEnded={() => onPause?.()}
                             />
                             <button
                               className="ghost-button"
                               onClick={() => onPause?.()}
-                              style={{
-                                padding: "4px 8px",
-                                color: "#ef4444",
-                                height: 32,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                borderRadius: 8,
-                                border: "1px solid #fee2e2",
-                                background: "#fff1f1"
-                              }}
+                              style={{ padding: 4, color: "#ef4444" }}
                               title="Close Player"
                               type="button"
                             >
