@@ -35,16 +35,11 @@ export default function App() {
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const normalizedPhone = normalizePhoneInput(phone);
+    const trimmedPhone = phone.trim();
     const nextPassword = password.trim();
 
-    if (!normalizedPhone || !nextPassword) {
+    if (!trimmedPhone || !nextPassword) {
       setLoginError("Phone number and password are required.");
-      return;
-    }
-
-    if (normalizedPhone.length !== 10) {
-      setLoginError("Phone number must be exactly 10 digits.");
       return;
     }
 
@@ -52,7 +47,7 @@ export default function App() {
     setLoginError(null);
 
     try {
-      const phoneCandidates = buildLoginPhoneCandidates(normalizedPhone);
+      const phoneCandidates = buildLoginPhoneCandidates(trimmedPhone);
       let payload: unknown = null;
       let lastErrorMessage = "";
       let lastStatus = 0;
@@ -92,7 +87,7 @@ export default function App() {
       }
 
       setAuthToken(accessToken);
-      setUsername(normalizedPhone);
+      setUsername(trimmedPhone);
       setPassword("");
       setLoginError(null);
     } catch (error) {
@@ -139,12 +134,9 @@ export default function App() {
               <input
                 autoComplete="tel"
                 className="auth-input"
-                inputMode="numeric"
-                maxLength={10}
-                onChange={(event) => setPhone(normalizePhoneInput(event.target.value))}
-                pattern="[0-9]{10}"
-                placeholder="Enter 10-digit phone number"
-                type="text"
+                onChange={(event) => setPhone(event.target.value)}
+                placeholder="Enter phone number"
+                type="tel"
                 value={phone}
               />
             </label>
@@ -270,12 +262,26 @@ function readAccessToken(payload: unknown): string {
   return asString(payload.data.access_token);
 }
 
-function buildLoginPhoneCandidates(phoneDigits: string): string[] {
-  return [`+91${phoneDigits}`, phoneDigits];
-}
+function buildLoginPhoneCandidates(rawPhone: string): string[] {
+  const trimmed = rawPhone.trim();
+  const compact = trimmed.replace(/\s+/g, "");
+  const digitsOnly = compact.replace(/\D/g, "");
+  const candidates: string[] = [];
 
-function normalizePhoneInput(value: string): string {
-  return value.replace(/\D/g, "").slice(0, 10);
+  if (compact) {
+    candidates.push(compact);
+  }
+
+  // India convenience: allow login with 10 digits by auto-trying +91 prefix.
+  if (!compact.startsWith("+")) {
+    if (digitsOnly.length === 10) {
+      candidates.push(`+91${digitsOnly}`);
+    } else if (digitsOnly.length === 12 && digitsOnly.startsWith("91")) {
+      candidates.push(`+${digitsOnly}`);
+    }
+  }
+
+  return Array.from(new Set(candidates));
 }
 
 async function extractErrorMessage(response: Response): Promise<string> {
