@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import DashboardHome from "./components/dashboard/DashboardHome";
 import type { Intern } from "./components/intern/InternSearch";
 import { configureCorpusService } from "./services/corpus";
-import { parseInternsCSV } from "./utils/parseInternsCSV";
 
 const ACCESS_TOKEN_STORAGE_KEY = "corpus_access_token";
 const USERNAME_STORAGE_KEY = "corpus_username";
@@ -28,28 +27,6 @@ export default function App() {
   useEffect(() => {
     persistUsername(username);
   }, [username]);
-
-  // Preload interns from CSV on login success
-  useEffect(() => {
-    if (!authToken) return;
-
-    fetch("/assets/interns.csv")
-      .then((res) => {
-        if (!res.ok) throw new Error(`CSV fetch failed: ${res.status}`);
-        return res.text();
-      })
-      .then((text) => {
-        const preloaded = parseInternsCSV(text);
-        setAddedInterns((prev) => {
-          const existingIds = new Set(prev.map((i) => i.id));
-          const newInterns = preloaded.filter((i) => !existingIds.has(i.id));
-          return newInterns.length > 0 ? [...prev, ...newInterns] : prev;
-        });
-      })
-      .catch((err) => {
-        console.warn("Could not preload interns from CSV:", err);
-      });
-  }, [authToken]);
 
   const handleRemoveIntern = (internId: string) => {
     setAddedInterns((prev) => prev.filter((i) => i.id !== internId));
@@ -195,6 +172,9 @@ export default function App() {
   return (
     <div className="app-shell">
       <div className="app-toolbar">
+        <div className="app-branding">
+          <h1 className="app-brand-title">StandupTracker</h1>
+        </div>
         <div className="profile-menu-container">
           <button
             aria-label="Open profile menu"
@@ -205,7 +185,9 @@ export default function App() {
             }}
             type="button"
           >
-            <span aria-hidden="true">👤</span>
+            <span aria-hidden="true" className="profile-avatar-icon">
+              U
+            </span>
           </button>
 
           {isProfileMenuOpen ? (
