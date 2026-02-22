@@ -2,12 +2,15 @@ import React from "react";
 import InternCard, { SubmissionStatus } from "../intern/InternCard";
 import type { Intern } from "../intern/InternSearch";
 
+import type { InternAudioMetadata } from "../../services/corpus/corpusService";
+
 export interface TeamIntern {
   internId: string;
   corpusUserId: string;
   internName?: string;
   status: SubmissionStatus;
   todayValidCount?: number;
+  audios?: InternAudioMetadata[];
 }
 
 export interface Team {
@@ -24,6 +27,9 @@ export interface TeamListProps {
   teams: Team[];
   addedInterns?: Intern[];
   selectedDateLabel?: string;
+  activeAudioId?: string | null;
+  onPlay?: (internId: string, audioId: string) => void;
+  onPause?: () => void;
   onVerifySubmission?: (internId: string) => void;
   onVerifyTeam?: (teamId: string) => void;
   verifyingTeamId?: string | null;
@@ -53,6 +59,9 @@ export const TeamList: React.FC<TeamListProps> = ({
   onVerifySubmission,
   onVerifyTeam,
   verifyingTeamId,
+  activeAudioId,
+  onPlay,
+  onPause,
   onAddInternToTeam,
   onDeleteIntern,
   onUpdateIntern,
@@ -362,6 +371,10 @@ export const TeamList: React.FC<TeamListProps> = ({
                   status={intern.status}
                   standupDateLabel={selectedDateLabel}
                   todayValidCount={intern.todayValidCount}
+                  audios={intern.audios}
+                  activeAudioId={activeAudioId}
+                  onPlay={onPlay}
+                  onPause={onPause}
                 />
               ))}
             </div>
