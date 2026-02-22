@@ -16,6 +16,7 @@ interface TeamDailyStatusRow {
   requiredStandupCount: number;
   remainingStandupCount: number;
   isCompleted: boolean;
+  contributorDetails: ContributorUploadDetail[];
 }
 
 interface WeeklyDayStatus {
@@ -26,6 +27,7 @@ interface WeeklyDayStatus {
   requiredStandupCount: number;
   remainingStandupCount: number;
   isCompleted: boolean;
+  contributorDetails: ContributorUploadDetail[];
 }
 
 interface TeamWeeklyStatusRow {
@@ -40,6 +42,12 @@ interface TeamWeeklyStatusRow {
 interface SubmissionAliasCriteria {
   standupAliases: Set<string>;
   internshipAliases: Set<string>;
+}
+
+interface ContributorUploadDetail {
+  internId: string;
+  internName: string;
+  uploadCount: number;
 }
 
 export interface DashboardLayoutProps {
@@ -588,7 +596,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     }}
                   >
                     <div style={{ display: "grid", gap: 3 }}>
-                      <h3 className="team-name">{row.teamName}</h3>
+                      <h3
+                        className="team-name"
+                        style={{ cursor: "help" }}
+                        title={formatContributorTooltip(row.contributorDetails)}
+                      >
+                        {row.teamName}
+                      </h3>
                       <div className="team-id">
                         Progress: {row.standupCount}/{row.requiredStandupCount}
                       </div>
@@ -669,7 +683,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                           padding: "8px 9px",
                         }}
                       >
-                        <strong style={{ color: "#0f172a", fontSize: 12 }}>{dayStatus.dayLabel}</strong>
+                        <strong
+                          style={{ color: "#0f172a", cursor: "help", fontSize: 12 }}
+                          title={formatContributorTooltip(dayStatus.contributorDetails)}
+                        >
+                          {dayStatus.dayLabel}
+                        </strong>
                         <span style={{ color: "#64748b", fontSize: 11 }}>{dayStatus.fullDateLabel}</span>
                         <span style={{ color: "#1e293b", fontSize: 12 }}>
                           {dayStatus.standupCount}/{dayStatus.requiredStandupCount}
@@ -719,18 +738,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           {isInlineStatusView ? "Team Status Dashboard" : title}
         </h1>
         {!isInlineStatusView ? (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button className="secondary-button" onClick={handleOpenStatusModal} type="button">
-              Status
-            </button>
-            <button
-              className="primary-button"
-              onClick={() => setIsCreatingTeam((prev) => !prev)}
-              type="button"
-            >
-              {isCreatingTeam ? "Cancel" : "Create Team"}
-            </button>
-          </div>
+          <button
+            className="primary-button"
+            onClick={() => setIsCreatingTeam((prev) => !prev)}
+            type="button"
+          >
+            {isCreatingTeam ? "Cancel" : "Create Team"}
+          </button>
         ) : null}
       </header>
 
@@ -1088,6 +1102,7 @@ function buildTeamDailyStatusRow(
   const totalStandupCount = sumTeamStandupsForDate(team, dateKey, countsByInternByDate);
   const cappedStandupCount = Math.min(totalStandupCount, requiredStandupCount);
   const remainingStandupCount = Math.max(requiredStandupCount - totalStandupCount, 0);
+  const contributorDetails = buildContributorDetailsForDate(team, dateKey, countsByInternByDate);
 
   return {
     teamId: team.teamId,
@@ -1096,6 +1111,7 @@ function buildTeamDailyStatusRow(
     requiredStandupCount,
     remainingStandupCount,
     isCompleted: totalStandupCount >= requiredStandupCount,
+    contributorDetails,
   };
 }
 
@@ -1109,6 +1125,7 @@ function buildTeamWeeklyStatusRow(
     const totalStandupCount = sumTeamStandupsForDate(team, dateKey, countsByInternByDate);
     const cappedStandupCount = Math.min(totalStandupCount, requiredStandupCount);
     const remainingStandupCount = Math.max(requiredStandupCount - totalStandupCount, 0);
+    const contributorDetails = buildContributorDetailsForDate(team, dateKey, countsByInternByDate);
 
     return {
       dateKey,
@@ -1118,6 +1135,7 @@ function buildTeamWeeklyStatusRow(
       requiredStandupCount,
       remainingStandupCount,
       isCompleted: totalStandupCount >= requiredStandupCount,
+      contributorDetails,
     };
   });
   const completedDaysCount = dayStatuses.filter((status) => status.isCompleted).length;
@@ -1149,10 +1167,43 @@ function sumTeamStandupsForDate(
   }, 0);
 }
 
+function buildContributorDetailsForDate(
+  team: Team,
+  dateKey: string,
+  countsByInternByDate: Map<string, Map<string, number>>
+): ContributorUploadDetail[] {
+  return getTeamInternEntries(team)
+    .map((intern) => ({
+      internId: intern.internId,
+      internName: intern.internName,
+      uploadCount: countsByInternByDate.get(intern.internId)?.get(dateKey) ?? 0,
+    }))
+    .filter((entry) => entry.uploadCount > 0)
+    .sort((left, right) => right.uploadCount - left.uploadCount);
+}
+
 function getTeamInternIds(team: Team): string[] {
+  return getTeamInternEntries(team).map((entry) => entry.internId);
+}
+
+function getTeamInternEntries(
+  team: Team
+): Array<Pick<ContributorUploadDetail, "internId" | "internName">> {
   return team.interns
-    .map((intern) => (intern.corpusUserId || intern.internId || "").trim())
-    .filter((value) => value.length > 0);
+    .map((intern) => {
+      const internId = (intern.corpusUserId || intern.internId || "").trim();
+      const internName = (intern.internName || "").trim() || internId;
+
+      if (!internId) {
+        return null;
+      }
+
+      return { internId, internName };
+    })
+    .filter(
+      (entry): entry is Pick<ContributorUploadDetail, "internId" | "internName"> =>
+        entry !== null
+    );
 }
 
 function getWeekDateKeys(anchorDateKey: string): string[] {
@@ -1207,6 +1258,16 @@ function formatMonthDay(dateKey: string): string {
   }
 
   return new Intl.DateTimeFormat(undefined, { month: "short", day: "2-digit" }).format(parsedDate);
+}
+
+function formatContributorTooltip(contributors: ContributorUploadDetail[]): string {
+  if (contributors.length === 0) {
+    return "No uploads for this selection.";
+  }
+
+  return contributors
+    .map((contributor) => `${contributor.internName}: ${contributor.uploadCount}`)
+    .join(" | ");
 }
 
 function buildSubmissionAliasCriteria(
