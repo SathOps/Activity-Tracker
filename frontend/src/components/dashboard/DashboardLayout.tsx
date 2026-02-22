@@ -89,6 +89,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [verifyingTeamId, setVerifyingTeamId] = React.useState<string | null>(null);
   const [isStatusModalOpen, setIsStatusModalOpen] = React.useState(false);
   const [statusView, setStatusView] = React.useState<StatusView>("DAILY");
+  const [activeAudioId, setActiveAudioId] = React.useState<string | null>(null);
   const [statusLoading, setStatusLoading] = React.useState(false);
   const [statusError, setStatusError] = React.useState<string | null>(null);
   const [teamDailyStatusRows, setTeamDailyStatusRows] = React.useState<TeamDailyStatusRow[]>([]);
@@ -282,6 +283,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       const countByInternId = new Map(
         verificationResults.map((result) => [result.internId, result.validCount])
       );
+      const audioByInternId = new Map(
+        verificationResults.map((result) => [result.internId, result.audios ?? []])
+      );
       const teamTodayStandupCount = verificationResults.reduce(
         (total, result) => total + result.validCount,
         0
@@ -295,8 +299,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
           return {
             ...candidateTeam,
-            teamStatus:
-              teamTodayStandupCount >= REQUIRED_TEAM_STANDUPS ? "COMPLETED" : "PENDING",
+            teamStatus: teamTodayStandupCount >= REQUIRED_TEAM_STANDUPS ? "COMPLETED" : "PENDING",
             todayStandupCount: teamTodayStandupCount,
             verifiedDate: verificationDateKey,
             requiredStandupCount: REQUIRED_TEAM_STANDUPS,
@@ -307,6 +310,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               return {
                 ...intern,
                 todayValidCount,
+                audios: audioByInternId.get(corpusUserId) ?? [],
                 status: todayValidCount > 0 ? "COMPLETED" : "PENDING",
               };
             }),
@@ -852,6 +856,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               }}
               selectedDateLabel={selectedDateLabel}
               verifyingTeamId={verifyingTeamId}
+              activeAudioId={activeAudioId}
+              onPlay={(_internId, audioId) => setActiveAudioId(audioId)}
+              onPause={() => setActiveAudioId(null)}
               teams={filteredTeams}
             />
           ) : null}
@@ -881,6 +888,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       status={intern.status}
                       standupDateLabel={selectedDateLabel}
                       todayValidCount={intern.todayValidCount}
+                      audios={intern.audios}
+                      activeAudioId={activeAudioId}
+                      onPlay={(_internId, audioId) => setActiveAudioId(audioId)}
+                      onPause={() => setActiveAudioId(null)}
                     />
                   </article>
                 ))
