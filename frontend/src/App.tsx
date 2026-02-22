@@ -233,6 +233,9 @@ export default function App() {
   return (
     <div className="app-shell">
       <div className="app-toolbar">
+        <div className="app-branding">
+          <h1 className="app-brand-title">StandupTracker</h1>
+        </div>
         <div className="profile-menu-container">
           <button
             aria-label="Open profile menu"
@@ -243,7 +246,9 @@ export default function App() {
             }}
             type="button"
           >
-            <span aria-hidden="true">👤</span>
+            <span aria-hidden="true" className="profile-avatar-icon">
+              U
+            </span>
           </button>
 
           {isProfileMenuOpen ? (

@@ -194,9 +194,10 @@ const InternSearch: React.FC<InternSearchProps> = ({ authToken, addedInterns, on
             <h3 className="intern-search-label">Add Intern</h3>
 
             <div className="intern-dropdown-wrapper">
-                <div style={{ position: "relative", flex: 1, minWidth: 260 }}>
+                <div className="intern-search-input-wrapper">
                     <input
                         id="intern-search-input"
+                        className="intern-search-input"
                         aria-label="Search intern by name"
                         type="text"
                         placeholder="Search intern by name…"
@@ -204,13 +205,6 @@ const InternSearch: React.FC<InternSearchProps> = ({ authToken, addedInterns, on
                         onChange={handleInputChange}
                         onFocus={handleFocus}
                         onBlur={handleBlur}
-                        style={{
-                            border: "1px solid #d1d5db",
-                            borderRadius: 6,
-                            fontSize: 14,
-                            padding: "8px 10px",
-                            width: "100%",
-                        }}
                     />
 
                     {/* ── Search Results Dropdown ── */}
@@ -244,8 +238,7 @@ const InternSearch: React.FC<InternSearchProps> = ({ authToken, addedInterns, on
                                             ) : (
                                                 <button
                                                     type="button"
-                                                    className="secondary-button"
-                                                    style={{ marginLeft: "auto", padding: "4px 10px", fontSize: 12 }}
+                                                    className="secondary-button intern-dropdown-add-btn"
                                                     onMouseDown={(e) => e.preventDefault()}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
