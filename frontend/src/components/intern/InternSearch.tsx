@@ -9,16 +9,21 @@ export interface Intern {
 
 /**
  * Calls GET /api/v1/users/search?query=... via the Vite proxy.
- * Auth token is injected server-side by the proxy (from .env CORPUS_TOKEN).
+ * Includes Authorization header from logged-in user session.
  */
-async function searchUsersFromCorpus(query: string): Promise<Intern[]> {
+async function searchUsersFromCorpus(query: string, authToken: string): Promise<Intern[]> {
     const url = `/api/v1/users/search?query=${encodeURIComponent(query)}`;
+    const headers: Record<string, string> = {
+        Accept: "application/json",
+    };
+
+    if (authToken) {
+        headers.Authorization = `Bearer ${authToken}`;
+    }
 
     const response = await fetch(url, {
         method: "GET",
-        headers: {
-            Accept: "application/json",
-        },
+        headers,
     });
 
     if (!response.ok) {
@@ -53,6 +58,7 @@ async function searchUsersFromCorpus(query: string): Promise<Intern[]> {
 }
 
 export interface InternSearchProps {
+    authToken: string;
     /** When provided, use parent-controlled interns list instead of local state */
     addedInterns?: Intern[];
     /** Called when an intern is added; required when addedInterns is provided */
@@ -64,7 +70,7 @@ export interface InternSearchProps {
  * Searches users from real Corpus API and allows
  * adding them to a local interns list.
  */
-const InternSearch: React.FC<InternSearchProps> = ({ addedInterns, onInternsChange }) => {
+const InternSearch: React.FC<InternSearchProps> = ({ authToken, addedInterns, onInternsChange }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<Intern[]>([]);
     const [localInternsList, setLocalInternsList] = useState<Intern[]>([]);
@@ -101,7 +107,7 @@ const InternSearch: React.FC<InternSearchProps> = ({ addedInterns, onInternsChan
         setIsLoading(true);
 
         try {
-            const results = await searchUsersFromCorpus(trimmed);
+            const results = await searchUsersFromCorpus(trimmed, authToken);
             setSearchResults(results);
         } catch (err) {
             if ((err as Error).name !== "AbortError") {
@@ -111,7 +117,7 @@ const InternSearch: React.FC<InternSearchProps> = ({ addedInterns, onInternsChan
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [authToken]);
 
     // Cleanup on unmount
     useEffect(() => {

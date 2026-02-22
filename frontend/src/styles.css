@@ -19,6 +19,72 @@ body {
   padding: 24px 16px 32px;
 }
 
+.app-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.auth-shell {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.auth-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  display: grid;
+  gap: 10px;
+  max-width: 380px;
+  padding: 20px;
+  width: 100%;
+}
+
+.auth-title {
+  color: #111827;
+  font-size: 22px;
+  margin: 0;
+}
+
+.auth-subtitle {
+  color: #4b5563;
+  font-size: 13px;
+  margin: 0;
+}
+
+.auth-form {
+  display: grid;
+  gap: 10px;
+}
+
+.auth-label {
+  color: #374151;
+  display: grid;
+  font-size: 13px;
+  gap: 6px;
+}
+
+.auth-input {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  padding: 10px 12px;
+}
+
+.auth-submit {
+  margin-top: 4px;
+}
+
+.auth-error {
+  color: #b91c1c;
+  font-size: 12px;
+  margin: 0;
+}
+
 .summary-row {
   display: grid;
   gap: 12px;

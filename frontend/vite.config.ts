@@ -14,8 +14,12 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: true,
           configure: (proxy) => {
-            proxy.on("proxyReq", (proxyReq) => {
-              if (corpusToken) {
+            proxy.on("proxyReq", (proxyReq, req) => {
+              const requestAuthHeader = proxyReq.getHeader("authorization");
+              const requestPath = req.url || "";
+              const isAuthRoute = requestPath.startsWith("/api/v1/auth/");
+
+              if (!requestAuthHeader && corpusToken && !isAuthRoute) {
                 proxyReq.setHeader("Authorization", `Bearer ${corpusToken}`);
               }
             });
