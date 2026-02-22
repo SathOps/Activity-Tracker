@@ -186,15 +186,6 @@ const InternSearch: React.FC<InternSearchProps> = ({ authToken, addedInterns, on
         setShowDropdown(false);
     };
 
-    const handleRemoveIntern = (internId: string) => {
-        const updated = internsList.filter((i) => i.id !== internId);
-        if (onInternsChange) {
-            onInternsChange(updated);
-        } else {
-            setLocalInternsList(updated);
-        }
-    };
-
     const hasQuery = searchQuery.trim().length > 0;
 
     return (
@@ -272,39 +263,6 @@ const InternSearch: React.FC<InternSearchProps> = ({ authToken, addedInterns, on
                     ) : null}
                 </div>
             </div>
-
-            {/* ── Added Interns Section ── */}
-            <h4 className="intern-search-added-header">
-                Added Interns ({internsList.length})
-            </h4>
-
-            {internsList.length === 0 ? (
-                <p className="intern-search-empty">No interns added yet</p>
-            ) : (
-                <div className="team-interns">
-                    {internsList.map((intern) => (
-                        <article className="intern-card" key={intern.id}>
-                            <div style={{ display: "grid", gap: 4 }}>
-                                <div className="intern-id">{intern.name}</div>
-                                <div style={{ color: "#6b7280", fontSize: 12 }}>
-                                    ID: {intern.id}
-                                </div>
-                            </div>
-                            <div className="intern-actions">
-                                <button
-                                    type="button"
-                                    className="ghost-button"
-                                    aria-label={`Remove ${intern.name}`}
-                                    title="Remove"
-                                    onClick={() => handleRemoveIntern(intern.id)}
-                                >
-                                    ❌
-                                </button>
-                            </div>
-                        </article>
-                    ))}
-                </div>
-            )}
         </div>
     );
 };
