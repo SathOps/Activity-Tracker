@@ -34,29 +34,18 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   title = "Team-wise Standup Submission Dashboard",
 }) => {
   const [managedTeams, setManagedTeams] = React.useState<Team[]>(() => teams ?? EMPTY_TEAMS);
-  const [selectedDateKey, setSelectedDateKey] = React.useState(() => getLocalDateKey(new Date()));
   const [searchTerm, setSearchTerm] = React.useState("");
   const [isCreatingTeam, setIsCreatingTeam] = React.useState(false);
   const [newTeamName, setNewTeamName] = React.useState("");
   const [activeView, setActiveView] = React.useState<DashboardView>(DEFAULT_VIEW);
   const [hoveredBox, setHoveredBox] = React.useState<DashboardView | null>(null);
   const [verifyingTeamId, setVerifyingTeamId] = React.useState<string | null>(null);
-  const hasInitializedDateSelection = React.useRef(false);
 
   React.useEffect(() => {
     if (teams) {
       setManagedTeams(teams);
     }
   }, [teams]);
-
-  React.useEffect(() => {
-    if (!hasInitializedDateSelection.current) {
-      hasInitializedDateSelection.current = true;
-      return;
-    }
-
-    setManagedTeams((prev) => prev.map((team) => resetTeamVerification(team)));
-  }, [selectedDateKey]);
 
   const totalTeams = managedTeams.length;
   const allInternRows = React.useMemo(
@@ -72,10 +61,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   );
   const totalInterns = allInternRows.length;
   const completedCount = allInternRows.filter((intern) => intern.status === "COMPLETED").length;
-  const selectedDateLabel = React.useMemo(
-    () => formatDateForDisplay(selectedDateKey),
-    [selectedDateKey]
-  );
 
   const normalizedQuery = searchTerm.trim().toLowerCase();
 
@@ -177,7 +162,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       return;
     }
 
-    const verificationDateKey = selectedDateKey;
+    const todayDateKey = getLocalDateKey(new Date());
     setVerifyingTeamId(teamId);
 
     try {
@@ -187,7 +172,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
           try {
             return await verifyStandupSubmission(corpusUserId, {
-              uploadedOnDate: verificationDateKey,
+              uploadedOnDate: todayDateKey,
               standupAliases: STANDUP_ALIAS_OVERRIDE,
               internshipAliases: INTERNSHIP_ALIAS_OVERRIDE,
             });
@@ -201,7 +186,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               internId: corpusUserId,
               validCount: 0,
               status: "PENDING" as const,
-              checkedDate: verificationDateKey,
+              checkedDate: todayDateKey,
             };
           }
         })
@@ -226,7 +211,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             teamStatus:
               teamTodayStandupCount >= REQUIRED_TEAM_STANDUPS ? "COMPLETED" : "PENDING",
             todayStandupCount: teamTodayStandupCount,
-            verifiedDate: verificationDateKey,
+            verifiedDate: todayDateKey,
             requiredStandupCount: REQUIRED_TEAM_STANDUPS,
             interns: candidateTeam.interns.map((intern) => {
               const corpusUserId = intern.corpusUserId || intern.internId;
@@ -296,16 +281,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   const handleDeleteTeam = (teamId: string) => {
     setManagedTeams((prev) => prev.filter((team) => team.teamId !== teamId));
-  };
-
-  const handleSelectedDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const nextDateKey = event.target.value;
-
-    if (!nextDateKey) {
-      return;
-    }
-
-    setSelectedDateKey(nextDateKey);
   };
 
   const handleUpdateTeamName = (teamId: string, newName: string) => {
@@ -406,32 +381,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       ) : null}
 
       <section style={{ marginBottom: 16 }}>
-        <label
-          style={{
-            color: "#374151",
-            display: "grid",
-            fontSize: 13,
-            gap: 6,
-            maxWidth: 280,
-          }}
-        >
-          <span>Standup verification date</span>
-          <input
-            aria-label="Standup verification date"
-            onChange={handleSelectedDateChange}
-            style={{
-              border: "1px solid #d1d5db",
-              borderRadius: 8,
-              fontSize: 14,
-              padding: "10px 12px",
-            }}
-            type="date"
-            value={selectedDateKey}
-          />
-        </label>
-      </section>
-
-      <section style={{ marginBottom: 16 }}>
         <input
           aria-label="Search"
           onChange={(event) => setSearchTerm(event.target.value)}
@@ -464,7 +413,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           onVerifyTeam={(teamId) => {
             void handleVerifyTeam(teamId);
           }}
-          selectedDateLabel={selectedDateLabel}
           verifyingTeamId={verifyingTeamId}
           teams={filteredTeams}
         />
@@ -493,7 +441,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   onUpdateIntern={handleUpdateIntern}
                   onVerifySubmission={handleVerifySubmission}
                   status={intern.status}
-                  standupDateLabel={selectedDateLabel}
                   todayValidCount={intern.todayValidCount}
                 />
               </article>
@@ -548,41 +495,12 @@ function mergeAliases(baseAliases: string[], extraAliases: string[] | undefined)
   return Array.from(new Set([...(baseAliases ?? []), ...(extraAliases ?? [])]));
 }
 
-function resetTeamVerification(team: Team): Team {
-  return {
-    ...team,
-    teamStatus: "PENDING",
-    todayStandupCount: 0,
-    verifiedDate: undefined,
-    requiredStandupCount: REQUIRED_TEAM_STANDUPS,
-    interns: team.interns.map((intern) => ({
-      ...intern,
-      status: "PENDING",
-      todayValidCount: 0,
-    })),
-  };
-}
-
 function getLocalDateKey(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
-}
-
-function formatDateForDisplay(dateKey: string): string {
-  const parsedDate = new Date(`${dateKey}T00:00:00`);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return dateKey;
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(parsedDate);
 }
 
 export default DashboardLayout;
