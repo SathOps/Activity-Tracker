@@ -8,6 +8,7 @@ export interface StandupVerificationResult {
   validCount: number;
   status: SubmissionStatus;
   checkedDate?: string;
+  audios?: InternAudioMetadata[];
 }
 
 export interface StandupVerificationOptions {
@@ -38,16 +39,18 @@ export async function verifyStandupSubmission(
   const criteria = resolveSubmissionCriteria(options);
   const audios = await getInternAudios(normalizedInternId);
 
-  const validCount = audios.filter((audio) =>
-    isValidStandupSubmissionAudio(audio, criteria) &&
-    matchesUploadedDate(audio, checkedDate)
-  ).length;
+  const validAudios = audios.filter(
+    (audio) =>
+      isValidStandupSubmissionAudio(audio, criteria) && matchesUploadedDate(audio, checkedDate)
+  );
+  const validCount = validAudios.length;
 
   return {
     internId: normalizedInternId,
     validCount,
     status: validCount > 0 ? "COMPLETED" : "PENDING",
     checkedDate,
+    audios: validAudios,
   };
 }
 
