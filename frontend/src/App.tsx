@@ -47,25 +47,38 @@ export default function App() {
     setLoginError(null);
 
     try {
-      const response = await fetch("/api/v1/auth/login", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phone: trimmedPhone,
-          password: nextPassword,
-        }),
-      });
+      const phoneCandidates = buildLoginPhoneCandidates(trimmedPhone);
+      let payload: unknown = null;
+      let lastErrorMessage = "";
+      let lastStatus = 0;
 
-      if (!response.ok) {
-        const errorMessage = await extractErrorMessage(response);
-        setLoginError(errorMessage || `Login failed (${response.status}).`);
+      for (const loginPhone of phoneCandidates) {
+        const response = await fetch("/api/v1/auth/login", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phone: loginPhone,
+            password: nextPassword,
+          }),
+        });
+
+        if (response.ok) {
+          payload = (await response.json()) as unknown;
+          break;
+        }
+
+        lastStatus = response.status;
+        lastErrorMessage = await extractErrorMessage(response);
+      }
+
+      if (!payload) {
+        setLoginError(lastErrorMessage || `Login failed (${lastStatus || "unknown"}).`);
         return;
       }
 
-      const payload = (await response.json()) as unknown;
       const accessToken = readAccessToken(payload);
 
       if (!accessToken) {
@@ -247,6 +260,28 @@ function readAccessToken(payload: unknown): string {
   }
 
   return asString(payload.data.access_token);
+}
+
+function buildLoginPhoneCandidates(rawPhone: string): string[] {
+  const trimmed = rawPhone.trim();
+  const compact = trimmed.replace(/\s+/g, "");
+  const digitsOnly = compact.replace(/\D/g, "");
+  const candidates: string[] = [];
+
+  if (compact) {
+    candidates.push(compact);
+  }
+
+  // India convenience: allow login with 10 digits by auto-trying +91 prefix.
+  if (!compact.startsWith("+")) {
+    if (digitsOnly.length === 10) {
+      candidates.push(`+91${digitsOnly}`);
+    } else if (digitsOnly.length === 12 && digitsOnly.startsWith("91")) {
+      candidates.push(`+${digitsOnly}`);
+    }
+  }
+
+  return Array.from(new Set(candidates));
 }
 
 async function extractErrorMessage(response: Response): Promise<string> {
