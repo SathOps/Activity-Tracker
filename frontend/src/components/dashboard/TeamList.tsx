@@ -23,6 +23,7 @@ export interface Team {
 export interface TeamListProps {
   teams: Team[];
   addedInterns?: Intern[];
+  selectedDateLabel?: string;
   onVerifySubmission?: (internId: string) => void;
   onVerifyTeam?: (teamId: string) => void;
   verifyingTeamId?: string | null;
@@ -48,6 +49,7 @@ const emptyDropdownState: DropdownState = {
 export const TeamList: React.FC<TeamListProps> = ({
   teams,
   addedInterns = [],
+  selectedDateLabel,
   onVerifySubmission,
   onVerifyTeam,
   verifyingTeamId,
@@ -199,6 +201,9 @@ export const TeamList: React.FC<TeamListProps> = ({
         const requiredCount = team.requiredStandupCount ?? 4;
         const standupCount = team.todayStandupCount ?? 0;
         const teamStatus = team.teamStatus ?? "PENDING";
+        const qualifiedStandupLabel = selectedDateLabel
+          ? `${selectedDateLabel} qualified standups`
+          : "Selected date qualified standups";
 
         return (
           <article className="team-card" key={team.teamId}>
@@ -240,7 +245,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                 )}
 
                 <div className="team-id">
-                  Today qualified standups: {standupCount}/{requiredCount} | {teamStatus}
+                  {qualifiedStandupLabel}: {standupCount}/{requiredCount} | {teamStatus}
                 </div>
                 {team.verifiedDate ? (
                   <div className="team-id">Verified date: {team.verifiedDate}</div>
@@ -353,6 +358,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                   onUpdateIntern={onUpdateIntern}
                   onVerifySubmission={onVerifySubmission}
                   status={intern.status}
+                  standupDateLabel={selectedDateLabel}
                   todayValidCount={intern.todayValidCount}
                 />
               ))}
