@@ -9,6 +9,7 @@ export interface InternAudioMetadata {
   tag: string;
   labels?: string[];
   uploadedAt?: string;
+  audioUrl?: string;
 }
 
 interface FetchRequestInit {
@@ -129,6 +130,33 @@ export async function getInternAudios(
   }
 
   return extractAudioItems(payload);
+}
+
+export async function getAudioRecordUrl(recordId: string): Promise<string | undefined> {
+  const normalizedRecordId = recordId.trim();
+
+  if (!normalizedRecordId) {
+    return undefined;
+  }
+
+  if (runtimeConfig.useMock) {
+    return undefined;
+  }
+
+  const payload = await requestCorpusApi(
+    `/api/v1/records/${encodeURIComponent(normalizedRecordId)}/record-url`
+  );
+
+  if (!payload || !isRecord(payload)) {
+    return undefined;
+  }
+
+  return (
+    pickString(payload, ["audio_url", "file_url", "record_url", "url"]) ||
+    (isRecord(payload.data)
+      ? pickString(payload.data, ["audio_url", "file_url", "record_url", "url"])
+      : undefined)
+  );
 }
 
 function resolveGlobalFetch(): FetchLike | undefined {
@@ -280,6 +308,15 @@ function parseAudioItem(
     ...contextualValues,
   ]);
   const uploadedAt = parseUploadedAt(item);
+  const audioUrl = pickString(item, [
+    "audio_url",
+    "file_url",
+    "record_url",
+    "url",
+    "audioUrl",
+    "fileUrl",
+    "recordUrl",
+  ]);
 
   return {
     id,
@@ -287,6 +324,7 @@ function parseAudioItem(
     tag: tagValues[0] ?? "",
     labels,
     uploadedAt,
+    audioUrl,
   };
 }
 
