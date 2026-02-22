@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 import InternSearch, { Intern } from "./components/intern/InternSearch";
+import InternsSummary from "./components/intern/InternsSummary";
+import InternsModal from "./components/intern/InternsModal";
 import { configureCorpusService } from "./services/corpus";
 
 const ACCESS_TOKEN_STORAGE_KEY = "corpus_access_token";
@@ -12,6 +14,7 @@ export default function App() {
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [showInternsModal, setShowInternsModal] = useState(false);
 
   useEffect(() => {
     // Browser requests use relative /api/v1 routes via Vite proxy.
@@ -21,6 +24,10 @@ export default function App() {
   useEffect(() => {
     persistAccessToken(authToken);
   }, [authToken]);
+
+  const handleRemoveIntern = (internId: string) => {
+    setAddedInterns((prev) => prev.filter((i) => i.id !== internId));
+  };
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -132,6 +139,17 @@ export default function App() {
         authToken={authToken}
         onInternsChange={setAddedInterns}
       />
+      <InternsSummary
+        interns={addedInterns}
+        onClick={() => setShowInternsModal(true)}
+      />
+      {showInternsModal ? (
+        <InternsModal
+          interns={addedInterns}
+          onClose={() => setShowInternsModal(false)}
+          onRemoveIntern={handleRemoveIntern}
+        />
+      ) : null}
       <DashboardLayout addedInterns={addedInterns} />
     </div>
   );
