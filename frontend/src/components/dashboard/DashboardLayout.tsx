@@ -46,6 +46,7 @@ export interface DashboardLayoutProps {
   teams?: Team[];
   addedInterns?: Intern[];
   title?: string;
+  statusDisplay?: "modal" | "inline";
 }
 
 const DEFAULT_VIEW: DashboardView = "TEAMS";
@@ -68,6 +69,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   teams,
   addedInterns,
   title = "Team-wise Standup Submission Dashboard",
+  statusDisplay = "modal",
 }) => {
   const [managedTeams, setManagedTeams] = React.useState<Team[]>(() => teams ?? EMPTY_TEAMS);
   const [selectedDateKey, setSelectedDateKey] = React.useState(() => getLocalDateKey(new Date()));
@@ -136,6 +138,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     () => teamWeeklyStatusRows.filter((row) => row.pendingDayDetails.length > 0),
     [teamWeeklyStatusRows]
   );
+  const isInlineStatusView = statusDisplay === "inline";
+  const isStatusPanelOpen = isInlineStatusView || isStatusModalOpen;
 
   const normalizedQuery = searchTerm.trim().toLowerCase();
 
@@ -440,12 +444,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   }, [managedTeams, selectedDateKey, selectedWeekDateKeys]);
 
   React.useEffect(() => {
-    if (!isStatusModalOpen) {
+    if (!isStatusPanelOpen) {
       return;
     }
 
     void loadStatusSummaries();
-  }, [isStatusModalOpen, loadStatusSummaries]);
+  }, [isStatusPanelOpen, loadStatusSummaries]);
 
   React.useEffect(() => {
     if (!isStatusModalOpen) {
@@ -474,96 +478,45 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     setIsStatusModalOpen(false);
   };
 
-  return (
-    <main className="dashboard-container">
-      <header className="dashboard-header">
-        <h1 className="dashboard-title">{title}</h1>
+  const renderStatusPanelContent = (isModalPanel: boolean) => (
+    <>
+      <header
+        style={{
+          alignItems: "center",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 12,
+          justifyContent: "space-between",
+        }}
+      >
+        <div style={{ display: "grid", gap: 4 }}>
+          {!isInlineStatusView ? (
+            <h2 style={{ color: "#0f172a", fontSize: 20, margin: 0 }}>Team Status Dashboard</h2>
+          ) : null}
+          <p style={{ color: "#475569", fontSize: 13, margin: 0 }}>
+            Daily date: {selectedDateLabel} | Weekly range: {selectedWeekLabel}
+          </p>
+        </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button className="secondary-button" onClick={handleOpenStatusModal} type="button">
-            Status
-          </button>
           <button
-            className="primary-button"
-            onClick={() => setIsCreatingTeam((prev) => !prev)}
+            className="ghost-button"
+            disabled={statusLoading}
+            onClick={() => {
+              void loadStatusSummaries();
+            }}
             type="button"
           >
-            {isCreatingTeam ? "Cancel" : "Create Team"}
+            {statusLoading ? "Refreshing..." : "Refresh"}
           </button>
+          {isModalPanel ? (
+            <button className="ghost-button" onClick={handleCloseStatusModal} type="button">
+              Close
+            </button>
+          ) : null}
         </div>
       </header>
 
-      <section
-        style={{
-          display: "grid",
-          gap: 10,
-          gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
-          marginBottom: 14,
-        }}
-      >
-        {[
-          { key: "TEAMS" as const, label: "Teams", value: totalTeams },
-          { key: "INTERNS" as const, label: "Interns", value: totalInterns },
-        ].map((item) => {
-          const isActive = activeView === item.key;
-          const isHovered = hoveredBox === item.key;
-
-          return (
-            <button
-              key={item.key}
-              onClick={() => setActiveView(item.key)}
-              onMouseEnter={() => setHoveredBox(item.key)}
-              onMouseLeave={() => setHoveredBox(null)}
-              style={{
-                backgroundColor: isActive ? "#eff6ff" : "#ffffff",
-                border: "1px solid #bfdbfe",
-                borderRadius: 12,
-                boxShadow: isActive || isHovered ? "0 0 0 3px rgba(147, 197, 253, 0.35)" : "none",
-                cursor: "pointer",
-                minHeight: 88,
-                padding: "10px 12px",
-                textAlign: "left",
-                transition: "box-shadow 180ms ease, background-color 180ms ease",
-              }}
-              type="button"
-            >
-              <div style={{ color: "#1d4ed8", fontSize: 13, marginBottom: 6 }}>{item.label}</div>
-              <strong style={{ color: "#0f172a", fontSize: 22, lineHeight: 1 }}>{item.value}</strong>
-            </button>
-          );
-        })}
-      </section>
-
-      {isCreatingTeam ? (
-        <section
-          style={{
-            alignItems: "center",
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 8,
-            marginBottom: 14,
-          }}
-        >
-          <input
-            aria-label="New team name"
-            onChange={(event) => setNewTeamName(event.target.value)}
-            placeholder="Enter team name"
-            style={{
-              border: "1px solid #d1d5db",
-              borderRadius: 6,
-              fontSize: 14,
-              minWidth: 260,
-              padding: "8px 10px",
-            }}
-            type="text"
-            value={newTeamName}
-          />
-          <button className="secondary-button" onClick={handleCreateTeam} type="button">
-            Add Team
-          </button>
-        </section>
-      ) : null}
-
-      <section style={{ marginBottom: 16 }}>
+      <section style={{ marginBottom: 4 }}>
         <label
           style={{
             color: "#374151",
@@ -589,78 +542,375 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </label>
       </section>
 
-      <section style={{ marginBottom: 16 }}>
-        <input
-          aria-label="Search"
-          onChange={(event) => setSearchTerm(event.target.value)}
-          placeholder={
-            activeView === "TEAMS"
-              ? "Search by team name..."
-              : "Search by intern name or team name..."
-          }
-          style={{
-            border: "1px solid #d1d5db",
-            borderRadius: 8,
-            fontSize: 14,
-            padding: "10px 12px",
-            width: "100%",
-          }}
-          type="text"
-          value={searchTerm}
-        />
+      <section style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        {(["DAILY", "WEEKLY"] as const).map((viewKey) => {
+          const isActive = statusView === viewKey;
+
+          return (
+            <button
+              key={viewKey}
+              onClick={() => setStatusView(viewKey)}
+              style={{
+                backgroundColor: isActive ? "#1d4ed8" : "#f8fafc",
+                border: "1px solid #bfdbfe",
+                borderRadius: 8,
+                color: isActive ? "#ffffff" : "#1e293b",
+                cursor: "pointer",
+                fontSize: 13,
+                fontWeight: 600,
+                padding: "8px 12px",
+              }}
+              type="button"
+            >
+              {viewKey === "DAILY" ? "Daily Standup Status" : "Weekly Standup Status"}
+            </button>
+          );
+        })}
       </section>
 
-      {activeView === "TEAMS" ? (
-        <TeamList
-          addedInterns={addedInterns}
-          onAddInternToTeam={handleAddInternToTeam}
-          onDeleteIntern={handleDeleteIntern}
-          onDeleteTeam={handleDeleteTeam}
-          onUpdateIntern={handleUpdateIntern}
-          onUpdateTeamName={handleUpdateTeamName}
-          onVerifySubmission={handleVerifySubmission}
-          onVerifyTeam={(teamId) => {
-            void handleVerifyTeam(teamId);
-          }}
-          selectedDateLabel={selectedDateLabel}
-          verifyingTeamId={verifyingTeamId}
-          teams={filteredTeams}
-        />
-      ) : null}
+      {statusLoading ? <p className="team-empty">Loading team status...</p> : null}
+      {!statusLoading && statusError ? <p className="team-empty">{statusError}</p> : null}
 
-      {activeView !== "TEAMS" ? (
-        <section className="team-list">
-          {filteredInternRows.length === 0 ? (
-            <p className="team-empty">
-              {activeView === "COMPLETED"
-                ? "No completed interns found."
-                : "No interns found for the current search."}
-            </p>
+      {!statusLoading && !statusError && statusView === "DAILY" ? (
+        <section style={{ display: "grid", gap: 14 }}>
+          {teamDailyStatusRows.length === 0 ? (
+            <p className="team-empty">No teams available for status tracking.</p>
           ) : (
-            filteredInternRows.map((intern) => (
-              <article className="team-card" key={intern.internId}>
-                <header className="team-header">
-                  <div>
-                    <h3 className="team-name">{intern.teamName}</h3>
-                  </div>
-                </header>
-                <InternCard
-                  internId={intern.internId}
-                  internName={intern.internName}
-                  onDeleteIntern={handleDeleteIntern}
-                  onUpdateIntern={handleUpdateIntern}
-                  onVerifySubmission={handleVerifySubmission}
-                  status={intern.status}
-                  standupDateLabel={selectedDateLabel}
-                  todayValidCount={intern.todayValidCount}
-                />
-              </article>
-            ))
+            <section className="team-list">
+              {teamDailyStatusRows.map((row) => (
+                <article className="team-card" key={row.teamId}>
+                  <header
+                    style={{
+                      alignItems: "center",
+                      display: "flex",
+                      gap: 8,
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <div style={{ display: "grid", gap: 3 }}>
+                      <h3 className="team-name">{row.teamName}</h3>
+                      <div className="team-id">
+                        Progress: {row.standupCount}/{row.requiredStandupCount}
+                      </div>
+                    </div>
+                    <span
+                      style={{
+                        alignItems: "center",
+                        backgroundColor: row.isCompleted ? "#dcfce7" : "#e5e7eb",
+                        border: `1px solid ${row.isCompleted ? "#86efac" : "#cbd5e1"}`,
+                        borderRadius: "9999px",
+                        color: row.isCompleted ? "#166534" : "#64748b",
+                        display: "inline-flex",
+                        fontSize: 16,
+                        height: 34,
+                        justifyContent: "center",
+                        width: 34,
+                      }}
+                      title={row.isCompleted ? "Completed" : "Pending"}
+                    >
+                      ✓
+                    </span>
+                  </header>
+                </article>
+              ))}
+            </section>
           )}
+
+          <section className="team-card" style={{ backgroundColor: "#f8fafc" }}>
+            <h3 className="team-name" style={{ marginBottom: 8 }}>
+              Daily Pending Summary
+            </h3>
+            {pendingDailyRows.length === 0 ? (
+              <p className="team-id">All teams completed required daily standups.</p>
+            ) : (
+              <ul style={{ display: "grid", gap: 6, margin: 0, paddingLeft: 18 }}>
+                {pendingDailyRows.map((row) => (
+                  <li key={row.teamId} style={{ color: "#334155", fontSize: 13 }}>
+                    {row.teamName}: {row.remainingStandupCount} standup(s) pending
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </section>
       ) : null}
 
-      {isStatusModalOpen ? (
+      {!statusLoading && !statusError && statusView === "WEEKLY" ? (
+        <section style={{ display: "grid", gap: 14 }}>
+          {teamWeeklyStatusRows.length === 0 ? (
+            <p className="team-empty">No teams available for weekly status tracking.</p>
+          ) : (
+            <section className="team-list">
+              {teamWeeklyStatusRows.map((row) => (
+                <article className="team-card" key={row.teamId}>
+                  <header style={{ marginBottom: 10 }}>
+                    <h3 className="team-name">{row.teamName}</h3>
+                    <div className="team-id">
+                      Completed days: {row.completedDaysCount}/{row.dayStatuses.length}
+                    </div>
+                  </header>
+
+                  <section
+                    style={{
+                      display: "grid",
+                      gap: 8,
+                      gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))",
+                    }}
+                  >
+                    {row.dayStatuses.map((dayStatus) => (
+                      <article
+                        key={dayStatus.dateKey}
+                        style={{
+                          backgroundColor: dayStatus.isCompleted ? "#f0fdf4" : "#f8fafc",
+                          border: `1px solid ${dayStatus.isCompleted ? "#86efac" : "#cbd5e1"}`,
+                          borderRadius: 8,
+                          display: "grid",
+                          gap: 4,
+                          padding: "8px 9px",
+                        }}
+                      >
+                        <strong style={{ color: "#0f172a", fontSize: 12 }}>{dayStatus.dayLabel}</strong>
+                        <span style={{ color: "#64748b", fontSize: 11 }}>{dayStatus.fullDateLabel}</span>
+                        <span style={{ color: "#1e293b", fontSize: 12 }}>
+                          {dayStatus.standupCount}/{dayStatus.requiredStandupCount}
+                        </span>
+                      </article>
+                    ))}
+                  </section>
+
+                  <section style={{ marginTop: 10 }}>
+                    {row.pendingDayDetails.length === 0 ? (
+                      <p className="team-id">No pending days for this week.</p>
+                    ) : (
+                      <p className="team-id">Pending days: {row.pendingDayDetails.join(", ")}</p>
+                    )}
+                  </section>
+                </article>
+              ))}
+            </section>
+          )}
+
+          <section className="team-card" style={{ backgroundColor: "#f8fafc" }}>
+            <h3 className="team-name" style={{ marginBottom: 8 }}>
+              Weekly Pending Summary
+            </h3>
+            {pendingWeeklyRows.length === 0 ? (
+              <p className="team-id">All teams completed weekly standups for every day.</p>
+            ) : (
+              <ul style={{ display: "grid", gap: 6, margin: 0, paddingLeft: 18 }}>
+                {pendingWeeklyRows.map((row) => (
+                  <li key={row.teamId} style={{ color: "#334155", fontSize: 13 }}>
+                    {row.teamName}: {row.pendingDayDetails.join(", ")} | Remaining:{" "}
+                    {row.totalRemainingStandups}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </section>
+      ) : null}
+    </>
+  );
+
+  return (
+    <main className="dashboard-container">
+      <header className="dashboard-header">
+        <h1 className="dashboard-title">
+          {isInlineStatusView ? "Team Status Dashboard" : title}
+        </h1>
+        {!isInlineStatusView ? (
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button className="secondary-button" onClick={handleOpenStatusModal} type="button">
+              Status
+            </button>
+            <button
+              className="primary-button"
+              onClick={() => setIsCreatingTeam((prev) => !prev)}
+              type="button"
+            >
+              {isCreatingTeam ? "Cancel" : "Create Team"}
+            </button>
+          </div>
+        ) : null}
+      </header>
+
+      {!isInlineStatusView ? (
+        <>
+          <section
+            style={{
+              display: "grid",
+              gap: 10,
+              gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+              marginBottom: 14,
+            }}
+          >
+            {[
+              { key: "TEAMS" as const, label: "Teams", value: totalTeams },
+              { key: "INTERNS" as const, label: "Interns", value: totalInterns },
+            ].map((item) => {
+              const isActive = activeView === item.key;
+              const isHovered = hoveredBox === item.key;
+
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => setActiveView(item.key)}
+                  onMouseEnter={() => setHoveredBox(item.key)}
+                  onMouseLeave={() => setHoveredBox(null)}
+                  style={{
+                    backgroundColor: isActive ? "#eff6ff" : "#ffffff",
+                    border: "1px solid #bfdbfe",
+                    borderRadius: 12,
+                    boxShadow: isActive || isHovered ? "0 0 0 3px rgba(147, 197, 253, 0.35)" : "none",
+                    cursor: "pointer",
+                    minHeight: 88,
+                    padding: "10px 12px",
+                    textAlign: "left",
+                    transition: "box-shadow 180ms ease, background-color 180ms ease",
+                  }}
+                  type="button"
+                >
+                  <div style={{ color: "#1d4ed8", fontSize: 13, marginBottom: 6 }}>{item.label}</div>
+                  <strong style={{ color: "#0f172a", fontSize: 22, lineHeight: 1 }}>
+                    {item.value}
+                  </strong>
+                </button>
+              );
+            })}
+          </section>
+
+          {isCreatingTeam ? (
+            <section
+              style={{
+                alignItems: "center",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 8,
+                marginBottom: 14,
+              }}
+            >
+              <input
+                aria-label="New team name"
+                onChange={(event) => setNewTeamName(event.target.value)}
+                placeholder="Enter team name"
+                style={{
+                  border: "1px solid #d1d5db",
+                  borderRadius: 6,
+                  fontSize: 14,
+                  minWidth: 260,
+                  padding: "8px 10px",
+                }}
+                type="text"
+                value={newTeamName}
+              />
+              <button className="secondary-button" onClick={handleCreateTeam} type="button">
+                Add Team
+              </button>
+            </section>
+          ) : null}
+
+          <section style={{ marginBottom: 16 }}>
+            <label
+              style={{
+                color: "#374151",
+                display: "grid",
+                fontSize: 13,
+                gap: 6,
+                maxWidth: 280,
+              }}
+            >
+              <span>Standup verification date</span>
+              <input
+                aria-label="Standup verification date"
+                onChange={handleSelectedDateChange}
+                style={{
+                  border: "1px solid #d1d5db",
+                  borderRadius: 8,
+                  fontSize: 14,
+                  padding: "10px 12px",
+                }}
+                type="date"
+                value={selectedDateKey}
+              />
+            </label>
+          </section>
+
+          <section style={{ marginBottom: 16 }}>
+            <input
+              aria-label="Search"
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder={
+                activeView === "TEAMS"
+                  ? "Search by team name..."
+                  : "Search by intern name or team name..."
+              }
+              style={{
+                border: "1px solid #d1d5db",
+                borderRadius: 8,
+                fontSize: 14,
+                padding: "10px 12px",
+                width: "100%",
+              }}
+              type="text"
+              value={searchTerm}
+            />
+          </section>
+
+          {activeView === "TEAMS" ? (
+            <TeamList
+              addedInterns={addedInterns}
+              onAddInternToTeam={handleAddInternToTeam}
+              onDeleteIntern={handleDeleteIntern}
+              onDeleteTeam={handleDeleteTeam}
+              onUpdateIntern={handleUpdateIntern}
+              onUpdateTeamName={handleUpdateTeamName}
+              onVerifySubmission={handleVerifySubmission}
+              onVerifyTeam={(teamId) => {
+                void handleVerifyTeam(teamId);
+              }}
+              selectedDateLabel={selectedDateLabel}
+              verifyingTeamId={verifyingTeamId}
+              teams={filteredTeams}
+            />
+          ) : null}
+
+          {activeView !== "TEAMS" ? (
+            <section className="team-list">
+              {filteredInternRows.length === 0 ? (
+                <p className="team-empty">
+                  {activeView === "COMPLETED"
+                    ? "No completed interns found."
+                    : "No interns found for the current search."}
+                </p>
+              ) : (
+                filteredInternRows.map((intern) => (
+                  <article className="team-card" key={intern.internId}>
+                    <header className="team-header">
+                      <div>
+                        <h3 className="team-name">{intern.teamName}</h3>
+                      </div>
+                    </header>
+                    <InternCard
+                      internId={intern.internId}
+                      internName={intern.internName}
+                      onDeleteIntern={handleDeleteIntern}
+                      onUpdateIntern={handleUpdateIntern}
+                      onVerifySubmission={handleVerifySubmission}
+                      status={intern.status}
+                      standupDateLabel={selectedDateLabel}
+                      todayValidCount={intern.todayValidCount}
+                    />
+                  </article>
+                ))
+              )}
+            </section>
+          ) : null}
+        </>
+      ) : (
+        <section style={{ display: "grid", gap: 14 }}>{renderStatusPanelContent(false)}</section>
+      )}
+
+      {!isInlineStatusView && isStatusModalOpen ? (
         <div
           aria-modal="true"
           onClick={handleCloseStatusModal}
@@ -689,211 +939,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               width: "100%",
             }}
           >
-            <header
-              style={{
-                alignItems: "center",
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 12,
-                justifyContent: "space-between",
-              }}
-            >
-              <div style={{ display: "grid", gap: 4 }}>
-                <h2 style={{ color: "#0f172a", fontSize: 20, margin: 0 }}>Team Status Dashboard</h2>
-                <p style={{ color: "#475569", fontSize: 13, margin: 0 }}>
-                  Daily date: {selectedDateLabel} | Weekly range: {selectedWeekLabel}
-                </p>
-              </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <button
-                  className="ghost-button"
-                  disabled={statusLoading}
-                  onClick={() => {
-                    void loadStatusSummaries();
-                  }}
-                  type="button"
-                >
-                  {statusLoading ? "Refreshing..." : "Refresh"}
-                </button>
-                <button className="ghost-button" onClick={handleCloseStatusModal} type="button">
-                  Close
-                </button>
-              </div>
-            </header>
-
-            <section style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {(["DAILY", "WEEKLY"] as const).map((viewKey) => {
-                const isActive = statusView === viewKey;
-
-                return (
-                  <button
-                    key={viewKey}
-                    onClick={() => setStatusView(viewKey)}
-                    style={{
-                      backgroundColor: isActive ? "#1d4ed8" : "#f8fafc",
-                      border: "1px solid #bfdbfe",
-                      borderRadius: 8,
-                      color: isActive ? "#ffffff" : "#1e293b",
-                      cursor: "pointer",
-                      fontSize: 13,
-                      fontWeight: 600,
-                      padding: "8px 12px",
-                    }}
-                    type="button"
-                  >
-                    {viewKey === "DAILY" ? "Daily Standup Status" : "Weekly Standup Status"}
-                  </button>
-                );
-              })}
-            </section>
-
-            {statusLoading ? <p className="team-empty">Loading team status...</p> : null}
-            {!statusLoading && statusError ? <p className="team-empty">{statusError}</p> : null}
-
-            {!statusLoading && !statusError && statusView === "DAILY" ? (
-              <section style={{ display: "grid", gap: 14 }}>
-                {teamDailyStatusRows.length === 0 ? (
-                  <p className="team-empty">No teams available for status tracking.</p>
-                ) : (
-                  <section className="team-list">
-                    {teamDailyStatusRows.map((row) => (
-                      <article className="team-card" key={row.teamId}>
-                        <header
-                          style={{
-                            alignItems: "center",
-                            display: "flex",
-                            gap: 8,
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <div style={{ display: "grid", gap: 3 }}>
-                            <h3 className="team-name">{row.teamName}</h3>
-                            <div className="team-id">
-                              Progress: {row.standupCount}/{row.requiredStandupCount}
-                            </div>
-                          </div>
-                          <span
-                            style={{
-                              alignItems: "center",
-                              backgroundColor: row.isCompleted ? "#dcfce7" : "#e5e7eb",
-                              border: `1px solid ${row.isCompleted ? "#86efac" : "#cbd5e1"}`,
-                              borderRadius: "9999px",
-                              color: row.isCompleted ? "#166534" : "#64748b",
-                              display: "inline-flex",
-                              fontSize: 16,
-                              height: 34,
-                              justifyContent: "center",
-                              width: 34,
-                            }}
-                            title={row.isCompleted ? "Completed" : "Pending"}
-                          >
-                            ✓
-                          </span>
-                        </header>
-                      </article>
-                    ))}
-                  </section>
-                )}
-
-                <section className="team-card" style={{ backgroundColor: "#f8fafc" }}>
-                  <h3 className="team-name" style={{ marginBottom: 8 }}>
-                    Daily Pending Summary
-                  </h3>
-                  {pendingDailyRows.length === 0 ? (
-                    <p className="team-id">All teams completed required daily standups.</p>
-                  ) : (
-                    <ul style={{ display: "grid", gap: 6, margin: 0, paddingLeft: 18 }}>
-                      {pendingDailyRows.map((row) => (
-                        <li key={row.teamId} style={{ color: "#334155", fontSize: 13 }}>
-                          {row.teamName}: {row.remainingStandupCount} standup(s) pending
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </section>
-              </section>
-            ) : null}
-
-            {!statusLoading && !statusError && statusView === "WEEKLY" ? (
-              <section style={{ display: "grid", gap: 14 }}>
-                {teamWeeklyStatusRows.length === 0 ? (
-                  <p className="team-empty">No teams available for weekly status tracking.</p>
-                ) : (
-                  <section className="team-list">
-                    {teamWeeklyStatusRows.map((row) => (
-                      <article className="team-card" key={row.teamId}>
-                        <header style={{ marginBottom: 10 }}>
-                          <h3 className="team-name">{row.teamName}</h3>
-                          <div className="team-id">
-                            Completed days: {row.completedDaysCount}/{row.dayStatuses.length}
-                          </div>
-                        </header>
-
-                        <section
-                          style={{
-                            display: "grid",
-                            gap: 8,
-                            gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))",
-                          }}
-                        >
-                          {row.dayStatuses.map((dayStatus) => (
-                            <article
-                              key={dayStatus.dateKey}
-                              style={{
-                                backgroundColor: dayStatus.isCompleted ? "#f0fdf4" : "#f8fafc",
-                                border: `1px solid ${dayStatus.isCompleted ? "#86efac" : "#cbd5e1"}`,
-                                borderRadius: 8,
-                                display: "grid",
-                                gap: 4,
-                                padding: "8px 9px",
-                              }}
-                            >
-                              <strong style={{ color: "#0f172a", fontSize: 12 }}>
-                                {dayStatus.dayLabel}
-                              </strong>
-                              <span style={{ color: "#64748b", fontSize: 11 }}>
-                                {dayStatus.fullDateLabel}
-                              </span>
-                              <span style={{ color: "#1e293b", fontSize: 12 }}>
-                                {dayStatus.standupCount}/{dayStatus.requiredStandupCount}
-                              </span>
-                            </article>
-                          ))}
-                        </section>
-
-                        <section style={{ marginTop: 10 }}>
-                          {row.pendingDayDetails.length === 0 ? (
-                            <p className="team-id">No pending days for this week.</p>
-                          ) : (
-                            <p className="team-id">
-                              Pending days: {row.pendingDayDetails.join(", ")}
-                            </p>
-                          )}
-                        </section>
-                      </article>
-                    ))}
-                  </section>
-                )}
-
-                <section className="team-card" style={{ backgroundColor: "#f8fafc" }}>
-                  <h3 className="team-name" style={{ marginBottom: 8 }}>
-                    Weekly Pending Summary
-                  </h3>
-                  {pendingWeeklyRows.length === 0 ? (
-                    <p className="team-id">All teams completed weekly standups for every day.</p>
-                  ) : (
-                    <ul style={{ display: "grid", gap: 6, margin: 0, paddingLeft: 18 }}>
-                      {pendingWeeklyRows.map((row) => (
-                        <li key={row.teamId} style={{ color: "#334155", fontSize: 13 }}>
-                          {row.teamName}: {row.pendingDayDetails.join(", ")} | Remaining:{" "}
-                          {row.totalRemainingStandups}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </section>
-              </section>
-            ) : null}
+            {renderStatusPanelContent(true)}
           </section>
         </div>
       ) : null}

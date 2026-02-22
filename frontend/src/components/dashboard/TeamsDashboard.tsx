@@ -4,10 +4,11 @@ import type { Intern } from "../intern/InternSearch";
 
 export interface TeamsDashboardProps {
     addedInterns: Intern[];
+    mode?: "teams" | "status";
 }
 
-const TeamsDashboard: React.FC<TeamsDashboardProps> = ({ addedInterns }) => {
-    return <DashboardLayout addedInterns={addedInterns} />;
+const TeamsDashboard: React.FC<TeamsDashboardProps> = ({ addedInterns, mode = "teams" }) => {
+    return <DashboardLayout addedInterns={addedInterns} statusDisplay={mode === "status" ? "inline" : "modal"} />;
 };
 
 export default TeamsDashboard;
