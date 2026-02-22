@@ -293,15 +293,12 @@ export const TeamList: React.FC<TeamListProps> = ({
                 <div style={{ position: "relative", flex: 1, minWidth: 220 }}>
                   <input
                     aria-label={`Add intern to ${team.teamName}`}
+                    className="team-add-intern-input"
                     onChange={(event) => handleInputChange(team.teamId, event.target.value)}
                     onFocus={() => handleFocus(team.teamId)}
                     onBlur={() => handleBlur(team.teamId)}
                     placeholder="Select intern from added list"
                     style={{
-                      border: "1px solid #d1d5db",
-                      borderRadius: 6,
-                      fontSize: 13,
-                      padding: "8px 10px",
                       width: "100%",
                     }}
                     type="text"
