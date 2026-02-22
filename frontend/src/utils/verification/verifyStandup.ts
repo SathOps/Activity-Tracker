@@ -27,6 +27,7 @@ const DEFAULT_STANDUP_ALIASES = [TARGET_CATEGORY];
 const DEFAULT_INTERNSHIP_ALIASES = [TARGET_TAG];
 const STANDUP_ALIAS_ENV_KEY = "STANDUP_LABEL_ALIASES";
 const INTERNSHIP_ALIAS_ENV_KEY = "INTERNSHIP_LABEL_ALIASES";
+const DATE_KEY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 export async function verifyStandupSubmission(
   internId: string,
@@ -84,6 +85,26 @@ function normalizeFilterDate(rawDate: string | undefined): string | undefined {
 
   if (!trimmed) {
     return undefined;
+  }
+
+  const dateKeyMatch = DATE_KEY_PATTERN.exec(trimmed);
+
+  if (dateKeyMatch) {
+    const [, yearToken, monthToken, dayToken] = dateKeyMatch;
+    const year = Number(yearToken);
+    const month = Number(monthToken);
+    const day = Number(dayToken);
+    const localDate = new Date(year, month - 1, day);
+
+    if (
+      localDate.getFullYear() !== year ||
+      localDate.getMonth() + 1 !== month ||
+      localDate.getDate() !== day
+    ) {
+      throw new Error("uploadedOnDate must be a valid date (recommended: YYYY-MM-DD).");
+    }
+
+    return `${yearToken}-${monthToken}-${dayToken}`;
   }
 
   const parsedDate = new Date(trimmed);
