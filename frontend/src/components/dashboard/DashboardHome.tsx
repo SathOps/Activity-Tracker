@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import InternsDashboard from "./InternsDashboard";
 import TeamsDashboard from "./TeamsDashboard";
+import type { Team } from "./TeamList";
 import type { Intern } from "../intern/InternSearch";
 
 type ActiveView = "interns" | "teams" | "status";
 
 export interface DashboardHomeProps {
     addedInterns: Intern[];
+    preloadedTeams?: Team[];
     authToken: string;
     onInternsChange: (interns: Intern[]) => void;
     onRemoveIntern: (internId: string) => void;
@@ -20,6 +22,7 @@ const TABS: { key: ActiveView; label: string; icon: string }[] = [
 
 const DashboardHome: React.FC<DashboardHomeProps> = ({
     addedInterns,
+    preloadedTeams,
     authToken,
     onInternsChange,
     onRemoveIntern,
@@ -53,6 +56,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
                 <TeamsDashboard
                     addedInterns={addedInterns}
                     mode={activeView === "status" ? "status" : "teams"}
+                    preloadedTeams={preloadedTeams}
                 />
             )}
         </>
