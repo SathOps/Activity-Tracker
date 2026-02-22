@@ -750,14 +750,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       {!isInlineStatusView ? (
         <>
-          <section
-            style={{
-              display: "grid",
-              gap: 10,
-              gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
-              marginBottom: 14,
-            }}
-          >
+          <section className="summary-cards-grid">
             {[
               { key: "TEAMS" as const, label: "Teams", value: totalTeams },
               { key: "INTERNS" as const, label: "Interns", value: totalInterns },
@@ -767,27 +760,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
               return (
                 <button
+                  className={`summary-card-button${isActive ? " is-active" : ""}`}
                   key={item.key}
                   onClick={() => setActiveView(item.key)}
                   onMouseEnter={() => setHoveredBox(item.key)}
                   onMouseLeave={() => setHoveredBox(null)}
-                  style={{
-                    backgroundColor: isActive ? "#eff6ff" : "#ffffff",
-                    border: "1px solid #bfdbfe",
-                    borderRadius: 12,
-                    boxShadow: isActive || isHovered ? "0 0 0 3px rgba(147, 197, 253, 0.35)" : "none",
-                    cursor: "pointer",
-                    minHeight: 88,
-                    padding: "10px 12px",
-                    textAlign: "left",
-                    transition: "box-shadow 180ms ease, background-color 180ms ease",
-                  }}
+                  data-hovered={isHovered ? "true" : undefined}
                   type="button"
                 >
-                  <div style={{ color: "#1d4ed8", fontSize: 13, marginBottom: 6 }}>{item.label}</div>
-                  <strong style={{ color: "#0f172a", fontSize: 22, lineHeight: 1 }}>
-                    {item.value}
-                  </strong>
+                  <div className="summary-card-label">{item.label}</div>
+                  <strong className="summary-card-value">{item.value}</strong>
                 </button>
               );
             })}
@@ -805,14 +787,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             >
               <input
                 aria-label="New team name"
+                className="team-search-input"
                 onChange={(event) => setNewTeamName(event.target.value)}
                 placeholder="Enter team name"
                 style={{
-                  border: "1px solid #d1d5db",
-                  borderRadius: 6,
-                  fontSize: 14,
                   minWidth: 260,
-                  padding: "8px 10px",
                 }}
                 type="text"
                 value={newTeamName}
@@ -836,13 +815,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <span>Standup verification date</span>
               <input
                 aria-label="Standup verification date"
+                className="date-input"
                 onChange={handleSelectedDateChange}
-                style={{
-                  border: "1px solid #d1d5db",
-                  borderRadius: 8,
-                  fontSize: 14,
-                  padding: "10px 12px",
-                }}
                 type="date"
                 value={selectedDateKey}
               />
@@ -852,19 +826,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           <section style={{ marginBottom: 16 }}>
             <input
               aria-label="Search"
+              className="team-search-input"
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder={
                 activeView === "TEAMS"
                   ? "Search by team name..."
                   : "Search by intern name or team name..."
               }
-              style={{
-                border: "1px solid #d1d5db",
-                borderRadius: 8,
-                fontSize: 14,
-                padding: "10px 12px",
-                width: "100%",
-              }}
               type="text"
               value={searchTerm}
             />
