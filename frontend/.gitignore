@@ -20,6 +20,7 @@ pnpm-debug.log*
 # cache / tooling
 .vite/
 .cache/
+coverage/
 .DS_Store
 
 # editor / IDE
