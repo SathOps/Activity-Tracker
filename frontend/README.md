@@ -156,8 +156,16 @@ uvicorn main:app --reload
 
 3. Configure environment variables:
 
-* SWECHA_API_BASE_URL
-* AUTH_TOKEN (if required)
+* `SWECHA_API_BASE_URL` (used by Vite dev proxy)
+* `VITE_SWECHA_API_BASE_URL` (browser runtime API base, if needed)
+* `CORPUS_TOKEN` (optional; only for proxy-injected auth in local dev)
+
+4. Vercel deployment:
+
+* This project uses `/api/...` routes in the frontend.
+* `vite.config.ts` proxy works only in `npm run dev`.
+* For production, `vercel.json` rewrites `/api/*` to `https://api.corpus.swecha.org/api/*`.
+* Ensure Vercel Framework Preset is **Vite**, Build Command is `npm run build`, and Output Directory is `dist`.
 
 ---
 
