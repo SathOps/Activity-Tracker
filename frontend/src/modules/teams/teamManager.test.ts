@@ -1,125 +1,94 @@
-// ─────────────────────────────────────────────────
-//  teamManager — Smoke Test Script
-// ─────────────────────────────────────────────────
+import { beforeEach, describe, expect, test } from "vitest";
 
 import {
-    createTeam,
-    renameTeam,
-    deleteTeam,
-    addInternToTeam,
-    removeInternFromTeam,
-    getAllTeams,
-    getTeamById,
-    resetStore,
-    seedMockData,
+  addInternToTeam,
+  createTeam,
+  deleteTeam,
+  getAllTeams,
+  getTeamById,
+  removeInternFromTeam,
+  renameTeam,
+  resetStore,
+  seedMockData,
 } from "./teamManager";
 
-function assert(condition: boolean, message: string): void {
-    if (!condition) {
-        throw new Error(`❌ ASSERTION FAILED: ${message}`);
-    }
-}
+describe("teamManager", () => {
+  beforeEach(() => {
+    resetStore();
+  });
 
-function expectThrow(fn: () => void, message: string): void {
-    let threw = false;
-    try {
-        fn();
-    } catch {
-        threw = true;
-    }
-    assert(threw, message);
-}
+  test("seedMockData clears existing teams", () => {
+    createTeam("Temp Team");
+    seedMockData();
 
-// ── Start fresh ──
-resetStore();
+    expect(getAllTeams()).toEqual([]);
+  });
 
-// ── Test: seedMockData ──
-seedMockData();
-assert(getAllTeams().length === 0, "seedMockData should not prefill teams");
-console.log("✅ seedMockData keeps store empty");
+  test("createTeam creates a team with trimmed name and empty members", () => {
+    const team = createTeam("  Gamma Force  ");
 
-// ── Test: createTeam ──
-resetStore();
-const team = createTeam("Gamma Force");
-assert(team.name === "Gamma Force", "createTeam should set the name");
-assert(team.members.length === 0, "createTeam should start with no members");
-assert(getAllTeams().length === 1, "store should have 1 team after create");
-console.log("✅ createTeam works");
+    expect(team.name).toBe("Gamma Force");
+    expect(team.members).toEqual([]);
+    expect(getAllTeams()).toHaveLength(1);
+  });
 
-// ── Test: createTeam validation ──
-expectThrow(() => createTeam(""), "createTeam should throw on empty name");
-expectThrow(() => createTeam("   "), "createTeam should throw on blank name");
-console.log("✅ createTeam validation works");
+  test("createTeam rejects empty names", () => {
+    expect(() => createTeam("")).toThrow("Team name cannot be empty.");
+    expect(() => createTeam("   ")).toThrow("Team name cannot be empty.");
+  });
 
-// ── Test: renameTeam ──
-const renamed = renameTeam(team.id, "Delta Force");
-assert(renamed.name === "Delta Force", "renameTeam should update the name");
-assert(
-    getTeamById(team.id)?.name === "Delta Force",
-    "store should reflect rename"
-);
-console.log("✅ renameTeam works");
+  test("renameTeam updates an existing team name", () => {
+    const team = createTeam("Old Name");
 
-// ── Test: renameTeam validation ──
-expectThrow(
-    () => renameTeam("nonexistent", "X"),
-    "renameTeam should throw for unknown teamId"
-);
-expectThrow(
-    () => renameTeam(team.id, ""),
-    "renameTeam should throw on empty new name"
-);
-console.log("✅ renameTeam validation works");
+    const renamed = renameTeam(team.id, " New Name ");
 
-// ── Test: addInternToTeam ──
-const withIntern = addInternToTeam(team.id, "intern-301");
-assert(withIntern.members.length === 1, "team should have 1 member");
-assert(
-    withIntern.members.includes("intern-301"),
-    "team should include intern-301"
-);
+    expect(renamed.name).toBe("New Name");
+    expect(getTeamById(team.id)?.name).toBe("New Name");
+  });
 
-// Duplicate add is a no-op
-const sameTeam = addInternToTeam(team.id, "intern-301");
-assert(
-    sameTeam.members.length === 1,
-    "duplicate add should not increase member count"
-);
-console.log("✅ addInternToTeam works (including duplicate no-op)");
+  test("renameTeam validates unknown team and empty name", () => {
+    const team = createTeam("Alpha");
 
-// ── Test: addInternToTeam validation ──
-expectThrow(
-    () => addInternToTeam("nonexistent", "intern-301"),
-    "addInternToTeam should throw for unknown teamId"
-);
-console.log("✅ addInternToTeam validation works");
+    expect(() => renameTeam("missing-id", "Next")).toThrow("Team not found: missing-id");
+    expect(() => renameTeam(team.id, "")).toThrow("New team name cannot be empty.");
+  });
 
-// ── Test: removeInternFromTeam ──
-const afterRemove = removeInternFromTeam(team.id, "intern-301");
-assert(afterRemove.members.length === 0, "team should have 0 members after removal");
-console.log("✅ removeInternFromTeam works");
+  test("addInternToTeam adds unique members and skips duplicates", () => {
+    const team = createTeam("Alpha");
 
-// ── Test: removeInternFromTeam validation ──
-expectThrow(
-    () => removeInternFromTeam(team.id, "intern-999"),
-    "removeInternFromTeam should throw for non-member intern"
-);
-expectThrow(
-    () => removeInternFromTeam("nonexistent", "intern-301"),
-    "removeInternFromTeam should throw for unknown teamId"
-);
-console.log("✅ removeInternFromTeam validation works");
+    addInternToTeam(team.id, "intern-301");
+    addInternToTeam(team.id, "intern-301");
 
-// ── Test: deleteTeam ──
-deleteTeam(team.id);
-assert(getAllTeams().length === 0, "store should be empty after delete");
-console.log("✅ deleteTeam works");
+    expect(getTeamById(team.id)?.members).toEqual(["intern-301"]);
+  });
 
-// ── Test: deleteTeam validation ──
-expectThrow(
-    () => deleteTeam("nonexistent"),
-    "deleteTeam should throw for unknown teamId"
-);
-console.log("✅ deleteTeam validation works");
+  test("addInternToTeam validates unknown team", () => {
+    expect(() => addInternToTeam("missing-id", "intern-301")).toThrow(
+      "Team not found: missing-id"
+    );
+  });
 
-console.log("\n🎉 All tests passed!");
+  test("removeInternFromTeam removes member and validates errors", () => {
+    const team = createTeam("Alpha");
+    addInternToTeam(team.id, "intern-1");
+
+    removeInternFromTeam(team.id, "intern-1");
+    expect(getTeamById(team.id)?.members).toEqual([]);
+
+    expect(() => removeInternFromTeam(team.id, "intern-999")).toThrow(
+      `Intern "intern-999" is not a member of team "${team.id}".`
+    );
+    expect(() => removeInternFromTeam("missing-id", "intern-1")).toThrow(
+      "Team not found: missing-id"
+    );
+  });
+
+  test("deleteTeam removes a team and validates unknown id", () => {
+    const team = createTeam("Alpha");
+
+    deleteTeam(team.id);
+    expect(getAllTeams()).toEqual([]);
+
+    expect(() => deleteTeam("missing-id")).toThrow("Team not found: missing-id");
+  });
+});
