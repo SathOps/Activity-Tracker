@@ -1,5 +1,5 @@
 :root {
-  font-family: "Manrope", "Segoe UI", "Inter", Arial, sans-serif;
+  font-family: 'Manrope', 'Segoe UI', 'Inter', Arial, sans-serif;
   line-height: 1.4;
   color: #111827;
   background: #f3f6fb;
@@ -18,7 +18,12 @@
 }
 
 body {
-  background: radial-gradient(circle at top right, #eef4ff 0%, #f3f6fb 42%, #f1f5f9 100%);
+  background: radial-gradient(
+    circle at top right,
+    #eef4ff 0%,
+    #f3f6fb 42%,
+    #f1f5f9 100%
+  );
   margin: 0;
 }
 
@@ -72,7 +77,10 @@ body {
   font-size: 15px;
   height: 40px;
   justify-content: center;
-  transition: transform 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background-color 0.22s ease;
   width: 40px;
 }
 
@@ -166,7 +174,9 @@ body {
   border-radius: 12px;
   font-size: 14px;
   padding: 11px 13px;
-  transition: border-color 0.22s ease, box-shadow 0.22s ease;
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
 }
 
 .auth-input::placeholder {
@@ -244,7 +254,10 @@ body {
   font-size: 13px;
   font-weight: 600;
   padding: 8px 12px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .primary-button {
@@ -366,7 +379,6 @@ body {
 }
 
 @media (max-width: 720px) {
-
   .dashboard-header,
   .team-header,
   .intern-card {
@@ -494,7 +506,9 @@ body {
   min-height: 80px;
   padding: 14px 16px;
   text-align: left;
-  transition: box-shadow 180ms ease, background-color 180ms ease;
+  transition:
+    box-shadow 180ms ease,
+    background-color 180ms ease;
   width: 100%;
 }
 
@@ -630,7 +644,10 @@ body {
   font-weight: 600;
   gap: 6px;
   padding: 8px 14px;
-  transition: background-color 220ms ease, color 220ms ease, border-color 220ms ease,
+  transition:
+    background-color 220ms ease,
+    color 220ms ease,
+    border-color 220ms ease,
     transform 220ms ease;
 }
 
@@ -697,7 +714,9 @@ body {
   border-radius: 12px;
   font-size: 14px;
   padding: 11px 13px;
-  transition: border-color 0.22s ease, box-shadow 0.22s ease;
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
   width: 100%;
 }
 
@@ -812,11 +831,14 @@ body {
   min-height: 114px;
   padding: 14px 16px;
   text-align: left;
-  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+  transition:
+    transform 0.24s ease,
+    box-shadow 0.24s ease,
+    border-color 0.24s ease;
 }
 
 .summary-card-button:hover,
-.summary-card-button[data-hovered="true"] {
+.summary-card-button[data-hovered='true'] {
   border-color: #a9c8ff;
   box-shadow: var(--shadow-hover);
   transform: translateY(-2px);
@@ -859,7 +881,9 @@ body {
   color: #0f172a;
   font-size: 14px;
   padding: 10px 12px;
-  transition: border-color 0.22s ease, box-shadow 0.22s ease;
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
   width: 100%;
 }
 

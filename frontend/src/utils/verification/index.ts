@@ -1,10 +1,10 @@
 export {
   isValidStandupSubmissionAudio,
   verifyStandupSubmission,
-} from "./verifyStandup";
+} from './verifyStandup';
 
 export type {
   StandupVerificationOptions,
   StandupVerificationResult,
   SubmissionStatus,
-} from "./verifyStandup";
+} from './verifyStandup';

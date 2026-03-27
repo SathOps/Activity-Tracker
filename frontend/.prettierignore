@@ -1,0 +1,8 @@
+builds
+cache
+coverage
+dist
+node_modules
+package-lock.json
+vite.config.js
+vite.config.d.ts

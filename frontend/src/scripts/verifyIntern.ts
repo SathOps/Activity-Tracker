@@ -2,11 +2,11 @@ import {
   configureCorpusService,
   getInternAudios,
   searchInternById,
-} from "../services/corpus";
+} from '../services/corpus';
 import {
   isValidStandupSubmissionAudio,
   verifyStandupSubmission,
-} from "../utils/verification";
+} from '../utils/verification';
 
 interface ProcessLike {
   env: Record<string, string | undefined>;
@@ -28,23 +28,25 @@ async function main(): Promise<void> {
 
   const profile = await searchInternById(internId);
   const audios = await getInternAudios(internId);
-  const verification = await verifyStandupSubmission(internId, { uploadedOnDate });
+  const verification = await verifyStandupSubmission(internId, {
+    uploadedOnDate,
+  });
 
-  console.log("Profile:", profile);
-  console.log("Total audios:", audios.length);
-  console.log("Verification:", verification);
+  console.log('Profile:', profile);
+  console.log('Total audios:', audios.length);
+  console.log('Verification:', verification);
 
   if (audios.length > 0 && verification.validCount === 0) {
     console.log(
-      "Debug: no audio matched both required labels (`stand-up` + `internship`)."
+      'Debug: no audio matched both required labels (`stand-up` + `internship`).'
     );
     console.table(
       audios.map((audio) => ({
         id: audio.id,
         category: audio.category,
         tag: audio.tag,
-        labels: (audio.labels ?? []).join(" | "),
-        uploadedAt: audio.uploadedAt ?? "",
+        labels: (audio.labels ?? []).join(' | '),
+        uploadedAt: audio.uploadedAt ?? '',
         categoryMatched: isValidStandupSubmissionAudio(audio),
         dateMatched: verification.checkedDate
           ? isUploadedOnDate(audio.uploadedAt, verification.checkedDate)
@@ -52,7 +54,7 @@ async function main(): Promise<void> {
       }))
     );
     console.log(
-      "Tip: if backend returns category IDs, set STANDUP_LABEL_ALIASES and INTERNSHIP_LABEL_ALIASES in .env (comma-separated names/ids)."
+      'Tip: if backend returns category IDs, set STANDUP_LABEL_ALIASES and INTERNSHIP_LABEL_ALIASES in .env (comma-separated names/ids).'
     );
     console.table(
       summarizeLabelFrequency(audios).map(([label, count]) => ({
@@ -70,7 +72,7 @@ function resolveInternId(): string {
 
   if (!internId) {
     throw new Error(
-      "Provide an intern ID as CLI arg (`npm run verify:intern -- <id>`) or set INTERN_ID in .env"
+      'Provide an intern ID as CLI arg (`npm run verify:intern -- <id>`) or set INTERN_ID in .env'
     );
   }
 
@@ -113,7 +115,9 @@ function summarizeLabelFrequency(
     }
   }
 
-  return Array.from(frequencies.entries()).sort((left, right) => right[1] - left[1]);
+  return Array.from(frequencies.entries()).sort(
+    (left, right) => right[1] - left[1]
+  );
 }
 
 function isUploadedOnDate(
@@ -139,7 +143,7 @@ function resolveRuntimeProcess(): ProcessLike {
   };
 
   if (!globalScope.process) {
-    throw new Error("verifyIntern script must run in a Node.js runtime.");
+    throw new Error('verifyIntern script must run in a Node.js runtime.');
   }
 
   return globalScope.process;

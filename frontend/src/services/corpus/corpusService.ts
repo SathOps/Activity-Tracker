@@ -46,31 +46,33 @@ interface RuntimeConfig {
 type UnknownRecord = Record<string, unknown>;
 
 const runtimeConfig: RuntimeConfig = {
-  baseUrl: "",
-  authToken: "",
+  baseUrl: '',
+  authToken: '',
   useMock: false,
   fetcher: resolveGlobalFetch(),
 };
 
 export function configureCorpusService(config: CorpusServiceConfig = {}): void {
-  if (typeof config.baseUrl === "string") {
+  if (typeof config.baseUrl === 'string') {
     runtimeConfig.baseUrl = config.baseUrl.trim();
   }
 
-  if (typeof config.authToken === "string") {
+  if (typeof config.authToken === 'string') {
     runtimeConfig.authToken = config.authToken;
   }
 
-  if (typeof config.useMock === "boolean") {
+  if (typeof config.useMock === 'boolean') {
     runtimeConfig.useMock = config.useMock;
   }
 
-  if (typeof config.fetcher === "function") {
+  if (typeof config.fetcher === 'function') {
     runtimeConfig.fetcher = config.fetcher;
   }
 }
 
-export async function searchInternById(internId: string): Promise<InternSummary> {
+export async function searchInternById(
+  internId: string
+): Promise<InternSummary> {
   const normalizedInternId = normalizeInternId(internId);
 
   if (runtimeConfig.useMock) {
@@ -132,7 +134,9 @@ export async function getInternAudios(
   return extractAudioItems(payload);
 }
 
-export async function getAudioRecordUrl(recordId: string): Promise<string | undefined> {
+export async function getAudioRecordUrl(
+  recordId: string
+): Promise<string | undefined> {
   const normalizedRecordId = recordId.trim();
 
   if (!normalizedRecordId) {
@@ -152,9 +156,9 @@ export async function getAudioRecordUrl(recordId: string): Promise<string | unde
   }
 
   return (
-    pickString(payload, ["audio_url", "file_url", "record_url", "url"]) ||
+    pickString(payload, ['audio_url', 'file_url', 'record_url', 'url']) ||
     (isRecord(payload.data)
-      ? pickString(payload.data, ["audio_url", "file_url", "record_url", "url"])
+      ? pickString(payload.data, ['audio_url', 'file_url', 'record_url', 'url'])
       : undefined)
   );
 }
@@ -162,7 +166,7 @@ export async function getAudioRecordUrl(recordId: string): Promise<string | unde
 function resolveGlobalFetch(): FetchLike | undefined {
   const globalScope = globalThis as { fetch?: unknown };
 
-  if (typeof globalScope.fetch !== "function") {
+  if (typeof globalScope.fetch !== 'function') {
     return undefined;
   }
 
@@ -173,7 +177,7 @@ function normalizeInternId(internId: string): string {
   const normalizedInternId = internId.trim();
 
   if (!normalizedInternId) {
-    throw new Error("internId is required");
+    throw new Error('internId is required');
   }
 
   return normalizedInternId;
@@ -195,11 +199,9 @@ function parseInternList(payload: unknown): InternSummary[] {
       if (!isRecord(item)) {
         return null;
       }
-      return parseInternSummary(item, "");
+      return parseInternSummary(item, '');
     })
-    .filter(
-      (item): item is InternSummary => item !== null && item.id !== ""
-    );
+    .filter((item): item is InternSummary => item !== null && item.id !== '');
 }
 
 function getMockAudios(_internId: string): InternAudioMetadata[] {
@@ -214,7 +216,7 @@ async function requestCorpusApi(path: string): Promise<unknown | undefined> {
     return undefined;
   }
 
-  const headers: Record<string, string> = { Accept: "application/json" };
+  const headers: Record<string, string> = { Accept: 'application/json' };
 
   if (runtimeConfig.authToken) {
     headers.Authorization = `Bearer ${runtimeConfig.authToken}`;
@@ -222,7 +224,7 @@ async function requestCorpusApi(path: string): Promise<unknown | undefined> {
 
   const requestUrl = baseUrl ? `${baseUrl}${path}` : path;
   const response = await fetcher(requestUrl, {
-    method: "GET",
+    method: 'GET',
     headers,
   });
 
@@ -240,10 +242,13 @@ async function requestCorpusApi(path: string): Promise<unknown | undefined> {
 }
 
 function trimTrailingSlash(value: string): string {
-  return value.replace(/\/+$/, "");
+  return value.replace(/\/+$/, '');
 }
 
-function parseInternSummary(payload: unknown, fallbackId: string): InternSummary {
+function parseInternSummary(
+  payload: unknown,
+  fallbackId: string
+): InternSummary {
   const primaryObject = resolvePrimaryObject(payload);
 
   if (!primaryObject) {
@@ -251,15 +256,15 @@ function parseInternSummary(payload: unknown, fallbackId: string): InternSummary
   }
 
   const id =
-    pickString(primaryObject, ["id", "_id", "user_id", "userId"]) ?? fallbackId;
+    pickString(primaryObject, ['id', '_id', 'user_id', 'userId']) ?? fallbackId;
 
   const name = pickString(primaryObject, [
-    "name",
-    "full_name",
-    "fullName",
-    "display_name",
-    "displayName",
-    "username",
+    'name',
+    'full_name',
+    'fullName',
+    'display_name',
+    'displayName',
+    'username',
   ]);
 
   if (!name) {
@@ -286,17 +291,20 @@ function parseAudioItem(
   }
 
   const id =
-    pickString(item, ["id", "_id", "record_id", "recordId", "uuid"]) ??
+    pickString(item, ['id', '_id', 'record_id', 'recordId', 'uuid']) ??
     `audio-${index + 1}`;
 
-  const categoryValues = extractFieldTextValues(item, ["category", "categories"]);
+  const categoryValues = extractFieldTextValues(item, [
+    'category',
+    'categories',
+  ]);
   const tagValues = extractFieldTextValues(item, [
-    "tag",
-    "tags",
-    "domain",
-    "domains",
-    "label",
-    "labels",
+    'tag',
+    'tags',
+    'domain',
+    'domains',
+    'label',
+    'labels',
   ]);
   const contextualValues = extractTextValuesByKeyPattern(
     item,
@@ -309,19 +317,19 @@ function parseAudioItem(
   ]);
   const uploadedAt = parseUploadedAt(item);
   const audioUrl = pickString(item, [
-    "audio_url",
-    "file_url",
-    "record_url",
-    "url",
-    "audioUrl",
-    "fileUrl",
-    "recordUrl",
+    'audio_url',
+    'file_url',
+    'record_url',
+    'url',
+    'audioUrl',
+    'fileUrl',
+    'recordUrl',
   ]);
 
   return {
     id,
-    category: categoryValues[0] ?? "",
-    tag: tagValues[0] ?? "",
+    category: categoryValues[0] ?? '',
+    tag: tagValues[0] ?? '',
     labels,
     uploadedAt,
     audioUrl,
@@ -346,7 +354,7 @@ function parseTextValues(value: unknown, depth = 0): string[] {
     return [];
   }
 
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     return splitLabelText(value);
   }
 
@@ -358,11 +366,11 @@ function parseTextValues(value: unknown, depth = 0): string[] {
 
   if (isRecord(value)) {
     const directValues = pickStrings(value, [
-      "name",
-      "slug",
-      "title",
-      "value",
-      "label",
+      'name',
+      'slug',
+      'title',
+      'value',
+      'label',
     ]).flatMap(splitLabelText);
 
     if (directValues.length > 0) {
@@ -455,7 +463,7 @@ function parseUploadedAt(source: UnknownRecord): string | undefined {
 }
 
 function resolveDateCandidate(value: unknown): string | undefined {
-  if (typeof value === "number" && Number.isFinite(value)) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
     const milliseconds = value > 9999999999 ? value : value * 1000;
     const parsed = new Date(milliseconds);
 
@@ -466,7 +474,7 @@ function resolveDateCandidate(value: unknown): string | undefined {
     return undefined;
   }
 
-  if (typeof value === "string" && value.trim()) {
+  if (typeof value === 'string' && value.trim()) {
     const parsed = new Date(value);
 
     if (!Number.isNaN(parsed.getTime())) {
@@ -515,8 +523,10 @@ function splitLabelText(value: string): string[] {
     .split(/[|,;/]+/g)
     .map((part) =>
       part
-        .replace(/^[\[\(\{'"`]+/, "")
-        .replace(/[\]\)\}'"`]+$/, "")
+        // eslint-disable-next-line no-useless-escape
+        .replace(/^[\[\(\{'"`]+/, '')
+        // eslint-disable-next-line no-useless-escape
+        .replace(/[\]\)\}'"`]+$/, '')
         .trim()
     )
     .filter((part) => part.length > 0);
@@ -612,7 +622,7 @@ function pickStrings(source: UnknownRecord, keys: readonly string[]): string[] {
   for (const key of keys) {
     const value = source[key];
 
-    if (typeof value === "string" && value.trim()) {
+    if (typeof value === 'string' && value.trim()) {
       values.push(value.trim());
     }
   }
@@ -621,5 +631,5 @@ function pickStrings(source: UnknownRecord, keys: readonly string[]): string[] {
 }
 
 function isRecord(value: unknown): value is UnknownRecord {
-  return typeof value === "object" && value !== null;
+  return typeof value === 'object' && value !== null;
 }

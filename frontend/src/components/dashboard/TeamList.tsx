@@ -1,8 +1,8 @@
-import React from "react";
-import InternCard, { SubmissionStatus } from "../intern/InternCard";
-import type { Intern } from "../intern/InternSearch";
+import React from 'react';
+import InternCard, { SubmissionStatus } from '../intern/InternCard';
+import type { Intern } from '../intern/InternSearch';
 
-import type { InternAudioMetadata } from "../../services/corpus/corpusService";
+import type { InternAudioMetadata } from '../../services/corpus/corpusService';
 
 export interface TeamIntern {
   internId: string;
@@ -46,7 +46,7 @@ interface DropdownState {
 }
 
 const emptyDropdownState: DropdownState = {
-  inputValue: "",
+  inputValue: '',
   showDropdown: false,
   selectedInternId: null,
 };
@@ -66,10 +66,16 @@ export const TeamList: React.FC<TeamListProps> = ({
   onDeleteTeam,
   onUpdateTeamName,
 }) => {
-  const [dropdownByTeam, setDropdownByTeam] = React.useState<Record<string, DropdownState>>({});
+  const [dropdownByTeam, setDropdownByTeam] = React.useState<
+    Record<string, DropdownState>
+  >({});
   const [editingTeamId, setEditingTeamId] = React.useState<string | null>(null);
-  const [teamNameDraftById, setTeamNameDraftById] = React.useState<Record<string, string>>({});
-  const blurTimeoutRef = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const [teamNameDraftById, setTeamNameDraftById] = React.useState<
+    Record<string, string>
+  >({});
+  const blurTimeoutRef = React.useRef<
+    Record<string, ReturnType<typeof setTimeout>>
+  >({});
 
   const getState = (teamId: string): DropdownState =>
     dropdownByTeam[teamId] ?? emptyDropdownState;
@@ -82,19 +88,24 @@ export const TeamList: React.FC<TeamListProps> = ({
   };
 
   React.useEffect(() => {
+    const blurTimeouts = blurTimeoutRef.current;
+
     return () => {
-      Object.values(blurTimeoutRef.current).forEach(clearTimeout);
+      Object.values(blurTimeouts).forEach(clearTimeout);
     };
   }, []);
 
   const isInternInAnyTeam = (internId: string): boolean =>
     teams.some((team) =>
       team.interns.some(
-        (intern) => intern.corpusUserId === internId || intern.internId === internId
+        (intern) =>
+          intern.corpusUserId === internId || intern.internId === internId
       )
     );
 
-  const getFilteredInterns = (teamId: string): Array<Intern & { alreadyInTeam: boolean }> => {
+  const getFilteredInterns = (
+    teamId: string
+  ): Array<Intern & { alreadyInTeam: boolean }> => {
     const { inputValue } = getState(teamId);
     const query = inputValue.trim().toLowerCase();
 
@@ -170,7 +181,7 @@ export const TeamList: React.FC<TeamListProps> = ({
     onAddInternToTeam(teamId, selectedIntern);
 
     patchState(teamId, {
-      inputValue: "",
+      inputValue: '',
       selectedInternId: null,
       showDropdown: false,
     });
@@ -191,7 +202,7 @@ export const TeamList: React.FC<TeamListProps> = ({
       return;
     }
 
-    const nextName = (teamNameDraftById[teamId] ?? "").trim();
+    const nextName = (teamNameDraftById[teamId] ?? '').trim();
 
     if (!nextName) {
       return;
@@ -212,17 +223,17 @@ export const TeamList: React.FC<TeamListProps> = ({
         const filtered = getFilteredInterns(team.teamId);
         const requiredCount = team.requiredStandupCount ?? 4;
         const standupCount = team.todayStandupCount ?? 0;
-        const teamStatus = team.teamStatus ?? "PENDING";
+        const teamStatus = team.teamStatus ?? 'PENDING';
         const qualifiedStandupLabel = selectedDateLabel
           ? `${selectedDateLabel} qualified standups`
-          : "Selected date qualified standups";
+          : 'Selected date qualified standups';
 
         return (
           <article className="team-card" key={team.teamId}>
             <header className="team-header">
-              <div style={{ display: "grid", gap: 4 }}>
+              <div style={{ display: 'grid', gap: 4 }}>
                 {editingTeamId === team.teamId ? (
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <input
                       aria-label={`Edit team name for ${team.teamName}`}
                       onChange={(event) =>
@@ -232,11 +243,11 @@ export const TeamList: React.FC<TeamListProps> = ({
                         }))
                       }
                       style={{
-                        border: "1px solid #d1d5db",
+                        border: '1px solid #d1d5db',
                         borderRadius: 6,
                         fontSize: 13,
                         minWidth: 220,
-                        padding: "6px 8px",
+                        padding: '6px 8px',
                       }}
                       type="text"
                       value={teamNameDraftById[team.teamId] ?? team.teamName}
@@ -248,7 +259,11 @@ export const TeamList: React.FC<TeamListProps> = ({
                     >
                       Save
                     </button>
-                    <button className="ghost-button" onClick={handleCancelTeamRename} type="button">
+                    <button
+                      className="ghost-button"
+                      onClick={handleCancelTeamRename}
+                      type="button"
+                    >
                       Cancel
                     </button>
                   </div>
@@ -257,27 +272,34 @@ export const TeamList: React.FC<TeamListProps> = ({
                 )}
 
                 <div className="team-id">
-                  {qualifiedStandupLabel}: {standupCount}/{requiredCount} | {teamStatus}
+                  {qualifiedStandupLabel}: {standupCount}/{requiredCount} |{' '}
+                  {teamStatus}
                 </div>
                 {team.verifiedDate ? (
-                  <div className="team-id">Verified date: {team.verifiedDate}</div>
+                  <div className="team-id">
+                    Verified date: {team.verifiedDate}
+                  </div>
                 ) : null}
               </div>
 
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {onVerifyTeam ? (
                   <button
                     className="secondary-button"
                     onClick={() => onVerifyTeam(team.teamId)}
                     type="button"
                   >
-                    {verifyingTeamId === team.teamId ? "Verifying..." : "Verify Team"}
+                    {verifyingTeamId === team.teamId
+                      ? 'Verifying...'
+                      : 'Verify Team'}
                   </button>
                 ) : null}
                 {onUpdateTeamName && editingTeamId !== team.teamId ? (
                   <button
                     className="secondary-button"
-                    onClick={() => handleStartTeamRename(team.teamId, team.teamName)}
+                    onClick={() =>
+                      handleStartTeamRename(team.teamId, team.teamName)
+                    }
                     type="button"
                   >
                     Edit Team
@@ -297,16 +319,18 @@ export const TeamList: React.FC<TeamListProps> = ({
 
             {onAddInternToTeam ? (
               <div className="intern-dropdown-wrapper">
-                <div style={{ position: "relative", flex: 1, minWidth: 220 }}>
+                <div style={{ position: 'relative', flex: 1, minWidth: 220 }}>
                   <input
                     aria-label={`Add intern to ${team.teamName}`}
                     className="team-add-intern-input"
-                    onChange={(event) => handleInputChange(team.teamId, event.target.value)}
+                    onChange={(event) =>
+                      handleInputChange(team.teamId, event.target.value)
+                    }
                     onFocus={() => handleFocus(team.teamId)}
                     onBlur={() => handleBlur(team.teamId)}
                     placeholder="Select intern from added list"
                     style={{
-                      width: "100%",
+                      width: '100%',
                     }}
                     type="text"
                     value={state.inputValue}
@@ -315,9 +339,13 @@ export const TeamList: React.FC<TeamListProps> = ({
                   {state.showDropdown ? (
                     <ul className="intern-dropdown" role="listbox">
                       {addedInterns.length === 0 ? (
-                        <li className="intern-dropdown-empty">No interns available</li>
+                        <li className="intern-dropdown-empty">
+                          No interns available
+                        </li>
                       ) : filtered.length === 0 ? (
-                        <li className="intern-dropdown-empty">No matching interns</li>
+                        <li className="intern-dropdown-empty">
+                          No matching interns
+                        </li>
                       ) : (
                         filtered.map((intern) => (
                           <li
@@ -325,7 +353,8 @@ export const TeamList: React.FC<TeamListProps> = ({
                             role="option"
                             aria-selected={state.selectedInternId === intern.id}
                             aria-disabled={intern.alreadyInTeam}
-                            className={`intern-dropdown-item${intern.alreadyInTeam ? " disabled" : ""}`}
+                            className={`intern-dropdown-item${intern.alreadyInTeam ? ' disabled' : ''}`}
+                            tabIndex={intern.alreadyInTeam ? -1 : 0}
                             onMouseDown={(event) => {
                               event.preventDefault();
                             }}
@@ -334,11 +363,25 @@ export const TeamList: React.FC<TeamListProps> = ({
                                 handleSelectIntern(team.teamId, intern);
                               }
                             }}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                if (!intern.alreadyInTeam) {
+                                  handleSelectIntern(team.teamId, intern);
+                                }
+                              }
+                            }}
                           >
-                            <span className="intern-dropdown-name">{intern.name}</span>
-                            <span className="intern-dropdown-id">{intern.id}</span>
+                            <span className="intern-dropdown-name">
+                              {intern.name}
+                            </span>
+                            <span className="intern-dropdown-id">
+                              {intern.id}
+                            </span>
                             {intern.alreadyInTeam ? (
-                              <span className="intern-dropdown-badge">Already in a team</span>
+                              <span className="intern-dropdown-badge">
+                                Already in a team
+                              </span>
                             ) : null}
                           </li>
                         ))

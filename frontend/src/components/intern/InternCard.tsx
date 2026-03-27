@@ -1,9 +1,9 @@
-import React from "react";
-import type { InternAudioMetadata } from "../../services/corpus/corpusService";
-import { getAudioRecordUrl } from "../../services/corpus/corpusService";
-import StandupAudioPlayer from "../audio/StandupAudioPlayer";
+import React from 'react';
+import type { InternAudioMetadata } from '../../services/corpus/corpusService';
+import { getAudioRecordUrl } from '../../services/corpus/corpusService';
+import StandupAudioPlayer from '../audio/StandupAudioPlayer';
 
-export type SubmissionStatus = "COMPLETED" | "PENDING";
+export type SubmissionStatus = 'COMPLETED' | 'PENDING';
 
 export interface InternCardProps {
   internId: string;
@@ -30,11 +30,13 @@ export const InternCard: React.FC<InternCardProps> = ({
   onDeleteIntern,
   onUpdateIntern,
 }) => {
-  const displayName = (internName ?? "").trim() || "Unnamed Intern";
+  const displayName = (internName ?? '').trim() || 'Unnamed Intern';
   const [isEditing, setIsEditing] = React.useState(false);
   const [editedName, setEditedName] = React.useState(displayName);
   const [isExpanded, setIsExpanded] = React.useState(false);
-  const [resolvedUrls, setResolvedUrls] = React.useState<Record<string, string>>({});
+  const [resolvedUrls, setResolvedUrls] = React.useState<
+    Record<string, string>
+  >({});
   const [resolvingId, setResolvingId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -66,7 +68,10 @@ export const InternCard: React.FC<InternCardProps> = ({
 
   const handlePlay = async (audioId: string, existingUrl?: string) => {
     // If it's a full URL, just use it
-    if (existingUrl && (existingUrl.startsWith("http") || existingUrl.startsWith("blob"))) {
+    if (
+      existingUrl &&
+      (existingUrl.startsWith('http') || existingUrl.startsWith('blob'))
+    ) {
       onPlay?.(internId, audioId);
       return;
     }
@@ -80,7 +85,7 @@ export const InternCard: React.FC<InternCardProps> = ({
           setResolvedUrls((prev) => ({ ...prev, [audioId]: url }));
         }
       } catch (error) {
-        console.error("Failed to resolve audio URL:", error);
+        console.error('Failed to resolve audio URL:', error);
       } finally {
         setResolvingId(null);
       }
@@ -90,56 +95,74 @@ export const InternCard: React.FC<InternCardProps> = ({
   };
 
   return (
-    <article className="intern-card" style={{ display: "grid", gap: 12 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div style={{ display: "grid", gap: 4 }}>
+    <article className="intern-card" style={{ display: 'grid', gap: 12 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+        }}
+      >
+        <div style={{ display: 'grid', gap: 4 }}>
           <div className="intern-id">{displayName}</div>
           {isEditing ? (
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <input
                 aria-label={`Edit intern name for ${displayName}`}
                 onChange={(event) => setEditedName(event.target.value)}
                 style={{
-                  border: "1px solid #d1d5db",
+                  border: '1px solid #d1d5db',
                   borderRadius: 6,
                   fontSize: 12,
                   minWidth: 180,
-                  padding: "6px 8px",
+                  padding: '6px 8px',
                 }}
                 type="text"
                 value={editedName}
               />
-              <button className="ghost-button" onClick={handleSave} type="button">
+              <button
+                className="ghost-button"
+                onClick={handleSave}
+                type="button"
+              >
                 Save
               </button>
-              <button className="ghost-button" onClick={handleCancel} type="button">
+              <button
+                className="ghost-button"
+                onClick={handleCancel}
+                type="button"
+              >
                 Cancel
               </button>
             </div>
           ) : (
-            <div style={{ color: "#4b5563", fontSize: 13 }}>
-              Qualified uploads{standupDateLabel ? ` on ${standupDateLabel}` : ""}:{" "}
+            <div style={{ color: '#4b5563', fontSize: 13 }}>
+              Qualified uploads
+              {standupDateLabel ? ` on ${standupDateLabel}` : ''}:{' '}
               {todayValidCount ?? 0}
             </div>
           )}
         </div>
 
-        <div className="intern-actions" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div
+          className="intern-actions"
+          style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+        >
           {audios.length > 0 && !isEditing && (
             <button
               className="ghost-button"
               onClick={toggleExpanded}
               style={{
-                padding: "4px 8px",
+                padding: '4px 8px',
                 fontSize: 12,
-                color: "#2563eb",
-                border: "1px solid #d1d5db",
+                color: '#2563eb',
+                border: '1px solid #d1d5db',
                 borderRadius: 6,
-                backgroundColor: isExpanded ? "#eff6ff" : "white",
+                backgroundColor: isExpanded ? '#eff6ff' : 'white',
               }}
               type="button"
             >
-              {isExpanded ? "Hide Audios" : `View Audios (${audios.length})`}
+              {isExpanded ? 'Hide Audios' : `View Audios (${audios.length})`}
             </button>
           )}
           {onUpdateIntern ? (
@@ -167,111 +190,136 @@ export const InternCard: React.FC<InternCardProps> = ({
         </div>
       </div>
 
-      {
-        isExpanded && (
-          <section
-            style={{
-              marginTop: 4,
-              padding: 8,
-              backgroundColor: "#f9fafb",
-              borderRadius: 6,
-              border: "1px solid #e5e7eb",
-            }}
-          >
-            {audios.length === 0 ? (
-              <div style={{ fontSize: 12, color: "#6b7280", textAlign: "center" }}>
-                No standup audios found
-              </div>
-            ) : (
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 8 }}>
-                {audios.map((audio, index) => {
-                  const isPlaying = activeAudioId === audio.id;
-                  const audioDate = audio.uploadedAt
-                    ? new Date(audio.uploadedAt).toLocaleString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
+      {isExpanded && (
+        <section
+          style={{
+            marginTop: 4,
+            padding: 8,
+            backgroundColor: '#f9fafb',
+            borderRadius: 6,
+            border: '1px solid #e5e7eb',
+          }}
+        >
+          {audios.length === 0 ? (
+            <div
+              style={{ fontSize: 12, color: '#6b7280', textAlign: 'center' }}
+            >
+              No standup audios found
+            </div>
+          ) : (
+            <ul
+              style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: 0,
+                display: 'grid',
+                gap: 8,
+              }}
+            >
+              {audios.map((audio, index) => {
+                const isPlaying = activeAudioId === audio.id;
+                const audioDate = audio.uploadedAt
+                  ? new Date(audio.uploadedAt).toLocaleString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
                     })
-                    : "Unknown date";
+                  : 'Unknown date';
 
-                  return (
-                    <li
-                      key={audio.id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: 8,
-                        fontSize: 12,
-                        padding: "4px 6px",
-                        backgroundColor: isPlaying ? "#eff6ff" : "transparent",
-                        borderRadius: 4,
-                      }}
+                return (
+                  <li
+                    key={audio.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      fontSize: 12,
+                      padding: '4px 6px',
+                      backgroundColor: isPlaying ? '#eff6ff' : 'transparent',
+                      borderRadius: 4,
+                    }}
+                  >
+                    <div style={{ display: 'grid' }}>
+                      <strong>Standup {index + 1}</strong>
+                      <span style={{ color: '#6b7280', fontSize: 11 }}>
+                        {audioDate}
+                      </span>
+                    </div>
+
+                    <div
+                      style={{ display: 'flex', alignItems: 'center', gap: 6 }}
                     >
-                      <div style={{ display: "grid" }}>
-                        <strong>Standup {index + 1}</strong>
-                        <span style={{ color: "#6b7280", fontSize: 11 }}>{audioDate}</span>
-                      </div>
-
-                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        {isPlaying && (resolvedUrls[audio.id] || audio.audioUrl) ? (
-                          <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", maxWidth: 300 }}>
-                            <StandupAudioPlayer
-                              audioUrl={resolvedUrls[audio.id] || audio.audioUrl || ""}
-                              label={`Standup ${index + 1}`}
-                              onPause={() => onPause?.()}
-                            />
-                            <button
-                              className="ghost-button"
-                              onClick={() => onPause?.()}
-                              style={{
-                                padding: "4px 8px",
-                                color: "#ef4444",
-                                height: 32,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                borderRadius: 8,
-                                border: "1px solid #fee2e2",
-                                background: "#fff1f1"
-                              }}
-                              title="Close Player"
-                              type="button"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        ) : resolvingId === audio.id ? (
-                          <span style={{ color: "#2563eb", fontSize: 11 }}>Resolving...</span>
-                        ) : (
+                      {isPlaying &&
+                      (resolvedUrls[audio.id] || audio.audioUrl) ? (
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            width: '100%',
+                            maxWidth: 300,
+                          }}
+                        >
+                          <StandupAudioPlayer
+                            audioUrl={
+                              resolvedUrls[audio.id] || audio.audioUrl || ''
+                            }
+                            label={`Standup ${index + 1}`}
+                            onPause={() => onPause?.()}
+                          />
                           <button
                             className="ghost-button"
-                            disabled={!audio.audioUrl && !audio.id}
-                            onClick={() => handlePlay(audio.id, audio.audioUrl)}
+                            onClick={() => onPause?.()}
                             style={{
-                              padding: "4px 10px",
-                              backgroundColor: "#2563eb",
-                              color: "white",
-                              borderRadius: 4,
-                              fontSize: 11,
-                              opacity: !audio.audioUrl && !audio.id ? 0.5 : 1,
+                              padding: '4px 8px',
+                              color: '#ef4444',
+                              height: 32,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              borderRadius: 8,
+                              border: '1px solid #fee2e2',
+                              background: '#fff1f1',
                             }}
+                            title="Close Player"
                             type="button"
                           >
-                            Play
+                            ✕
                           </button>
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
-        )
-      }
-    </article >
+                        </div>
+                      ) : resolvingId === audio.id ? (
+                        <span style={{ color: '#2563eb', fontSize: 11 }}>
+                          Resolving...
+                        </span>
+                      ) : (
+                        <button
+                          className="ghost-button"
+                          disabled={!audio.audioUrl && !audio.id}
+                          onClick={() => handlePlay(audio.id, audio.audioUrl)}
+                          style={{
+                            padding: '4px 10px',
+                            backgroundColor: '#2563eb',
+                            color: 'white',
+                            borderRadius: 4,
+                            fontSize: 11,
+                            opacity: !audio.audioUrl && !audio.id ? 0.5 : 1,
+                          }}
+                          type="button"
+                        >
+                          Play
+                        </button>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+      )}
+    </article>
   );
 };
 

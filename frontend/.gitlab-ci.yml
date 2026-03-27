@@ -17,8 +17,8 @@ default:
     - npm ci --cache .npm --prefer-offline
 
 variables:
-  CI: "true"
-  NPM_CONFIG_CACHE: ".npm"
+  CI: 'true'
+  NPM_CONFIG_CACHE: '.npm'
 
 test:
   stage: test

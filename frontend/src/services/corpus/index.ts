@@ -3,11 +3,11 @@ export {
   getInternAudios,
   searchInternById,
   searchInternsByName,
-} from "./corpusService";
+} from './corpusService';
 
 export type {
   CorpusServiceConfig,
   FetchLike,
   InternAudioMetadata,
   InternSummary,
-} from "./corpusService";
+} from './corpusService';

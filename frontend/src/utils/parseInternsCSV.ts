@@ -11,34 +11,34 @@
  */
 
 export interface Intern {
-    id: string;
-    name: string;
+  id: string;
+  name: string;
 }
 
 export function parseInternsCSV(csvText: string): Intern[] {
-    const lines = csvText.split(/\r?\n/);
-    const interns: Intern[] = [];
-    const seenIds = new Set<string>();
+  const lines = csvText.split(/\r?\n/);
+  const interns: Intern[] = [];
+  const seenIds = new Set<string>();
 
-    // Start at index 1 to skip the header row
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
+  // Start at index 1 to skip the header row
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
 
-        // Split on the first comma only (name could theoretically contain commas)
-        const commaIndex = line.indexOf(",");
-        if (commaIndex === -1) continue;
+    // Split on the first comma only (name could theoretically contain commas)
+    const commaIndex = line.indexOf(',');
+    if (commaIndex === -1) continue;
 
-        const id = line.slice(0, commaIndex).trim();
-        const name = line.slice(commaIndex + 1).trim();
+    const id = line.slice(0, commaIndex).trim();
+    const name = line.slice(commaIndex + 1).trim();
 
-        if (!id) continue;
+    if (!id) continue;
 
-        if (seenIds.has(id)) continue;
-        seenIds.add(id);
+    if (seenIds.has(id)) continue;
+    seenIds.add(id);
 
-        interns.push({ id, name: name || id });
-    }
+    interns.push({ id, name: name || id });
+  }
 
-    return interns;
+  return interns;
 }

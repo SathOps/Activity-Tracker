@@ -1,32 +1,32 @@
-import { useEffect, useState } from "react";
-import DashboardHome from "./components/dashboard/DashboardHome";
-import type { Team } from "./components/dashboard/TeamList";
-import type { Intern } from "./components/intern/InternSearch";
-import { configureCorpusService } from "./services/corpus";
-import { parseInternsCSV } from "./utils/parseInternsCSV";
+import { useEffect, useState } from 'react';
+import DashboardHome from './components/dashboard/DashboardHome';
+import type { Team } from './components/dashboard/TeamList';
+import type { Intern } from './components/intern/InternSearch';
+import { configureCorpusService } from './services/corpus';
+import { parseInternsCSV } from './utils/parseInternsCSV';
 import {
   buildPreloadedTeams,
   parseTeamMembersCSV,
   parseTeamsCSV,
-} from "./utils/parseTeamSeedCSV";
+} from './utils/parseTeamSeedCSV';
 
-const ACCESS_TOKEN_STORAGE_KEY = "corpus_access_token";
-const USERNAME_STORAGE_KEY = "corpus_username";
+const ACCESS_TOKEN_STORAGE_KEY = 'corpus_access_token';
+const USERNAME_STORAGE_KEY = 'corpus_username';
 
 export default function App() {
   const [addedInterns, setAddedInterns] = useState<Intern[]>([]);
   const [preloadedTeams, setPreloadedTeams] = useState<Team[]>([]);
   const [authToken, setAuthToken] = useState(() => readStoredAccessToken());
   const [username, setUsername] = useState(() => readStoredUsername());
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   useEffect(() => {
     // Browser requests use relative /api/v1 routes via Vite proxy.
-    configureCorpusService({ baseUrl: "", useMock: false, authToken });
+    configureCorpusService({ baseUrl: '', useMock: false, authToken });
   }, [authToken]);
 
   useEffect(() => {
@@ -46,38 +46,60 @@ export default function App() {
     let isCancelled = false;
 
     const preloadFromCsv = async () => {
-      const [internsResult, teamsResult, teamMembersResult] = await Promise.allSettled([
-        fetchCsvText("assets/interns.csv", ["intern_id", "intern_name"]),
-        fetchCsvText("assets/teams.csv", ["team_id", "team_name"]),
-        fetchCsvText("assets/team_members.csv", ["team_id", "intern_id", "student_name"]),
-      ]);
+      const [internsResult, teamsResult, teamMembersResult] =
+        await Promise.allSettled([
+          fetchCsvText('assets/interns.csv', ['intern_id', 'intern_name']),
+          fetchCsvText('assets/teams.csv', ['team_id', 'team_name']),
+          fetchCsvText('assets/team_members.csv', [
+            'team_id',
+            'intern_id',
+            'student_name',
+          ]),
+        ]);
 
       if (isCancelled) {
         return;
       }
 
       const preloadedInterns =
-        internsResult.status === "fulfilled" ? parseInternsCSV(internsResult.value) : [];
+        internsResult.status === 'fulfilled'
+          ? parseInternsCSV(internsResult.value)
+          : [];
 
       if (preloadedInterns.length > 0) {
-        setAddedInterns((prev) => mergeInternCollections(prev, preloadedInterns));
+        setAddedInterns((prev) =>
+          mergeInternCollections(prev, preloadedInterns)
+        );
       }
 
-      const teamRows = teamsResult.status === "fulfilled" ? parseTeamsCSV(teamsResult.value) : [];
+      const teamRows =
+        teamsResult.status === 'fulfilled'
+          ? parseTeamsCSV(teamsResult.value)
+          : [];
       const teamMemberRows =
-        teamMembersResult.status === "fulfilled" ? parseTeamMembersCSV(teamMembersResult.value) : [];
-      setPreloadedTeams(buildPreloadedTeams(teamRows, teamMemberRows, preloadedInterns));
+        teamMembersResult.status === 'fulfilled'
+          ? parseTeamMembersCSV(teamMembersResult.value)
+          : [];
+      setPreloadedTeams(
+        buildPreloadedTeams(teamRows, teamMemberRows, preloadedInterns)
+      );
 
-      if (internsResult.status === "rejected") {
-        console.warn("Could not preload interns from CSV:", internsResult.reason);
+      if (internsResult.status === 'rejected') {
+        console.warn(
+          'Could not preload interns from CSV:',
+          internsResult.reason
+        );
       }
 
-      if (teamsResult.status === "rejected") {
-        console.warn("Could not preload teams from CSV:", teamsResult.reason);
+      if (teamsResult.status === 'rejected') {
+        console.warn('Could not preload teams from CSV:', teamsResult.reason);
       }
 
-      if (teamMembersResult.status === "rejected") {
-        console.warn("Could not preload team members from CSV:", teamMembersResult.reason);
+      if (teamMembersResult.status === 'rejected') {
+        console.warn(
+          'Could not preload team members from CSV:',
+          teamMembersResult.reason
+        );
       }
     };
 
@@ -99,12 +121,12 @@ export default function App() {
     const nextPassword = password.trim();
 
     if (!normalizedPhone || !nextPassword) {
-      setLoginError("Phone number and password are required.");
+      setLoginError('Phone number and password are required.');
       return;
     }
 
     if (normalizedPhone.length !== 10) {
-      setLoginError("Phone number must be exactly 10 digits.");
+      setLoginError('Phone number must be exactly 10 digits.');
       return;
     }
 
@@ -114,15 +136,15 @@ export default function App() {
     try {
       const phoneCandidates = buildLoginPhoneCandidates(normalizedPhone);
       let payload: unknown = null;
-      let lastErrorMessage = "";
+      let lastErrorMessage = '';
       let lastStatus = 0;
 
       for (const loginPhone of phoneCandidates) {
-        const response = await fetch("/api/v1/auth/login", {
-          method: "POST",
+        const response = await fetch('/api/v1/auth/login', {
+          method: 'POST',
           headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             phone: loginPhone,
@@ -140,35 +162,39 @@ export default function App() {
       }
 
       if (!payload) {
-        setLoginError(lastErrorMessage || `Login failed (${lastStatus || "unknown"}).`);
+        setLoginError(
+          lastErrorMessage || `Login failed (${lastStatus || 'unknown'}).`
+        );
         return;
       }
 
       const accessToken = readAccessToken(payload);
 
       if (!accessToken) {
-        setLoginError("Login succeeded but access token was not found in response.");
+        setLoginError(
+          'Login succeeded but access token was not found in response.'
+        );
         return;
       }
 
       setAuthToken(accessToken);
       setUsername(normalizedPhone);
-      setPassword("");
+      setPassword('');
       setLoginError(null);
     } catch (error) {
-      console.error("Login request failed", error);
-      setLoginError("Unable to reach the login endpoint. Please try again.");
+      console.error('Login request failed', error);
+      setLoginError('Unable to reach the login endpoint. Please try again.');
     } finally {
       setIsLoggingIn(false);
     }
   };
 
   const handleLogout = () => {
-    setAuthToken("");
-    setUsername("");
+    setAuthToken('');
+    setUsername('');
     setAddedInterns([]);
     setPreloadedTeams([]);
-    setPassword("");
+    setPassword('');
     setLoginError(null);
     setIsProfileMenuOpen(false);
   };
@@ -178,13 +204,20 @@ export default function App() {
       return;
     }
 
-    const handleDocumentClick = () => {
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (
+        event.target instanceof Element &&
+        event.target.closest('.profile-menu-container')
+      ) {
+        return;
+      }
+
       setIsProfileMenuOpen(false);
     };
 
-    document.addEventListener("click", handleDocumentClick);
+    document.addEventListener('click', handleDocumentClick);
     return () => {
-      document.removeEventListener("click", handleDocumentClick);
+      document.removeEventListener('click', handleDocumentClick);
     };
   }, [isProfileMenuOpen]);
 
@@ -193,7 +226,9 @@ export default function App() {
       <main className="auth-shell">
         <section className="auth-card">
           <h1 className="auth-title">Corpus Login</h1>
-          <p className="auth-subtitle">Login with phone number and password to open dashboard.</p>
+          <p className="auth-subtitle">
+            Login with phone number and password to open dashboard.
+          </p>
           <form className="auth-form" onSubmit={handleLogin}>
             <label className="auth-label">
               Phone Number
@@ -202,7 +237,9 @@ export default function App() {
                 className="auth-input"
                 inputMode="numeric"
                 maxLength={10}
-                onChange={(event) => setPhone(normalizePhoneInput(event.target.value))}
+                onChange={(event) =>
+                  setPhone(normalizePhoneInput(event.target.value))
+                }
                 pattern="[0-9]{10}"
                 placeholder="Enter 10-digit phone number"
                 type="text"
@@ -221,8 +258,12 @@ export default function App() {
               />
             </label>
             {loginError ? <p className="auth-error">{loginError}</p> : null}
-            <button className="primary-button auth-submit" disabled={isLoggingIn} type="submit">
-              {isLoggingIn ? "Logging in..." : "Login"}
+            <button
+              className="primary-button auth-submit"
+              disabled={isLoggingIn}
+              type="submit"
+            >
+              {isLoggingIn ? 'Logging in...' : 'Login'}
             </button>
           </form>
         </section>
@@ -252,14 +293,14 @@ export default function App() {
           </button>
 
           {isProfileMenuOpen ? (
-            <div
-              className="profile-menu-dropdown"
-              onClick={(event) => event.stopPropagation()}
-              role="dialog"
-            >
+            <div className="profile-menu-dropdown" role="dialog">
               <div className="profile-menu-label">User Number</div>
-              <div className="profile-menu-id">{username || "Unavailable"}</div>
-              <button className="secondary-button profile-menu-logout" onClick={handleLogout} type="button">
+              <div className="profile-menu-id">{username || 'Unavailable'}</div>
+              <button
+                className="secondary-button profile-menu-logout"
+                onClick={handleLogout}
+                type="button"
+              >
                 Logout
               </button>
             </div>
@@ -278,15 +319,15 @@ export default function App() {
 }
 
 function readStoredAccessToken(): string {
-  if (typeof window === "undefined") {
-    return "";
+  if (typeof window === 'undefined') {
+    return '';
   }
 
-  return window.localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY) ?? "";
+  return window.localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY) ?? '';
 }
 
 function persistAccessToken(token: string): void {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return;
   }
 
@@ -299,15 +340,15 @@ function persistAccessToken(token: string): void {
 }
 
 function readStoredUsername(): string {
-  if (typeof window === "undefined") {
-    return "";
+  if (typeof window === 'undefined') {
+    return '';
   }
 
-  return window.localStorage.getItem(USERNAME_STORAGE_KEY) ?? "";
+  return window.localStorage.getItem(USERNAME_STORAGE_KEY) ?? '';
 }
 
 function persistUsername(username: string): void {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return;
   }
 
@@ -321,7 +362,7 @@ function persistUsername(username: string): void {
 
 function readAccessToken(payload: unknown): string {
   if (!isRecord(payload)) {
-    return "";
+    return '';
   }
 
   const directToken = asString(payload.access_token);
@@ -331,7 +372,7 @@ function readAccessToken(payload: unknown): string {
   }
 
   if (!isRecord(payload.data)) {
-    return "";
+    return '';
   }
 
   return asString(payload.data.access_token);
@@ -341,8 +382,11 @@ function buildLoginPhoneCandidates(phoneDigits: string): string[] {
   return [`+91${phoneDigits}`, phoneDigits];
 }
 
-async function fetchCsvText(path: string, expectedHeaders: string[]): Promise<string> {
-  const normalizedPath = path.replace(/^\/+/, "");
+async function fetchCsvText(
+  path: string,
+  expectedHeaders: string[]
+): Promise<string> {
+  const normalizedPath = path.replace(/^\/+/, '');
   const candidates = buildAssetFetchCandidates(normalizedPath);
   const errorMessages: string[] = [];
 
@@ -361,7 +405,7 @@ async function fetchCsvText(path: string, expectedHeaders: string[]): Promise<st
         return text;
       }
 
-      const firstLine = text.split(/\r?\n/, 1)[0] || "";
+      const firstLine = text.split(/\r?\n/, 1)[0] || '';
       const sanitizedFirstLine = firstLine.trim().slice(0, 80);
       errorMessages.push(
         `${candidate} -> invalid CSV payload (first line: "${sanitizedFirstLine}")`
@@ -371,7 +415,9 @@ async function fetchCsvText(path: string, expectedHeaders: string[]): Promise<st
     }
   }
 
-  throw new Error(`CSV fetch failed for ${normalizedPath}: ${errorMessages.join(", ")}`);
+  throw new Error(
+    `CSV fetch failed for ${normalizedPath}: ${errorMessages.join(', ')}`
+  );
 }
 
 function isValidCsvPayload(text: string, expectedHeaders: string[]): boolean {
@@ -381,19 +427,28 @@ function isValidCsvPayload(text: string, expectedHeaders: string[]): boolean {
 
   const firstLine = text
     .split(/\r?\n/, 1)[0]
-    ?.replace(/^\uFEFF/, "")
+    ?.replace(/^\uFEFF/, '')
     .trim()
     .toLowerCase();
 
-  if (!firstLine || firstLine.startsWith("<!doctype") || firstLine.startsWith("<html")) {
+  if (
+    !firstLine ||
+    firstLine.startsWith('<!doctype') ||
+    firstLine.startsWith('<html')
+  ) {
     return false;
   }
 
-  const normalizedExpectedHeaders = expectedHeaders.map((header) => header.trim().toLowerCase());
+  const normalizedExpectedHeaders = expectedHeaders.map((header) =>
+    header.trim().toLowerCase()
+  );
   return normalizedExpectedHeaders.some((header) => firstLine.includes(header));
 }
 
-function mergeInternCollections(existing: Intern[], incoming: Intern[]): Intern[] {
+function mergeInternCollections(
+  existing: Intern[],
+  incoming: Intern[]
+): Intern[] {
   const byId = new Map(existing.map((intern) => [intern.id, intern]));
 
   for (const intern of incoming) {
@@ -406,21 +461,17 @@ function mergeInternCollections(existing: Intern[], incoming: Intern[]): Intern[
 }
 
 function buildAssetFetchCandidates(path: string): string[] {
-  const baseUrl = normalizeBaseUrl(import.meta.env.BASE_URL || "/");
-  const fileName = path.split("/").pop() || path;
-  const candidates = [
-    `${baseUrl}${path}`,
-    `/${path}`,
-    `./${path}`,
-  ];
+  const baseUrl = normalizeBaseUrl(import.meta.env.BASE_URL || '/');
+  const fileName = path.split('/').pop() || path;
+  const candidates = [`${baseUrl}${path}`, `/${path}`, `./${path}`];
 
-  if (typeof window !== "undefined") {
-    const currentDirectoryPath = window.location.pathname.replace(/[^/]*$/, "");
+  if (typeof window !== 'undefined') {
+    const currentDirectoryPath = window.location.pathname.replace(/[^/]*$/, '');
     if (currentDirectoryPath) {
       candidates.push(`${currentDirectoryPath}${path}`);
     }
 
-    if (window.location.pathname.includes("/dist/")) {
+    if (window.location.pathname.includes('/dist/')) {
       candidates.push(`/dist/${path}`);
       candidates.push(`./dist/${path}`);
     }
@@ -440,17 +491,19 @@ function buildAssetFetchCandidates(path: string): string[] {
 function normalizeBaseUrl(baseUrl: string): string {
   const trimmedBaseUrl = baseUrl.trim();
 
-  if (!trimmedBaseUrl || trimmedBaseUrl === "/") {
-    return "/";
+  if (!trimmedBaseUrl || trimmedBaseUrl === '/') {
+    return '/';
   }
 
-  const prefixed = trimmedBaseUrl.startsWith("/") ? trimmedBaseUrl : `/${trimmedBaseUrl}`;
-  return prefixed.endsWith("/") ? prefixed : `${prefixed}/`;
+  const prefixed = trimmedBaseUrl.startsWith('/')
+    ? trimmedBaseUrl
+    : `/${trimmedBaseUrl}`;
+  return prefixed.endsWith('/') ? prefixed : `${prefixed}/`;
 }
 
 function resolveLoadedAssetDirectory(): string {
-  if (typeof document === "undefined" || typeof window === "undefined") {
-    return "";
+  if (typeof document === 'undefined' || typeof window === 'undefined') {
+    return '';
   }
 
   const scriptOrLink = Array.from(
@@ -465,7 +518,7 @@ function resolveLoadedAssetDirectory(): string {
         ? element.src
         : element instanceof HTMLLinkElement
           ? element.href
-          : "";
+          : '';
 
     if (!candidateUrl) {
       continue;
@@ -473,9 +526,9 @@ function resolveLoadedAssetDirectory(): string {
 
     try {
       const parsed = new URL(candidateUrl, window.location.href);
-      const directoryPath = parsed.pathname.replace(/[^/]*$/, "");
+      const directoryPath = parsed.pathname.replace(/[^/]*$/, '');
 
-      if (!directoryPath.includes("/assets/")) {
+      if (!directoryPath.includes('/assets/')) {
         continue;
       }
 
@@ -485,58 +538,58 @@ function resolveLoadedAssetDirectory(): string {
     }
   }
 
-  return "";
+  return '';
 }
 
 function normalizePhoneInput(value: string): string {
-  return value.replace(/\D/g, "").slice(0, 10);
+  return value.replace(/\D/g, '').slice(0, 10);
 }
 
 async function extractErrorMessage(response: Response): Promise<string> {
   try {
     const payload = (await response.json()) as unknown;
 
-    if (typeof payload === "string") {
+    if (typeof payload === 'string') {
       return payload.trim();
     }
 
     if (!isRecord(payload)) {
-      return "";
+      return '';
     }
 
     const detail = payload.detail;
 
-    if (typeof detail === "string") {
+    if (typeof detail === 'string') {
       return detail.trim();
     }
 
     if (Array.isArray(detail) && detail.length > 0) {
       return detail
         .map((entry) => {
-          if (typeof entry === "string") {
+          if (typeof entry === 'string') {
             return entry;
           }
 
           if (isRecord(entry)) {
-            return asString(entry.msg) || asString(entry.message) || "";
+            return asString(entry.msg) || asString(entry.message) || '';
           }
 
-          return "";
+          return '';
         })
         .filter((message) => message.length > 0)
-        .join(", ");
+        .join(', ');
     }
 
     return asString(payload.message);
   } catch {
-    return "";
+    return '';
   }
 }
 
 function asString(value: unknown): string {
-  return typeof value === "string" ? value.trim() : "";
+  return typeof value === 'string' ? value.trim() : '';
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
+  return typeof value === 'object' && value !== null;
 }

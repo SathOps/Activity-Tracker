@@ -1,13 +1,13 @@
-import React from "react";
-import TeamList, { Team } from "./TeamList";
-import InternCard from "../intern/InternCard";
-import type { Intern } from "../intern/InternSearch";
-import { verifyStandupSubmission } from "../../utils/verification";
-import { getInternAudios } from "../../services/corpus";
-import type { InternAudioMetadata } from "../../services/corpus";
+import React from 'react';
+import TeamList, { Team } from './TeamList';
+import InternCard from '../intern/InternCard';
+import type { Intern } from '../intern/InternSearch';
+import { verifyStandupSubmission } from '../../utils/verification';
+import { getInternAudios } from '../../services/corpus';
+import type { InternAudioMetadata } from '../../services/corpus';
 
-type DashboardView = "TEAMS" | "INTERNS" | "COMPLETED";
-type StatusView = "DAILY" | "WEEKLY";
+type DashboardView = 'TEAMS' | 'INTERNS' | 'COMPLETED';
+type StatusView = 'DAILY' | 'WEEKLY';
 
 interface TeamDailyStatusRow {
   teamId: string;
@@ -54,48 +54,59 @@ export interface DashboardLayoutProps {
   teams?: Team[];
   addedInterns?: Intern[];
   title?: string;
-  statusDisplay?: "modal" | "inline";
+  statusDisplay?: 'modal' | 'inline';
 }
 
-const DEFAULT_VIEW: DashboardView = "TEAMS";
+const DEFAULT_VIEW: DashboardView = 'TEAMS';
 const EMPTY_TEAMS: Team[] = [];
 const REQUIRED_TEAM_STANDUPS = 4;
 const REQUIRED_CATEGORY_UUID_ALIASES = [
-  "c81f5d73-9090-453e-bb08-c2f46453e0bd",
-  "4dd053f4-6323-43d4-87a3-ce1816bd9459",
+  'c81f5d73-9090-453e-bb08-c2f46453e0bd',
+  '4dd053f4-6323-43d4-87a3-ce1816bd9459',
 ];
 const STANDUP_ALIAS_OVERRIDE = mergeAliases(
-  ["Stand-Up", ...REQUIRED_CATEGORY_UUID_ALIASES],
+  ['Stand-Up', ...REQUIRED_CATEGORY_UUID_ALIASES],
   parseAliasEnv(import.meta.env.VITE_STANDUP_LABEL_ALIASES)
 );
 const INTERNSHIP_ALIAS_OVERRIDE = mergeAliases(
-  ["Internship", ...REQUIRED_CATEGORY_UUID_ALIASES],
+  ['Internship', ...REQUIRED_CATEGORY_UUID_ALIASES],
   parseAliasEnv(import.meta.env.VITE_INTERNSHIP_LABEL_ALIASES)
 );
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   teams,
   addedInterns,
-  title = "Team-wise Standup Submission Dashboard",
-  statusDisplay = "modal",
+  title = 'Team-wise Standup Submission Dashboard',
+  statusDisplay = 'modal',
 }) => {
-  const [managedTeams, setManagedTeams] = React.useState<Team[]>(() => teams ?? EMPTY_TEAMS);
-  const [selectedDateKey, setSelectedDateKey] = React.useState(() => getLocalDateKey(new Date()));
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const [managedTeams, setManagedTeams] = React.useState<Team[]>(
+    () => teams ?? EMPTY_TEAMS
+  );
+  const [selectedDateKey, setSelectedDateKey] = React.useState(() =>
+    getLocalDateKey(new Date())
+  );
+  const [searchTerm, setSearchTerm] = React.useState('');
   const [isCreatingTeam, setIsCreatingTeam] = React.useState(false);
-  const [newTeamName, setNewTeamName] = React.useState("");
-  const [activeView, setActiveView] = React.useState<DashboardView>(DEFAULT_VIEW);
-  const [hoveredBox, setHoveredBox] = React.useState<DashboardView | null>(null);
-  const [verifyingTeamId, setVerifyingTeamId] = React.useState<string | null>(null);
+  const [newTeamName, setNewTeamName] = React.useState('');
+  const [activeView, setActiveView] =
+    React.useState<DashboardView>(DEFAULT_VIEW);
+  const [hoveredBox, setHoveredBox] = React.useState<DashboardView | null>(
+    null
+  );
+  const [verifyingTeamId, setVerifyingTeamId] = React.useState<string | null>(
+    null
+  );
   const [isStatusModalOpen, setIsStatusModalOpen] = React.useState(false);
-  const [statusView, setStatusView] = React.useState<StatusView>("DAILY");
+  const [statusView, setStatusView] = React.useState<StatusView>('DAILY');
   const [activeAudioId, setActiveAudioId] = React.useState<string | null>(null);
   const [statusLoading, setStatusLoading] = React.useState(false);
   const [statusError, setStatusError] = React.useState<string | null>(null);
-  const [teamDailyStatusRows, setTeamDailyStatusRows] = React.useState<TeamDailyStatusRow[]>([]);
-  const [teamWeeklyStatusRows, setTeamWeeklyStatusRows] = React.useState<TeamWeeklyStatusRow[]>(
-    []
-  );
+  const [teamDailyStatusRows, setTeamDailyStatusRows] = React.useState<
+    TeamDailyStatusRow[]
+  >([]);
+  const [teamWeeklyStatusRows, setTeamWeeklyStatusRows] = React.useState<
+    TeamWeeklyStatusRow[]
+  >([]);
   const hasInitializedDateSelection = React.useRef(false);
   const statusLoadRequestId = React.useRef(0);
 
@@ -144,10 +155,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     [teamDailyStatusRows]
   );
   const pendingWeeklyRows = React.useMemo(
-    () => teamWeeklyStatusRows.filter((row) => row.pendingDayDetails.length > 0),
+    () =>
+      teamWeeklyStatusRows.filter((row) => row.pendingDayDetails.length > 0),
     [teamWeeklyStatusRows]
   );
-  const isInlineStatusView = statusDisplay === "inline";
+  const isInlineStatusView = statusDisplay === 'inline';
   const isStatusPanelOpen = isInlineStatusView || isStatusModalOpen;
 
   const normalizedQuery = searchTerm.trim().toLowerCase();
@@ -157,13 +169,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       return managedTeams;
     }
 
-    return managedTeams.filter((team) => team.teamName.toLowerCase().includes(normalizedQuery));
+    return managedTeams.filter((team) =>
+      team.teamName.toLowerCase().includes(normalizedQuery)
+    );
   }, [managedTeams, normalizedQuery]);
 
   const filteredInternRows = React.useMemo(() => {
     const source =
-      activeView === "COMPLETED"
-        ? allInternRows.filter((intern) => intern.status === "COMPLETED")
+      activeView === 'COMPLETED'
+        ? allInternRows.filter((intern) => intern.status === 'COMPLETED')
         : allInternRows;
 
     if (!normalizedQuery) {
@@ -172,7 +186,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
     return source.filter(
       (intern) =>
-        (intern.internName ?? "").toLowerCase().includes(normalizedQuery) ||
+        (intern.internName ?? '').toLowerCase().includes(normalizedQuery) ||
         intern.teamName.toLowerCase().includes(normalizedQuery)
     );
   }, [activeView, allInternRows, normalizedQuery]);
@@ -190,13 +204,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         teamId: buildTeamId(teamName, prev),
         teamName,
         interns: [],
-        teamStatus: "PENDING",
+        teamStatus: 'PENDING',
         todayStandupCount: 0,
         requiredStandupCount: REQUIRED_TEAM_STANDUPS,
       },
     ]);
 
-    setNewTeamName("");
+    setNewTeamName('');
     setIsCreatingTeam(false);
   };
 
@@ -215,7 +229,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
         const duplicateExists = team.interns.some(
           (existingIntern) =>
-            existingIntern.corpusUserId === intern.id || existingIntern.internId === intern.id
+            existingIntern.corpusUserId === intern.id ||
+            existingIntern.internId === intern.id
         );
 
         if (duplicateExists) {
@@ -224,7 +239,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
         return {
           ...team,
-          teamStatus: "PENDING",
+          teamStatus: 'PENDING',
           todayStandupCount: 0,
           verifiedDate: undefined,
           requiredStandupCount: REQUIRED_TEAM_STANDUPS,
@@ -234,7 +249,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               internId: intern.id,
               corpusUserId: intern.id,
               internName: trimmedName,
-              status: "PENDING",
+              status: 'PENDING',
               todayValidCount: 0,
             },
           ],
@@ -244,7 +259,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   };
 
   const handleVerifyTeam = async (teamId: string) => {
-    const team = managedTeams.find((candidateTeam) => candidateTeam.teamId === teamId);
+    const team = managedTeams.find(
+      (candidateTeam) => candidateTeam.teamId === teamId
+    );
 
     if (!team || team.interns.length === 0) {
       return;
@@ -273,7 +290,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             return {
               internId: corpusUserId,
               validCount: 0,
-              status: "PENDING" as const,
+              status: 'PENDING' as const,
               checkedDate: verificationDateKey,
             };
           }
@@ -281,10 +298,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       );
 
       const countByInternId = new Map(
-        verificationResults.map((result) => [result.internId, result.validCount])
+        verificationResults.map((result) => [
+          result.internId,
+          result.validCount,
+        ])
       );
       const audioByInternId = new Map(
-        verificationResults.map((result) => [result.internId, result.audios ?? []])
+        verificationResults.map((result) => [
+          result.internId,
+          result.audios ?? [],
+        ])
       );
       const teamTodayStandupCount = verificationResults.reduce(
         (total, result) => total + result.validCount,
@@ -299,7 +322,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
           return {
             ...candidateTeam,
-            teamStatus: teamTodayStandupCount >= REQUIRED_TEAM_STANDUPS ? "COMPLETED" : "PENDING",
+            teamStatus:
+              teamTodayStandupCount >= REQUIRED_TEAM_STANDUPS
+                ? 'COMPLETED'
+                : 'PENDING',
             todayStandupCount: teamTodayStandupCount,
             verifiedDate: verificationDateKey,
             requiredStandupCount: REQUIRED_TEAM_STANDUPS,
@@ -311,7 +337,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 ...intern,
                 todayValidCount,
                 audios: audioByInternId.get(corpusUserId) ?? [],
-                status: todayValidCount > 0 ? "COMPLETED" : "PENDING",
+                status: todayValidCount > 0 ? 'COMPLETED' : 'PENDING',
               };
             }),
           };
@@ -331,11 +357,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
         return {
           ...team,
-          teamStatus: "PENDING",
+          teamStatus: 'PENDING',
           todayStandupCount: 0,
           verifiedDate: undefined,
           requiredStandupCount: REQUIRED_TEAM_STANDUPS,
-          interns: team.interns.filter((intern) => intern.internId !== internId),
+          interns: team.interns.filter(
+            (intern) => intern.internId !== internId
+          ),
         };
       })
     );
@@ -352,7 +380,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       prev.map((team) => ({
         ...team,
         interns: team.interns.map((intern) =>
-          intern.internId === internId ? { ...intern, internName: trimmedName } : intern
+          intern.internId === internId
+            ? { ...intern, internName: trimmedName }
+            : intern
         ),
       }))
     );
@@ -362,7 +392,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     setManagedTeams((prev) => prev.filter((team) => team.teamId !== teamId));
   };
 
-  const handleSelectedDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectedDateChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const nextDateKey = event.target.value;
 
     if (!nextDateKey) {
@@ -380,7 +412,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     }
 
     setManagedTeams((prev) =>
-      prev.map((team) => (team.teamId === teamId ? { ...team, teamName: trimmedName } : team))
+      prev.map((team) =>
+        team.teamId === teamId ? { ...team, teamName: trimmedName } : team
+      )
     );
   };
 
@@ -424,7 +458,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       );
       setTeamWeeklyStatusRows(
         managedTeams.map((team) =>
-          buildTeamWeeklyStatusRow(team, selectedWeekDateKeys, countsByInternByDate)
+          buildTeamWeeklyStatusRow(
+            team,
+            selectedWeekDateKeys,
+            countsByInternByDate
+          )
         )
       );
     } catch (error) {
@@ -432,8 +470,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         return;
       }
 
-      console.error("Unable to load team status summary", error);
-      setStatusError("Unable to load team status summary right now. Please try again.");
+      console.error('Unable to load team status summary', error);
+      setStatusError(
+        'Unable to load team status summary right now. Please try again.'
+      );
       setTeamDailyStatusRows([]);
       setTeamWeeklyStatusRows([]);
     } finally {
@@ -457,15 +497,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     }
 
     const handleEscapeClose = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         setIsStatusModalOpen(false);
       }
     };
 
-    window.addEventListener("keydown", handleEscapeClose);
+    window.addEventListener('keydown', handleEscapeClose);
 
     return () => {
-      window.removeEventListener("keydown", handleEscapeClose);
+      window.removeEventListener('keydown', handleEscapeClose);
     };
   }, [isStatusModalOpen]);
 
@@ -477,22 +517,24 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     <>
       <header
         style={{
-          alignItems: "center",
-          display: "flex",
-          flexWrap: "wrap",
+          alignItems: 'center',
+          display: 'flex',
+          flexWrap: 'wrap',
           gap: 12,
-          justifyContent: "space-between",
+          justifyContent: 'space-between',
         }}
       >
-        <div style={{ display: "grid", gap: 4 }}>
+        <div style={{ display: 'grid', gap: 4 }}>
           {!isInlineStatusView ? (
-            <h2 style={{ color: "#0f172a", fontSize: 20, margin: 0 }}>Team Status Dashboard</h2>
+            <h2 style={{ color: '#0f172a', fontSize: 20, margin: 0 }}>
+              Team Status Dashboard
+            </h2>
           ) : null}
-          <p style={{ color: "#475569", fontSize: 13, margin: 0 }}>
+          <p style={{ color: '#475569', fontSize: 13, margin: 0 }}>
             Daily date: {selectedDateLabel} | Weekly range: {selectedWeekLabel}
           </p>
         </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button
             className="ghost-button"
             disabled={statusLoading}
@@ -501,10 +543,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             }}
             type="button"
           >
-            {statusLoading ? "Refreshing..." : "Refresh"}
+            {statusLoading ? 'Refreshing...' : 'Refresh'}
           </button>
           {isModalPanel ? (
-            <button className="ghost-button" onClick={handleCloseStatusModal} type="button">
+            <button
+              className="ghost-button"
+              onClick={handleCloseStatusModal}
+              type="button"
+            >
               Close
             </button>
           ) : null}
@@ -514,8 +560,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       <section style={{ marginBottom: 4 }}>
         <label
           style={{
-            color: "#374151",
-            display: "grid",
+            color: '#374151',
+            display: 'grid',
             fontSize: 13,
             gap: 6,
             maxWidth: 280,
@@ -526,10 +572,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             aria-label="Standup verification date"
             onChange={handleSelectedDateChange}
             style={{
-              border: "1px solid #d1d5db",
+              border: '1px solid #d1d5db',
               borderRadius: 8,
               fontSize: 14,
-              padding: "10px 12px",
+              padding: '10px 12px',
             }}
             type="date"
             value={selectedDateKey}
@@ -537,8 +583,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </label>
       </section>
 
-      <section style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {(["DAILY", "WEEKLY"] as const).map((viewKey) => {
+      <section style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {(['DAILY', 'WEEKLY'] as const).map((viewKey) => {
           const isActive = statusView === viewKey;
 
           return (
@@ -546,46 +592,54 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               key={viewKey}
               onClick={() => setStatusView(viewKey)}
               style={{
-                backgroundColor: isActive ? "#1d4ed8" : "#f8fafc",
-                border: "1px solid #bfdbfe",
+                backgroundColor: isActive ? '#1d4ed8' : '#f8fafc',
+                border: '1px solid #bfdbfe',
                 borderRadius: 8,
-                color: isActive ? "#ffffff" : "#1e293b",
-                cursor: "pointer",
+                color: isActive ? '#ffffff' : '#1e293b',
+                cursor: 'pointer',
                 fontSize: 13,
                 fontWeight: 600,
-                padding: "8px 12px",
+                padding: '8px 12px',
               }}
               type="button"
             >
-              {viewKey === "DAILY" ? "Daily Standup Status" : "Weekly Standup Status"}
+              {viewKey === 'DAILY'
+                ? 'Daily Standup Status'
+                : 'Weekly Standup Status'}
             </button>
           );
         })}
       </section>
 
-      {statusLoading ? <p className="team-empty">Loading team status...</p> : null}
-      {!statusLoading && statusError ? <p className="team-empty">{statusError}</p> : null}
+      {statusLoading ? (
+        <p className="team-empty">Loading team status...</p>
+      ) : null}
+      {!statusLoading && statusError ? (
+        <p className="team-empty">{statusError}</p>
+      ) : null}
 
-      {!statusLoading && !statusError && statusView === "DAILY" ? (
-        <section style={{ display: "grid", gap: 14 }}>
+      {!statusLoading && !statusError && statusView === 'DAILY' ? (
+        <section style={{ display: 'grid', gap: 14 }}>
           {teamDailyStatusRows.length === 0 ? (
-            <p className="team-empty">No teams available for status tracking.</p>
+            <p className="team-empty">
+              No teams available for status tracking.
+            </p>
           ) : (
             <section className="team-list">
               {teamDailyStatusRows.map((row) => (
                 <article className="team-card" key={row.teamId}>
                   <header
                     style={{
-                      alignItems: "center",
-                      display: "flex",
+                      alignItems: 'center',
+                      display: 'flex',
                       gap: 8,
-                      justifyContent: "space-between",
+                      justifyContent: 'space-between',
                     }}
                   >
-                    <div style={{ display: "grid", gap: 3 }}>
+                    <div style={{ display: 'grid', gap: 3 }}>
                       <h3
                         className="team-name"
-                        style={{ cursor: "help" }}
+                        style={{ cursor: 'help' }}
                         title={formatContributorTooltip(row.contributorDetails)}
                       >
                         {row.teamName}
@@ -596,18 +650,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     </div>
                     <span
                       style={{
-                        alignItems: "center",
-                        backgroundColor: row.isCompleted ? "#dcfce7" : "#e5e7eb",
-                        border: `1px solid ${row.isCompleted ? "#86efac" : "#cbd5e1"}`,
-                        borderRadius: "9999px",
-                        color: row.isCompleted ? "#166534" : "#64748b",
-                        display: "inline-flex",
+                        alignItems: 'center',
+                        backgroundColor: row.isCompleted
+                          ? '#dcfce7'
+                          : '#e5e7eb',
+                        border: `1px solid ${row.isCompleted ? '#86efac' : '#cbd5e1'}`,
+                        borderRadius: '9999px',
+                        color: row.isCompleted ? '#166534' : '#64748b',
+                        display: 'inline-flex',
                         fontSize: 16,
                         height: 34,
-                        justifyContent: "center",
+                        justifyContent: 'center',
                         width: 34,
                       }}
-                      title={row.isCompleted ? "Completed" : "Pending"}
+                      title={row.isCompleted ? 'Completed' : 'Pending'}
                     >
                       ✓
                     </span>
@@ -617,17 +673,25 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </section>
           )}
 
-          <section className="team-card" style={{ backgroundColor: "#f8fafc" }}>
+          <section className="team-card" style={{ backgroundColor: '#f8fafc' }}>
             <h3 className="team-name" style={{ marginBottom: 8 }}>
               Daily Pending Summary
             </h3>
             {pendingDailyRows.length === 0 ? (
-              <p className="team-id">All teams completed required daily standups.</p>
+              <p className="team-id">
+                All teams completed required daily standups.
+              </p>
             ) : (
-              <ul style={{ display: "grid", gap: 6, margin: 0, paddingLeft: 18 }}>
+              <ul
+                style={{ display: 'grid', gap: 6, margin: 0, paddingLeft: 18 }}
+              >
                 {pendingDailyRows.map((row) => (
-                  <li key={row.teamId} style={{ color: "#334155", fontSize: 13 }}>
-                    {row.teamName}: {row.remainingStandupCount} standup(s) pending
+                  <li
+                    key={row.teamId}
+                    style={{ color: '#334155', fontSize: 13 }}
+                  >
+                    {row.teamName}: {row.remainingStandupCount} standup(s)
+                    pending
                   </li>
                 ))}
               </ul>
@@ -636,10 +700,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </section>
       ) : null}
 
-      {!statusLoading && !statusError && statusView === "WEEKLY" ? (
-        <section style={{ display: "grid", gap: 14 }}>
+      {!statusLoading && !statusError && statusView === 'WEEKLY' ? (
+        <section style={{ display: 'grid', gap: 14 }}>
           {teamWeeklyStatusRows.length === 0 ? (
-            <p className="team-empty">No teams available for weekly status tracking.</p>
+            <p className="team-empty">
+              No teams available for weekly status tracking.
+            </p>
           ) : (
             <section className="team-list">
               {teamWeeklyStatusRows.map((row) => (
@@ -647,38 +713,51 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   <header style={{ marginBottom: 10 }}>
                     <h3 className="team-name">{row.teamName}</h3>
                     <div className="team-id">
-                      Completed days: {row.completedDaysCount}/{row.dayStatuses.length}
+                      Completed days: {row.completedDaysCount}/
+                      {row.dayStatuses.length}
                     </div>
                   </header>
 
                   <section
                     style={{
-                      display: "grid",
+                      display: 'grid',
                       gap: 8,
-                      gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))",
+                      gridTemplateColumns:
+                        'repeat(auto-fit, minmax(110px, 1fr))',
                     }}
                   >
                     {row.dayStatuses.map((dayStatus) => (
                       <article
                         key={dayStatus.dateKey}
                         style={{
-                          backgroundColor: dayStatus.isCompleted ? "#f0fdf4" : "#f8fafc",
-                          border: `1px solid ${dayStatus.isCompleted ? "#86efac" : "#cbd5e1"}`,
+                          backgroundColor: dayStatus.isCompleted
+                            ? '#f0fdf4'
+                            : '#f8fafc',
+                          border: `1px solid ${dayStatus.isCompleted ? '#86efac' : '#cbd5e1'}`,
                           borderRadius: 8,
-                          display: "grid",
+                          display: 'grid',
                           gap: 4,
-                          padding: "8px 9px",
+                          padding: '8px 9px',
                         }}
                       >
                         <strong
-                          style={{ color: "#0f172a", cursor: "help", fontSize: 12 }}
-                          title={formatContributorTooltip(dayStatus.contributorDetails)}
+                          style={{
+                            color: '#0f172a',
+                            cursor: 'help',
+                            fontSize: 12,
+                          }}
+                          title={formatContributorTooltip(
+                            dayStatus.contributorDetails
+                          )}
                         >
                           {dayStatus.dayLabel}
                         </strong>
-                        <span style={{ color: "#64748b", fontSize: 11 }}>{dayStatus.fullDateLabel}</span>
-                        <span style={{ color: "#1e293b", fontSize: 12 }}>
-                          {dayStatus.standupCount}/{dayStatus.requiredStandupCount}
+                        <span style={{ color: '#64748b', fontSize: 11 }}>
+                          {dayStatus.fullDateLabel}
+                        </span>
+                        <span style={{ color: '#1e293b', fontSize: 12 }}>
+                          {dayStatus.standupCount}/
+                          {dayStatus.requiredStandupCount}
                         </span>
                       </article>
                     ))}
@@ -688,7 +767,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     {row.pendingDayDetails.length === 0 ? (
                       <p className="team-id">No pending days for this week.</p>
                     ) : (
-                      <p className="team-id">Pending days: {row.pendingDayDetails.join(", ")}</p>
+                      <p className="team-id">
+                        Pending days: {row.pendingDayDetails.join(', ')}
+                      </p>
                     )}
                   </section>
                 </article>
@@ -696,18 +777,25 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </section>
           )}
 
-          <section className="team-card" style={{ backgroundColor: "#f8fafc" }}>
+          <section className="team-card" style={{ backgroundColor: '#f8fafc' }}>
             <h3 className="team-name" style={{ marginBottom: 8 }}>
               Weekly Pending Summary
             </h3>
             {pendingWeeklyRows.length === 0 ? (
-              <p className="team-id">All teams completed weekly standups for every day.</p>
+              <p className="team-id">
+                All teams completed weekly standups for every day.
+              </p>
             ) : (
-              <ul style={{ display: "grid", gap: 6, margin: 0, paddingLeft: 18 }}>
+              <ul
+                style={{ display: 'grid', gap: 6, margin: 0, paddingLeft: 18 }}
+              >
                 {pendingWeeklyRows.map((row) => (
-                  <li key={row.teamId} style={{ color: "#334155", fontSize: 13 }}>
-                    {row.teamName}: {row.pendingDayDetails.join(", ")} | Remaining:{" "}
-                    {row.totalRemainingStandups}
+                  <li
+                    key={row.teamId}
+                    style={{ color: '#334155', fontSize: 13 }}
+                  >
+                    {row.teamName}: {row.pendingDayDetails.join(', ')} |
+                    Remaining: {row.totalRemainingStandups}
                   </li>
                 ))}
               </ul>
@@ -722,7 +810,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     <main className="dashboard-container">
       <header className="dashboard-header">
         <h1 className="dashboard-title">
-          {isInlineStatusView ? "Team Status Dashboard" : title}
+          {isInlineStatusView ? 'Team Status Dashboard' : title}
         </h1>
         {!isInlineStatusView ? (
           <button
@@ -730,7 +818,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             onClick={() => setIsCreatingTeam((prev) => !prev)}
             type="button"
           >
-            {isCreatingTeam ? "Cancel" : "Create Team"}
+            {isCreatingTeam ? 'Cancel' : 'Create Team'}
           </button>
         ) : null}
       </header>
@@ -739,20 +827,24 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <>
           <section className="summary-cards-grid">
             {[
-              { key: "TEAMS" as const, label: "Teams", value: totalTeams },
-              { key: "INTERNS" as const, label: "Interns", value: totalInterns },
+              { key: 'TEAMS' as const, label: 'Teams', value: totalTeams },
+              {
+                key: 'INTERNS' as const,
+                label: 'Interns',
+                value: totalInterns,
+              },
             ].map((item) => {
               const isActive = activeView === item.key;
               const isHovered = hoveredBox === item.key;
 
               return (
                 <button
-                  className={`summary-card-button${isActive ? " is-active" : ""}`}
+                  className={`summary-card-button${isActive ? ' is-active' : ''}`}
                   key={item.key}
                   onClick={() => setActiveView(item.key)}
                   onMouseEnter={() => setHoveredBox(item.key)}
                   onMouseLeave={() => setHoveredBox(null)}
-                  data-hovered={isHovered ? "true" : undefined}
+                  data-hovered={isHovered ? 'true' : undefined}
                   type="button"
                 >
                   <div className="summary-card-label">{item.label}</div>
@@ -765,9 +857,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           {isCreatingTeam ? (
             <section
               style={{
-                alignItems: "center",
-                display: "flex",
-                flexWrap: "wrap",
+                alignItems: 'center',
+                display: 'flex',
+                flexWrap: 'wrap',
                 gap: 8,
                 marginBottom: 14,
               }}
@@ -783,7 +875,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 type="text"
                 value={newTeamName}
               />
-              <button className="secondary-button" onClick={handleCreateTeam} type="button">
+              <button
+                className="secondary-button"
+                onClick={handleCreateTeam}
+                type="button"
+              >
                 Add Team
               </button>
             </section>
@@ -792,8 +888,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           <section style={{ marginBottom: 16 }}>
             <label
               style={{
-                color: "#374151",
-                display: "grid",
+                color: '#374151',
+                display: 'grid',
                 fontSize: 13,
                 gap: 6,
                 maxWidth: 280,
@@ -816,16 +912,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               className="team-search-input"
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder={
-                activeView === "TEAMS"
-                  ? "Search by team name..."
-                  : "Search by intern name or team name..."
+                activeView === 'TEAMS'
+                  ? 'Search by team name...'
+                  : 'Search by intern name or team name...'
               }
               type="text"
               value={searchTerm}
             />
           </section>
 
-          {activeView === "TEAMS" ? (
+          {activeView === 'TEAMS' ? (
             <TeamList
               addedInterns={addedInterns}
               onAddInternToTeam={handleAddInternToTeam}
@@ -845,13 +941,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             />
           ) : null}
 
-          {activeView !== "TEAMS" ? (
+          {activeView !== 'TEAMS' ? (
             <section className="team-list">
               {filteredInternRows.length === 0 ? (
                 <p className="team-empty">
-                  {activeView === "COMPLETED"
-                    ? "No completed interns found."
-                    : "No interns found for the current search."}
+                  {activeView === 'COMPLETED'
+                    ? 'No completed interns found.'
+                    : 'No interns found for the current search.'}
                 </p>
               ) : (
                 filteredInternRows.map((intern) => (
@@ -880,36 +976,36 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           ) : null}
         </>
       ) : (
-        <section style={{ display: "grid", gap: 14 }}>{renderStatusPanelContent(false)}</section>
+        <section style={{ display: 'grid', gap: 14 }}>
+          {renderStatusPanelContent(false)}
+        </section>
       )}
 
       {!isInlineStatusView && isStatusModalOpen ? (
         <div
           aria-modal="true"
-          onClick={handleCloseStatusModal}
           role="dialog"
           style={{
-            backgroundColor: "rgba(15, 23, 42, 0.45)",
-            display: "flex",
+            backgroundColor: 'rgba(15, 23, 42, 0.45)',
+            display: 'flex',
             inset: 0,
-            justifyContent: "center",
-            padding: "24px 14px",
-            position: "fixed",
+            justifyContent: 'center',
+            padding: '24px 14px',
+            position: 'fixed',
             zIndex: 80,
           }}
         >
           <section
-            onClick={(event) => event.stopPropagation()}
             style={{
-              backgroundColor: "#ffffff",
+              backgroundColor: '#ffffff',
               borderRadius: 12,
-              display: "grid",
+              display: 'grid',
               gap: 14,
-              maxHeight: "100%",
+              maxHeight: '100%',
               maxWidth: 980,
-              overflowY: "auto",
+              overflowY: 'auto',
               padding: 16,
-              width: "100%",
+              width: '100%',
             }}
           >
             {renderStatusPanelContent(true)}
@@ -921,7 +1017,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 };
 
 function buildTeamId(teamName: string, existingTeams: Team[]): string {
-  const base = normalizeIdentifier(teamName) || "team";
+  const base = normalizeIdentifier(teamName) || 'team';
   const existingIds = new Set(existingTeams.map((team) => team.teamId));
   let candidate = base;
   let suffix = 2;
@@ -938,8 +1034,8 @@ function normalizeIdentifier(value: string): string {
   return value
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 function parseAliasEnv(rawAliases: string | undefined): string[] | undefined {
@@ -959,20 +1055,23 @@ function parseAliasEnv(rawAliases: string | undefined): string[] | undefined {
   return Array.from(new Set(aliases));
 }
 
-function mergeAliases(baseAliases: string[], extraAliases: string[] | undefined): string[] {
+function mergeAliases(
+  baseAliases: string[],
+  extraAliases: string[] | undefined
+): string[] {
   return Array.from(new Set([...(baseAliases ?? []), ...(extraAliases ?? [])]));
 }
 
 function resetTeamVerification(team: Team): Team {
   return {
     ...team,
-    teamStatus: "PENDING",
+    teamStatus: 'PENDING',
     todayStandupCount: 0,
     verifiedDate: undefined,
     requiredStandupCount: REQUIRED_TEAM_STANDUPS,
     interns: team.interns.map((intern) => ({
       ...intern,
-      status: "PENDING",
+      status: 'PENDING',
       todayValidCount: 0,
     })),
   };
@@ -980,8 +1079,8 @@ function resetTeamVerification(team: Team): Team {
 
 function getLocalDateKey(date: Date): string {
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
 
   return `${year}-${month}-${day}`;
 }
@@ -994,9 +1093,9 @@ function formatDateForDisplay(dateKey: string): string {
   }
 
   return new Intl.DateTimeFormat(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   }).format(parsedDate);
 }
 
@@ -1005,7 +1104,11 @@ function collectUniqueTeamInternIds(teams: Team[]): string[] {
 
   for (const team of teams) {
     for (const intern of team.interns) {
-      const corpusUserId = (intern.corpusUserId || intern.internId || "").trim();
+      const corpusUserId = (
+        intern.corpusUserId ||
+        intern.internId ||
+        ''
+      ).trim();
 
       if (corpusUserId) {
         uniqueIds.add(corpusUserId);
@@ -1038,7 +1141,10 @@ async function buildInternDateCountMap(
             continue;
           }
 
-          dateCounts.set(uploadedDateKey, (dateCounts.get(uploadedDateKey) ?? 0) + 1);
+          dateCounts.set(
+            uploadedDateKey,
+            (dateCounts.get(uploadedDateKey) ?? 0) + 1
+          );
         }
 
         return [internId, dateCounts] as const;
@@ -1057,11 +1163,23 @@ function buildTeamDailyStatusRow(
   dateKey: string,
   countsByInternByDate: Map<string, Map<string, number>>
 ): TeamDailyStatusRow {
-  const requiredStandupCount = team.requiredStandupCount ?? REQUIRED_TEAM_STANDUPS;
-  const totalStandupCount = sumTeamStandupsForDate(team, dateKey, countsByInternByDate);
+  const requiredStandupCount =
+    team.requiredStandupCount ?? REQUIRED_TEAM_STANDUPS;
+  const totalStandupCount = sumTeamStandupsForDate(
+    team,
+    dateKey,
+    countsByInternByDate
+  );
   const cappedStandupCount = Math.min(totalStandupCount, requiredStandupCount);
-  const remainingStandupCount = Math.max(requiredStandupCount - totalStandupCount, 0);
-  const contributorDetails = buildContributorDetailsForDate(team, dateKey, countsByInternByDate);
+  const remainingStandupCount = Math.max(
+    requiredStandupCount - totalStandupCount,
+    0
+  );
+  const contributorDetails = buildContributorDetailsForDate(
+    team,
+    dateKey,
+    countsByInternByDate
+  );
 
   return {
     teamId: team.teamId,
@@ -1079,12 +1197,27 @@ function buildTeamWeeklyStatusRow(
   weekDateKeys: string[],
   countsByInternByDate: Map<string, Map<string, number>>
 ): TeamWeeklyStatusRow {
-  const requiredStandupCount = team.requiredStandupCount ?? REQUIRED_TEAM_STANDUPS;
+  const requiredStandupCount =
+    team.requiredStandupCount ?? REQUIRED_TEAM_STANDUPS;
   const dayStatuses = weekDateKeys.map((dateKey) => {
-    const totalStandupCount = sumTeamStandupsForDate(team, dateKey, countsByInternByDate);
-    const cappedStandupCount = Math.min(totalStandupCount, requiredStandupCount);
-    const remainingStandupCount = Math.max(requiredStandupCount - totalStandupCount, 0);
-    const contributorDetails = buildContributorDetailsForDate(team, dateKey, countsByInternByDate);
+    const totalStandupCount = sumTeamStandupsForDate(
+      team,
+      dateKey,
+      countsByInternByDate
+    );
+    const cappedStandupCount = Math.min(
+      totalStandupCount,
+      requiredStandupCount
+    );
+    const remainingStandupCount = Math.max(
+      requiredStandupCount - totalStandupCount,
+      0
+    );
+    const contributorDetails = buildContributorDetailsForDate(
+      team,
+      dateKey,
+      countsByInternByDate
+    );
 
     return {
       dateKey,
@@ -1097,10 +1230,14 @@ function buildTeamWeeklyStatusRow(
       contributorDetails,
     };
   });
-  const completedDaysCount = dayStatuses.filter((status) => status.isCompleted).length;
+  const completedDaysCount = dayStatuses.filter(
+    (status) => status.isCompleted
+  ).length;
   const pendingDayDetails = dayStatuses
     .filter((status) => !status.isCompleted)
-    .map((status) => `${status.dayLabel} (${status.remainingStandupCount} pending)`);
+    .map(
+      (status) => `${status.dayLabel} (${status.remainingStandupCount} pending)`
+    );
   const totalRemainingStandups = dayStatuses.reduce(
     (total, status) => total + status.remainingStandupCount,
     0
@@ -1147,11 +1284,11 @@ function getTeamInternIds(team: Team): string[] {
 
 function getTeamInternEntries(
   team: Team
-): Array<Pick<ContributorUploadDetail, "internId" | "internName">> {
+): Array<Pick<ContributorUploadDetail, 'internId' | 'internName'>> {
   return team.interns
     .map((intern) => {
-      const internId = (intern.corpusUserId || intern.internId || "").trim();
-      const internName = (intern.internName || "").trim() || internId;
+      const internId = (intern.corpusUserId || intern.internId || '').trim();
+      const internName = (intern.internName || '').trim() || internId;
 
       if (!internId) {
         return null;
@@ -1160,7 +1297,9 @@ function getTeamInternEntries(
       return { internId, internName };
     })
     .filter(
-      (entry): entry is Pick<ContributorUploadDetail, "internId" | "internName"> =>
+      (
+        entry
+      ): entry is Pick<ContributorUploadDetail, 'internId' | 'internName'> =>
         entry !== null
     );
 }
@@ -1190,7 +1329,7 @@ function getWeekDateKeys(anchorDateKey: string): string[] {
 
 function formatWeekRangeLabel(weekDateKeys: string[]): string {
   if (weekDateKeys.length === 0) {
-    return "Invalid week";
+    return 'Invalid week';
   }
 
   const start = formatMonthDay(weekDateKeys[0]);
@@ -1206,7 +1345,9 @@ function formatWeekdayShort(dateKey: string): string {
     return dateKey;
   }
 
-  return new Intl.DateTimeFormat(undefined, { weekday: "short" }).format(parsedDate);
+  return new Intl.DateTimeFormat(undefined, { weekday: 'short' }).format(
+    parsedDate
+  );
 }
 
 function formatMonthDay(dateKey: string): string {
@@ -1216,17 +1357,24 @@ function formatMonthDay(dateKey: string): string {
     return dateKey;
   }
 
-  return new Intl.DateTimeFormat(undefined, { month: "short", day: "2-digit" }).format(parsedDate);
+  return new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: '2-digit',
+  }).format(parsedDate);
 }
 
-function formatContributorTooltip(contributors: ContributorUploadDetail[]): string {
+function formatContributorTooltip(
+  contributors: ContributorUploadDetail[]
+): string {
   if (contributors.length === 0) {
-    return "No uploads for this selection.";
+    return 'No uploads for this selection.';
   }
 
   return contributors
-    .map((contributor) => `${contributor.internName}: ${contributor.uploadCount}`)
-    .join(" | ");
+    .map(
+      (contributor) => `${contributor.internName}: ${contributor.uploadCount}`
+    )
+    .join(' | ');
 }
 
 function buildSubmissionAliasCriteria(
@@ -1256,8 +1404,8 @@ function toComparableAliasSet(aliases: string[]): Set<string> {
 }
 
 function audioMatchesSubmissionCriteria(
-  audio: Pick<InternAudioMetadata, "category" | "tag"> &
-    Partial<Pick<InternAudioMetadata, "labels">>,
+  audio: Pick<InternAudioMetadata, 'category' | 'tag'> &
+    Partial<Pick<InternAudioMetadata, 'labels'>>,
   criteria: SubmissionAliasCriteria
 ): boolean {
   const availableLabels = collectComparableAudioLabels(audio);
@@ -1270,8 +1418,8 @@ function audioMatchesSubmissionCriteria(
 }
 
 function collectComparableAudioLabels(
-  audio: Pick<InternAudioMetadata, "category" | "tag"> &
-    Partial<Pick<InternAudioMetadata, "labels">>
+  audio: Pick<InternAudioMetadata, 'category' | 'tag'> &
+    Partial<Pick<InternAudioMetadata, 'labels'>>
 ): Set<string> {
   const candidates = [audio.category, audio.tag, ...(audio.labels ?? [])];
   const labels = new Set<string>();
@@ -1297,7 +1445,10 @@ function splitAliasTokens(value: string): string[] {
 }
 
 function normalizeComparableText(value: string): string {
-  return value.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
 }
 
 function hasDistinctCriteriaMatch(
@@ -1305,10 +1456,19 @@ function hasDistinctCriteriaMatch(
   standupAliases: Set<string>,
   internshipAliases: Set<string>
 ): boolean {
-  const matchedStandupAliases = getMatchedAliases(availableLabels, standupAliases);
-  const matchedInternshipAliases = getMatchedAliases(availableLabels, internshipAliases);
+  const matchedStandupAliases = getMatchedAliases(
+    availableLabels,
+    standupAliases
+  );
+  const matchedInternshipAliases = getMatchedAliases(
+    availableLabels,
+    internshipAliases
+  );
 
-  if (matchedStandupAliases.length === 0 || matchedInternshipAliases.length === 0) {
+  if (
+    matchedStandupAliases.length === 0 ||
+    matchedInternshipAliases.length === 0
+  ) {
     return false;
   }
 
@@ -1323,7 +1483,10 @@ function hasDistinctCriteriaMatch(
   return false;
 }
 
-function getMatchedAliases(availableLabels: Set<string>, expectedAliases: Set<string>): string[] {
+function getMatchedAliases(
+  availableLabels: Set<string>,
+  expectedAliases: Set<string>
+): string[] {
   const matchedAliases: string[] = [];
 
   for (const expectedAlias of expectedAliases) {
@@ -1335,7 +1498,9 @@ function getMatchedAliases(availableLabels: Set<string>, expectedAliases: Set<st
   return matchedAliases;
 }
 
-function resolveUploadedDateKey(uploadedAt: string | undefined): string | undefined {
+function resolveUploadedDateKey(
+  uploadedAt: string | undefined
+): string | undefined {
   if (!uploadedAt) {
     return undefined;
   }

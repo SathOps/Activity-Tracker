@@ -1,5 +1,5 @@
-import type { Team } from "../components/dashboard/TeamList";
-import type { Intern } from "../components/intern/InternSearch";
+import type { Team } from '../components/dashboard/TeamList';
+import type { Intern } from '../components/intern/InternSearch';
 
 interface TeamSeedRow {
   teamId: string;
@@ -22,7 +22,9 @@ export function parseTeamsCSV(csvText: string): TeamSeedRow[] {
 
   for (const record of records) {
     const teamName = sanitizeCell(record.team_name || record.teamname);
-    const teamId = sanitizeCell(record.team_id || record.teamid) || normalizeIdentifier(teamName);
+    const teamId =
+      sanitizeCell(record.team_id || record.teamid) ||
+      normalizeIdentifier(teamName);
     const resolvedTeamName = teamName || teamId;
 
     if (!teamId || seenTeamIds.has(teamId)) {
@@ -74,7 +76,10 @@ export function buildPreloadedTeams(
       teamNameById.set(teamRow.teamId, teamRow.teamName);
     }
 
-    teamIdByNormalizedName.set(normalizeLookupKey(teamRow.teamName), teamRow.teamId);
+    teamIdByNormalizedName.set(
+      normalizeLookupKey(teamRow.teamName),
+      teamRow.teamId
+    );
   }
 
   const internsById = new Map(interns.map((intern) => [intern.id, intern]));
@@ -84,10 +89,14 @@ export function buildPreloadedTeams(
   const internsByIdLookup = new Map(
     interns.map((intern) => [normalizeLookupKey(intern.id), intern])
   );
-  const teamInternsById = new Map<string, Team["interns"]>();
+  const teamInternsById = new Map<string, Team['interns']>();
 
   for (const member of teamMemberRows) {
-    const resolvedTeamId = resolveTeamId(member, teamNameById, teamIdByNormalizedName);
+    const resolvedTeamId = resolveTeamId(
+      member,
+      teamNameById,
+      teamIdByNormalizedName
+    );
 
     if (!resolvedTeamId) {
       continue;
@@ -95,8 +104,10 @@ export function buildPreloadedTeams(
 
     const resolvedIntern =
       (member.internId && internsById.get(member.internId)) ||
-      (member.studentName && internsByName.get(normalizeLookupKey(member.studentName))) ||
-      (member.studentName && internsByIdLookup.get(normalizeLookupKey(member.studentName)));
+      (member.studentName &&
+        internsByName.get(normalizeLookupKey(member.studentName))) ||
+      (member.studentName &&
+        internsByIdLookup.get(normalizeLookupKey(member.studentName)));
 
     if (!resolvedIntern) {
       continue;
@@ -111,22 +122,25 @@ export function buildPreloadedTeams(
     teamInterns.push({
       internId: resolvedIntern.id,
       corpusUserId: resolvedIntern.id,
-      internName: resolvedIntern.name || member.studentName || resolvedIntern.id,
-      status: "PENDING",
+      internName:
+        resolvedIntern.name || member.studentName || resolvedIntern.id,
+      status: 'PENDING',
       todayValidCount: 0,
     });
 
     teamInternsById.set(resolvedTeamId, teamInterns);
   }
 
-  const teams: Team[] = Array.from(teamNameById.entries()).map(([teamId, teamName]) => ({
-    teamId,
-    teamName,
-    interns: teamInternsById.get(teamId) ?? [],
-    teamStatus: "PENDING",
-    todayStandupCount: 0,
-    requiredStandupCount: 4,
-  }));
+  const teams: Team[] = Array.from(teamNameById.entries()).map(
+    ([teamId, teamName]) => ({
+      teamId,
+      teamName,
+      interns: teamInternsById.get(teamId) ?? [],
+      teamStatus: 'PENDING',
+      todayStandupCount: 0,
+      requiredStandupCount: 4,
+    })
+  );
 
   return teams;
 }
@@ -138,7 +152,9 @@ function parseCsvRecords(csvText: string): CsvRecord[] {
     return [];
   }
 
-  const headers = splitCsvLine(lines[0]).map((header) => normalizeHeaderName(header));
+  const headers = splitCsvLine(lines[0]).map((header) =>
+    normalizeHeaderName(header)
+  );
   const records: CsvRecord[] = [];
 
   for (let index = 1; index < lines.length; index += 1) {
@@ -155,7 +171,7 @@ function parseCsvRecords(csvText: string): CsvRecord[] {
       if (!header) {
         continue;
       }
-      record[header] = sanitizeCell(values[headerIndex] ?? "");
+      record[header] = sanitizeCell(values[headerIndex] ?? '');
     }
 
     records.push(record);
@@ -166,7 +182,7 @@ function parseCsvRecords(csvText: string): CsvRecord[] {
 
 function splitCsvLine(line: string): string[] {
   const values: string[] = [];
-  let current = "";
+  let current = '';
   let insideQuotes = false;
 
   for (let index = 0; index < line.length; index += 1) {
@@ -183,9 +199,9 @@ function splitCsvLine(line: string): string[] {
       continue;
     }
 
-    if (char === "," && !insideQuotes) {
+    if (char === ',' && !insideQuotes) {
       values.push(current);
-      current = "";
+      current = '';
       continue;
     }
 
@@ -197,11 +213,14 @@ function splitCsvLine(line: string): string[] {
 }
 
 function sanitizeCell(value: string | null | undefined): string {
-  return (value ?? "").trim();
+  return (value ?? '').trim();
 }
 
 function normalizeHeaderName(value: string): string {
-  return sanitizeCell(value).replace(/^\uFEFF/, "").toLowerCase().replace(/\s+/g, "_");
+  return sanitizeCell(value)
+    .replace(/^\uFEFF/, '')
+    .toLowerCase()
+    .replace(/\s+/g, '_');
 }
 
 function normalizeLookupKey(value: string): string {
@@ -218,23 +237,32 @@ function resolveTeamId(
   }
 
   if (member.teamName) {
-    const mappedTeamId = teamIdByNormalizedName.get(normalizeLookupKey(member.teamName));
+    const mappedTeamId = teamIdByNormalizedName.get(
+      normalizeLookupKey(member.teamName)
+    );
 
     if (mappedTeamId) {
       return mappedTeamId;
     }
   }
 
-  const generatedTeamId = normalizeIdentifier(member.teamId || member.teamName || "");
+  const generatedTeamId = normalizeIdentifier(
+    member.teamId || member.teamName || ''
+  );
 
   if (!generatedTeamId) {
-    return "";
+    return '';
   }
 
   if (!teamNameById.has(generatedTeamId)) {
-    const resolvedTeamName = sanitizeCell(member.teamName || member.teamId || generatedTeamId);
+    const resolvedTeamName = sanitizeCell(
+      member.teamName || member.teamId || generatedTeamId
+    );
     teamNameById.set(generatedTeamId, resolvedTeamName || generatedTeamId);
-    teamIdByNormalizedName.set(normalizeLookupKey(resolvedTeamName || generatedTeamId), generatedTeamId);
+    teamIdByNormalizedName.set(
+      normalizeLookupKey(resolvedTeamName || generatedTeamId),
+      generatedTeamId
+    );
   }
 
   return generatedTeamId;
@@ -243,6 +271,6 @@ function resolveTeamId(
 function normalizeIdentifier(value: string): string {
   return sanitizeCell(value)
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }

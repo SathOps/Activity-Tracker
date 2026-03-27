@@ -1,7 +1,7 @@
-import { getInternAudios } from "../../services/corpus";
-import type { InternAudioMetadata } from "../../services/corpus";
+import { getInternAudios } from '../../services/corpus';
+import type { InternAudioMetadata } from '../../services/corpus';
 
-export type SubmissionStatus = "COMPLETED" | "PENDING";
+export type SubmissionStatus = 'COMPLETED' | 'PENDING';
 
 export interface StandupVerificationResult {
   internId: string;
@@ -22,12 +22,12 @@ interface SubmissionCriteria {
   internshipAliases: Set<string>;
 }
 
-const TARGET_CATEGORY = "standup";
-const TARGET_TAG = "internship";
+const TARGET_CATEGORY = 'standup';
+const TARGET_TAG = 'internship';
 const DEFAULT_STANDUP_ALIASES = [TARGET_CATEGORY];
 const DEFAULT_INTERNSHIP_ALIASES = [TARGET_TAG];
-const STANDUP_ALIAS_ENV_KEY = "STANDUP_LABEL_ALIASES";
-const INTERNSHIP_ALIAS_ENV_KEY = "INTERNSHIP_LABEL_ALIASES";
+const STANDUP_ALIAS_ENV_KEY = 'STANDUP_LABEL_ALIASES';
+const INTERNSHIP_ALIAS_ENV_KEY = 'INTERNSHIP_LABEL_ALIASES';
 const DATE_KEY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 export async function verifyStandupSubmission(
@@ -41,22 +41,23 @@ export async function verifyStandupSubmission(
 
   const validAudios = audios.filter(
     (audio) =>
-      isValidStandupSubmissionAudio(audio, criteria) && matchesUploadedDate(audio, checkedDate)
+      isValidStandupSubmissionAudio(audio, criteria) &&
+      matchesUploadedDate(audio, checkedDate)
   );
   const validCount = validAudios.length;
 
   return {
     internId: normalizedInternId,
     validCount,
-    status: validCount > 0 ? "COMPLETED" : "PENDING",
+    status: validCount > 0 ? 'COMPLETED' : 'PENDING',
     checkedDate,
     audios: validAudios,
   };
 }
 
 export function isValidStandupSubmissionAudio(
-  audio: Pick<InternAudioMetadata, "category" | "tag"> &
-    Partial<Pick<InternAudioMetadata, "labels">>,
+  audio: Pick<InternAudioMetadata, 'category' | 'tag'> &
+    Partial<Pick<InternAudioMetadata, 'labels'>>,
   criteriaOverride?: SubmissionCriteria
 ): boolean {
   const availableLabels = collectComparableLabels(audio);
@@ -73,7 +74,7 @@ function normalizeInternId(internId: string): string {
   const normalizedInternId = internId.trim();
 
   if (!normalizedInternId) {
-    throw new Error("internId is required");
+    throw new Error('internId is required');
   }
 
   return normalizedInternId;
@@ -104,7 +105,9 @@ function normalizeFilterDate(rawDate: string | undefined): string | undefined {
       localDate.getMonth() + 1 !== month ||
       localDate.getDate() !== day
     ) {
-      throw new Error("uploadedOnDate must be a valid date (recommended: YYYY-MM-DD).");
+      throw new Error(
+        'uploadedOnDate must be a valid date (recommended: YYYY-MM-DD).'
+      );
     }
 
     return `${yearToken}-${monthToken}-${dayToken}`;
@@ -113,14 +116,16 @@ function normalizeFilterDate(rawDate: string | undefined): string | undefined {
   const parsedDate = new Date(trimmed);
 
   if (Number.isNaN(parsedDate.getTime())) {
-    throw new Error("uploadedOnDate must be a valid date (recommended: YYYY-MM-DD).");
+    throw new Error(
+      'uploadedOnDate must be a valid date (recommended: YYYY-MM-DD).'
+    );
   }
 
   return toLocalDateKey(parsedDate);
 }
 
 function matchesUploadedDate(
-  audio: Pick<InternAudioMetadata, "uploadedAt">,
+  audio: Pick<InternAudioMetadata, 'uploadedAt'>,
   expectedDate: string | undefined
 ): boolean {
   if (!expectedDate) {
@@ -141,12 +146,15 @@ function matchesUploadedDate(
 }
 
 function normalizeComparableValue(value: string): string {
-  return value.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
 }
 
 function collectComparableLabels(
-  audio: Pick<InternAudioMetadata, "category" | "tag"> &
-    Partial<Pick<InternAudioMetadata, "labels">>
+  audio: Pick<InternAudioMetadata, 'category' | 'tag'> &
+    Partial<Pick<InternAudioMetadata, 'labels'>>
 ): Set<string> {
   const candidates = [audio.category, audio.tag, ...(audio.labels ?? [])];
   const labels = new Set<string>();
@@ -172,7 +180,10 @@ function splitCandidateLabel(value: string): string[] {
 }
 
 function resolveSubmissionCriteria(
-  options: Pick<StandupVerificationOptions, "standupAliases" | "internshipAliases"> = {}
+  options: Pick<
+    StandupVerificationOptions,
+    'standupAliases' | 'internshipAliases'
+  > = {}
 ): SubmissionCriteria {
   return {
     standupAliases: buildAliasSet(DEFAULT_STANDUP_ALIASES, [
@@ -224,10 +235,19 @@ function hasDistinctCriteriaMatch(
   standupAliases: Set<string>,
   internshipAliases: Set<string>
 ): boolean {
-  const matchedStandupAliases = getMatchedAliases(availableLabels, standupAliases);
-  const matchedInternshipAliases = getMatchedAliases(availableLabels, internshipAliases);
+  const matchedStandupAliases = getMatchedAliases(
+    availableLabels,
+    standupAliases
+  );
+  const matchedInternshipAliases = getMatchedAliases(
+    availableLabels,
+    internshipAliases
+  );
 
-  if (matchedStandupAliases.length === 0 || matchedInternshipAliases.length === 0) {
+  if (
+    matchedStandupAliases.length === 0 ||
+    matchedInternshipAliases.length === 0
+  ) {
     return false;
   }
 
@@ -269,8 +289,8 @@ function getEnvValue(key: string): string | undefined {
 
 function toLocalDateKey(date: Date): string {
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
 
   return `${year}-${month}-${day}`;
 }

@@ -3,14 +3,14 @@
 // ─────────────────────────────────────────────────
 
 import {
-    Team,
-    getTeamById,
-    setTeam,
-    deleteTeamById,
-    getAllTeams,
-    resetStore,
-    seedMockData,
-} from "../../store/teamStore";
+  Team,
+  getTeamById,
+  setTeam,
+  deleteTeamById,
+  getAllTeams,
+  resetStore,
+  seedMockData,
+} from '../../store/teamStore';
 
 // Re-export store utilities so consumers can import everything from one place.
 export { getAllTeams, getTeamById, resetStore, seedMockData };
@@ -22,8 +22,8 @@ export type { Team };
 let teamCounter = 0;
 
 function generateId(): string {
-    teamCounter += 1;
-    return `team-${teamCounter}`;
+  teamCounter += 1;
+  return `team-${teamCounter}`;
 }
 
 // ── Public API ──────────────────────────────────
@@ -33,18 +33,18 @@ function generateId(): string {
  * @returns The newly created Team object.
  */
 export function createTeam(name: string): Team {
-    if (!name || name.trim().length === 0) {
-        throw new Error("Team name cannot be empty.");
-    }
+  if (!name || name.trim().length === 0) {
+    throw new Error('Team name cannot be empty.');
+  }
 
-    const team: Team = {
-        id: generateId(),
-        name: name.trim(),
-        members: [],
-    };
+  const team: Team = {
+    id: generateId(),
+    name: name.trim(),
+    members: [],
+  };
 
-    setTeam(team);
-    return team;
+  setTeam(team);
+  return team;
 }
 
 /**
@@ -53,17 +53,17 @@ export function createTeam(name: string): Team {
  * @returns The updated Team object.
  */
 export function renameTeam(teamId: string, newName: string): Team {
-    const team = getTeamById(teamId);
-    if (!team) {
-        throw new Error(`Team not found: ${teamId}`);
-    }
-    if (!newName || newName.trim().length === 0) {
-        throw new Error("New team name cannot be empty.");
-    }
+  const team = getTeamById(teamId);
+  if (!team) {
+    throw new Error(`Team not found: ${teamId}`);
+  }
+  if (!newName || newName.trim().length === 0) {
+    throw new Error('New team name cannot be empty.');
+  }
 
-    team.name = newName.trim();
-    setTeam(team);
-    return team;
+  team.name = newName.trim();
+  setTeam(team);
+  return team;
 }
 
 /**
@@ -71,10 +71,10 @@ export function renameTeam(teamId: string, newName: string): Team {
  * @throws If the team is not found.
  */
 export function deleteTeam(teamId: string): void {
-    const existed = deleteTeamById(teamId);
-    if (!existed) {
-        throw new Error(`Team not found: ${teamId}`);
-    }
+  const existed = deleteTeamById(teamId);
+  if (!existed) {
+    throw new Error(`Team not found: ${teamId}`);
+  }
 }
 
 /**
@@ -84,17 +84,17 @@ export function deleteTeam(teamId: string): void {
  * @returns The updated Team object.
  */
 export function addInternToTeam(teamId: string, internId: string): Team {
-    const team = getTeamById(teamId);
-    if (!team) {
-        throw new Error(`Team not found: ${teamId}`);
-    }
+  const team = getTeamById(teamId);
+  if (!team) {
+    throw new Error(`Team not found: ${teamId}`);
+  }
 
-    if (!team.members.includes(internId)) {
-        team.members.push(internId);
-        setTeam(team);
-    }
+  if (!team.members.includes(internId)) {
+    team.members.push(internId);
+    setTeam(team);
+  }
 
-    return team;
+  return team;
 }
 
 /**
@@ -103,19 +103,19 @@ export function addInternToTeam(teamId: string, internId: string): Team {
  * @returns The updated Team object.
  */
 export function removeInternFromTeam(teamId: string, internId: string): Team {
-    const team = getTeamById(teamId);
-    if (!team) {
-        throw new Error(`Team not found: ${teamId}`);
-    }
+  const team = getTeamById(teamId);
+  if (!team) {
+    throw new Error(`Team not found: ${teamId}`);
+  }
 
-    const index = team.members.indexOf(internId);
-    if (index === -1) {
-        throw new Error(
-            `Intern "${internId}" is not a member of team "${teamId}".`
-        );
-    }
+  const index = team.members.indexOf(internId);
+  if (index === -1) {
+    throw new Error(
+      `Intern "${internId}" is not a member of team "${teamId}".`
+    );
+  }
 
-    team.members.splice(index, 1);
-    setTeam(team);
-    return team;
+  team.members.splice(index, 1);
+  setTeam(team);
+  return team;
 }
