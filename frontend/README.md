@@ -4,6 +4,14 @@
 
 ---
 
+## 📘 User Manual
+
+For end-to-end usage instructions, see:
+
+- `docs/USER_MANUAL.md`
+
+---
+
 ## 📌 Overview
 
 The **Team-wise Standup Audio Submission Checker** is a client-side management application designed to integrate with the **Swecha Corpus backend**. The primary goal of this project is to simplify the process of organizing interns into teams and verifying whether required standup audio submissions have been uploaded under specific corpus categories.

@@ -1,196 +1,189 @@
 # Contributing
 
-  ## Overview
+## Overview
 
-  This project is a Vite + React + TypeScript frontend for managing interns, grouping them into teams, and checking standup audio
-  submissions against the Swecha Corpus backend.
+This project is a Vite + React + TypeScript frontend for managing interns, grouping them into teams, and verifying standup audio submissions against the Swecha Corpus backend.
 
-  Core areas in the codebase:
+Core areas in the codebase:
 
-  - `src/App.tsx`: login flow, session persistence, CSV preload, app shell
-  - `src/components/`: intern search, dashboards, team list, audio playback
-  - `src/services/corpus/`: Corpus API client and runtime configuration
-  - `src/utils/verification/`: standup verification logic
-  - `src/utils/parse*.ts`: CSV parsing for interns and seeded teams
-  - `tests/`: unit tests for parsing, store behavior, verification, and corpus service logic
+- `src/App.tsx`: login flow, session persistence, CSV preload, app shell
+- `src/components/`: intern search, dashboards, team list, audio playback
+- `src/services/corpus/`: Corpus API client and runtime configuration
+- `src/utils/verification/`: standup verification logic
+- `src/utils/parse*.ts`: CSV parsing for interns and seeded teams
+- `tests/`: unit tests for parsing, state behavior, verification, and Corpus service parsing
 
-  ## Prerequisites
+For end-user behavior and workflows, see `docs/USER_MANUAL.md`.
 
-  - Node.js 20 or newer
-  - npm
+## Prerequisites
 
-  ## Installation
+- Node.js 20 or newer
+- npm
 
-  1. Clone the repository.
-  2. Install dependencies:
+## Installation
 
+1. Clone the repository.
+2. Install dependencies:
 
-  npm install
+```bash
+npm install
+```
 
-  3. Optional local environment variables:
+3. Optional local environment variables:
 
-  SWECHA_API_BASE_URL=https://api.corpus.swecha.org
-  VITE_SWECHA_API_BASE_URL=https://api.corpus.swecha.org
-  CORPUS_TOKEN=your_optional_token
+```env
+SWECHA_API_BASE_URL=https://api.corpus.swecha.org
+VITE_SWECHA_API_BASE_URL=https://api.corpus.swecha.org
+CORPUS_TOKEN=your_optional_token
+VITE_STANDUP_LABEL_ALIASES=standup,stand-up
+VITE_INTERNSHIP_LABEL_ALIASES=internship,intern
+```
 
-  Notes:
+Notes:
 
-  - In local development, browser requests use relative /api/... routes through the Vite proxy in vite.config.ts.
-  - CORPUS_TOKEN is only used by the local proxy when a request does not already contain an Authorization header.
-  - In production on Vercel, /api/* is rewritten using vercel.json.
+- In local development, browser requests use relative `/api/...` routes through the Vite proxy in `vite.config.ts`.
+- `CORPUS_TOKEN` is used by the local proxy only when an outgoing request has no `Authorization` header.
+- In production on Vercel, `/api/*` is rewritten using `vercel.json`.
 
-  ## Usage
+## Local Development
 
-  Start the local development server:
+Start local dev server:
 
-  npm run dev
+```bash
+npm run dev
+```
 
-  Build the project:
+Build:
 
-  npm run build
+```bash
+npm run build
+```
 
-  Preview the production build:
+Preview build:
 
-  npm run preview
+```bash
+npm run preview
+```
 
-  Application flow:
+## Quality Checks
 
-  1. Log in with a phone number and password.
-  2. On successful login, the app preloads interns and seeded teams from:
-      - public/assets/interns.csv
-      - public/assets/teams.csv
-      - public/assets/team_members.csv
-  3. Use the Interns tab to search Corpus users and add them to the workspace.
-  4. Use the Team Dashboard tab to create and manage teams.
-  5. Use the Status or verification flow to check whether interns have valid standup audio submissions.
+Run tests:
 
-  ## Quality Checks
+```bash
+npm test
+```
 
-  Run tests:
+Run test coverage:
 
-  npm test
+```bash
+npm run test:coverage
+```
 
-  Run test coverage:
+Run linting:
 
-  npm run test:coverage
+```bash
+npm run lint
+```
 
-  Run linting:
+Check formatting:
 
-  npm run lint
+```bash
+npm run format:check
+```
 
-  Check formatting:
+Apply formatting:
 
-  npm run format:check
+```bash
+npm run format
+```
 
-  Apply formatting:
+Type-check:
 
-  npm run format
+```bash
+npx tsc -b
+```
 
-  Recommended pre-push validation:
+Recommended pre-push validation:
 
-  npm run format:check
-  npm run lint
-  npx tsc --noEmit
-  npm test
+```bash
+npm run format:check
+npm run lint
+npx tsc -b
+npm test
+```
 
-  ## Contribution Workflow
+## Contribution Workflow
 
-  1. Create a branch from the latest main branch.
-  2. Make focused changes.
-  3. Keep generated and local cache artifacts out of commits.
-  4. Run the quality checks locally.
-  5. Submit a merge request with a clear summary, validation steps, and any relevant screenshots for UI changes.
+1. Create a branch from the latest `main`.
+2. Make focused changes.
+3. Keep generated and local cache artifacts out of commits.
+4. Run quality checks locally.
+5. Submit a merge request with:
+   - clear summary
+   - validation steps
+   - screenshots for UI changes (when applicable)
 
-  ## Commit Message Convention
+## Commit Message Convention
 
-  Use semantic commits so the history stays readable and searchable.
+Use semantic commit messages:
 
-  Recommended format:
+```text
+<type>: <short summary>
+```
 
-  <type>: <short summary>
+Common types:
 
-  Common commit types:
+- `feat`: new feature
+- `fix`: bug fix
+- `chore`: tooling, config, maintenance
+- `docs`: documentation only
+- `refactor`: code restructuring without behavior change
+- `test`: test updates or additions
+- `style`: formatting/non-functional style changes
 
-  - feat: new feature
-  - fix: bug fix
-  - chore: tooling, config, maintenance
-  - docs: documentation only
-  - refactor: code restructuring without behavior change
-  - test: test updates or additions
-  - style: formatting or non-functional style-only changes
+## Changelog Process
 
-  Examples:
+- Update `CHANGELOG.md` for any user-visible or contributor-relevant change.
+- Add changes under `## [Unreleased]` in the appropriate section (`Added`, `Changed`, `Fixed`, `Removed`).
+- Move unreleased entries into a version section during release.
 
-  feat: add team status dashboard
-  fix: handle missing corpus audio metadata
-  chore: set up eslint and prettier
-  docs: add contributing and changelog docs
-  refactor: simplify standup verification flow
-  test: add coverage for team seed parsing
-  style: format dashboard components
+## Code Guidelines
 
-  Guidelines:
+- Use TypeScript throughout.
+- Follow the existing ESLint and Prettier configuration.
+- Prefer small, isolated changes.
+- Add/update tests when behavior changes in parsing, verification, state handling, or API parsing.
+- Keep architecture boundaries:
+  - UI in `src/components/`
+  - API interaction in `src/services/`
+  - reusable parsing/verification in `src/utils/`
 
-  - Keep the summary short and specific.
-  - Use the imperative mood.
-  - Avoid mixing unrelated changes in one commit.
-  - Prefer one logical change per commit.
+## CI
 
-  ## Code Guidelines
+GitLab CI currently runs:
 
-  - Use TypeScript throughout the frontend codebase.
-  - Follow the current ESLint and Prettier configuration.
-  - Prefer small, isolated changes over broad refactors unless the refactor is the task.
-  - Add or update tests when changing parsing, verification logic, state behavior, or API client behavior.
-  - Preserve the current app architecture:
-      - UI logic in src/components/
-      - backend interaction in src/services/
-      - reusable parsing and verification logic in src/utils/
+- `npm run test:coverage`
+- `npm run build`
 
-  ## Testing Guidance
+Run lint, format checks, and type checks locally before opening an MR.
 
-  You should add or update tests when changing:
+## Do Not Commit
 
-  - CSV parsing behavior
-  - standup verification rules
-  - team management logic
-  - corpus API response parsing
+Do not commit generated or local-only artifacts such as:
 
-  Existing coverage areas include:
+- `builds/`
+- `cache/`
+- `coverage/`
+- `dist/`
+- local environment files (`.env`, `.env.*`)
 
-  - tests/parseInternsCSV.test.ts
-  - tests/parseTeamSeedCSV.test.ts
-  - tests/teamStore.test.ts
-  - tests/corpusService.test.ts
-  - tests/verifyStandup.test.ts
-  - src/modules/teams/teamManager.test.ts
+## Merge Request Checklist
 
-  ## CI
-
-  GitLab CI currently runs:
-
-  - npm run test:coverage
-  - npm run build
-
-  Contributors should still run linting, formatting, and TypeScript checks locally before opening an MR.
-
-  ## Do Not Commit
-
-  Do not commit generated or local-only artifacts such as:
-
-  - builds/
-  - cache/
-  - coverage/
-  - dist/
-  - local environment files
-
-  ## Merge Request Checklist
-
-  - [ ] Changes are scoped to the task
-  - [ ] npm run format:check passes
-  - [ ] npm run lint passes
-  - [ ] npx tsc --noEmit passes
-  - [ ] npm test passes
-  - [ ] Tests were added or updated where behavior changed
-  - [ ] Generated files and caches are not included
-  - [ ] Commit messages follow the semantic commit convention
+- [ ] Changes are scoped to the task
+- [ ] `npm run format:check` passes
+- [ ] `npm run lint` passes
+- [ ] `npx tsc -b` passes
+- [ ] `npm test` passes
+- [ ] Tests were added/updated where behavior changed
+- [ ] Generated files and caches are not included
+- [ ] `CHANGELOG.md` updated (if applicable)
