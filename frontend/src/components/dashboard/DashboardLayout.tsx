@@ -693,19 +693,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     <div
                       style={{
                         alignItems: 'center',
-                        backgroundColor: row.isCompleted
-                          ? 'var(--success-bg)'
-                          : 'var(--surface-2)',
-                        border: `1px solid ${row.isCompleted ? 'var(--success-border)' : 'var(--border)'}`,
-                        borderRadius: '9999px',
-                        color: row.isCompleted
-                          ? 'var(--success-text)'
-                          : 'var(--text-subtle)',
-                        display: 'inline-flex',
-                        fontSize: 16,
-                        height: 34,
-                        justifyContent: 'center',
-                        width: 34,
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 6,
+                        justifyContent: 'flex-end',
+                        maxWidth: 220,
                       }}
                     >
                       {row.slotStatuses.map((slot) => (
@@ -718,8 +710,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                             border: `1px solid ${getStatusSlotBorder(slot.status)}`,
                             borderRadius: 9999,
                             color: getStatusSlotColor(slot.status),
+                            display: 'inline-flex',
                             fontSize: 11,
                             fontWeight: 700,
+                            justifyContent: 'center',
+                            minWidth: 36,
                             padding: '4px 8px',
                           }}
                           title={`${slot.label} (${slot.windowLabel})`}
