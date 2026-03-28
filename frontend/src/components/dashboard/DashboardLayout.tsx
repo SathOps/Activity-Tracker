@@ -90,9 +90,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [newTeamName, setNewTeamName] = React.useState('');
   const [activeView, setActiveView] =
     React.useState<DashboardView>(DEFAULT_VIEW);
-  const [hoveredBox, setHoveredBox] = React.useState<DashboardView | null>(
-    null
-  );
   const [verifyingTeamId, setVerifyingTeamId] = React.useState<string | null>(
     null
   );
@@ -125,7 +122,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     setManagedTeams((prev) => prev.map((team) => resetTeamVerification(team)));
   }, [selectedDateKey]);
 
-  const totalTeams = managedTeams.length;
   const allInternRows = React.useMemo(
     () =>
       managedTeams.flatMap((team) =>
@@ -137,7 +133,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       ),
     [managedTeams]
   );
-  const totalInterns = allInternRows.length;
   const selectedDateLabel = React.useMemo(
     () => formatDateForDisplay(selectedDateKey),
     [selectedDateKey]
@@ -526,11 +521,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       >
         <div style={{ display: 'grid', gap: 4 }}>
           {!isInlineStatusView ? (
-            <h2 style={{ color: '#0f172a', fontSize: 20, margin: 0 }}>
+            <h2 style={{ color: 'var(--text-main)', fontSize: 20, margin: 0 }}>
               Team Status Dashboard
             </h2>
           ) : null}
-          <p style={{ color: '#475569', fontSize: 13, margin: 0 }}>
+          <p style={{ color: 'var(--text-subtle)', fontSize: 13, margin: 0 }}>
             Daily date: {selectedDateLabel} | Weekly range: {selectedWeekLabel}
           </p>
         </div>
@@ -560,7 +555,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       <section style={{ marginBottom: 4 }}>
         <label
           style={{
-            color: '#374151',
+            color: 'var(--text-main)',
             display: 'grid',
             fontSize: 13,
             gap: 6,
@@ -572,8 +567,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             aria-label="Standup verification date"
             onChange={handleSelectedDateChange}
             style={{
-              border: '1px solid #d1d5db',
+              backgroundColor: 'var(--surface-0)',
+              border: '1px solid var(--border)',
               borderRadius: 8,
+              color: 'var(--text-main)',
               fontSize: 14,
               padding: '10px 12px',
             }}
@@ -592,10 +589,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               key={viewKey}
               onClick={() => setStatusView(viewKey)}
               style={{
-                backgroundColor: isActive ? '#1d4ed8' : '#f8fafc',
-                border: '1px solid #bfdbfe',
+                backgroundColor: isActive
+                  ? 'var(--accent)'
+                  : 'var(--surface-1)',
+                border: '1px solid var(--border)',
                 borderRadius: 8,
-                color: isActive ? '#ffffff' : '#1e293b',
+                color: isActive ? '#ffffff' : 'var(--text-main)',
                 cursor: 'pointer',
                 fontSize: 13,
                 fontWeight: 600,
@@ -652,11 +651,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       style={{
                         alignItems: 'center',
                         backgroundColor: row.isCompleted
-                          ? '#dcfce7'
-                          : '#e5e7eb',
-                        border: `1px solid ${row.isCompleted ? '#86efac' : '#cbd5e1'}`,
+                          ? 'var(--success-bg)'
+                          : 'var(--surface-2)',
+                        border: `1px solid ${row.isCompleted ? 'var(--success-border)' : 'var(--border)'}`,
                         borderRadius: '9999px',
-                        color: row.isCompleted ? '#166534' : '#64748b',
+                        color: row.isCompleted
+                          ? 'var(--success-text)'
+                          : 'var(--text-subtle)',
                         display: 'inline-flex',
                         fontSize: 16,
                         height: 34,
@@ -673,7 +674,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </section>
           )}
 
-          <section className="team-card" style={{ backgroundColor: '#f8fafc' }}>
+          <section
+            className="team-card"
+            style={{ backgroundColor: 'var(--surface-1)' }}
+          >
             <h3 className="team-name" style={{ marginBottom: 8 }}>
               Daily Pending Summary
             </h3>
@@ -688,7 +692,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 {pendingDailyRows.map((row) => (
                   <li
                     key={row.teamId}
-                    style={{ color: '#334155', fontSize: 13 }}
+                    style={{ color: 'var(--text-subtle)', fontSize: 13 }}
                   >
                     {row.teamName}: {row.remainingStandupCount} standup(s)
                     pending
@@ -731,9 +735,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                         key={dayStatus.dateKey}
                         style={{
                           backgroundColor: dayStatus.isCompleted
-                            ? '#f0fdf4'
-                            : '#f8fafc',
-                          border: `1px solid ${dayStatus.isCompleted ? '#86efac' : '#cbd5e1'}`,
+                            ? 'var(--success-bg)'
+                            : 'var(--surface-1)',
+                          border: `1px solid ${dayStatus.isCompleted ? 'var(--success-border)' : 'var(--border)'}`,
                           borderRadius: 8,
                           display: 'grid',
                           gap: 4,
@@ -742,7 +746,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       >
                         <strong
                           style={{
-                            color: '#0f172a',
+                            color: 'var(--text-main)',
                             cursor: 'help',
                             fontSize: 12,
                           }}
@@ -752,10 +756,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                         >
                           {dayStatus.dayLabel}
                         </strong>
-                        <span style={{ color: '#64748b', fontSize: 11 }}>
+                        <span
+                          style={{ color: 'var(--text-subtle)', fontSize: 11 }}
+                        >
                           {dayStatus.fullDateLabel}
                         </span>
-                        <span style={{ color: '#1e293b', fontSize: 12 }}>
+                        <span
+                          style={{ color: 'var(--text-main)', fontSize: 12 }}
+                        >
                           {dayStatus.standupCount}/
                           {dayStatus.requiredStandupCount}
                         </span>
@@ -777,7 +785,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </section>
           )}
 
-          <section className="team-card" style={{ backgroundColor: '#f8fafc' }}>
+          <section
+            className="team-card"
+            style={{ backgroundColor: 'var(--surface-1)' }}
+          >
             <h3 className="team-name" style={{ marginBottom: 8 }}>
               Weekly Pending Summary
             </h3>
@@ -792,7 +803,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 {pendingWeeklyRows.map((row) => (
                   <li
                     key={row.teamId}
-                    style={{ color: '#334155', fontSize: 13 }}
+                    style={{ color: 'var(--text-subtle)', fontSize: 13 }}
                   >
                     {row.teamName}: {row.pendingDayDetails.join(', ')} |
                     Remaining: {row.totalRemainingStandups}
@@ -825,30 +836,21 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       {!isInlineStatusView ? (
         <>
-          <section className="summary-cards-grid">
+          <section className="dashboard-view-switch" aria-label="View selector">
             {[
-              { key: 'TEAMS' as const, label: 'Teams', value: totalTeams },
-              {
-                key: 'INTERNS' as const,
-                label: 'Interns',
-                value: totalInterns,
-              },
+              { key: 'TEAMS' as const, label: 'Team Management' },
+              { key: 'INTERNS' as const, label: 'Intern Directory' },
             ].map((item) => {
               const isActive = activeView === item.key;
-              const isHovered = hoveredBox === item.key;
 
               return (
                 <button
-                  className={`summary-card-button${isActive ? ' is-active' : ''}`}
+                  className={`dashboard-view-button${isActive ? ' is-active' : ''}`}
                   key={item.key}
                   onClick={() => setActiveView(item.key)}
-                  onMouseEnter={() => setHoveredBox(item.key)}
-                  onMouseLeave={() => setHoveredBox(null)}
-                  data-hovered={isHovered ? 'true' : undefined}
                   type="button"
                 >
-                  <div className="summary-card-label">{item.label}</div>
-                  <strong className="summary-card-value">{item.value}</strong>
+                  {item.label}
                 </button>
               );
             })}
@@ -888,7 +890,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           <section style={{ marginBottom: 16 }}>
             <label
               style={{
-                color: '#374151',
+                color: 'var(--text-main)',
                 display: 'grid',
                 fontSize: 13,
                 gap: 6,
@@ -997,7 +999,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         >
           <section
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--surface-0)',
+              border: '1px solid var(--border)',
               borderRadius: 12,
               display: 'grid',
               gap: 14,

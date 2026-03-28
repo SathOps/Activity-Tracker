@@ -12,6 +12,9 @@ import {
 
 const ACCESS_TOKEN_STORAGE_KEY = 'corpus_access_token';
 const USERNAME_STORAGE_KEY = 'corpus_username';
+const THEME_STORAGE_KEY = 'standup_theme_mode';
+
+type ThemeMode = 'light' | 'dark';
 
 export default function App() {
   const [addedInterns, setAddedInterns] = useState<Intern[]>([]);
@@ -23,6 +26,9 @@ export default function App() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() =>
+    readStoredThemeMode()
+  );
 
   useEffect(() => {
     // Browser requests use relative /api/v1 routes via Vite proxy.
@@ -35,6 +41,15 @@ export default function App() {
   useEffect(() => {
     persistUsername(username);
   }, [username]);
+  useEffect(() => {
+    persistThemeMode(themeMode);
+
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    document.documentElement.setAttribute('data-theme', themeMode);
+  }, [themeMode]);
 
   // Preload interns and team seed data from CSV on login success
   useEffect(() => {
@@ -224,48 +239,66 @@ export default function App() {
   if (!authToken) {
     return (
       <main className="auth-shell">
-        <section className="auth-card">
-          <h1 className="auth-title">Corpus Login</h1>
-          <p className="auth-subtitle">
-            Login with phone number and password to open dashboard.
-          </p>
-          <form className="auth-form" onSubmit={handleLogin}>
-            <label className="auth-label">
-              Phone Number
-              <input
-                autoComplete="tel"
-                className="auth-input"
-                inputMode="numeric"
-                maxLength={10}
-                onChange={(event) =>
-                  setPhone(normalizePhoneInput(event.target.value))
-                }
-                pattern="[0-9]{10}"
-                placeholder="Enter 10-digit phone number"
-                type="text"
-                value={phone}
-              />
-            </label>
-            <label className="auth-label">
-              Password
-              <input
-                autoComplete="current-password"
-                className="auth-input"
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="Enter password"
-                type="password"
-                value={password}
-              />
-            </label>
-            {loginError ? <p className="auth-error">{loginError}</p> : null}
-            <button
-              className="primary-button auth-submit"
-              disabled={isLoggingIn}
-              type="submit"
-            >
-              {isLoggingIn ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
+        <section className="auth-stage">
+          <section className="auth-intro-panel">
+            <p className="auth-kicker">Team Standup Tracker</p>
+            <h1 className="auth-intro-title">
+              Daily standup operations for high-accountability teams.
+            </h1>
+            <p className="auth-intro-copy">
+              Manage intern submissions, verify completion, and track team-wise
+              progress from one professional operations workspace.
+            </p>
+            <ul className="auth-intro-points" aria-label="Platform highlights">
+              <li>Fast intern and team assignment workflow</li>
+              <li>Daily and weekly status verification views</li>
+              <li>Audio evidence access directly from team cards</li>
+            </ul>
+          </section>
+
+          <section className="auth-card">
+            <h2 className="auth-title">Corpus Login</h2>
+            <p className="auth-subtitle">
+              Login with phone number and password to open dashboard.
+            </p>
+            <form className="auth-form" onSubmit={handleLogin}>
+              <label className="auth-label">
+                Phone Number
+                <input
+                  autoComplete="tel"
+                  className="auth-input"
+                  inputMode="numeric"
+                  maxLength={10}
+                  onChange={(event) =>
+                    setPhone(normalizePhoneInput(event.target.value))
+                  }
+                  pattern="[0-9]{10}"
+                  placeholder="Enter 10-digit phone number"
+                  type="text"
+                  value={phone}
+                />
+              </label>
+              <label className="auth-label">
+                Password
+                <input
+                  autoComplete="current-password"
+                  className="auth-input"
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="Enter password"
+                  type="password"
+                  value={password}
+                />
+              </label>
+              {loginError ? <p className="auth-error">{loginError}</p> : null}
+              <button
+                className="primary-button auth-submit"
+                disabled={isLoggingIn}
+                type="submit"
+              >
+                {isLoggingIn ? 'Logging in...' : 'Login'}
+              </button>
+            </form>
+          </section>
         </section>
       </main>
     );
@@ -275,9 +308,26 @@ export default function App() {
     <div className="app-shell">
       <div className="app-toolbar">
         <div className="app-branding">
-          <h1 className="app-brand-title">StandupTracker</h1>
+          <div className="app-brand-mark" aria-hidden="true">
+            ST
+          </div>
+          <div>
+            <h1 className="app-brand-title">Standup Tracker</h1>
+            <p className="app-brand-subtitle">Operations Console</p>
+          </div>
         </div>
         <div className="profile-menu-container">
+          <button
+            aria-label={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} mode`}
+            className="theme-toggle-button"
+            onClick={() =>
+              setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'))
+            }
+            type="button"
+          >
+            {themeMode === 'dark' ? 'Light' : 'Dark'}
+          </button>
+
           <button
             aria-label="Open profile menu"
             className="profile-icon-button"
@@ -358,6 +408,28 @@ function persistUsername(username: string): void {
   }
 
   window.localStorage.setItem(USERNAME_STORAGE_KEY, username);
+}
+
+function readStoredThemeMode(): ThemeMode {
+  if (typeof window === 'undefined') {
+    return 'dark';
+  }
+
+  const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+
+  if (stored === 'dark' || stored === 'light') {
+    return stored;
+  }
+
+  return 'dark';
+}
+
+function persistThemeMode(mode: ThemeMode): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(THEME_STORAGE_KEY, mode);
 }
 
 function readAccessToken(payload: unknown): string {

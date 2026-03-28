@@ -243,8 +243,10 @@ export const TeamList: React.FC<TeamListProps> = ({
                         }))
                       }
                       style={{
-                        border: '1px solid #d1d5db',
+                        backgroundColor: 'var(--surface-0)',
+                        border: '1px solid var(--border)',
                         borderRadius: 6,
+                        color: 'var(--text-main)',
                         fontSize: 13,
                         minWidth: 220,
                         padding: '6px 8px',

@@ -84,7 +84,7 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
       <div
         style={{
           fontSize: 12,
-          color: '#ef4444',
+          color: 'var(--danger-text)',
           padding: '8px',
           textAlign: 'center',
         }}
@@ -101,12 +101,13 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
         display: 'grid',
         gap: 8,
         padding: '12px',
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--surface-0)',
+        color: 'var(--text-main)',
         borderRadius: 10,
-        border: '1px solid #e5e7eb',
+        border: '1px solid var(--border)',
         width: '100%',
         maxWidth: '400px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+        boxShadow: 'var(--shadow-soft)',
       }}
     >
       {/* Audio-only content; captions track not available for these short standup clips. */}
@@ -114,7 +115,13 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
       <audio ref={audioRef} src={audioUrl} autoPlay />
 
       {hasError ? (
-        <div style={{ fontSize: 12, color: '#ef4444', textAlign: 'center' }}>
+        <div
+          style={{
+            fontSize: 12,
+            color: 'var(--danger-text)',
+            textAlign: 'center',
+          }}
+        >
           Unable to play audio
         </div>
       ) : (
@@ -127,13 +134,19 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
               marginBottom: 4,
             }}
           >
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#374151' }}>
+            <span
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: 'var(--text-main)',
+              }}
+            >
               {label || 'Standup Audio'}
             </span>
             <div
               style={{
                 fontSize: 11,
-                color: '#6b7280',
+                color: 'var(--text-subtle)',
                 fontFamily: 'monospace',
               }}
             >
@@ -150,7 +163,7 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
             style={{
               width: '100%',
               height: 4,
-              accentColor: '#2563eb',
+              accentColor: 'var(--accent)',
               cursor: 'pointer',
             }}
           />
@@ -171,7 +184,7 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
                 border: 'none',
                 cursor: 'pointer',
                 fontSize: 18,
-                color: '#4b5563',
+                color: 'var(--text-subtle)',
               }}
               title="Rewind 10s"
               type="button"
@@ -184,7 +197,8 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
             <button
               onClick={togglePlay}
               style={{
-                background: '#2563eb',
+                background:
+                  'linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%)',
                 border: 'none',
                 borderRadius: '50%',
                 width: 36,
@@ -193,9 +207,9 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                color: 'white',
+                color: '#ffffff',
                 fontSize: 14,
-                boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)',
+                boxShadow: '0 8px 14px rgba(30, 79, 178, 0.26)',
               }}
               title={isPlaying ? 'Pause' : 'Play'}
               type="button"
@@ -222,7 +236,7 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
                 border: 'none',
                 cursor: 'pointer',
                 fontSize: 18,
-                color: '#4b5563',
+                color: 'var(--text-subtle)',
               }}
               title="Forward 10s"
               type="button"

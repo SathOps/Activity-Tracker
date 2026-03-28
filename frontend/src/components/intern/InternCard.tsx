@@ -111,9 +111,11 @@ export const InternCard: React.FC<InternCardProps> = ({
                 aria-label={`Edit intern name for ${displayName}`}
                 onChange={(event) => setEditedName(event.target.value)}
                 style={{
-                  border: '1px solid #d1d5db',
+                  border: '1px solid var(--border)',
                   borderRadius: 6,
+                  color: 'var(--text-main)',
                   fontSize: 12,
+                  backgroundColor: 'var(--surface-0)',
                   minWidth: 180,
                   padding: '6px 8px',
                 }}
@@ -136,7 +138,7 @@ export const InternCard: React.FC<InternCardProps> = ({
               </button>
             </div>
           ) : (
-            <div style={{ color: '#4b5563', fontSize: 13 }}>
+            <div style={{ color: 'var(--text-subtle)', fontSize: 13 }}>
               Qualified uploads
               {standupDateLabel ? ` on ${standupDateLabel}` : ''}:{' '}
               {todayValidCount ?? 0}
@@ -155,10 +157,12 @@ export const InternCard: React.FC<InternCardProps> = ({
               style={{
                 padding: '4px 8px',
                 fontSize: 12,
-                color: '#2563eb',
-                border: '1px solid #d1d5db',
+                color: 'var(--accent)',
+                border: '1px solid var(--border)',
                 borderRadius: 6,
-                backgroundColor: isExpanded ? '#eff6ff' : 'white',
+                backgroundColor: isExpanded
+                  ? 'var(--accent-soft)'
+                  : 'var(--surface-0)',
               }}
               type="button"
             >
@@ -195,14 +199,18 @@ export const InternCard: React.FC<InternCardProps> = ({
           style={{
             marginTop: 4,
             padding: 8,
-            backgroundColor: '#f9fafb',
+            backgroundColor: 'var(--surface-1)',
             borderRadius: 6,
-            border: '1px solid #e5e7eb',
+            border: '1px solid var(--border)',
           }}
         >
           {audios.length === 0 ? (
             <div
-              style={{ fontSize: 12, color: '#6b7280', textAlign: 'center' }}
+              style={{
+                fontSize: 12,
+                color: 'var(--text-subtle)',
+                textAlign: 'center',
+              }}
             >
               No standup audios found
             </div>
@@ -237,13 +245,17 @@ export const InternCard: React.FC<InternCardProps> = ({
                       gap: 8,
                       fontSize: 12,
                       padding: '4px 6px',
-                      backgroundColor: isPlaying ? '#eff6ff' : 'transparent',
+                      backgroundColor: isPlaying
+                        ? 'var(--accent-soft)'
+                        : 'transparent',
                       borderRadius: 4,
                     }}
                   >
                     <div style={{ display: 'grid' }}>
                       <strong>Standup {index + 1}</strong>
-                      <span style={{ color: '#6b7280', fontSize: 11 }}>
+                      <span
+                        style={{ color: 'var(--text-subtle)', fontSize: 11 }}
+                      >
                         {audioDate}
                       </span>
                     </div>
@@ -274,14 +286,14 @@ export const InternCard: React.FC<InternCardProps> = ({
                             onClick={() => onPause?.()}
                             style={{
                               padding: '4px 8px',
-                              color: '#ef4444',
+                              color: 'var(--danger-text)',
                               height: 32,
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               borderRadius: 8,
-                              border: '1px solid #fee2e2',
-                              background: '#fff1f1',
+                              border: '1px solid var(--danger-border)',
+                              background: 'var(--danger-bg)',
                             }}
                             title="Close Player"
                             type="button"
@@ -290,7 +302,7 @@ export const InternCard: React.FC<InternCardProps> = ({
                           </button>
                         </div>
                       ) : resolvingId === audio.id ? (
-                        <span style={{ color: '#2563eb', fontSize: 11 }}>
+                        <span style={{ color: 'var(--accent)', fontSize: 11 }}>
                           Resolving...
                         </span>
                       ) : (
@@ -300,8 +312,8 @@ export const InternCard: React.FC<InternCardProps> = ({
                           onClick={() => handlePlay(audio.id, audio.audioUrl)}
                           style={{
                             padding: '4px 10px',
-                            backgroundColor: '#2563eb',
-                            color: 'white',
+                            backgroundColor: 'var(--accent)',
+                            color: '#ffffff',
                             borderRadius: 4,
                             fontSize: 11,
                             opacity: !audio.audioUrl && !audio.id ? 0.5 : 1,
