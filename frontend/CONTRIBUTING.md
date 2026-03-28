@@ -80,6 +80,10 @@ Run test coverage:
 npm run test:coverage
 ```
 
+Coverage policy:
+
+- `npm run test:coverage` enforces 100% statements, branches, functions, and lines for the repo's executable TypeScript modules under `src/modules/`, `src/services/`, `src/store/`, and `src/utils/`
+
 Run linting:
 
 ```bash

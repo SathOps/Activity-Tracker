@@ -1,5 +1,6 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
+import { loadEnv } from 'vite';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -11,6 +12,25 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    test: {
+      coverage: {
+        all: true,
+        provider: 'v8',
+        include: [
+          'src/modules/**/*.ts',
+          'src/services/**/*.ts',
+          'src/store/**/*.ts',
+          'src/utils/**/*.ts',
+        ],
+        exclude: ['src/**/*.d.ts', 'src/**/*.test.ts', 'src/**/index.ts'],
+        thresholds: {
+          branches: 100,
+          functions: 100,
+          lines: 100,
+          statements: 100,
+        },
+      },
+    },
     server: {
       proxy: {
         '/api': {

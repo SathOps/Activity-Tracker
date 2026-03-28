@@ -159,5 +159,84 @@ describe('verifyStandup', () => {
     await expect(
       verifyStandupSubmission('intern-4', { uploadedOnDate: '2026-13-40' })
     ).rejects.toThrow('uploadedOnDate must be a valid date');
+
+    await expect(
+      verifyStandupSubmission('intern-4', {
+        uploadedOnDate: 'definitely-not-a-date',
+      })
+    ).rejects.toThrow('uploadedOnDate must be a valid date');
+  });
+
+  test('verifyStandupSubmission supports alias arrays and parses non-YYYY-MM-DD date strings', async () => {
+    mockedGetInternAudios.mockResolvedValue([
+      buildAudio({
+        id: 'audio-valid',
+        category: 'Daily Standup',
+        tag: 'Internship Track',
+        uploadedAt: '2026-02-10T10:00:00.000Z',
+      }),
+      buildAudio({
+        id: 'audio-missing-date',
+        category: 'Daily Standup',
+        tag: 'Internship Track',
+        uploadedAt: undefined,
+      }),
+      buildAudio({
+        id: 'audio-invalid-date',
+        category: 'Daily Standup',
+        tag: 'Internship Track',
+        uploadedAt: 'not-a-date',
+      }),
+    ]);
+
+    const result = await verifyStandupSubmission('  intern-5  ', {
+      uploadedOnDate: '2026-02-10T12:00:00Z',
+      standupAliases: ['!!!', 'daily standup', 'progress update'],
+      internshipAliases: ['   ', 'internship track', 'internship program'],
+    });
+
+    expect(mockedGetInternAudios).toHaveBeenCalledWith('intern-5');
+    expect(result.checkedDate).toBe('2026-02-10');
+    expect(result.validCount).toBe(1);
+    expect(result.audios?.map((audio) => audio.id)).toEqual(['audio-valid']);
+  });
+
+  test('verifyStandupSubmission treats blank uploadedOnDate as no filter and rejects blank intern ids', async () => {
+    mockedGetInternAudios.mockResolvedValue([buildAudio({ id: 'audio-any' })]);
+
+    const result = await verifyStandupSubmission('intern-6', {
+      uploadedOnDate: '   ',
+    });
+
+    expect(result.checkedDate).toBeUndefined();
+    expect(result.validCount).toBe(1);
+    await expect(verifyStandupSubmission('   ')).rejects.toThrow(
+      'internId is required'
+    );
+  });
+
+  test('isValidStandupSubmissionAudio ignores blank alias tokens and works without labels', () => {
+    const result = isValidStandupSubmissionAudio(
+      {
+        category: 'Daily Standup',
+        tag: 'Internship Track',
+        labels: ['!!!'],
+      },
+      {
+        standupAliases: new Set(['!!!', 'dailystandup']),
+        internshipAliases: new Set(['', 'internshiptrack']),
+      }
+    );
+
+    expect(result).toBe(true);
+  });
+
+  test('isValidStandupSubmissionAudio works when labels are omitted entirely', () => {
+    const result = isValidStandupSubmissionAudio({
+      category: 'standup',
+      tag: 'internship',
+    });
+
+    expect(result).toBe(true);
   });
 });

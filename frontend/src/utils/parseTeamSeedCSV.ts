@@ -32,7 +32,7 @@ export function parseTeamsCSV(csvText: string): TeamSeedRow[] {
     }
 
     seenTeamIds.add(teamId);
-    rows.push({ teamId, teamName: resolvedTeamName || teamId });
+    rows.push({ teamId, teamName: resolvedTeamName });
   }
 
   return rows;
@@ -53,10 +53,10 @@ export function parseTeamMembersCSV(csvText: string): TeamMemberSeedRow[] {
     }
 
     rows.push({
-      teamId: teamId || undefined,
-      teamName: teamName || undefined,
-      internId: internId || undefined,
-      studentName: studentName || undefined,
+      teamId: teamId.length > 0 ? teamId : undefined,
+      teamName: teamName.length > 0 ? teamName : undefined,
+      internId: internId.length > 0 ? internId : undefined,
+      studentName: studentName.length > 0 ? studentName : undefined,
     });
   }
 
@@ -122,8 +122,7 @@ export function buildPreloadedTeams(
     teamInterns.push({
       internId: resolvedIntern.id,
       corpusUserId: resolvedIntern.id,
-      internName:
-        resolvedIntern.name || member.studentName || resolvedIntern.id,
+      internName: resolveInternDisplayName(resolvedIntern, member.studentName),
       status: 'PENDING',
       todayValidCount: 0,
     });
@@ -255,17 +254,42 @@ function resolveTeamId(
   }
 
   if (!teamNameById.has(generatedTeamId)) {
-    const resolvedTeamName = sanitizeCell(
-      member.teamName || member.teamId || generatedTeamId
-    );
-    teamNameById.set(generatedTeamId, resolvedTeamName || generatedTeamId);
+    let resolvedTeamNameSource = generatedTeamId;
+
+    if (member.teamId) {
+      resolvedTeamNameSource = member.teamId;
+    }
+
+    if (member.teamName) {
+      resolvedTeamNameSource = member.teamName;
+    }
+
+    const resolvedTeamName = sanitizeCell(resolvedTeamNameSource);
+    teamNameById.set(generatedTeamId, resolvedTeamName);
     teamIdByNormalizedName.set(
-      normalizeLookupKey(resolvedTeamName || generatedTeamId),
+      normalizeLookupKey(resolvedTeamName),
       generatedTeamId
     );
   }
 
   return generatedTeamId;
+}
+
+function resolveInternDisplayName(
+  intern: Intern,
+  fallbackStudentName: string | undefined
+): string {
+  const trimmedName = intern.name.trim();
+
+  if (trimmedName) {
+    return trimmedName;
+  }
+
+  if (fallbackStudentName) {
+    return fallbackStudentName;
+  }
+
+  return intern.id;
 }
 
 function normalizeIdentifier(value: string): string {

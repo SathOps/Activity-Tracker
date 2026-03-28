@@ -33,7 +33,7 @@ export interface CorpusServiceConfig {
   baseUrl?: string;
   authToken?: string;
   useMock?: boolean;
-  fetcher?: FetchLike;
+  fetcher?: FetchLike | null;
 }
 
 interface RuntimeConfig {
@@ -65,8 +65,9 @@ export function configureCorpusService(config: CorpusServiceConfig = {}): void {
     runtimeConfig.useMock = config.useMock;
   }
 
-  if (typeof config.fetcher === 'function') {
-    runtimeConfig.fetcher = config.fetcher;
+  if ('fetcher' in config) {
+    runtimeConfig.fetcher =
+      typeof config.fetcher === 'function' ? config.fetcher : undefined;
   }
 }
 
@@ -521,31 +522,25 @@ function splitLabelText(value: string): string[] {
 
   return cleaned
     .split(/[|,;/]+/g)
-    .map((part) =>
-      part
-        // eslint-disable-next-line no-useless-escape
-        .replace(/^[\[\(\{'"`]+/, '')
-        // eslint-disable-next-line no-useless-escape
-        .replace(/[\]\)\}'"`]+$/, '')
-        .trim()
-    )
+    .map((part) => {
+      const trimmedPart = part.trim();
+
+      return (
+        trimmedPart
+          // eslint-disable-next-line no-useless-escape
+          .replace(/^[\[\(\{'"`]+/, '')
+          // eslint-disable-next-line no-useless-escape
+          .replace(/[\]\)\}'"`]+$/, '')
+          .trim()
+      );
+    })
     .filter((part) => part.length > 0);
 }
 
 function uniqueNonEmptyStrings(values: readonly string[]): string[] {
-  const uniqueValues = new Set<string>();
-
-  for (const value of values) {
-    const normalized = value.trim();
-
-    if (!normalized) {
-      continue;
-    }
-
-    uniqueValues.add(normalized);
-  }
-
-  return Array.from(uniqueValues);
+  return Array.from(
+    new Set(values.map((value) => value.trim()).filter((value) => value.length))
+  );
 }
 
 function resolveArray(payload: unknown): unknown[] {
