@@ -13,6 +13,7 @@ The format is based on Keep a Changelog, and this project follows a simple relea
 - `lint`, `format`, and `format:check` npm scripts
 - contribution guide for local development and project workflow
 - repo-managed Git hooks for pre-commit staged formatting/linting and pre-push validation
+- `scripts/updateChangelog.js` plus `npm run changelog:update` to append notes to the changelog without manual edits
 
 ### Changed
 
@@ -23,6 +24,8 @@ The format is based on Keep a Changelog, and this project follows a simple relea
 - Standardized code formatting across the codebase
 - Updated lint and format ignores to exclude generated and cache artifacts
 - Expanded automated test coverage across services, utils, store, and module logic, and enforced 100% coverage thresholds for those executable TypeScript modules
+- Standup slot timing now respects the on-time window end and late cutoff before assigning GOOD/DELAYED badges, ensuring missing uploads render grey and multi-word label aliases split cleanly in verification
+- Dashboard status summaries now retry each intern fetch up to three times, fail fast instead of showing partial data, remove the partial-data warning, and surface a refresh error when any request still fails
 
 ### Fixed
 

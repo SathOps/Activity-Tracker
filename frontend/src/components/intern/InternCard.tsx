@@ -1,6 +1,7 @@
 import React from 'react';
 import type { InternAudioMetadata } from '../../services/corpus/corpusService';
 import { getAudioRecordUrl } from '../../services/corpus/corpusService';
+import type { StandupSlotResult } from '../../utils/verification';
 import StandupAudioPlayer from '../audio/StandupAudioPlayer';
 
 export type SubmissionStatus = 'COMPLETED' | 'PENDING';
@@ -8,8 +9,8 @@ export type SubmissionStatus = 'COMPLETED' | 'PENDING';
 export interface InternCardProps {
   internId: string;
   internName?: string;
-  teamProgressCount?: number;
-  requiredStandupCount?: number;
+  todayValidCount?: number;
+  slotStatuses?: StandupSlotResult[];
   standupDateLabel?: string;
   audios?: InternAudioMetadata[];
   activeAudioId?: string | null;
@@ -22,8 +23,8 @@ export interface InternCardProps {
 export const InternCard: React.FC<InternCardProps> = ({
   internId,
   internName,
-  teamProgressCount = 0,
-  requiredStandupCount = 4,
+  todayValidCount,
+  slotStatuses = [],
   standupDateLabel,
   audios = [],
   activeAudioId,
@@ -33,6 +34,9 @@ export const InternCard: React.FC<InternCardProps> = ({
   onUpdateIntern,
 }) => {
   const displayName = (internName ?? '').trim() || 'Unnamed Intern';
+  const visibleSlotStatuses = slotStatuses.filter(
+    (slot) => slot.status !== 'MISSING'
+  );
   const [isEditing, setIsEditing] = React.useState(false);
   const [editedName, setEditedName] = React.useState(displayName);
   const [isExpanded, setIsExpanded] = React.useState(false);
@@ -140,11 +144,61 @@ export const InternCard: React.FC<InternCardProps> = ({
               </button>
             </div>
           ) : (
-            <div style={{ color: 'var(--text-subtle)', fontSize: 13 }}>
-              Team uploads
-              {standupDateLabel ? ` on ${standupDateLabel}` : ''}:{' '}
-              {teamProgressCount}/{requiredStandupCount}
-            </div>
+            <>
+              <div style={{ color: '#4b5563', fontSize: 13 }}>
+                Qualified uploads
+                {standupDateLabel ? ` on ${standupDateLabel}` : ''}:{' '}
+                {todayValidCount ?? 0}
+              </div>
+              {visibleSlotStatuses.length > 0 ? (
+                <div
+                  style={{
+                    display: 'grid',
+                    gap: 6,
+                    marginTop: 6,
+                  }}
+                >
+                  {visibleSlotStatuses.map((slot) => (
+                    <div
+                      key={slot.slotId}
+                      style={{
+                        alignItems: 'center',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 6,
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: '#0f172a',
+                          fontSize: 12,
+                          fontWeight: 600,
+                          minWidth: 78,
+                        }}
+                      >
+                        {slot.label}
+                      </span>
+                      <span
+                        style={{
+                          backgroundColor: getSlotStatusBackground(slot.status),
+                          border: `1px solid ${getSlotStatusBorder(slot.status)}`,
+                          borderRadius: 9999,
+                          color: getSlotStatusColor(slot.status),
+                          fontSize: 11,
+                          fontWeight: 700,
+                          padding: '2px 8px',
+                        }}
+                      >
+                        {slot.status}
+                      </span>
+                      <span style={{ color: '#6b7280', fontSize: 11 }}>
+                        {slot.windowLabel}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </>
           )}
         </div>
 
@@ -336,5 +390,41 @@ export const InternCard: React.FC<InternCardProps> = ({
     </article>
   );
 };
+
+function getSlotStatusBackground(status: StandupSlotResult['status']): string {
+  if (status === 'GOOD') {
+    return '#dcfce7';
+  }
+
+  if (status === 'DELAYED') {
+    return '#fef3c7';
+  }
+
+  return '#f1f5f9';
+}
+
+function getSlotStatusBorder(status: StandupSlotResult['status']): string {
+  if (status === 'GOOD') {
+    return '#86efac';
+  }
+
+  if (status === 'DELAYED') {
+    return '#fcd34d';
+  }
+
+  return '#cbd5e1';
+}
+
+function getSlotStatusColor(status: StandupSlotResult['status']): string {
+  if (status === 'GOOD') {
+    return '#166534';
+  }
+
+  if (status === 'DELAYED') {
+    return '#92400e';
+  }
+
+  return '#475569';
+}
 
 export default InternCard;

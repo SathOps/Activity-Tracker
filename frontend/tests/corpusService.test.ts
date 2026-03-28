@@ -14,6 +14,7 @@ interface FetchCall {
     method?: string;
     headers?: Record<string, string>;
     body?: string;
+    cache?: string;
   };
 }
 
@@ -58,7 +59,10 @@ test('searchInternById uses configured base URL/auth header and parses profile p
   expect(calls).toHaveLength(1);
   expect(calls[0].url).toBe('https://api.example.test/api/v1/users/intern_1');
   expect(calls[0].init?.method).toBe('GET');
+  expect(calls[0].init?.cache).toBe('no-store');
   expect(calls[0].init?.headers?.Accept).toBe('application/json');
+  expect(calls[0].init?.headers?.['Cache-Control']).toBe('no-cache');
+  expect(calls[0].init?.headers?.Pragma).toBe('no-cache');
   expect(calls[0].init?.headers?.Authorization).toBe('Bearer token-123');
 });
 
@@ -392,6 +396,33 @@ test('getInternAudios returns an empty list on 404', async () => {
   });
 
   await expect(getInternAudios('intern_404')).resolves.toEqual([]);
+});
+
+test('getInternAudios treats timezone-less backend timestamps as GMT', async () => {
+  configureCorpusService({
+    fetcher: async () =>
+      mockResponse(200, [
+        {
+          id: 'audio_gmt',
+          category: 'standup',
+          tag: 'internship',
+          uploadedAt: '2026-02-10T03:40:00',
+        },
+      ]),
+  });
+
+  const audios = await getInternAudios('intern_gmt');
+
+  expect(audios).toEqual([
+    {
+      id: 'audio_gmt',
+      category: 'standup',
+      tag: 'internship',
+      labels: ['standup', 'internship'],
+      uploadedAt: '2026-02-10T03:40:00.000Z',
+      audioUrl: undefined,
+    },
+  ]);
 });
 
 test('getAudioRecordUrl returns URL from nested payload data and ignores blank input', async () => {

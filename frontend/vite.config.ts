@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { loadEnv } from 'vite';
 
@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     test: {
+      exclude: [...configDefaults.exclude, 'builds/**'],
       coverage: {
         reporter: ['text', 'cobertura', 'html'],
         all: true,

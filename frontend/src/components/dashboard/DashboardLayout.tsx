@@ -2,7 +2,16 @@ import React from 'react';
 import TeamList, { Team } from './TeamList';
 import InternCard from '../intern/InternCard';
 import type { Intern } from '../intern/InternSearch';
-import { verifyStandupSubmission } from '../../utils/verification';
+import { parseTimestamp } from '../../utils/timestamps';
+import {
+  buildStandupSlotResults,
+  countCompletedStandupSlots,
+  getDateKeyInTimeZone,
+  getDefaultStandupTimeZone,
+  isValidStandupSubmissionAudio,
+  verifyStandupSubmission,
+  type StandupSlotResult,
+} from '../../utils/verification';
 import { getInternAudios } from '../../services/corpus';
 import type { InternAudioMetadata } from '../../services/corpus';
 
@@ -16,6 +25,7 @@ interface TeamDailyStatusRow {
   requiredStandupCount: number;
   remainingStandupCount: number;
   isCompleted: boolean;
+  slotStatuses: StandupSlotResult[];
   contributorDetails: ContributorUploadDetail[];
 }
 
@@ -72,6 +82,9 @@ const INTERNSHIP_ALIAS_OVERRIDE = mergeAliases(
   ['Internship', ...REQUIRED_CATEGORY_UUID_ALIASES],
   parseAliasEnv(import.meta.env.VITE_INTERNSHIP_LABEL_ALIASES)
 );
+const STANDUP_TIME_ZONE = getDefaultStandupTimeZone();
+const STATUS_FETCH_BATCH_SIZE = 4;
+const MAX_INTERN_FETCH_ATTEMPTS = 3;
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   teams,
@@ -122,7 +135,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     setManagedTeams((prev) => prev.map((team) => resetTeamVerification(team)));
   }, [selectedDateKey]);
 
-  const totalTeams = managedTeams.length;
   const teamProgressById = React.useMemo(
     () => buildTeamProgressById(managedTeams),
     [managedTeams]
@@ -216,6 +228,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         teamStatus: 'PENDING',
         todayStandupCount: 0,
         requiredStandupCount: REQUIRED_TEAM_STANDUPS,
+        teamSlotStatuses: createMissingSlotStatuses(),
       },
     ]);
 
@@ -260,6 +273,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               internName: trimmedName,
               status: 'PENDING',
               todayValidCount: 0,
+              slotStatuses: createMissingSlotStatuses(),
             },
           ],
         };
@@ -301,6 +315,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               validCount: 0,
               status: 'PENDING' as const,
               checkedDate: verificationDateKey,
+              audios: [],
+              slotStatuses: createMissingSlotStatuses(),
             };
           }
         })
@@ -318,10 +334,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           result.audios ?? [],
         ])
       );
-      const teamTodayStandupCount = verificationResults.reduce(
-        (total, result) => total + result.validCount,
-        0
+      const teamSlotStatuses = buildStandupSlotResults(
+        verificationResults.flatMap((result) => result.audios ?? []),
+        verificationDateKey
       );
+      const teamTodayStandupCount =
+        countCompletedStandupSlots(teamSlotStatuses);
 
       setManagedTeams((prev) =>
         prev.map((candidateTeam) => {
@@ -338,13 +356,19 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             todayStandupCount: teamTodayStandupCount,
             verifiedDate: verificationDateKey,
             requiredStandupCount: REQUIRED_TEAM_STANDUPS,
+            teamSlotStatuses,
             interns: candidateTeam.interns.map((intern) => {
               const corpusUserId = intern.corpusUserId || intern.internId;
               const todayValidCount = countByInternId.get(corpusUserId) ?? 0;
+              const slotStatuses =
+                verificationResults.find(
+                  (result) => result.internId === corpusUserId
+                )?.slotStatuses ?? createMissingSlotStatuses();
 
               return {
                 ...intern,
                 todayValidCount,
+                slotStatuses,
                 audios: audioByInternId.get(corpusUserId) ?? [],
                 status: todayValidCount > 0 ? 'COMPLETED' : 'PENDING',
               };
@@ -450,7 +474,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       const relevantDateKeys = new Set<string>(selectedWeekDateKeys);
       relevantDateKeys.add(selectedDateKey);
       const uniqueInternIds = collectUniqueTeamInternIds(managedTeams);
-      const countsByInternByDate = await buildInternDateCountMap(
+      const submissionSnapshot = await buildInternSubmissionSnapshot(
         uniqueInternIds,
         relevantDateKeys,
         aliasCriteria
@@ -462,7 +486,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       setTeamDailyStatusRows(
         managedTeams.map((team) =>
-          buildTeamDailyStatusRow(team, selectedDateKey, countsByInternByDate)
+          buildTeamDailyStatusRow(
+            team,
+            selectedDateKey,
+            submissionSnapshot.countsByInternByDate,
+            submissionSnapshot.audiosByInternByDate
+          )
         )
       );
       setTeamWeeklyStatusRows(
@@ -470,7 +499,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           buildTeamWeeklyStatusRow(
             team,
             selectedWeekDateKeys,
-            countsByInternByDate
+            submissionSnapshot.countsByInternByDate,
+            submissionSnapshot.audiosByInternByDate
           )
         )
       );
@@ -481,7 +511,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       console.error('Unable to load team status summary', error);
       setStatusError(
-        'Unable to load team status summary right now. Please try again.'
+        'Unable to load team status summary right now. Please refresh to try again.'
       );
       setTeamDailyStatusRows([]);
       setTeamWeeklyStatusRows([]);
@@ -630,7 +660,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {!statusLoading && statusError ? (
         <p className="team-empty">{statusError}</p>
       ) : null}
-
       {!statusLoading && !statusError && statusView === 'DAILY' ? (
         <section style={{ display: 'grid', gap: 14 }}>
           {teamDailyStatusRows.length === 0 ? (
@@ -643,7 +672,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 <article className="team-card" key={row.teamId}>
                   <header
                     style={{
-                      alignItems: 'center',
+                      alignItems: 'start',
                       display: 'flex',
                       gap: 8,
                       justifyContent: 'space-between',
@@ -661,7 +690,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                         Progress: {row.standupCount}/{row.requiredStandupCount}
                       </div>
                     </div>
-                    <span
+                    <div
                       style={{
                         alignItems: 'center',
                         backgroundColor: row.isCompleted
@@ -678,10 +707,27 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                         justifyContent: 'center',
                         width: 34,
                       }}
-                      title={row.isCompleted ? 'Completed' : 'Pending'}
                     >
-                      ✓
-                    </span>
+                      {row.slotStatuses.map((slot) => (
+                        <span
+                          key={slot.slotId}
+                          style={{
+                            backgroundColor: getStatusSlotBackground(
+                              slot.status
+                            ),
+                            border: `1px solid ${getStatusSlotBorder(slot.status)}`,
+                            borderRadius: 9999,
+                            color: getStatusSlotColor(slot.status),
+                            fontSize: 11,
+                            fontWeight: 700,
+                            padding: '4px 8px',
+                          }}
+                          title={`${slot.label} (${slot.windowLabel})`}
+                        >
+                          {slot.slotId}
+                        </span>
+                      ))}
+                    </div>
                   </header>
                 </article>
               ))}
@@ -979,10 +1025,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       onDeleteIntern={handleDeleteIntern}
                       onUpdateIntern={handleUpdateIntern}
                       standupDateLabel={selectedDateLabel}
-                      teamProgressCount={
-                        intern.teamProgressCount ?? intern.todayValidCount ?? 0
-                      }
-                      requiredStandupCount={intern.requiredStandupCount}
+                      todayValidCount={intern.todayValidCount}
+                      slotStatuses={intern.slotStatuses}
                       audios={intern.audios}
                       activeAudioId={activeAudioId}
                       onPlay={(_internId, audioId) => setActiveAudioId(audioId)}
@@ -1089,11 +1133,13 @@ function resetTeamVerification(team: Team): Team {
     todayStandupCount: 0,
     verifiedDate: undefined,
     requiredStandupCount: REQUIRED_TEAM_STANDUPS,
+    teamSlotStatuses: createMissingSlotStatuses(),
     interns: team.interns.map((intern) => ({
       ...intern,
       status: 'PENDING',
       teamProgressCount: 0,
       todayValidCount: 0,
+      slotStatuses: createMissingSlotStatuses(),
     })),
   };
 }
@@ -1174,6 +1220,10 @@ function deriveTeamWithTeamProgress(
   };
 }
 
+function createMissingSlotStatuses(): StandupSlotResult[] {
+  return buildStandupSlotResults([], '');
+}
+
 function getLocalDateKey(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -1216,57 +1266,64 @@ function collectUniqueTeamInternIds(teams: Team[]): string[] {
   return Array.from(uniqueIds);
 }
 
-async function buildInternDateCountMap(
+interface InternSubmissionSnapshot {
+  countsByInternByDate: Map<string, Map<string, number>>;
+  audiosByInternByDate: Map<string, Map<string, InternAudioMetadata[]>>;
+}
+
+async function buildInternSubmissionSnapshot(
   internIds: string[],
   targetDateKeys: Set<string>,
   criteria: SubmissionAliasCriteria
-): Promise<Map<string, Map<string, number>>> {
-  const entries = await Promise.all(
-    internIds.map(async (internId) => {
-      try {
-        const audios = await getInternAudios(internId);
-        const dateCounts = new Map<string, number>();
+): Promise<InternSubmissionSnapshot> {
+  const entries: Array<
+    readonly [string, Map<string, number>, Map<string, InternAudioMetadata[]>]
+  > = [];
 
-        for (const audio of audios) {
-          if (!audioMatchesSubmissionCriteria(audio, criteria)) {
-            continue;
-          }
+  for (
+    let batchStartIndex = 0;
+    batchStartIndex < internIds.length;
+    batchStartIndex += STATUS_FETCH_BATCH_SIZE
+  ) {
+    const batchInternIds = internIds.slice(
+      batchStartIndex,
+      batchStartIndex + STATUS_FETCH_BATCH_SIZE
+    );
+    const batchEntries = await Promise.all(
+      batchInternIds.map((internId) =>
+        fetchInternContributionWithRetries(internId, targetDateKeys, criteria)
+      )
+    );
 
-          const uploadedDateKey = resolveUploadedDateKey(audio.uploadedAt);
+    entries.push(...batchEntries);
+  }
 
-          if (!uploadedDateKey || !targetDateKeys.has(uploadedDateKey)) {
-            continue;
-          }
-
-          dateCounts.set(
-            uploadedDateKey,
-            (dateCounts.get(uploadedDateKey) ?? 0) + 1
-          );
-        }
-
-        return [internId, dateCounts] as const;
-      } catch (error) {
-        console.error(`Unable to load contributions for "${internId}"`, error);
-        return [internId, new Map<string, number>()] as const;
-      }
-    })
-  );
-
-  return new Map(entries);
+  return {
+    countsByInternByDate: new Map(
+      entries.map(([internId, dateCounts]) => [internId, dateCounts])
+    ),
+    audiosByInternByDate: new Map(
+      entries.map(([internId, _dateCounts, dateAudios]) => [
+        internId,
+        dateAudios,
+      ])
+    ),
+  };
 }
 
 function buildTeamDailyStatusRow(
   team: Team,
   dateKey: string,
-  countsByInternByDate: Map<string, Map<string, number>>
+  countsByInternByDate: Map<string, Map<string, number>>,
+  audiosByInternByDate: Map<string, Map<string, InternAudioMetadata[]>>
 ): TeamDailyStatusRow {
   const requiredStandupCount =
     team.requiredStandupCount ?? REQUIRED_TEAM_STANDUPS;
-  const totalStandupCount = sumTeamStandupsForDate(
-    team,
-    dateKey,
-    countsByInternByDate
+  const slotStatuses = buildStandupSlotResults(
+    collectTeamAudiosForDate(team, dateKey, audiosByInternByDate),
+    dateKey
   );
+  const totalStandupCount = countCompletedStandupSlots(slotStatuses);
   const cappedStandupCount = Math.min(totalStandupCount, requiredStandupCount);
   const remainingStandupCount = Math.max(
     requiredStandupCount - totalStandupCount,
@@ -1285,6 +1342,7 @@ function buildTeamDailyStatusRow(
     requiredStandupCount,
     remainingStandupCount,
     isCompleted: totalStandupCount >= requiredStandupCount,
+    slotStatuses,
     contributorDetails,
   };
 }
@@ -1292,16 +1350,17 @@ function buildTeamDailyStatusRow(
 function buildTeamWeeklyStatusRow(
   team: Team,
   weekDateKeys: string[],
-  countsByInternByDate: Map<string, Map<string, number>>
+  countsByInternByDate: Map<string, Map<string, number>>,
+  audiosByInternByDate: Map<string, Map<string, InternAudioMetadata[]>>
 ): TeamWeeklyStatusRow {
   const requiredStandupCount =
     team.requiredStandupCount ?? REQUIRED_TEAM_STANDUPS;
   const dayStatuses = weekDateKeys.map((dateKey) => {
-    const totalStandupCount = sumTeamStandupsForDate(
-      team,
-      dateKey,
-      countsByInternByDate
+    const slotStatuses = buildStandupSlotResults(
+      collectTeamAudiosForDate(team, dateKey, audiosByInternByDate),
+      dateKey
     );
+    const totalStandupCount = countCompletedStandupSlots(slotStatuses);
     const cappedStandupCount = Math.min(
       totalStandupCount,
       requiredStandupCount
@@ -1350,14 +1409,14 @@ function buildTeamWeeklyStatusRow(
   };
 }
 
-function sumTeamStandupsForDate(
+function collectTeamAudiosForDate(
   team: Team,
   dateKey: string,
-  countsByInternByDate: Map<string, Map<string, number>>
-): number {
-  return getTeamInternIds(team).reduce((total, internId) => {
-    return total + (countsByInternByDate.get(internId)?.get(dateKey) ?? 0);
-  }, 0);
+  audiosByInternByDate: Map<string, Map<string, InternAudioMetadata[]>>
+): InternAudioMetadata[] {
+  return getTeamInternIds(team).flatMap(
+    (internId) => audiosByInternByDate.get(internId)?.get(dateKey) ?? []
+  );
 }
 
 function buildContributorDetailsForDate(
@@ -1474,6 +1533,110 @@ function formatContributorTooltip(
     .join(' | ');
 }
 
+function getStatusSlotBackground(status: StandupSlotResult['status']): string {
+  if (status === 'GOOD') {
+    return '#dcfce7';
+  }
+
+  if (status === 'DELAYED') {
+    return '#fef3c7';
+  }
+
+  return '#f1f5f9';
+}
+
+function getStatusSlotBorder(status: StandupSlotResult['status']): string {
+  if (status === 'GOOD') {
+    return '#86efac';
+  }
+
+  if (status === 'DELAYED') {
+    return '#fcd34d';
+  }
+
+  return '#cbd5e1';
+}
+
+function getStatusSlotColor(status: StandupSlotResult['status']): string {
+  if (status === 'GOOD') {
+    return '#166534';
+  }
+
+  if (status === 'DELAYED') {
+    return '#92400e';
+  }
+
+  return '#475569';
+}
+
+async function fetchInternContributionWithRetries(
+  internId: string,
+  targetDateKeys: Set<string>,
+  criteria: SubmissionAliasCriteria
+): Promise<
+  readonly [string, Map<string, number>, Map<string, InternAudioMetadata[]>]
+> {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= MAX_INTERN_FETCH_ATTEMPTS; attempt += 1) {
+    try {
+      return await collectInternContributionData(
+        internId,
+        targetDateKeys,
+        criteria
+      );
+    } catch (error) {
+      lastError = error;
+
+      if (attempt === MAX_INTERN_FETCH_ATTEMPTS) {
+        console.error(
+          `Unable to load contributions for "${internId}" after ${MAX_INTERN_FETCH_ATTEMPTS} attempts`,
+          error
+        );
+        throw error instanceof Error
+          ? error
+          : new Error(`Unable to load contributions for "${internId}".`);
+      }
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('Unable to load intern contributions.');
+}
+
+async function collectInternContributionData(
+  internId: string,
+  targetDateKeys: Set<string>,
+  criteria: SubmissionAliasCriteria
+): Promise<
+  readonly [string, Map<string, number>, Map<string, InternAudioMetadata[]>]
+> {
+  const audios = await getInternAudios(internId);
+  const dateCounts = new Map<string, number>();
+  const dateAudios = new Map<string, InternAudioMetadata[]>();
+
+  for (const audio of audios) {
+    if (!audioMatchesSubmissionCriteria(audio, criteria)) {
+      continue;
+    }
+
+    const uploadedDateKey = resolveUploadedDateKey(audio.uploadedAt);
+
+    if (!uploadedDateKey || !targetDateKeys.has(uploadedDateKey)) {
+      continue;
+    }
+
+    dateCounts.set(uploadedDateKey, (dateCounts.get(uploadedDateKey) ?? 0) + 1);
+    dateAudios.set(uploadedDateKey, [
+      ...(dateAudios.get(uploadedDateKey) ?? []),
+      audio,
+    ]);
+  }
+
+  return [internId, dateCounts, dateAudios];
+}
+
 function buildSubmissionAliasCriteria(
   standupAliases: string[],
   internshipAliases: string[]
@@ -1505,38 +1668,12 @@ function audioMatchesSubmissionCriteria(
     Partial<Pick<InternAudioMetadata, 'labels'>>,
   criteria: SubmissionAliasCriteria
 ): boolean {
-  const availableLabels = collectComparableAudioLabels(audio);
-
-  return hasDistinctCriteriaMatch(
-    availableLabels,
-    criteria.standupAliases,
-    criteria.internshipAliases
-  );
-}
-
-function collectComparableAudioLabels(
-  audio: Pick<InternAudioMetadata, 'category' | 'tag'> &
-    Partial<Pick<InternAudioMetadata, 'labels'>>
-): Set<string> {
-  const candidates = [audio.category, audio.tag, ...(audio.labels ?? [])];
-  const labels = new Set<string>();
-
-  for (const candidate of candidates) {
-    for (const token of splitAliasTokens(candidate)) {
-      const normalized = normalizeComparableText(token);
-
-      if (normalized) {
-        labels.add(normalized);
-      }
-    }
-  }
-
-  return labels;
+  return isValidStandupSubmissionAudio(audio, criteria);
 }
 
 function splitAliasTokens(value: string): string[] {
   return value
-    .split(/[|,;/]+/g)
+    .split(/[\s|,;/]+/g)
     .map((segment) => segment.trim())
     .filter((segment) => segment.length > 0);
 }
@@ -1548,53 +1685,6 @@ function normalizeComparableText(value: string): string {
     .replace(/[^a-z0-9]/g, '');
 }
 
-function hasDistinctCriteriaMatch(
-  availableLabels: Set<string>,
-  standupAliases: Set<string>,
-  internshipAliases: Set<string>
-): boolean {
-  const matchedStandupAliases = getMatchedAliases(
-    availableLabels,
-    standupAliases
-  );
-  const matchedInternshipAliases = getMatchedAliases(
-    availableLabels,
-    internshipAliases
-  );
-
-  if (
-    matchedStandupAliases.length === 0 ||
-    matchedInternshipAliases.length === 0
-  ) {
-    return false;
-  }
-
-  for (const standupAlias of matchedStandupAliases) {
-    for (const internshipAlias of matchedInternshipAliases) {
-      if (standupAlias !== internshipAlias) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-function getMatchedAliases(
-  availableLabels: Set<string>,
-  expectedAliases: Set<string>
-): string[] {
-  const matchedAliases: string[] = [];
-
-  for (const expectedAlias of expectedAliases) {
-    if (availableLabels.has(expectedAlias)) {
-      matchedAliases.push(expectedAlias);
-    }
-  }
-
-  return matchedAliases;
-}
-
 function resolveUploadedDateKey(
   uploadedAt: string | undefined
 ): string | undefined {
@@ -1602,13 +1692,13 @@ function resolveUploadedDateKey(
     return undefined;
   }
 
-  const parsedDate = new Date(uploadedAt);
+  const parsedDate = parseTimestamp(uploadedAt);
 
-  if (Number.isNaN(parsedDate.getTime())) {
+  if (!parsedDate) {
     return undefined;
   }
 
-  return getLocalDateKey(parsedDate);
+  return getDateKeyInTimeZone(parsedDate, STANDUP_TIME_ZONE);
 }
 
 export default DashboardLayout;

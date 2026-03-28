@@ -1,5 +1,13 @@
 import { getInternAudios } from '../../services/corpus';
 import type { InternAudioMetadata } from '../../services/corpus';
+import { parseTimestamp } from '../timestamps';
+import {
+  buildStandupSlotResults,
+  countCompletedStandupSlots,
+  getDateKeyInTimeZone,
+  getDefaultStandupTimeZone,
+  type StandupSlotResult,
+} from './standupSlots';
 
 export type SubmissionStatus = 'COMPLETED' | 'PENDING';
 
@@ -9,6 +17,7 @@ export interface StandupVerificationResult {
   status: SubmissionStatus;
   checkedDate?: string;
   audios?: InternAudioMetadata[];
+  slotStatuses: StandupSlotResult[];
 }
 
 export interface StandupVerificationOptions {
@@ -29,6 +38,7 @@ const DEFAULT_INTERNSHIP_ALIASES = [TARGET_TAG];
 const STANDUP_ALIAS_ENV_KEY = 'STANDUP_LABEL_ALIASES';
 const INTERNSHIP_ALIAS_ENV_KEY = 'INTERNSHIP_LABEL_ALIASES';
 const DATE_KEY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+const STANDUP_TIME_ZONE = getDefaultStandupTimeZone();
 
 export async function verifyStandupSubmission(
   internId: string,
@@ -44,7 +54,12 @@ export async function verifyStandupSubmission(
       isValidStandupSubmissionAudio(audio, criteria) &&
       matchesUploadedDate(audio, checkedDate)
   );
-  const validCount = validAudios.length;
+  const slotStatuses = checkedDate
+    ? buildStandupSlotResults(validAudios, checkedDate)
+    : buildStandupSlotResults([], '');
+  const validCount = checkedDate
+    ? countCompletedStandupSlots(slotStatuses)
+    : validAudios.length;
 
   return {
     internId: normalizedInternId,
@@ -52,6 +67,7 @@ export async function verifyStandupSubmission(
     status: validCount > 0 ? 'COMPLETED' : 'PENDING',
     checkedDate,
     audios: validAudios,
+    slotStatuses,
   };
 }
 
@@ -62,8 +78,22 @@ export function isValidStandupSubmissionAudio(
 ): boolean {
   const availableLabels = collectComparableLabels(audio);
   const criteria = criteriaOverride ?? resolveSubmissionCriteria();
+  const categoryLabels = collectComparableValues([audio.category]);
+  const tagLabels = collectComparableValues([audio.tag]);
 
-  return hasDistinctCriteriaMatch(
+  if (
+    hasDistinctCriteriaMatch(
+      availableLabels,
+      criteria.standupAliases,
+      criteria.internshipAliases
+    )
+  ) {
+    return true;
+  }
+
+  return hasFieldSeparatedCriteriaMatch(
+    categoryLabels,
+    tagLabels,
     availableLabels,
     criteria.standupAliases,
     criteria.internshipAliases
@@ -121,7 +151,7 @@ function normalizeFilterDate(rawDate: string | undefined): string | undefined {
     );
   }
 
-  return toLocalDateKey(parsedDate);
+  return getDateKeyInTimeZone(parsedDate, STANDUP_TIME_ZONE);
 }
 
 function matchesUploadedDate(
@@ -136,13 +166,13 @@ function matchesUploadedDate(
     return false;
   }
 
-  const parsedDate = new Date(audio.uploadedAt);
+  const parsedDate = parseTimestamp(audio.uploadedAt);
 
-  if (Number.isNaN(parsedDate.getTime())) {
+  if (!parsedDate) {
     return false;
   }
 
-  return toLocalDateKey(parsedDate) === expectedDate;
+  return getDateKeyInTimeZone(parsedDate, STANDUP_TIME_ZONE) === expectedDate;
 }
 
 function normalizeComparableValue(value: string): string {
@@ -157,9 +187,19 @@ function collectComparableLabels(
     Partial<Pick<InternAudioMetadata, 'labels'>>
 ): Set<string> {
   const candidates = [audio.category, audio.tag, ...(audio.labels ?? [])];
+  return collectComparableValues(candidates);
+}
+
+function collectComparableValues(candidates: string[]): Set<string> {
   const labels = new Set<string>();
 
   for (const candidate of candidates) {
+    const wholeCandidate = normalizeComparableValue(candidate);
+
+    if (wholeCandidate) {
+      labels.add(wholeCandidate);
+    }
+
     for (const token of splitCandidateLabel(candidate)) {
       const normalized = normalizeComparableValue(token);
 
@@ -172,9 +212,66 @@ function collectComparableLabels(
   return labels;
 }
 
+function hasFieldSeparatedCriteriaMatch(
+  categoryLabels: Set<string>,
+  tagLabels: Set<string>,
+  availableLabels: Set<string>,
+  standupAliases: Set<string>,
+  internshipAliases: Set<string>
+): boolean {
+  const hasLooseStandupAlias =
+    getMatchedAliases(availableLabels, standupAliases).length > 0;
+  const hasLooseInternshipAlias =
+    getMatchedAliases(availableLabels, internshipAliases).length > 0;
+  const categorySharedAliases = getMatchedAliases(
+    categoryLabels,
+    intersectAliases(standupAliases, internshipAliases)
+  );
+  const tagSharedAliases = getMatchedAliases(
+    tagLabels,
+    intersectAliases(standupAliases, internshipAliases)
+  );
+
+  if (!hasLooseStandupAlias || !hasLooseInternshipAlias) {
+    return false;
+  }
+
+  return sharesOpaqueAlias(categorySharedAliases, tagSharedAliases);
+}
+
+function intersectAliases(
+  leftAliases: Set<string>,
+  rightAliases: Set<string>
+): Set<string> {
+  const sharedAliases = new Set<string>();
+
+  for (const alias of leftAliases) {
+    if (rightAliases.has(alias)) {
+      sharedAliases.add(alias);
+    }
+  }
+
+  return sharedAliases;
+}
+
+function sharesOpaqueAlias(
+  leftAliases: string[],
+  rightAliases: string[]
+): boolean {
+  const rightAliasSet = new Set(rightAliases);
+
+  return leftAliases.some(
+    (alias) => rightAliasSet.has(alias) && isOpaqueAlias(alias)
+  );
+}
+
+function isOpaqueAlias(alias: string): boolean {
+  return alias.length >= 12 && /\d/.test(alias);
+}
+
 function splitCandidateLabel(value: string): string[] {
   return value
-    .split(/[|,;/]+/g)
+    .split(/[\s|,;/]+/g)
     .map((segment) => segment.trim())
     .filter((segment) => segment.length > 0);
 }
@@ -285,12 +382,4 @@ function getEnvValue(key: string): string | undefined {
   };
 
   return globalScope.process?.env?.[key];
-}
-
-function toLocalDateKey(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
 }

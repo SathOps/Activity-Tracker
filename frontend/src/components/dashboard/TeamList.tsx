@@ -3,6 +3,7 @@ import InternCard, { SubmissionStatus } from '../intern/InternCard';
 import type { Intern } from '../intern/InternSearch';
 
 import type { InternAudioMetadata } from '../../services/corpus/corpusService';
+import type { StandupSlotResult } from '../../utils/verification';
 
 export interface TeamIntern {
   internId: string;
@@ -11,6 +12,7 @@ export interface TeamIntern {
   status: SubmissionStatus;
   todayValidCount?: number;
   teamProgressCount?: number;
+  slotStatuses?: StandupSlotResult[];
   audios?: InternAudioMetadata[];
 }
 
@@ -22,6 +24,7 @@ export interface Team {
   requiredStandupCount?: number;
   verifiedDate?: string;
   teamStatus?: SubmissionStatus;
+  teamSlotStatuses?: StandupSlotResult[];
 }
 
 export interface TeamListProps {
@@ -278,6 +281,33 @@ export const TeamList: React.FC<TeamListProps> = ({
                   {qualifiedStandupLabel}: {standupCount}/{requiredCount} |{' '}
                   {teamStatus}
                 </div>
+                {team.teamSlotStatuses?.length ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 6,
+                    }}
+                  >
+                    {team.teamSlotStatuses.map((slot) => (
+                      <span
+                        key={slot.slotId}
+                        style={{
+                          backgroundColor: getSlotStatusBackground(slot.status),
+                          border: `1px solid ${getSlotStatusBorder(slot.status)}`,
+                          borderRadius: 9999,
+                          color: getSlotStatusColor(slot.status),
+                          fontSize: 11,
+                          fontWeight: 700,
+                          padding: '2px 8px',
+                        }}
+                        title={`${slot.label} (${slot.windowLabel})`}
+                      >
+                        {slot.slotId}: {slot.status}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
                 {team.verifiedDate ? (
                   <div className="team-id">
                     Verified date: {team.verifiedDate}
@@ -412,10 +442,8 @@ export const TeamList: React.FC<TeamListProps> = ({
                   onDeleteIntern={onDeleteIntern}
                   onUpdateIntern={onUpdateIntern}
                   standupDateLabel={selectedDateLabel}
-                  teamProgressCount={
-                    intern.teamProgressCount ?? intern.todayValidCount ?? 0
-                  }
-                  requiredStandupCount={requiredCount}
+                  todayValidCount={intern.todayValidCount}
+                  slotStatuses={intern.slotStatuses}
                   audios={intern.audios}
                   activeAudioId={activeAudioId}
                   onPlay={onPlay}
@@ -429,5 +457,41 @@ export const TeamList: React.FC<TeamListProps> = ({
     </section>
   );
 };
+
+function getSlotStatusBackground(status: StandupSlotResult['status']): string {
+  if (status === 'GOOD') {
+    return '#dcfce7';
+  }
+
+  if (status === 'DELAYED') {
+    return '#fef3c7';
+  }
+
+  return '#f1f5f9';
+}
+
+function getSlotStatusBorder(status: StandupSlotResult['status']): string {
+  if (status === 'GOOD') {
+    return '#86efac';
+  }
+
+  if (status === 'DELAYED') {
+    return '#fcd34d';
+  }
+
+  return '#cbd5e1';
+}
+
+function getSlotStatusColor(status: StandupSlotResult['status']): string {
+  if (status === 'GOOD') {
+    return '#166534';
+  }
+
+  if (status === 'DELAYED') {
+    return '#92400e';
+  }
+
+  return '#475569';
+}
 
 export default TeamList;

@@ -1,3 +1,5 @@
+import { toIsoTimestamp } from '../../utils/timestamps';
+
 export interface InternSummary {
   id: string;
   name?: string;
@@ -16,6 +18,13 @@ interface FetchRequestInit {
   method?: string;
   headers?: Record<string, string>;
   body?: string;
+  cache?:
+    | 'default'
+    | 'force-cache'
+    | 'no-cache'
+    | 'no-store'
+    | 'only-if-cached'
+    | 'reload';
 }
 
 interface FetchResponse {
@@ -218,6 +227,8 @@ async function requestCorpusApi(path: string): Promise<unknown | undefined> {
   }
 
   const headers: Record<string, string> = { Accept: 'application/json' };
+  headers['Cache-Control'] = 'no-cache';
+  headers.Pragma = 'no-cache';
 
   if (runtimeConfig.authToken) {
     headers.Authorization = `Bearer ${runtimeConfig.authToken}`;
@@ -225,6 +236,7 @@ async function requestCorpusApi(path: string): Promise<unknown | undefined> {
 
   const requestUrl = baseUrl ? `${baseUrl}${path}` : path;
   const response = await fetcher(requestUrl, {
+    cache: 'no-store',
     method: 'GET',
     headers,
   });
@@ -464,25 +476,11 @@ function parseUploadedAt(source: UnknownRecord): string | undefined {
 }
 
 function resolveDateCandidate(value: unknown): string | undefined {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    const milliseconds = value > 9999999999 ? value : value * 1000;
-    const parsed = new Date(milliseconds);
-
-    if (!Number.isNaN(parsed.getTime())) {
-      return parsed.toISOString();
-    }
-
-    return undefined;
-  }
-
-  if (typeof value === 'string' && value.trim()) {
-    const parsed = new Date(value);
-
-    if (!Number.isNaN(parsed.getTime())) {
-      return parsed.toISOString();
-    }
-
-    return undefined;
+  if (
+    (typeof value === 'number' && Number.isFinite(value)) ||
+    (typeof value === 'string' && value.trim())
+  ) {
+    return toIsoTimestamp(value);
   }
 
   if (!isRecord(value)) {

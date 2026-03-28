@@ -59,6 +59,16 @@ describe('verifyStandup', () => {
     expect(result).toBe(true);
   });
 
+  test('isValidStandupSubmissionAudio handles multi-word labels split by spaces', () => {
+    const result = isValidStandupSubmissionAudio({
+      category: 'Daily Standup Entry',
+      tag: 'Internship Track',
+      labels: [],
+    });
+
+    expect(result).toBe(true);
+  });
+
   test('isValidStandupSubmissionAudio rejects entries missing internship label', () => {
     const result = isValidStandupSubmissionAudio({
       category: 'standup',
@@ -83,6 +93,22 @@ describe('verifyStandup', () => {
     );
 
     expect(result).toBe(false);
+  });
+
+  test('isValidStandupSubmissionAudio accepts the same alias when category and tag fields are distinct', () => {
+    const result = isValidStandupSubmissionAudio(
+      {
+        category: 'c81f5d73-9090-453e-bb08-c2f46453e0bd',
+        tag: 'c81f5d73-9090-453e-bb08-c2f46453e0bd',
+        labels: [],
+      },
+      {
+        standupAliases: new Set(['c81f5d739090453ebb08c2f46453e0bd']),
+        internshipAliases: new Set(['c81f5d739090453ebb08c2f46453e0bd']),
+      }
+    );
+
+    expect(result).toBe(true);
   });
 
   test('verifyStandupSubmission filters by date and marks completed when at least one valid audio exists', async () => {
@@ -117,6 +143,34 @@ describe('verifyStandup', () => {
     expect(result.validCount).toBe(1);
     expect(result.status).toBe('COMPLETED');
     expect(result.audios?.map((audio) => audio.id)).toEqual(['audio-valid']);
+    expect(result.slotStatuses).toEqual([
+      {
+        slotId: 'S1',
+        label: 'Standup 1',
+        windowLabel: '09:00-09:30',
+        status: 'MISSING',
+      },
+      {
+        slotId: 'S2',
+        label: 'Standup 2',
+        windowLabel: '12:00-12:30',
+        status: 'MISSING',
+      },
+      {
+        slotId: 'S3',
+        label: 'Standup 3',
+        windowLabel: '14:00-14:30',
+        status: 'DELAYED',
+        uploadedAt: '2026-02-10T10:00:00.000Z',
+        audioId: 'audio-valid',
+      },
+      {
+        slotId: 'S4',
+        label: 'Standup 4',
+        windowLabel: '16:30-17:00',
+        status: 'MISSING',
+      },
+    ]);
   });
 
   test('verifyStandupSubmission marks pending when no valid submission exists', async () => {
@@ -133,6 +187,9 @@ describe('verifyStandup', () => {
     expect(result.validCount).toBe(0);
     expect(result.status).toBe('PENDING');
     expect(result.audios).toEqual([]);
+    expect(result.slotStatuses.every((slot) => slot.status === 'MISSING')).toBe(
+      true
+    );
   });
 
   test('verifyStandupSubmission reads label aliases from environment variables', async () => {
@@ -223,8 +280,8 @@ describe('verifyStandup', () => {
         labels: ['!!!'],
       },
       {
-        standupAliases: new Set(['!!!', 'dailystandup']),
-        internshipAliases: new Set(['', 'internshiptrack']),
+        standupAliases: new Set(['', 'standup']),
+        internshipAliases: new Set(['', 'internship']),
       }
     );
 
@@ -238,5 +295,46 @@ describe('verifyStandup', () => {
     });
 
     expect(result).toBe(true);
+  });
+
+  test('verifyStandupSubmission matches selected dates using IST for UTC corpus timestamps', async () => {
+    mockedGetInternAudios.mockResolvedValue([
+      buildAudio({
+        id: 'audio-ist-date',
+        uploadedAt: '2026-02-09T18:45:00.000Z',
+      }),
+    ]);
+
+    const result = await verifyStandupSubmission('intern-5', {
+      uploadedOnDate: '2026-02-10',
+    });
+
+    expect(result.validCount).toBe(0);
+    expect(result.status).toBe('PENDING');
+    expect(result.audios?.map((audio) => audio.id)).toEqual(['audio-ist-date']);
+  });
+
+  test('verifyStandupSubmission treats timezone-less corpus timestamps as GMT before IST slot matching', async () => {
+    mockedGetInternAudios.mockResolvedValue([
+      buildAudio({
+        id: 'audio-gmt-no-zone',
+        uploadedAt: '2026-02-10T03:40:00',
+      }),
+    ]);
+
+    const result = await verifyStandupSubmission('intern-7', {
+      uploadedOnDate: '2026-02-10',
+    });
+
+    expect(result.validCount).toBe(1);
+    expect(result.status).toBe('COMPLETED');
+    expect(result.slotStatuses[0]).toEqual({
+      slotId: 'S1',
+      label: 'Standup 1',
+      windowLabel: '09:00-09:30',
+      status: 'GOOD',
+      uploadedAt: '2026-02-10T03:40:00',
+      audioId: 'audio-gmt-no-zone',
+    });
   });
 });
