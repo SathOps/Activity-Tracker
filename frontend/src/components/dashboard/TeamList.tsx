@@ -10,6 +10,7 @@ export interface TeamIntern {
   internName?: string;
   status: SubmissionStatus;
   todayValidCount?: number;
+  teamProgressCount?: number;
   audios?: InternAudioMetadata[];
 }
 
@@ -411,7 +412,10 @@ export const TeamList: React.FC<TeamListProps> = ({
                   onDeleteIntern={onDeleteIntern}
                   onUpdateIntern={onUpdateIntern}
                   standupDateLabel={selectedDateLabel}
-                  todayValidCount={intern.todayValidCount}
+                  teamProgressCount={
+                    intern.teamProgressCount ?? intern.todayValidCount ?? 0
+                  }
+                  requiredStandupCount={requiredCount}
                   audios={intern.audios}
                   activeAudioId={activeAudioId}
                   onPlay={onPlay}

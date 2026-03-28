@@ -8,7 +8,8 @@ export type SubmissionStatus = 'COMPLETED' | 'PENDING';
 export interface InternCardProps {
   internId: string;
   internName?: string;
-  todayValidCount?: number;
+  teamProgressCount?: number;
+  requiredStandupCount?: number;
   standupDateLabel?: string;
   audios?: InternAudioMetadata[];
   activeAudioId?: string | null;
@@ -21,7 +22,8 @@ export interface InternCardProps {
 export const InternCard: React.FC<InternCardProps> = ({
   internId,
   internName,
-  todayValidCount,
+  teamProgressCount = 0,
+  requiredStandupCount = 4,
   standupDateLabel,
   audios = [],
   activeAudioId,
@@ -139,9 +141,9 @@ export const InternCard: React.FC<InternCardProps> = ({
             </div>
           ) : (
             <div style={{ color: 'var(--text-subtle)', fontSize: 13 }}>
-              Qualified uploads
+              Team uploads
               {standupDateLabel ? ` on ${standupDateLabel}` : ''}:{' '}
-              {todayValidCount ?? 0}
+              {teamProgressCount}/{requiredStandupCount}
             </div>
           )}
         </div>

@@ -122,16 +122,30 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     setManagedTeams((prev) => prev.map((team) => resetTeamVerification(team)));
   }, [selectedDateKey]);
 
+  const totalTeams = managedTeams.length;
+  const teamProgressById = React.useMemo(
+    () => buildTeamProgressById(managedTeams),
+    [managedTeams]
+  );
+  const displayTeams = React.useMemo(
+    () =>
+      managedTeams.map((team) =>
+        deriveTeamWithTeamProgress(team, teamProgressById)
+      ),
+    [managedTeams, teamProgressById]
+  );
   const allInternRows = React.useMemo(
     () =>
-      managedTeams.flatMap((team) =>
+      displayTeams.flatMap((team) =>
         team.interns.map((intern) => ({
           ...intern,
           teamId: team.teamId,
           teamName: team.teamName,
+          requiredStandupCount:
+            team.requiredStandupCount ?? REQUIRED_TEAM_STANDUPS,
         }))
       ),
-    [managedTeams]
+    [displayTeams]
   );
   const selectedDateLabel = React.useMemo(
     () => formatDateForDisplay(selectedDateKey),
@@ -161,13 +175,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   const filteredTeams = React.useMemo(() => {
     if (!normalizedQuery) {
-      return managedTeams;
+      return displayTeams;
     }
 
-    return managedTeams.filter((team) =>
+    return displayTeams.filter((team) =>
       team.teamName.toLowerCase().includes(normalizedQuery)
     );
-  }, [managedTeams, normalizedQuery]);
+  }, [displayTeams, normalizedQuery]);
 
   const filteredInternRows = React.useMemo(() => {
     const source =
@@ -965,7 +979,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       onDeleteIntern={handleDeleteIntern}
                       onUpdateIntern={handleUpdateIntern}
                       standupDateLabel={selectedDateLabel}
-                      todayValidCount={intern.todayValidCount}
+                      teamProgressCount={
+                        intern.teamProgressCount ?? intern.todayValidCount ?? 0
+                      }
+                      requiredStandupCount={intern.requiredStandupCount}
                       audios={intern.audios}
                       activeAudioId={activeAudioId}
                       onPlay={(_internId, audioId) => setActiveAudioId(audioId)}
@@ -1075,7 +1092,84 @@ function resetTeamVerification(team: Team): Team {
     interns: team.interns.map((intern) => ({
       ...intern,
       status: 'PENDING',
+      teamProgressCount: 0,
       todayValidCount: 0,
+    })),
+  };
+}
+
+function normalizeTeamId(teamId: string | null | undefined): string {
+  return (teamId ?? '').trim();
+}
+
+function buildTeamProgressById(
+  teams: Team[]
+): Map<
+  string,
+  { teamProgressCount: number; teamStatus: 'COMPLETED' | 'PENDING' }
+> {
+  const progressByTeamId = new Map<
+    string,
+    { teamProgressCount: number; teamStatus: 'COMPLETED' | 'PENDING' }
+  >();
+
+  for (const team of teams) {
+    const normalizedTeamId = normalizeTeamId(team.teamId);
+
+    if (!normalizedTeamId) {
+      continue;
+    }
+
+    const requiredStandupCount =
+      team.requiredStandupCount ?? REQUIRED_TEAM_STANDUPS;
+    const teamProgressCount = Math.min(
+      team.interns.reduce(
+        (total, intern) => total + (intern.todayValidCount ?? 0),
+        0
+      ),
+      requiredStandupCount
+    );
+
+    progressByTeamId.set(normalizedTeamId, {
+      teamProgressCount,
+      teamStatus: teamProgressCount > 0 ? 'COMPLETED' : 'PENDING',
+    });
+  }
+
+  return progressByTeamId;
+}
+
+function deriveTeamWithTeamProgress(
+  team: Team,
+  teamProgressById: Map<
+    string,
+    { teamProgressCount: number; teamStatus: 'COMPLETED' | 'PENDING' }
+  >
+): Team {
+  const normalizedTeamId = normalizeTeamId(team.teamId);
+
+  if (!normalizedTeamId) {
+    return team;
+  }
+
+  const teamProgress = teamProgressById.get(normalizedTeamId);
+
+  if (!teamProgress) {
+    return team;
+  }
+
+  const requiredStandupCount =
+    team.requiredStandupCount ?? REQUIRED_TEAM_STANDUPS;
+
+  return {
+    ...team,
+    teamStatus: teamProgress.teamStatus,
+    todayStandupCount: teamProgress.teamProgressCount,
+    requiredStandupCount,
+    interns: team.interns.map((intern) => ({
+      ...intern,
+      status: teamProgress.teamStatus,
+      teamProgressCount: teamProgress.teamProgressCount,
     })),
   };
 }
