@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     test: {
       coverage: {
+        reporter: ['text', 'cobertura', 'html'],
         all: true,
         provider: 'v8',
         include: [

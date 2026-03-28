@@ -1,6 +1,7 @@
 image: node:20
 
 stages:
+  - lint
   - test
   - build
 
@@ -20,12 +21,32 @@ variables:
   CI: 'true'
   NPM_CONFIG_CACHE: '.npm'
 
+lint:
+  stage: lint
+  script:
+    - npm run format:check
+    # Generate GitLab Code Quality report, don't fail yet
+    - npm run lint -- -f gitlab -o gl-codequality.json || true
+    # Run lint again so standard output is visible in logs, fails pipeline if there are errors
+    - npm run lint
+    - npm run typecheck
+  artifacts:
+    reports:
+      codequality: gl-codequality.json
+    expire_in: 7 days
+
 test:
   stage: test
+  # Matches vitest text reporter output
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
   script:
     - npm run test:coverage
   artifacts:
     when: always
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
     paths:
       - coverage/
     expire_in: 7 days
