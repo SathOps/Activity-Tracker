@@ -12,12 +12,14 @@ The format is based on Keep a Changelog, and this project follows a simple relea
 - ESLint and Prettier project tooling
 - `lint`, `format`, and `format:check` npm scripts
 - contribution guide for local development and project workflow
+- repo-managed Git hooks for pre-commit staged formatting/linting and pre-push validation
 
 ### Changed
 
 - `README.md` now links directly to the user manual for easier discoverability
 - `CONTRIBUTING.md` was restructured and updated with current commands, type-check guidance (`npx tsc -b`), changelog process, and current environment variable usage
 - Expanded lint coverage to source files, tests, and config files
+- Expanded lint coverage to helper scripts under `scripts/`
 - Standardized code formatting across the codebase
 - Updated lint and format ignores to exclude generated and cache artifacts
 

@@ -44,6 +44,7 @@ Notes:
 - In local development, browser requests use relative `/api/...` routes through the Vite proxy in `vite.config.ts`.
 - `CORPUS_TOKEN` is used by the local proxy only when an outgoing request has no `Authorization` header.
 - In production on Vercel, `/api/*` is rewritten using `vercel.json`.
+- `npm install` runs `prepare`, which configures Git to use the committed hooks in `.githooks/`.
 
 ## Local Development
 
@@ -110,6 +111,17 @@ npm run format:check
 npm run lint
 npx tsc -b
 npm test
+```
+
+Installed Git hooks:
+
+- `pre-commit`: runs staged-file formatting plus ESLint autofix on staged JS/TS files, then restages the changes
+- `pre-push`: runs `npm run validate`
+
+If hooks are not active in an existing clone, run:
+
+```bash
+npm run prepare
 ```
 
 ## Contribution Workflow

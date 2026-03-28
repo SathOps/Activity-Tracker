@@ -23,6 +23,7 @@ export default [
   {
     files: [
       'src/**/*.{js,jsx,ts,tsx}',
+      'scripts/**/*.{js,mjs,cjs,ts}',
       'tests/**/*.{js,jsx,ts,tsx}',
       '*.config.{js,mjs,cjs,ts}',
     ],

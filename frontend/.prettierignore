@@ -2,6 +2,7 @@ builds
 cache
 coverage
 dist
+.githooks
 node_modules
 package-lock.json
 vite.config.js

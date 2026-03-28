@@ -10,9 +10,13 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "validate": "npm run format:check && npm run lint && npm run typecheck && npm test",
+    "validate:staged": "node scripts/runStagedChecks.mjs",
+    "prepare": "node scripts/setupGitHooks.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",
