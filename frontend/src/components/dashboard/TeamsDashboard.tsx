@@ -6,7 +6,7 @@ import type { Intern } from '../intern/InternSearch';
 export interface TeamsDashboardProps {
   addedInterns: Intern[];
   preloadedTeams?: Team[];
-  mode?: 'teams' | 'status';
+  mode?: 'teams' | 'status' | 'analytics';
 }
 
 const TeamsDashboard: React.FC<TeamsDashboardProps> = ({
@@ -18,6 +18,7 @@ const TeamsDashboard: React.FC<TeamsDashboardProps> = ({
     <DashboardLayout
       addedInterns={addedInterns}
       teams={preloadedTeams}
+      mode={mode}
       statusDisplay={mode === 'status' ? 'inline' : 'modal'}
     />
   );

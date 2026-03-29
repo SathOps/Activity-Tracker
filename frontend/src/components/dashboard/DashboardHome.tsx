@@ -4,7 +4,7 @@ import TeamsDashboard from './TeamsDashboard';
 import type { Team } from './TeamList';
 import type { Intern } from '../intern/InternSearch';
 
-type ActiveView = 'interns' | 'teams' | 'status';
+type ActiveView = 'interns' | 'teams' | 'status' | 'analytics';
 
 export interface DashboardHomeProps {
   addedInterns: Intern[];
@@ -18,6 +18,7 @@ const TABS: { key: ActiveView; label: string; icon: string }[] = [
   { key: 'interns', label: 'Interns', icon: '👤' },
   { key: 'teams', label: 'Team Dashboard', icon: '👥' },
   { key: 'status', label: 'Status', icon: '📊' },
+  { key: 'analytics', label: 'Analytics', icon: '📈' },
 ];
 
 const DashboardHome: React.FC<DashboardHomeProps> = ({
@@ -55,7 +56,13 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
       ) : (
         <TeamsDashboard
           addedInterns={addedInterns}
-          mode={activeView === 'status' ? 'status' : 'teams'}
+          mode={
+            activeView === 'status'
+              ? 'status'
+              : activeView === 'analytics'
+                ? 'analytics'
+                : 'teams'
+          }
           preloadedTeams={preloadedTeams}
         />
       )}

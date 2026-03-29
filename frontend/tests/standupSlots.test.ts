@@ -353,6 +353,10 @@ describe('standupSlots', () => {
     expect(resolveStandupSlot(24 * 60 * 60)).toBeUndefined();
   });
 
+  test('returns undefined before the first slot window', () => {
+    expect(resolveStandupSlot(0)).toBeUndefined();
+  });
+
   test('skips filled earlier slots until it finds the next missing backfill target', () => {
     expect(
       resolveStandupSlot(14 * 60 * 60 + 35 * 60, new Set(['S2', 'S3']))

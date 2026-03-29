@@ -65,6 +65,7 @@ export interface DashboardLayoutProps {
   addedInterns?: Intern[];
   title?: string;
   statusDisplay?: 'modal' | 'inline';
+  mode?: 'teams' | 'status' | 'analytics';
 }
 
 const DEFAULT_VIEW: DashboardView = 'TEAMS';
@@ -91,6 +92,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   addedInterns,
   title = 'Team-wise Standup Submission Dashboard',
   statusDisplay = 'modal',
+  mode = 'teams',
 }) => {
   const [managedTeams, setManagedTeams] = React.useState<Team[]>(
     () => teams ?? EMPTY_TEAMS
@@ -117,8 +119,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [teamWeeklyStatusRows, setTeamWeeklyStatusRows] = React.useState<
     TeamWeeklyStatusRow[]
   >([]);
+  const [analyticsTeamDailyTotals, setAnalyticsTeamDailyTotals] =
+    React.useState<Map<string, Map<string, number>>>(new Map());
+  const [analyticsLoading, setAnalyticsLoading] = React.useState(false);
+  const [analyticsError, setAnalyticsError] = React.useState<string | null>(
+    null
+  );
   const hasInitializedDateSelection = React.useRef(false);
   const statusLoadRequestId = React.useRef(0);
+  const analyticsLoadRequestId = React.useRef(0);
 
   React.useEffect(() => {
     if (teams) {
@@ -171,6 +180,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     () => formatWeekRangeLabel(selectedWeekDateKeys),
     [selectedWeekDateKeys]
   );
+  const analyticsDateKeys = React.useMemo(
+    () => getTrailingDateKeys(selectedDateKey, 29),
+    [selectedDateKey]
+  );
   const pendingDailyRows = React.useMemo(
     () => teamDailyStatusRows.filter((row) => !row.isCompleted),
     [teamDailyStatusRows]
@@ -182,6 +195,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   );
   const isInlineStatusView = statusDisplay === 'inline';
   const isStatusPanelOpen = isInlineStatusView || isStatusModalOpen;
+  const isAnalyticsView = mode === 'analytics';
 
   const normalizedQuery = searchTerm.trim().toLowerCase();
 
@@ -522,6 +536,80 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     }
   }, [managedTeams, selectedDateKey, selectedWeekDateKeys]);
 
+  const loadAnalytics = React.useCallback(async () => {
+    const requestId = analyticsLoadRequestId.current + 1;
+    analyticsLoadRequestId.current = requestId;
+
+    const validTeams = managedTeams.filter((team) =>
+      Boolean(normalizeTeamId(team.teamId))
+    );
+
+    if (validTeams.length === 0) {
+      setAnalyticsTeamDailyTotals(new Map());
+      setAnalyticsError(null);
+      setAnalyticsLoading(false);
+      return;
+    }
+
+    setAnalyticsLoading(true);
+    setAnalyticsError(null);
+
+    try {
+      const aliasCriteria = buildSubmissionAliasCriteria(
+        STANDUP_ALIAS_OVERRIDE,
+        INTERNSHIP_ALIAS_OVERRIDE
+      );
+      const targetDateKeys = new Set<string>(analyticsDateKeys);
+      const uniqueInternIds = collectUniqueTeamInternIds(validTeams);
+      const { countsByInternByDate } = await buildInternSubmissionSnapshot(
+        uniqueInternIds,
+        targetDateKeys,
+        aliasCriteria
+      );
+
+      if (analyticsLoadRequestId.current !== requestId) {
+        return;
+      }
+
+      const teamTotals = new Map<string, Map<string, number>>();
+
+      for (const team of validTeams) {
+        const teamId = normalizeTeamId(team.teamId);
+        const teamDateCounts = new Map<string, number>();
+
+        for (const dateKey of analyticsDateKeys) {
+          const teamCount = sumTeamStandupsForDate(
+            team,
+            dateKey,
+            countsByInternByDate
+          );
+          teamDateCounts.set(
+            dateKey,
+            Math.min(teamCount, REQUIRED_TEAM_STANDUPS)
+          );
+        }
+
+        teamTotals.set(teamId, teamDateCounts);
+      }
+
+      setAnalyticsTeamDailyTotals(teamTotals);
+    } catch (error) {
+      if (analyticsLoadRequestId.current !== requestId) {
+        return;
+      }
+
+      console.error('Unable to load analytics', error);
+      setAnalyticsError(
+        'Unable to load analytics right now. Please try again.'
+      );
+      setAnalyticsTeamDailyTotals(new Map());
+    } finally {
+      if (analyticsLoadRequestId.current === requestId) {
+        setAnalyticsLoading(false);
+      }
+    }
+  }, [analyticsDateKeys, managedTeams]);
+
   React.useEffect(() => {
     if (!isStatusPanelOpen) {
       return;
@@ -529,6 +617,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
     void loadStatusSummaries();
   }, [isStatusPanelOpen, loadStatusSummaries]);
+
+  React.useEffect(() => {
+    if (!isAnalyticsView) {
+      return;
+    }
+
+    void loadAnalytics();
+  }, [isAnalyticsView, loadAnalytics]);
 
   React.useEffect(() => {
     if (!isStatusModalOpen) {
@@ -872,6 +968,66 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     </>
   );
 
+  const renderAnalyticsContent = () => (
+    <section style={{ display: 'grid', gap: 16 }}>
+      <header
+        style={{
+          alignItems: 'center',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 12,
+          justifyContent: 'space-between',
+        }}
+      >
+        <div style={{ display: 'grid', gap: 4 }}>
+          <h2 style={{ color: '#0f172a', fontSize: 20, margin: 0 }}>
+            Team Analytics
+          </h2>
+          <p style={{ color: '#475569', fontSize: 13, margin: 0 }}>
+            Daily uploads across all teams | Range:{' '}
+            {formatDateForDisplay(analyticsDateKeys[0])} -{' '}
+            {formatDateForDisplay(
+              analyticsDateKeys[analyticsDateKeys.length - 1]
+            )}
+          </p>
+        </div>
+        <button
+          className="ghost-button"
+          disabled={analyticsLoading}
+          onClick={() => {
+            void loadAnalytics();
+          }}
+          type="button"
+        >
+          {analyticsLoading ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </header>
+
+      {analyticsLoading ? (
+        <p className="team-empty">Loading analytics...</p>
+      ) : null}
+      {!analyticsLoading && analyticsError ? (
+        <p className="team-empty">{analyticsError}</p>
+      ) : null}
+
+      {!analyticsLoading && !analyticsError ? (
+        <section className="team-card" style={{ backgroundColor: '#f8fafc' }}>
+          <h3 className="team-name" style={{ marginBottom: 8 }}>
+            Member Activity Heatmap
+          </h3>
+          <p className="team-id" style={{ marginBottom: 12 }}>
+            Daily uploads per team | Max 4 per day
+          </p>
+          {renderTeamHeatmap(
+            managedTeams,
+            analyticsDateKeys,
+            analyticsTeamDailyTotals
+          )}
+        </section>
+      ) : null}
+    </section>
+  );
+
   return (
     <main className="dashboard-container">
       <header className="dashboard-header">
@@ -889,7 +1045,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         ) : null}
       </header>
 
-      {!isInlineStatusView ? (
+      {isAnalyticsView ? (
+        renderAnalyticsContent()
+      ) : !isInlineStatusView ? (
         <>
           <section className="dashboard-view-switch" aria-label="View selector">
             {[
@@ -1218,6 +1376,119 @@ function deriveTeamWithTeamProgress(
 function createMissingSlotStatuses(): StandupSlotResult[] {
   return buildStandupSlotResults([], '');
 }
+function renderTeamHeatmap(
+  teams: Team[],
+  dateKeys: string[],
+  teamTotals: Map<string, Map<string, number>>
+): JSX.Element {
+  const rows = teams.filter((team) => normalizeTeamId(team.teamId));
+
+  if (rows.length === 0 || dateKeys.length === 0) {
+    return <div className="team-empty">No activity data.</div>;
+  }
+
+  return (
+    <div style={{ overflowX: 'auto' }}>
+      <div
+        style={{
+          color: '#64748b',
+          fontSize: 11,
+          marginBottom: 6,
+          textAlign: 'right',
+        }}
+      >
+        Scroll to view more →
+      </div>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `160px repeat(${dateKeys.length}, 22px)`,
+          gap: 6,
+          alignItems: 'center',
+        }}
+      >
+        <div style={{ color: '#475569', fontSize: 11 }}>Team</div>
+        {dateKeys.map((dateKey) => (
+          <div
+            key={dateKey}
+            style={{
+              color: '#64748b',
+              fontSize: 10,
+              textAlign: 'center',
+            }}
+          >
+            {formatWeekdayShort(dateKey)}
+          </div>
+        ))}
+
+        {rows.map((team) => {
+          const teamId = normalizeTeamId(team.teamId);
+          const teamDateCounts = teamTotals.get(teamId) ?? new Map();
+
+          return (
+            <React.Fragment key={teamId}>
+              <div
+                style={{
+                  color: '#0f172a',
+                  fontSize: 12,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+                title={team.teamName}
+              >
+                {team.teamName}
+              </div>
+              {dateKeys.map((dateKey) => {
+                const count = teamDateCounts.get(dateKey) ?? 0;
+                const intensity = getTeamHeatmapIntensity(count);
+
+                return (
+                  <div
+                    key={`${teamId}-${dateKey}`}
+                    title={`${team.teamName} | ${formatMonthDay(
+                      dateKey
+                    )}: ${count}/4 uploads`}
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: 4,
+                      backgroundColor: intensity.background,
+                      border: `1px solid ${intensity.border}`,
+                    }}
+                  />
+                );
+              })}
+            </React.Fragment>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function getTeamHeatmapIntensity(value: number): {
+  background: string;
+  border: string;
+} {
+  if (value <= 0) {
+    return { background: '#EFF3FF', border: '#C6DBEF' };
+  }
+
+  if (value === 1) {
+    return { background: '#C6DBEF', border: '#9ECAE1' };
+  }
+
+  if (value === 2) {
+    return { background: '#9ECAE1', border: '#6BAED6' };
+  }
+
+  if (value === 3) {
+    return { background: '#6BAED6', border: '#3182BD' };
+  }
+
+  return { background: '#3182BD', border: '#08519C' };
+}
 
 function getLocalDateKey(date: Date): string {
   const year = date.getFullYear();
@@ -1433,6 +1704,16 @@ function getTeamInternIds(team: Team): string[] {
   return getTeamInternEntries(team).map((entry) => entry.internId);
 }
 
+function sumTeamStandupsForDate(
+  team: Team,
+  dateKey: string,
+  countsByInternByDate: Map<string, Map<string, number>>
+): number {
+  return getTeamInternIds(team).reduce((total, internId) => {
+    return total + (countsByInternByDate.get(internId)?.get(dateKey) ?? 0);
+  }, 0);
+}
+
 function getTeamInternEntries(
   team: Team
 ): Array<Pick<ContributorUploadDetail, 'internId' | 'internName'>> {
@@ -1476,6 +1757,27 @@ function getWeekDateKeys(anchorDateKey: string): string[] {
   }
 
   return weekDateKeys;
+}
+
+function getTrailingDateKeys(
+  anchorDateKey: string,
+  daysBack: number
+): string[] {
+  const anchorDate = new Date(`${anchorDateKey}T00:00:00`);
+
+  if (Number.isNaN(anchorDate.getTime())) {
+    return [];
+  }
+
+  const dateKeys: string[] = [];
+
+  for (let offset = daysBack; offset >= 0; offset -= 1) {
+    const day = new Date(anchorDate);
+    day.setDate(anchorDate.getDate() - offset);
+    dateKeys.push(getLocalDateKey(day));
+  }
+
+  return dateKeys;
 }
 
 function formatWeekRangeLabel(weekDateKeys: string[]): string {
