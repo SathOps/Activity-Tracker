@@ -11,7 +11,7 @@ const resources = {
   hi: { translation: hiTranslations },
 };
 
-i18next
+void i18next
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({

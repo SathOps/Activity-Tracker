@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DashboardHome from './components/dashboard/DashboardHome';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import type { Team } from './components/dashboard/TeamList';
 import type { Intern } from './components/intern/InternSearch';
-import { configureCorpusService } from './services/corpus';
+import {
+  configureCorpusService,
+  getCurrentUser,
+  type InternSummary,
+} from './services/corpus';
 import { parseInternsCSV } from './utils/parseInternsCSV';
 import {
   buildPreloadedTeams,
@@ -18,12 +22,20 @@ const THEME_STORAGE_KEY = 'standup_theme_mode';
 
 type ThemeMode = 'light' | 'dark';
 
+const CORPUS_DEFAULT_BASE =
+  (
+    import.meta.env.VITE_SWECHA_API_BASE_URL ||
+    import.meta.env.SWECHA_API_BASE_URL ||
+    ''
+  ).trim() || 'https://api.corpus.swecha.org';
+
 export default function App() {
   const { t } = useTranslation();
   const [addedInterns, setAddedInterns] = useState<Intern[]>([]);
   const [preloadedTeams, setPreloadedTeams] = useState<Team[]>([]);
   const [authToken, setAuthToken] = useState(() => readStoredAccessToken());
   const [username, setUsername] = useState(() => readStoredUsername());
+  const [userProfile, setUserProfile] = useState<InternSummary | null>(null);
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -34,9 +46,52 @@ export default function App() {
   );
 
   useEffect(() => {
-    // Browser requests use relative /api/v1 routes via Vite proxy.
-    configureCorpusService({ baseUrl: '', useMock: false, authToken });
+    configureCorpusService({
+      baseUrl: CORPUS_DEFAULT_BASE,
+      useMock: false,
+      authToken,
+    });
   }, [authToken]);
+
+  useEffect(() => {
+    if (!authToken) {
+      setUserProfile(null);
+      return;
+    }
+
+    let isCancelled = false;
+    const fallbackId = username.trim();
+
+    const loadProfile = async () => {
+      try {
+        const profile = await getCurrentUser(fallbackId);
+        if (!isCancelled) {
+          setUserProfile(profile);
+        }
+      } catch (error) {
+        console.error('Failed to load profile details', error);
+        if (!isCancelled) {
+          setUserProfile(null);
+        }
+      }
+    };
+
+    void loadProfile();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [authToken, username]);
+
+  const profileDisplayName = useMemo(
+    () => userProfile?.name || userProfile?.username || username.trim() || '',
+    [userProfile, username]
+  );
+
+  const profileInitial = useMemo(() => {
+    const trimmed = profileDisplayName.trim();
+    return trimmed ? trimmed.charAt(0).toUpperCase() : 'U';
+  }, [profileDisplayName]);
 
   useEffect(() => {
     persistAccessToken(authToken);
@@ -216,6 +271,7 @@ export default function App() {
     setPassword('');
     setLoginError(null);
     setIsProfileMenuOpen(false);
+    setUserProfile(null);
   };
 
   useEffect(() => {
@@ -328,7 +384,9 @@ export default function App() {
             }
             type="button"
           >
-            {themeMode === 'dark' ? t('theme.light') : t('theme.dark')}
+            <span aria-hidden="true" className="theme-toggle-icon">
+              {themeMode === 'dark' ? '☀' : '☾'}
+            </span>
           </button>
 
           <button
@@ -341,25 +399,47 @@ export default function App() {
             type="button"
           >
             <span aria-hidden="true" className="profile-avatar-icon">
-              U
+              {profileInitial}
             </span>
           </button>
 
           {isProfileMenuOpen ? (
-            <div className="profile-menu-dropdown" role="dialog">
-              <div className="profile-menu-label">
-                {t('profile.userNumber')}
+            <div
+              className="profile-menu-dropdown profile-menu-card"
+              role="dialog"
+            >
+              <div className="profile-card-top">
+                <span className="profile-card-avatar">{profileInitial}</span>
+                <div>
+                  <div className="profile-card-name">{profileDisplayName}</div>
+                  <div className="profile-card-username">
+                    {userProfile?.username
+                      ? `@${userProfile.username}`
+                      : username
+                        ? `@${username.trim()}`
+                        : t('common.unavailable')}
+                  </div>
+                </div>
               </div>
-              <div className="profile-menu-id">
-                {username || t('common.unavailable')}
+              <div className="profile-card-body">
+                <div className="profile-card-row">
+                  <span className="profile-card-label">
+                    {t('profile.phoneLabel')}
+                  </span>
+                  <span className="profile-card-value">
+                    {userProfile?.phone ?? username ?? t('common.unavailable')}
+                  </span>
+                </div>
               </div>
-              <button
-                className="secondary-button profile-menu-logout"
-                onClick={handleLogout}
-                type="button"
-              >
-                {t('auth.logout')}
-              </button>
+              <div className="profile-card-footer">
+                <button
+                  className="secondary-button profile-menu-logout"
+                  onClick={handleLogout}
+                  type="button"
+                >
+                  {t('auth.logout')}
+                </button>
+              </div>
             </div>
           ) : null}
         </div>
