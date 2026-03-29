@@ -751,15 +751,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           >
             {statusLoading ? t('dashboard.refreshing') : t('button.refresh')}
           </button>
-          {isInlineStatusView && statusView === 'DAILY' ? (
-            <button
-              className="ghost-button"
-              onClick={() => setShowDailyChart((prev) => !prev)}
-              type="button"
-            >
-              {showDailyChart ? 'Hide Chart' : 'Show Chart'}
-            </button>
-          ) : null}
           {isModalPanel ? (
             <button
               className="ghost-button"
@@ -800,34 +791,54 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </label>
       </section>
 
-      <section style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {(['DAILY', 'WEEKLY'] as const).map((viewKey) => {
-          const isActive = statusView === viewKey;
+      <section
+        style={{
+          alignItems: 'center',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 8,
+          justifyContent: 'space-between',
+        }}
+      >
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {(['DAILY', 'WEEKLY'] as const).map((viewKey) => {
+            const isActive = statusView === viewKey;
 
-          return (
-            <button
-              key={viewKey}
-              onClick={() => setStatusView(viewKey)}
-              style={{
-                backgroundColor: isActive
-                  ? 'var(--accent)'
-                  : 'var(--surface-1)',
-                border: '1px solid var(--border)',
-                borderRadius: 8,
-                color: isActive ? '#ffffff' : 'var(--text-main)',
-                cursor: 'pointer',
-                fontSize: 13,
-                fontWeight: 600,
-                padding: '8px 12px',
-              }}
-              type="button"
-            >
-              {viewKey === 'DAILY'
-                ? t('dashboard.dailyStandupStatus')
-                : t('dashboard.weeklyStandupStatus')}
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={viewKey}
+                onClick={() => setStatusView(viewKey)}
+                style={{
+                  backgroundColor: isActive
+                    ? 'var(--accent)'
+                    : 'var(--surface-1)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 8,
+                  color: isActive ? '#ffffff' : 'var(--text-main)',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  padding: '8px 12px',
+                }}
+                type="button"
+              >
+                {viewKey === 'DAILY'
+                  ? 'Daily Standup Status'
+                  : 'Weekly Standup Status'}
+              </button>
+            );
+          })}
+        </div>
+
+        {isInlineStatusView && statusView === 'DAILY' ? (
+          <button
+            className="ghost-button"
+            onClick={() => setShowDailyChart((prev) => !prev)}
+            type="button"
+          >
+            {showDailyChart ? 'Hide Chart' : 'Show Chart'}
+          </button>
+        ) : null}
       </section>
 
       {statusLoading ? (

@@ -44,16 +44,16 @@
   --danger-border: #f4c1c8;
   --danger-text: #8f2532;
 
-  --slot-good-bg: #0b4402;
-  --slot-good-border: #0b4402;
+  --slot-good-bg: #146504;
+  --slot-good-border: #146504;
   --slot-good-text: #ffffff;
 
-  --slot-delayed-bg: #dcc21e;
-  --slot-delayed-border: #dcc21e;
+  --slot-delayed-bg: #e8cf2d;
+  --slot-delayed-border: #e8cf2d;
   --slot-delayed-text: #1f1b00;
 
-  --slot-missing-bg: #7a0000;
-  --slot-missing-border: #7a0000;
+  --slot-missing-bg: #910000;
+  --slot-missing-border: #910000;
   --slot-missing-text: #ffffff;
 
   --shadow-soft: 0 10px 26px rgba(15, 23, 42, 0.08);
@@ -1046,6 +1046,17 @@ select {
 
 [data-theme='dark'] .team-ring-member {
   background: rgba(0, 52, 101, 0.2);
+}
+
+[data-theme='dark'] .team-name,
+[data-theme='dark'] .team-id,
+[data-theme='dark'] .intern-id,
+[data-theme='dark'] .intern-dropdown-id,
+[data-theme='dark'] .intern-dropdown-empty,
+[data-theme='dark'] .interns-list-card-id,
+[data-theme='dark'] .team-empty,
+[data-theme='dark'] .app-brand-subtitle {
+  color: #ffffff;
 }
 
 [data-theme='dark'] .app-toolbar,
