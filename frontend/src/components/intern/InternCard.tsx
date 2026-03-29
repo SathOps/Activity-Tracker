@@ -149,19 +149,12 @@ export const InternCard: React.FC<InternCardProps> = ({
             </div>
           ) : (
             <>
-<<<<<<< HEAD
               <div style={{ color: '#4b5563', fontSize: 13 }}>
                 {t('interns.qualifiedUploads')}
                 {standupDateLabel
                   ? t('interns.onDate', { date: standupDateLabel })
                   : ''}
                 : {todayValidCount ?? 0}
-=======
-              <div style={{ color: 'var(--text-subtle)', fontSize: 13 }}>
-                Qualified uploads
-                {standupDateLabel ? ` on ${standupDateLabel}` : ''}:{' '}
-                {todayValidCount ?? 0}
->>>>>>> 7468466 (fix(alignment): realigned show chart button and fixed font)
               </div>
               {visibleSlotStatuses.length > 0 ? (
                 <div
@@ -183,7 +176,7 @@ export const InternCard: React.FC<InternCardProps> = ({
                     >
                       <span
                         style={{
-                          color: 'var(--text-main)',
+                          color: '#0f172a',
                           fontSize: 12,
                           fontWeight: 600,
                           minWidth: 78,
@@ -204,9 +197,7 @@ export const InternCard: React.FC<InternCardProps> = ({
                       >
                         {slot.status}
                       </span>
-                      <span
-                        style={{ color: 'var(--text-subtle)', fontSize: 11 }}
-                      >
+                      <span style={{ color: '#6b7280', fontSize: 11 }}>
                         {slot.windowLabel}
                       </span>
                     </div>
@@ -414,38 +405,38 @@ export const InternCard: React.FC<InternCardProps> = ({
 
 function getSlotStatusBackground(status: StandupSlotResult['status']): string {
   if (status === 'GOOD') {
-    return 'var(--slot-good-bg)';
+    return '#dcfce7';
   }
 
   if (status === 'DELAYED') {
-    return 'var(--slot-delayed-bg)';
+    return '#fef3c7';
   }
 
-  return 'var(--slot-missing-bg)';
+  return '#f1f5f9';
 }
 
 function getSlotStatusBorder(status: StandupSlotResult['status']): string {
   if (status === 'GOOD') {
-    return 'var(--slot-good-border)';
+    return '#86efac';
   }
 
   if (status === 'DELAYED') {
-    return 'var(--slot-delayed-border)';
+    return '#fcd34d';
   }
 
-  return 'var(--slot-missing-border)';
+  return '#cbd5e1';
 }
 
 function getSlotStatusColor(status: StandupSlotResult['status']): string {
   if (status === 'GOOD') {
-    return 'var(--slot-good-text)';
+    return '#166534';
   }
 
   if (status === 'DELAYED') {
-    return 'var(--slot-delayed-text)';
+    return '#92400e';
   }
 
-  return 'var(--slot-missing-text)';
+  return '#475569';
 }
 
 export default InternCard;

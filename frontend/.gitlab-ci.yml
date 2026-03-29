@@ -1,4 +1,4 @@
-image: node:22
+image: node:20
 
 stages:
   - quality
@@ -25,11 +25,17 @@ variables:
 quality_checks:
   stage: quality
   script:
-    - export NODE_OPTIONS="--import tsx"
     - npm run format:check
+    # Generate GitLab Code Quality report, don't fail yet
+    - npm run lint -- -f gitlab -o gl-codequality.json || true
+    # Run lint again so standard output is visible in logs, fails pipeline if there are errors
     - npm run lint
     - npm run typecheck
     - npm run knip
+  artifacts:
+    reports:
+      codequality: gl-codequality.json
+    expire_in: 7 days
 
 i18n_validation:
   stage: i18n
@@ -37,8 +43,14 @@ i18n_validation:
     - npm run validate:i18n
     - npm run i18n:replace
 
+test_cases:
+  stage: test
+  script:
+    - npm test
+
 test_coverage:
   stage: test
+  # Matches vitest text reporter output
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
   script:
     - npm run test:coverage

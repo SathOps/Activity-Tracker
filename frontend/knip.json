@@ -1,8 +1,8 @@
 {
   "$schema": "https://unpkg.com/knip/schema.json",
-  "entry": ["src/scripts/verifyIntern.ts"],
+  "entry": ["src/main.tsx", "src/App.tsx", "src/scripts/verifyIntern.ts"],
   "project": ["src/**/*.{ts,tsx}"],
-  "ignoreDependencies": ["tsx", "@vitejs/plugin-react"],
+  "ignoreDependencies": ["eslint-formatter-gitlab", "lint-staged"],
   "rules": {
     "exports": "off",
     "types": "off",

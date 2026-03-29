@@ -55,10 +55,6 @@ function readChangedFiles() {
   return [...new Set(workingTree)];
 }
 
-/**
- * @param {string} file
- * @returns {string}
- */
 function normalizePath(file) {
   return file.replace(/\\/g, '/');
 }
@@ -89,15 +85,9 @@ function inferSectionFromFiles(files) {
   return 'Changed';
 }
 
-/**
- * @param {string[]} files
- * @returns {string}
- */
 function createAutoMessage(files) {
   const limit = 5;
-  const sorted = [...new Set(files.map(normalizePath))].sort((left, right) =>
-    left.localeCompare(right)
-  );
+  const sorted = [...new Set(files.map(normalizePath))].sort();
   const shown = sorted.slice(0, limit).map((file) => `\`${file}\``);
   const remaining = sorted.length - shown.length;
   const suffix = remaining > 0 ? `, and ${remaining} more file(s)` : '';

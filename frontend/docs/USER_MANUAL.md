@@ -110,8 +110,6 @@ VITE_INTERNSHIP_LABEL_ALIASES=internship,intern
 npm run dev
 ```
 
-The repo keeps npm script wrappers, but the primary toolchain is Vite+.
-
 ### Production Build
 
 ```bash
@@ -331,8 +329,7 @@ No. Normal login-based bearer token flow works without it.
 npm run lint
 npm run format:check
 npm run format
-npm test
+npm run test
 npm run test:coverage
-npm run typecheck
-npm run build
+npx tsc -b
 ```

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import TeamList, { Team } from './TeamList';
-import TeamStatusRing from './TeamStatusRing';
 import InternCard from '../intern/InternCard';
 import type { Intern } from '../intern/InternSearch';
 import { parseTimestamp } from '../../utils/timestamps';
@@ -16,11 +15,9 @@ import {
 } from '../../utils/verification';
 import { getInternAudios } from '../../services/corpus';
 import type { InternAudioMetadata } from '../../services/corpus';
-import { RecordStandupModal } from '../RecordStandupModal';
 
 type DashboardView = 'TEAMS' | 'INTERNS' | 'COMPLETED';
 type StatusView = 'DAILY' | 'WEEKLY';
-type AnalyticsQualityFilter = 'ALL' | 'GOOD' | 'DELAYED' | 'MISSING';
 
 interface TeamDailyStatusRow {
   teamId: string;
@@ -41,7 +38,6 @@ interface WeeklyDayStatus {
   requiredStandupCount: number;
   remainingStandupCount: number;
   isCompleted: boolean;
-  slotStatuses: StandupSlotResult[];
   contributorDetails: ContributorUploadDetail[];
 }
 
@@ -52,15 +48,6 @@ interface TeamWeeklyStatusRow {
   completedDaysCount: number;
   pendingDayDetails: string[];
   totalRemainingStandups: number;
-}
-
-interface TeamAnalyticsQualityRow {
-  teamId: string;
-  teamName: string;
-  goodCount: number;
-  delayedCount: number;
-  missingCount: number;
-  score: number;
 }
 
 interface SubmissionAliasCriteria {
@@ -80,7 +67,6 @@ export interface DashboardLayoutProps {
   title?: string;
   statusDisplay?: 'modal' | 'inline';
   mode?: 'teams' | 'status' | 'analytics';
-  authToken?: string;
 }
 
 const DEFAULT_VIEW: DashboardView = 'TEAMS';
@@ -108,7 +94,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   title,
   statusDisplay = 'modal',
   mode = 'teams',
-  authToken,
 }) => {
   const { t } = useTranslation();
   const [managedTeams, setManagedTeams] = React.useState<Team[]>(
@@ -127,9 +112,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   );
   const [isStatusModalOpen, setIsStatusModalOpen] = React.useState(false);
   const [statusView, setStatusView] = React.useState<StatusView>('DAILY');
-  const [analyticsQualityFilter, setAnalyticsQualityFilter] =
-    React.useState<AnalyticsQualityFilter>('ALL');
-  const [showDailyChart, setShowDailyChart] = React.useState(false);
   const [activeAudioId, setActiveAudioId] = React.useState<string | null>(null);
   const [statusLoading, setStatusLoading] = React.useState(false);
   const [statusError, setStatusError] = React.useState<string | null>(null);
@@ -141,14 +123,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   >([]);
   const [analyticsTeamDailyTotals, setAnalyticsTeamDailyTotals] =
     React.useState<Map<string, Map<string, number>>>(new Map());
-  const [analyticsQualityRows, setAnalyticsQualityRows] = React.useState<
-    TeamAnalyticsQualityRow[]
-  >([]);
   const [analyticsLoading, setAnalyticsLoading] = React.useState(false);
   const [analyticsError, setAnalyticsError] = React.useState<string | null>(
     null
   );
-  const [isRecordModalOpen, setIsRecordModalOpen] = React.useState(false);
   const hasInitializedDateSelection = React.useRef(false);
   const statusLoadRequestId = React.useRef(0);
   const analyticsLoadRequestId = React.useRef(0);
@@ -209,13 +187,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     () => getTrailingDateKeys(selectedDateKey, 29),
     [selectedDateKey]
   );
-  const teamMemberNamesById = React.useMemo(
-    () =>
-      new Map(
-        managedTeams.map((team) => [team.teamId, getTeamMemberNames(team)])
-      ),
-    [managedTeams]
-  );
   const pendingDailyRows = React.useMemo(
     () => teamDailyStatusRows.filter((row) => !row.isCompleted),
     [teamDailyStatusRows]
@@ -257,16 +228,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         intern.teamName.toLowerCase().includes(normalizedQuery)
     );
   }, [activeView, allInternRows, normalizedQuery]);
-  const rankedAnalyticsTeams = React.useMemo(() => {
-    const teamById = new Map(managedTeams.map((team) => [team.teamId, team]));
-
-    return rankAnalyticsQualityRows(
-      analyticsQualityRows,
-      analyticsQualityFilter
-    )
-      .map((row) => teamById.get(row.teamId))
-      .filter((team): team is Team => team !== undefined);
-  }, [analyticsQualityFilter, analyticsQualityRows, managedTeams]);
 
   const handleCreateTeam = () => {
     const teamName = newTeamName.trim();
@@ -479,10 +440,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     );
   };
 
-  const handleUploadSuccess = () => {
-    setIsRecordModalOpen(false);
-  };
-
   const handleDeleteTeam = (teamId: string) => {
     setManagedTeams((prev) => prev.filter((team) => team.teamId !== teamId));
   };
@@ -497,17 +454,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     }
 
     setSelectedDateKey(nextDateKey);
-  };
-
-  const handleShiftAnalyticsRange = (days: number) => {
-    const currentDate = new Date(`${selectedDateKey}T00:00:00`);
-
-    if (Number.isNaN(currentDate.getTime())) {
-      return;
-    }
-
-    currentDate.setDate(currentDate.getDate() + days);
-    setSelectedDateKey(getLocalDateKey(currentDate));
   };
 
   const handleUpdateTeamName = (teamId: string, newName: string) => {
@@ -604,7 +550,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
     if (validTeams.length === 0) {
       setAnalyticsTeamDailyTotals(new Map());
-      setAnalyticsQualityRows([]);
       setAnalyticsError(null);
       setAnalyticsLoading(false);
       return;
@@ -620,19 +565,17 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       );
       const targetDateKeys = new Set<string>(analyticsDateKeys);
       const uniqueInternIds = collectUniqueTeamInternIds(validTeams);
-      const { countsByInternByDate, audiosByInternByDate } =
-        await buildInternSubmissionSnapshot(
-          uniqueInternIds,
-          targetDateKeys,
-          aliasCriteria
-        );
+      const { countsByInternByDate } = await buildInternSubmissionSnapshot(
+        uniqueInternIds,
+        targetDateKeys,
+        aliasCriteria
+      );
 
       if (analyticsLoadRequestId.current !== requestId) {
         return;
       }
 
       const teamTotals = new Map<string, Map<string, number>>();
-      const qualityRows: TeamAnalyticsQualityRow[] = [];
 
       for (const team of validTeams) {
         const teamId = normalizeTeamId(team.teamId);
@@ -651,17 +594,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         }
 
         teamTotals.set(teamId, teamDateCounts);
-        qualityRows.push(
-          buildTeamAnalyticsQualityRow(
-            team,
-            analyticsDateKeys,
-            audiosByInternByDate
-          )
-        );
       }
 
       setAnalyticsTeamDailyTotals(teamTotals);
-      setAnalyticsQualityRows(qualityRows);
     } catch (error) {
       if (analyticsLoadRequestId.current !== requestId) {
         return;
@@ -670,7 +605,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       console.error('Unable to load analytics', error);
       setAnalyticsError(t('dashboard.unableToLoadAnalytics'));
       setAnalyticsTeamDailyTotals(new Map());
-      setAnalyticsQualityRows([]);
     } finally {
       if (analyticsLoadRequestId.current === requestId) {
         setAnalyticsLoading(false);
@@ -740,7 +674,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             })}
           </p>
         </div>
-        <div style={{ display: 'grid', gap: 8, justifyItems: 'end' }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button
             className="ghost-button"
             disabled={statusLoading}
@@ -791,54 +725,34 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </label>
       </section>
 
-      <section
-        style={{
-          alignItems: 'center',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 8,
-          justifyContent: 'space-between',
-        }}
-      >
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {(['DAILY', 'WEEKLY'] as const).map((viewKey) => {
-            const isActive = statusView === viewKey;
+      <section style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {(['DAILY', 'WEEKLY'] as const).map((viewKey) => {
+          const isActive = statusView === viewKey;
 
-            return (
-              <button
-                key={viewKey}
-                onClick={() => setStatusView(viewKey)}
-                style={{
-                  backgroundColor: isActive
-                    ? 'var(--accent)'
-                    : 'var(--surface-1)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 8,
-                  color: isActive ? '#ffffff' : 'var(--text-main)',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  padding: '8px 12px',
-                }}
-                type="button"
-              >
-                {viewKey === 'DAILY'
-                  ? 'Daily Standup Status'
-                  : 'Weekly Standup Status'}
-              </button>
-            );
-          })}
-        </div>
-
-        {isInlineStatusView && statusView === 'DAILY' ? (
-          <button
-            className="ghost-button"
-            onClick={() => setShowDailyChart((prev) => !prev)}
-            type="button"
-          >
-            {showDailyChart ? 'Hide Chart' : 'Show Chart'}
-          </button>
-        ) : null}
+          return (
+            <button
+              key={viewKey}
+              onClick={() => setStatusView(viewKey)}
+              style={{
+                backgroundColor: isActive
+                  ? 'var(--accent)'
+                  : 'var(--surface-1)',
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+                color: isActive ? '#ffffff' : 'var(--text-main)',
+                cursor: 'pointer',
+                fontSize: 13,
+                fontWeight: 600,
+                padding: '8px 12px',
+              }}
+              type="button"
+            >
+              {viewKey === 'DAILY'
+                ? t('dashboard.dailyStandupStatus')
+                : t('dashboard.weeklyStandupStatus')}
+            </button>
+          );
+        })}
       </section>
 
       {statusLoading ? (
@@ -847,39 +761,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {!statusLoading && statusError ? (
         <p className="team-empty">{statusError}</p>
       ) : null}
-
-      {!statusLoading &&
-      !statusError &&
-      isInlineStatusView &&
-      statusView === 'DAILY' &&
-      showDailyChart &&
-      teamDailyStatusRows.length > 0 ? (
-        <section
-          className="status-glance-panel"
-          aria-label="At-a-glance statistics"
-        >
-          <header className="status-glance-header">
-            <h3 className="status-glance-title">At-a-Glance Statistics</h3>
-            <p className="status-glance-copy">
-              Hover a team ring to view team members.
-            </p>
-          </header>
-
-          <section className="status-glance-grid">
-            {teamDailyStatusRows.map((row) => (
-              <TeamStatusRing
-                key={row.teamId}
-                memberNames={teamMemberNamesById.get(row.teamId) ?? []}
-                requiredStandupCount={row.requiredStandupCount}
-                slotStatuses={row.slotStatuses}
-                standupCount={row.standupCount}
-                teamName={row.teamName}
-              />
-            ))}
-          </section>
-        </section>
-      ) : null}
-
       {!statusLoading && !statusError && statusView === 'DAILY' ? (
         <section style={{ display: 'grid', gap: 14 }}>
           {teamDailyStatusRows.length === 0 ? (
@@ -1100,158 +981,69 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     </>
   );
 
-  const renderAnalyticsContent = () => {
-    return (
-      <section style={{ display: 'grid', gap: 16 }}>
-        <header
-          style={{
-            alignItems: 'center',
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 12,
-            justifyContent: 'space-between',
+  const renderAnalyticsContent = () => (
+    <section style={{ display: 'grid', gap: 16 }}>
+      <header
+        style={{
+          alignItems: 'center',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 12,
+          justifyContent: 'space-between',
+        }}
+      >
+        <div style={{ display: 'grid', gap: 4 }}>
+          <h2 style={{ color: '#0f172a', fontSize: 20, margin: 0 }}>
+            {t('dashboard.teamAnalytics')}
+          </h2>
+          <p style={{ color: '#475569', fontSize: 13, margin: 0 }}>
+            {t('dashboard.dailyUploadsAcrossAllTeamsRange', {
+              start: formatDateForDisplay(analyticsDateKeys[0]),
+              end: formatDateForDisplay(
+                analyticsDateKeys[analyticsDateKeys.length - 1]
+              ),
+            })}
+          </p>
+        </div>
+        <button
+          className="ghost-button"
+          disabled={analyticsLoading}
+          onClick={() => {
+            void loadAnalytics();
           }}
+          type="button"
         >
-          <div style={{ display: 'grid', gap: 4 }}>
-            <h2 style={{ color: '#0f172a', fontSize: 20, margin: 0 }}>
-              {t('dashboard.teamAnalytics')}
-            </h2>
-            <p style={{ color: '#475569', fontSize: 13, margin: 0 }}>
-              {t('dashboard.dailyUploadsAcrossAllTeamsRange', {
-                start: formatDateForDisplay(analyticsDateKeys[0]),
-                end: formatDateForDisplay(
-                  analyticsDateKeys[analyticsDateKeys.length - 1]
-                ),
-              })}
-            </p>
-          </div>
-          <div
-            style={{
-              alignItems: 'end',
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 8,
-            }}
-          >
-            <label
-              style={{
-                color: '#475569',
-                display: 'grid',
-                fontSize: 12,
-                gap: 4,
-                minWidth: 170,
-              }}
-            >
-              <span>{t('dashboard.customDate')}</span>
-              <input
-                aria-label={t('dashboard.customDate')}
-                className="date-input"
-                onChange={handleSelectedDateChange}
-                type="date"
-                value={selectedDateKey}
-              />
-            </label>
-            <button
-              className="ghost-button"
-              onClick={() => handleShiftAnalyticsRange(-30)}
-              type="button"
-            >
-              {t('dashboard.previousRange')}
-            </button>
-            <button
-              className="ghost-button"
-              onClick={() => handleShiftAnalyticsRange(30)}
-              type="button"
-            >
-              {t('dashboard.nextRange')}
-            </button>
-            <button
-              className="ghost-button"
-              disabled={analyticsLoading}
-              onClick={() => {
-                void loadAnalytics();
-              }}
-              type="button"
-            >
-              {analyticsLoading
-                ? t('dashboard.refreshing')
-                : t('button.refresh')}
-            </button>
-          </div>
-        </header>
+          {analyticsLoading ? t('dashboard.refreshing') : t('button.refresh')}
+        </button>
+      </header>
 
-        {analyticsLoading ? (
-          <p className="team-empty">{t('dashboard.loadingAnalytics')}</p>
-        ) : null}
-        {!analyticsLoading && analyticsError ? (
-          <p className="team-empty">{analyticsError}</p>
-        ) : null}
+      {analyticsLoading ? (
+        <p className="team-empty">{t('dashboard.loadingAnalytics')}</p>
+      ) : null}
+      {!analyticsLoading && analyticsError ? (
+        <p className="team-empty">{analyticsError}</p>
+      ) : null}
 
-        {!analyticsLoading && !analyticsError ? (
-          <section className="team-card" style={{ backgroundColor: '#f8fafc' }}>
-            <div
-              style={{
-                alignItems: 'center',
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 8,
-                justifyContent: 'space-between',
-                marginBottom: 12,
-              }}
-            >
-              <div style={{ display: 'grid', gap: 4 }}>
-                <div
-                  style={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: 8,
-                  }}
-                >
-                  <h3 className="team-name" style={{ margin: 0 }}>
-                    {t('dashboard.memberActivityHeatmap')}
-                  </h3>
-                  {(
-                    [
-                      ['ALL', t('dashboard.filterAll')],
-                      ['GOOD', t('dashboard.filterGood')],
-                      ['DELAYED', t('dashboard.filterDelayed')],
-                      ['MISSING', t('dashboard.filterMissing')],
-                    ] as Array<[AnalyticsQualityFilter, string]>
-                  ).map(([filterKey, label]) => {
-                    const isActive = analyticsQualityFilter === filterKey;
-
-                    return (
-                      <button
-                        key={filterKey}
-                        onClick={() => setAnalyticsQualityFilter(filterKey)}
-                        style={getFilterButtonStyle(isActive)}
-                        type="button"
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
-                <p className="team-id" style={{ margin: 0 }}>
-                  {t('dashboard.dailyUploadsPerTeamMax')}
-                </p>
-              </div>
-            </div>
-
-            {renderTeamHeatmap(
-              rankedAnalyticsTeams,
-              analyticsDateKeys,
-              analyticsTeamDailyTotals,
-              t('dashboard.noLeaderboardResults'),
-              t('dashboard.scrollToViewMore'),
-              t('dashboard.teamColumn')
-            )}
-          </section>
-        ) : null}
-      </section>
-    );
-  };
+      {!analyticsLoading && !analyticsError ? (
+        <section className="team-card" style={{ backgroundColor: '#f8fafc' }}>
+          <h3 className="team-name" style={{ marginBottom: 8 }}>
+            {t('dashboard.memberActivityHeatmap')}
+          </h3>
+          <p className="team-id" style={{ marginBottom: 12 }}>
+            {t('dashboard.dailyUploadsPerTeamMax')}
+          </p>
+          {renderTeamHeatmap(
+            managedTeams,
+            analyticsDateKeys,
+            analyticsTeamDailyTotals,
+            t('dashboard.noActivityData'),
+            t('dashboard.scrollToViewMore'),
+            t('dashboard.teamColumn')
+          )}
+        </section>
+      ) : null}
+    </section>
+  );
 
   return (
     <main className="dashboard-container">
@@ -1262,22 +1054,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             : resolvedTitle}
         </h1>
         {!isInlineStatusView ? (
-          <div className="dashboard-header-actions">
-            <button
-              className="secondary-button"
-              onClick={() => setIsRecordModalOpen(true)}
-              type="button"
-            >
-              Record Standup
-            </button>
-            <button
-              className="primary-button"
-              onClick={() => setIsCreatingTeam((prev) => !prev)}
-              type="button"
-            >
-              {isCreatingTeam ? t('button.cancel') : t('teams.createTeam')}
-            </button>
-          </div>
+          <button
+            className="primary-button"
+            onClick={() => setIsCreatingTeam((prev) => !prev)}
+            type="button"
+          >
+            {isCreatingTeam ? t('button.cancel') : t('teams.createTeam')}
+          </button>
         ) : null}
       </header>
 
@@ -1470,14 +1253,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             {renderStatusPanelContent(true)}
           </section>
         </div>
-      ) : null}
-
-      {isRecordModalOpen && authToken ? (
-        <RecordStandupModal
-          authToken={authToken}
-          onClose={() => setIsRecordModalOpen(false)}
-          onSuccess={handleUploadSuccess}
-        />
       ) : null}
     </main>
   );
@@ -1699,7 +1474,9 @@ function renderTeamHeatmap(
                 return (
                   <div
                     key={`${teamId}-${dateKey}`}
-                    title={`${team.teamName} | ${formatMonthDay(dateKey)}: ${count}/4 uploads`}
+                    title={`${team.teamName} | ${formatMonthDay(
+                      dateKey
+                    )}: ${count}/4 uploads`}
                     style={{
                       width: 18,
                       height: 18,
@@ -1901,7 +1678,6 @@ function buildTeamWeeklyStatusRow(
       requiredStandupCount,
       remainingStandupCount,
       isCompleted: totalStandupCount >= requiredStandupCount,
-      slotStatuses,
       contributorDetails,
     };
   });
@@ -1927,89 +1703,6 @@ function buildTeamWeeklyStatusRow(
     pendingDayDetails,
     totalRemainingStandups,
   };
-}
-
-function buildTeamAnalyticsQualityRow(
-  team: Team,
-  dateKeys: string[],
-  audiosByInternByDate: Map<string, Map<string, InternAudioMetadata[]>>
-): TeamAnalyticsQualityRow {
-  let goodCount = 0;
-  let delayedCount = 0;
-  let missingCount = 0;
-
-  for (const dateKey of dateKeys) {
-    const slotStatuses = buildStandupSlotResults(
-      collectTeamAudiosForDate(team, dateKey, audiosByInternByDate),
-      dateKey
-    );
-
-    for (const slotStatus of slotStatuses) {
-      if (slotStatus.status === 'GOOD') {
-        goodCount += 1;
-      } else if (slotStatus.status === 'DELAYED') {
-        delayedCount += 1;
-      } else {
-        missingCount += 1;
-      }
-    }
-  }
-
-  return {
-    teamId: team.teamId,
-    teamName: team.teamName,
-    goodCount,
-    delayedCount,
-    missingCount,
-    score: goodCount * 2 + delayedCount,
-  };
-}
-
-function rankAnalyticsQualityRows(
-  rows: TeamAnalyticsQualityRow[],
-  filter: AnalyticsQualityFilter
-): TeamAnalyticsQualityRow[] {
-  const filteredRows =
-    filter === 'ALL'
-      ? rows
-      : rows.filter((row) => getAnalyticsQualityCount(row, filter) > 0);
-
-  return [...filteredRows].sort((left, right) => {
-    const primaryComparison =
-      getAnalyticsQualityCount(right, filter) -
-      getAnalyticsQualityCount(left, filter);
-
-    if (primaryComparison !== 0) {
-      return primaryComparison;
-    }
-
-    return (
-      right.score - left.score ||
-      right.goodCount - left.goodCount ||
-      right.delayedCount - left.delayedCount ||
-      left.missingCount - right.missingCount ||
-      left.teamName.localeCompare(right.teamName)
-    );
-  });
-}
-
-function getAnalyticsQualityCount(
-  row: TeamAnalyticsQualityRow,
-  filter: AnalyticsQualityFilter
-): number {
-  if (filter === 'GOOD') {
-    return row.goodCount;
-  }
-
-  if (filter === 'DELAYED') {
-    return row.delayedCount;
-  }
-
-  if (filter === 'MISSING') {
-    return row.missingCount;
-  }
-
-  return row.score;
 }
 
 function collectTeamAudiosForDate(
@@ -2171,61 +1864,40 @@ function formatContributorTooltip(
     .join(' | ');
 }
 
-function getFilterButtonStyle(isActive: boolean): React.CSSProperties {
-  return {
-    backgroundColor: isActive ? 'var(--accent)' : 'var(--surface-1)',
-    border: '1px solid var(--border)',
-    borderRadius: 8,
-    color: isActive ? '#ffffff' : 'var(--text-main)',
-    cursor: 'pointer',
-    fontSize: 13,
-    fontWeight: 600,
-    padding: '8px 12px',
-  };
-}
-
 function getStatusSlotBackground(status: StandupSlotResult['status']): string {
   if (status === 'GOOD') {
-    return 'var(--slot-good-bg)';
+    return '#dcfce7';
   }
 
   if (status === 'DELAYED') {
-    return 'var(--slot-delayed-bg)';
+    return '#fef3c7';
   }
 
-  return 'var(--slot-missing-bg)';
+  return '#f1f5f9';
 }
 
 function getStatusSlotBorder(status: StandupSlotResult['status']): string {
   if (status === 'GOOD') {
-    return 'var(--slot-good-border)';
+    return '#86efac';
   }
 
   if (status === 'DELAYED') {
-    return 'var(--slot-delayed-border)';
+    return '#fcd34d';
   }
 
-  return 'var(--slot-missing-border)';
+  return '#cbd5e1';
 }
 
 function getStatusSlotColor(status: StandupSlotResult['status']): string {
   if (status === 'GOOD') {
-    return 'var(--slot-good-text)';
+    return '#166534';
   }
 
   if (status === 'DELAYED') {
-    return 'var(--slot-delayed-text)';
+    return '#92400e';
   }
 
-  return 'var(--slot-missing-text)';
-}
-
-function getTeamMemberNames(team: Team): string[] {
-  return team.interns
-    .map((intern) =>
-      (intern.internName || intern.corpusUserId || intern.internId || '').trim()
-    )
-    .filter((memberName) => memberName.length > 0);
+  return '#475569';
 }
 
 async function fetchInternContributionWithRetries(

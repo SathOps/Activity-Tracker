@@ -1,9 +1,8 @@
-import { afterEach, expect, test, vi } from 'vite-plus/test';
+import { afterEach, expect, test, vi } from 'vitest';
 
 import {
   configureCorpusService,
   getAudioRecordUrl,
-  getCurrentUser,
   getInternAudios,
   searchInternById,
   searchInternsByName,
@@ -67,81 +66,6 @@ test('searchInternById uses configured base URL/auth header and parses profile p
   expect(calls[0].init?.headers?.Authorization).toBe('Bearer token-123');
 });
 
-test('getCurrentUser hits /api/v1/auth/me and parses profile', async () => {
-  const calls: string[] = [];
-
-  configureCorpusService({
-    fetcher: async (url) => {
-      calls.push(url);
-      return mockResponse(200, {
-        id: 'current_user',
-        full_name: 'Current User',
-        username: 'current',
-        email: 'current@example.com',
-        phone: '+911234567890',
-      });
-    },
-  });
-
-  const profile = await getCurrentUser('fallback');
-
-  expect(profile).toEqual({
-    id: 'current_user',
-    name: 'Current User',
-    username: 'current',
-    email: 'current@example.com',
-    phone: '+911234567890',
-  });
-  expect(calls).toEqual(['/api/v1/auth/me']);
-});
-
-test('getCurrentUser falls back when endpoint is missing', async () => {
-  configureCorpusService({
-    fetcher: async () => mockResponse(404, { detail: 'Not Found' }),
-  });
-
-  const profile = await getCurrentUser('fallback-id');
-
-  expect(profile).toEqual({ id: 'fallback-id' });
-});
-
-test('getCurrentUser returns mock profile when configured', async () => {
-  configureCorpusService({
-    useMock: true,
-  });
-
-  const profileWithFallback = await getCurrentUser('from-arg');
-  expect(profileWithFallback).toEqual({ id: 'from-arg' });
-
-  const profileNoFallback = await getCurrentUser('');
-  expect(profileNoFallback).toEqual({ id: 'current-user' });
-});
-
-test('searchInternById captures username, email, and phone when present', async () => {
-  configureCorpusService({
-    fetcher: async () =>
-      mockResponse(200, {
-        data: {
-          id: 'intern_with_profile',
-          full_name: 'User Profile',
-          username: 'profile-user',
-          email: 'user@example.com',
-          phone: '+910000000000',
-        },
-      }),
-  });
-
-  const profile = await searchInternById('intern_with_profile');
-
-  expect(profile).toEqual({
-    id: 'intern_with_profile',
-    name: 'User Profile',
-    username: 'profile-user',
-    email: 'user@example.com',
-    phone: '+910000000000',
-  });
-});
-
 test('searchInternById throws for blank intern ids', async () => {
   await expect(searchInternById('   ')).rejects.toThrow('internId is required');
 });
@@ -202,13 +126,13 @@ test('configureCorpusService preserves the current fetcher when fetcher is omitt
 });
 
 test('corpus service resolves without a global fetch implementation', async () => {
-  const globalScope = globalThis as {
+  const globalScope = globalThis as typeof globalThis & {
     fetch?: typeof globalThis.fetch;
   };
   const originalFetch = globalScope.fetch;
 
   vi.resetModules();
-  globalScope.fetch = undefined;
+  delete globalScope.fetch;
 
   try {
     const corpusModule =
@@ -216,9 +140,7 @@ test('corpus service resolves without a global fetch implementation', async () =
 
     await expect(
       corpusModule.searchInternById('intern_no_fetch')
-    ).resolves.toEqual({
-      id: 'intern_no_fetch',
-    });
+    ).resolves.toEqual({ id: 'intern_no_fetch' });
   } finally {
     globalScope.fetch = originalFetch;
     vi.resetModules();
@@ -287,7 +209,7 @@ test('searchInternsByName parses nested results collections and filters invalid 
 
   expect(results).toEqual([
     { id: 'intern_2', name: 'Intern Two' },
-    { id: 'intern_3', name: 'intern-three', username: 'intern-three' },
+    { id: 'intern_3', name: 'intern-three' },
   ]);
 });
 
