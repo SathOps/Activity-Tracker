@@ -8,6 +8,7 @@ The format is based on Keep a Changelog, and this project follows a simple relea
 
 ### Added
 
+- Dead code detection tool Knip for identifying unused files, exports, and dependencies
 - Comprehensive user manual at `docs/USER_MANUAL.md` covering setup, workflows, CSV seed formats, verification rules, API endpoints, troubleshooting, and FAQ
 - ESLint and Prettier project tooling
 - `lint`, `format`, and `format:check` npm scripts
@@ -21,6 +22,7 @@ The format is based on Keep a Changelog, and this project follows a simple relea
 
 ### Changed
 
+- Updated GitLab CI/CD pipeline and package.json scripts with Knip validation
 - `README.md` now links directly to the user manual for easier discoverability
 - `CONTRIBUTING.md` was restructured and updated with current commands, type-check guidance (`npx tsc -b`), changelog process, and current environment variable usage
 - Expanded lint coverage to source files, tests, and config files

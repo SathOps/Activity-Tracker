@@ -30,6 +30,7 @@ lint:
     # Run lint again so standard output is visible in logs, fails pipeline if there are errors
     - npm run lint
     - npm run typecheck
+    - npm run knip
   artifacts:
     reports:
       codequality: gl-codequality.json

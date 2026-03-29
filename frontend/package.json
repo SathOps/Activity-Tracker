@@ -18,7 +18,10 @@
     "validate:i18n": "node scripts/validateI18n.mjs",
     "validate": "npm run format:check && npm run lint && npm run typecheck && npm run validate:i18n && npm test",
     "validate:staged": "node scripts/runStagedChecks.mjs",
-    "prepare": "node scripts/setupGitHooks.mjs"
+    "prepare": "node scripts/setupGitHooks.mjs && husky install",
+    "knip": "knip",
+    "knip:fix": "knip --fix",
+    "knip:strict": "knip --include exports,files,dependencies"
   },
   "dependencies": {
     "i18next": "^26.0.1",
@@ -44,6 +47,9 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "globals": "^16.4.0",
+    "husky": "^9.1.7",
+    "knip": "^6.1.0",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.6.2",
     "typescript": "^5.6.3",
     "vite": "^7.3.1",
