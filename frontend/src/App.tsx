@@ -1,8 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import DashboardHome from './components/dashboard/DashboardHome';
+import LanguageSwitcher from './components/LanguageSwitcher';
 import type { Team } from './components/dashboard/TeamList';
 import type { Intern } from './components/intern/InternSearch';
-import { configureCorpusService } from './services/corpus';
+import {
+  configureCorpusService,
+  getCurrentUser,
+  type InternSummary,
+} from './services/corpus';
 import { parseInternsCSV } from './utils/parseInternsCSV';
 import {
   buildPreloadedTeams,
@@ -16,11 +22,20 @@ const THEME_STORAGE_KEY = 'standup_theme_mode';
 
 type ThemeMode = 'light' | 'dark';
 
+const CORPUS_DEFAULT_BASE =
+  (
+    import.meta.env.VITE_SWECHA_API_BASE_URL ||
+    import.meta.env.SWECHA_API_BASE_URL ||
+    ''
+  ).trim() || 'https://api.corpus.swecha.org';
+
 export default function App() {
+  const { t } = useTranslation();
   const [addedInterns, setAddedInterns] = useState<Intern[]>([]);
   const [preloadedTeams, setPreloadedTeams] = useState<Team[]>([]);
   const [authToken, setAuthToken] = useState(() => readStoredAccessToken());
   const [username, setUsername] = useState(() => readStoredUsername());
+  const [userProfile, setUserProfile] = useState<InternSummary | null>(null);
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -31,9 +46,52 @@ export default function App() {
   );
 
   useEffect(() => {
-    // Browser requests use relative /api/v1 routes via Vite proxy.
-    configureCorpusService({ baseUrl: '', useMock: false, authToken });
+    configureCorpusService({
+      baseUrl: CORPUS_DEFAULT_BASE,
+      useMock: false,
+      authToken,
+    });
   }, [authToken]);
+
+  useEffect(() => {
+    if (!authToken) {
+      setUserProfile(null);
+      return;
+    }
+
+    let isCancelled = false;
+    const fallbackId = username.trim();
+
+    const loadProfile = async () => {
+      try {
+        const profile = await getCurrentUser(fallbackId);
+        if (!isCancelled) {
+          setUserProfile(profile);
+        }
+      } catch (error) {
+        console.error('Failed to load profile details', error);
+        if (!isCancelled) {
+          setUserProfile(null);
+        }
+      }
+    };
+
+    void loadProfile();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [authToken, username]);
+
+  const profileDisplayName = useMemo(
+    () => userProfile?.name || userProfile?.username || username.trim() || '',
+    [userProfile, username]
+  );
+
+  const profileInitial = useMemo(() => {
+    const trimmed = profileDisplayName.trim();
+    return trimmed ? trimmed.charAt(0).toUpperCase() : 'U';
+  }, [profileDisplayName]);
 
   useEffect(() => {
     persistAccessToken(authToken);
@@ -136,12 +194,12 @@ export default function App() {
     const nextPassword = password.trim();
 
     if (!normalizedPhone || !nextPassword) {
-      setLoginError('Phone number and password are required.');
+      setLoginError(t('validation.phoneAndPasswordRequired'));
       return;
     }
 
     if (normalizedPhone.length !== 10) {
-      setLoginError('Phone number must be exactly 10 digits.');
+      setLoginError(t('validation.phoneMustBeTenDigits'));
       return;
     }
 
@@ -178,7 +236,10 @@ export default function App() {
 
       if (!payload) {
         setLoginError(
-          lastErrorMessage || `Login failed (${lastStatus || 'unknown'}).`
+          lastErrorMessage ||
+            t('auth.loginFailedWithStatus', {
+              status: lastStatus || t('common.unknown'),
+            })
         );
         return;
       }
@@ -186,9 +247,7 @@ export default function App() {
       const accessToken = readAccessToken(payload);
 
       if (!accessToken) {
-        setLoginError(
-          'Login succeeded but access token was not found in response.'
-        );
+        setLoginError(t('auth.tokenMissing'));
         return;
       }
 
@@ -198,7 +257,7 @@ export default function App() {
       setLoginError(null);
     } catch (error) {
       console.error('Login request failed', error);
-      setLoginError('Unable to reach the login endpoint. Please try again.');
+      setLoginError(t('auth.endpointUnavailable'));
     } finally {
       setIsLoggingIn(false);
     }
@@ -212,6 +271,7 @@ export default function App() {
     setPassword('');
     setLoginError(null);
     setIsProfileMenuOpen(false);
+    setUserProfile(null);
   };
 
   useEffect(() => {
@@ -241,29 +301,25 @@ export default function App() {
       <main className="auth-shell">
         <section className="auth-stage">
           <section className="auth-intro-panel">
-            <p className="auth-kicker">Team Standup Tracker</p>
-            <h1 className="auth-intro-title">
-              Daily standup operations for high-accountability teams.
-            </h1>
-            <p className="auth-intro-copy">
-              Manage intern submissions, verify completion, and track team-wise
-              progress from one professional operations workspace.
-            </p>
-            <ul className="auth-intro-points" aria-label="Platform highlights">
-              <li>Fast intern and team assignment workflow</li>
-              <li>Daily and weekly status verification views</li>
-              <li>Audio evidence access directly from team cards</li>
+            <p className="auth-kicker">{t('app.title')}</p>
+            <h1 className="auth-intro-title">{t('auth.introTitle')}</h1>
+            <p className="auth-intro-copy">{t('auth.introCopy')}</p>
+            <ul
+              className="auth-intro-points"
+              aria-label={t('auth.highlightsAria')}
+            >
+              <li>{t('auth.highlight1')}</li>
+              <li>{t('auth.highlight2')}</li>
+              <li>{t('auth.highlight3')}</li>
             </ul>
           </section>
 
           <section className="auth-card">
-            <h2 className="auth-title">Corpus Login</h2>
-            <p className="auth-subtitle">
-              Login with phone number and password to open dashboard.
-            </p>
+            <h2 className="auth-title">{t('auth.loginTitle')}</h2>
+            <p className="auth-subtitle">{t('auth.loginSubtitle')}</p>
             <form className="auth-form" onSubmit={handleLogin}>
               <label className="auth-label">
-                Phone Number
+                {t('auth.phone')}
                 <input
                   autoComplete="tel"
                   className="auth-input"
@@ -273,18 +329,18 @@ export default function App() {
                     setPhone(normalizePhoneInput(event.target.value))
                   }
                   pattern="[0-9]{10}"
-                  placeholder="Enter 10-digit phone number"
+                  placeholder={t('auth.phonePlaceholder')}
                   type="text"
                   value={phone}
                 />
               </label>
               <label className="auth-label">
-                Password
+                {t('auth.password')}
                 <input
                   autoComplete="current-password"
                   className="auth-input"
                   onChange={(event) => setPassword(event.target.value)}
-                  placeholder="Enter password"
+                  placeholder={t('auth.passwordPlaceholder')}
                   type="password"
                   value={password}
                 />
@@ -295,7 +351,7 @@ export default function App() {
                 disabled={isLoggingIn}
                 type="submit"
               >
-                {isLoggingIn ? 'Logging in...' : 'Login'}
+                {isLoggingIn ? t('auth.loggingIn') : t('auth.login')}
               </button>
             </form>
           </section>
@@ -312,24 +368,29 @@ export default function App() {
             ST
           </div>
           <div>
-            <h1 className="app-brand-title">Standup Tracker</h1>
-            <p className="app-brand-subtitle">Operations Console</p>
+            <h1 className="app-brand-title">{t('app.title')}</h1>
+            <p className="app-brand-subtitle">{t('app.operationsConsole')}</p>
           </div>
         </div>
         <div className="profile-menu-container">
+          <LanguageSwitcher />
           <button
-            aria-label={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} mode`}
+            aria-label={t('theme.switchMode', {
+              mode: themeMode === 'dark' ? t('theme.light') : t('theme.dark'),
+            })}
             className="theme-toggle-button"
             onClick={() =>
               setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'))
             }
             type="button"
           >
-            {themeMode === 'dark' ? 'Light' : 'Dark'}
+            <span aria-hidden="true" className="theme-toggle-icon">
+              {themeMode === 'dark' ? '☀' : '☾'}
+            </span>
           </button>
 
           <button
-            aria-label="Open profile menu"
+            aria-label={t('profile.openMenu')}
             className="profile-icon-button"
             onClick={(event) => {
               event.stopPropagation();
@@ -338,21 +399,47 @@ export default function App() {
             type="button"
           >
             <span aria-hidden="true" className="profile-avatar-icon">
-              U
+              {profileInitial}
             </span>
           </button>
 
           {isProfileMenuOpen ? (
-            <div className="profile-menu-dropdown" role="dialog">
-              <div className="profile-menu-label">User Number</div>
-              <div className="profile-menu-id">{username || 'Unavailable'}</div>
-              <button
-                className="secondary-button profile-menu-logout"
-                onClick={handleLogout}
-                type="button"
-              >
-                Logout
-              </button>
+            <div
+              className="profile-menu-dropdown profile-menu-card"
+              role="dialog"
+            >
+              <div className="profile-card-top">
+                <span className="profile-card-avatar">{profileInitial}</span>
+                <div>
+                  <div className="profile-card-name">{profileDisplayName}</div>
+                  <div className="profile-card-username">
+                    {userProfile?.username
+                      ? `@${userProfile.username}`
+                      : username
+                        ? `@${username.trim()}`
+                        : t('common.unavailable')}
+                  </div>
+                </div>
+              </div>
+              <div className="profile-card-body">
+                <div className="profile-card-row">
+                  <span className="profile-card-label">
+                    {t('profile.phoneLabel')}
+                  </span>
+                  <span className="profile-card-value">
+                    {userProfile?.phone ?? username ?? t('common.unavailable')}
+                  </span>
+                </div>
+              </div>
+              <div className="profile-card-footer">
+                <button
+                  className="secondary-button profile-menu-logout"
+                  onClick={handleLogout}
+                  type="button"
+                >
+                  {t('auth.logout')}
+                </button>
+              </div>
             </div>
           ) : null}
         </div>

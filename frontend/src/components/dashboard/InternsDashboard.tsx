@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import InternSearch, { Intern } from '../intern/InternSearch';
 
 export interface InternsDashboardProps {
@@ -14,6 +15,7 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
   onInternsChange,
   onRemoveIntern,
 }) => {
+  const { t } = useTranslation();
   const [listSearchQuery, setListSearchQuery] = useState('');
 
   const normalizedQuery = listSearchQuery.trim().toLowerCase();
@@ -31,14 +33,14 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
       <section className="interns-list-panel">
         <header className="interns-list-header">
           <h2 className="interns-list-title">
-            Interns{' '}
+            {t('interns.title')}{' '}
             <span className="interns-list-count">({addedInterns.length})</span>
           </h2>
           <input
             type="text"
             className="interns-list-search"
-            placeholder="Search by name or ID…"
-            aria-label="Search interns list"
+            placeholder={t('interns.searchByNameOrIdPlaceholder')}
+            aria-label={t('interns.searchListAria')}
             value={listSearchQuery}
             onChange={(e) => setListSearchQuery(e.target.value)}
           />
@@ -46,11 +48,11 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
 
         <div className="interns-list-body">
           {addedInterns.length === 0 ? (
-            <p className="interns-list-empty">
-              No interns added yet. Use the search on the right to add interns.
-            </p>
+            <p className="interns-list-empty">{t('interns.noneAddedYet')}</p>
           ) : filteredInterns.length === 0 ? (
-            <p className="interns-list-empty">No matching interns found.</p>
+            <p className="interns-list-empty">
+              {t('interns.noMatchingInterns')}
+            </p>
           ) : (
             <div className="interns-list-items">
               {filteredInterns.map((intern) => (
@@ -60,14 +62,14 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
                       {intern.name}
                     </span>
                     <span className="interns-list-card-id">
-                      ID: {intern.id}
+                      {t('interns.idPrefix', { id: intern.id })}
                     </span>
                   </div>
                   <button
                     type="button"
                     className="ghost-button"
-                    aria-label={`Remove ${intern.name}`}
-                    title="Remove"
+                    aria-label={t('interns.removeAria', { name: intern.name })}
+                    title={t('interns.removeTitle')}
                     onClick={() => onRemoveIntern(intern.id)}
                   >
                     ✕

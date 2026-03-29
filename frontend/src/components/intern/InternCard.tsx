@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { InternAudioMetadata } from '../../services/corpus/corpusService';
 import { getAudioRecordUrl } from '../../services/corpus/corpusService';
 import type { StandupSlotResult } from '../../utils/verification';
@@ -33,7 +34,8 @@ export const InternCard: React.FC<InternCardProps> = ({
   onDeleteIntern,
   onUpdateIntern,
 }) => {
-  const displayName = (internName ?? '').trim() || 'Unnamed Intern';
+  const { t } = useTranslation();
+  const displayName = (internName ?? '').trim() || t('interns.unnamedIntern');
   const visibleSlotStatuses = slotStatuses.filter(
     (slot) => slot.status !== 'MISSING'
   );
@@ -114,7 +116,9 @@ export const InternCard: React.FC<InternCardProps> = ({
           {isEditing ? (
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <input
-                aria-label={`Edit intern name for ${displayName}`}
+                aria-label={t('interns.editInternNameFor', {
+                  name: displayName,
+                })}
                 onChange={(event) => setEditedName(event.target.value)}
                 style={{
                   border: '1px solid var(--border)',
@@ -133,22 +137,24 @@ export const InternCard: React.FC<InternCardProps> = ({
                 onClick={handleSave}
                 type="button"
               >
-                Save
+                {t('button.save')}
               </button>
               <button
                 className="ghost-button"
                 onClick={handleCancel}
                 type="button"
               >
-                Cancel
+                {t('button.cancel')}
               </button>
             </div>
           ) : (
             <>
               <div style={{ color: '#4b5563', fontSize: 13 }}>
-                Qualified uploads
-                {standupDateLabel ? ` on ${standupDateLabel}` : ''}:{' '}
-                {todayValidCount ?? 0}
+                {t('interns.qualifiedUploads')}
+                {standupDateLabel
+                  ? t('interns.onDate', { date: standupDateLabel })
+                  : ''}
+                : {todayValidCount ?? 0}
               </div>
               {visibleSlotStatuses.length > 0 ? (
                 <div
@@ -222,15 +228,17 @@ export const InternCard: React.FC<InternCardProps> = ({
               }}
               type="button"
             >
-              {isExpanded ? 'Hide Audios' : `View Audios (${audios.length})`}
+              {isExpanded
+                ? t('interns.hideAudios')
+                : t('interns.viewAudiosCount', { count: audios.length })}
             </button>
           )}
           {onUpdateIntern ? (
             <button
-              aria-label={`Edit ${displayName}`}
+              aria-label={t('interns.editAria', { name: displayName })}
               className="ghost-button"
               onClick={() => setIsEditing(true)}
-              title="Edit"
+              title={t('button.edit')}
               type="button"
             >
               ✎
@@ -238,10 +246,10 @@ export const InternCard: React.FC<InternCardProps> = ({
           ) : null}
           {onDeleteIntern ? (
             <button
-              aria-label={`Delete ${displayName}`}
+              aria-label={t('interns.deleteAria', { name: displayName })}
               className="ghost-button"
               onClick={() => onDeleteIntern(internId)}
-              title="Delete"
+              title={t('button.delete')}
               type="button"
             >
               🗑
@@ -268,7 +276,7 @@ export const InternCard: React.FC<InternCardProps> = ({
                 textAlign: 'center',
               }}
             >
-              No standup audios found
+              {t('interns.noStandupAudios')}
             </div>
           ) : (
             <ul
@@ -289,7 +297,7 @@ export const InternCard: React.FC<InternCardProps> = ({
                       hour: '2-digit',
                       minute: '2-digit',
                     })
-                  : 'Unknown date';
+                  : t('interns.unknownDate');
 
                 return (
                   <li
@@ -308,7 +316,9 @@ export const InternCard: React.FC<InternCardProps> = ({
                     }}
                   >
                     <div style={{ display: 'grid' }}>
-                      <strong>Standup {index + 1}</strong>
+                      <strong>
+                        {t('interns.standupIndex', { index: index + 1 })}
+                      </strong>
                       <span
                         style={{ color: 'var(--text-subtle)', fontSize: 11 }}
                       >
@@ -334,7 +344,9 @@ export const InternCard: React.FC<InternCardProps> = ({
                             audioUrl={
                               resolvedUrls[audio.id] || audio.audioUrl || ''
                             }
-                            label={`Standup ${index + 1}`}
+                            label={t('interns.standupIndex', {
+                              index: index + 1,
+                            })}
                             onPause={() => onPause?.()}
                           />
                           <button
@@ -351,7 +363,7 @@ export const InternCard: React.FC<InternCardProps> = ({
                               border: '1px solid var(--danger-border)',
                               background: 'var(--danger-bg)',
                             }}
-                            title="Close Player"
+                            title={t('audio.closePlayer')}
                             type="button"
                           >
                             ✕
@@ -359,7 +371,7 @@ export const InternCard: React.FC<InternCardProps> = ({
                         </div>
                       ) : resolvingId === audio.id ? (
                         <span style={{ color: 'var(--accent)', fontSize: 11 }}>
-                          Resolving...
+                          {t('interns.resolving')}
                         </span>
                       ) : (
                         <button
@@ -376,7 +388,7 @@ export const InternCard: React.FC<InternCardProps> = ({
                           }}
                           type="button"
                         >
-                          Play
+                          {t('audio.play')}
                         </button>
                       )}
                     </div>

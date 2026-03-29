@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface StandupAudioPlayerProps {
   audioUrl: string;
@@ -11,6 +12,7 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
   label,
   onPause,
 }) => {
+  const { t } = useTranslation();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -89,7 +91,7 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
           textAlign: 'center',
         }}
       >
-        Audio URL missing
+        {t('audio.urlMissing')}
       </div>
     );
   }
@@ -111,7 +113,7 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
       }}
     >
       {/* Audio-only content; captions track not available for these short standup clips. */}
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      {/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
       <audio ref={audioRef} src={audioUrl} autoPlay />
 
       {hasError ? (
@@ -122,7 +124,7 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
             textAlign: 'center',
           }}
         >
-          Unable to play audio
+          {t('audio.unableToPlay')}
         </div>
       ) : (
         <>
@@ -141,7 +143,7 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
                 color: 'var(--text-main)',
               }}
             >
-              {label || 'Standup Audio'}
+              {label || t('audio.standupAudio')}
             </span>
             <div
               style={{
@@ -186,10 +188,10 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
                 fontSize: 18,
                 color: 'var(--text-subtle)',
               }}
-              title="Rewind 10s"
+              title={t('audio.rewind10')}
               type="button"
             >
-              <span role="img" aria-label="rewind">
+              <span role="img" aria-label={t('audio.rewind')}>
                 ⏪
               </span>
             </button>
@@ -211,17 +213,21 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
                 fontSize: 14,
                 boxShadow: '0 8px 14px rgba(30, 79, 178, 0.26)',
               }}
-              title={isPlaying ? 'Pause' : 'Play'}
+              title={isPlaying ? t('audio.pause') : t('audio.play')}
               type="button"
             >
               {isPlaying ? (
-                <span role="img" aria-label="pause" style={{ fontSize: 12 }}>
+                <span
+                  role="img"
+                  aria-label={t('audio.pause')}
+                  style={{ fontSize: 12 }}
+                >
                   ⏸
                 </span>
               ) : (
                 <span
                   role="img"
-                  aria-label="play"
+                  aria-label={t('audio.play')}
                   style={{ fontSize: 12, marginLeft: 2 }}
                 >
                   ▶
@@ -238,10 +244,10 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
                 fontSize: 18,
                 color: 'var(--text-subtle)',
               }}
-              title="Forward 10s"
+              title={t('audio.forward10')}
               type="button"
             >
-              <span role="img" aria-label="forward">
+              <span role="img" aria-label={t('audio.forward')}>
                 ⏩
               </span>
             </button>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import InternCard, { SubmissionStatus } from '../intern/InternCard';
 import type { Intern } from '../intern/InternSearch';
 
@@ -70,6 +71,7 @@ export const TeamList: React.FC<TeamListProps> = ({
   onDeleteTeam,
   onUpdateTeamName,
 }) => {
+  const { t } = useTranslation();
   const [dropdownByTeam, setDropdownByTeam] = React.useState<
     Record<string, DropdownState>
   >({});
@@ -217,7 +219,7 @@ export const TeamList: React.FC<TeamListProps> = ({
   };
 
   if (teams.length === 0) {
-    return <p className="team-empty">No teams available.</p>;
+    return <p className="team-empty">{t('teams.noTeamsAvailable')}</p>;
   }
 
   return (
@@ -229,8 +231,8 @@ export const TeamList: React.FC<TeamListProps> = ({
         const standupCount = team.todayStandupCount ?? 0;
         const teamStatus = team.teamStatus ?? 'PENDING';
         const qualifiedStandupLabel = selectedDateLabel
-          ? `${selectedDateLabel} qualified standups`
-          : 'Selected date qualified standups';
+          ? t('teams.qualifiedStandupsOnDate', { date: selectedDateLabel })
+          : t('teams.selectedDateQualifiedStandups');
 
         return (
           <article className="team-card" key={team.teamId}>
@@ -239,7 +241,9 @@ export const TeamList: React.FC<TeamListProps> = ({
                 {editingTeamId === team.teamId ? (
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <input
-                      aria-label={`Edit team name for ${team.teamName}`}
+                      aria-label={t('teams.editTeamNameFor', {
+                        name: team.teamName,
+                      })}
                       onChange={(event) =>
                         setTeamNameDraftById((prev) => ({
                           ...prev,
@@ -263,14 +267,14 @@ export const TeamList: React.FC<TeamListProps> = ({
                       onClick={() => handleSaveTeamRename(team.teamId)}
                       type="button"
                     >
-                      Save
+                      {t('button.save')}
                     </button>
                     <button
                       className="ghost-button"
                       onClick={handleCancelTeamRename}
                       type="button"
                     >
-                      Cancel
+                      {t('button.cancel')}
                     </button>
                   </div>
                 ) : (
@@ -310,7 +314,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                 ) : null}
                 {team.verifiedDate ? (
                   <div className="team-id">
-                    Verified date: {team.verifiedDate}
+                    {t('teams.verifiedDate')}: {team.verifiedDate}
                   </div>
                 ) : null}
               </div>
@@ -323,8 +327,8 @@ export const TeamList: React.FC<TeamListProps> = ({
                     type="button"
                   >
                     {verifyingTeamId === team.teamId
-                      ? 'Verifying...'
-                      : 'Verify Team'}
+                      ? t('teams.verifying')
+                      : t('teams.verifyTeam')}
                   </button>
                 ) : null}
                 {onUpdateTeamName && editingTeamId !== team.teamId ? (
@@ -335,7 +339,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                     }
                     type="button"
                   >
-                    Edit Team
+                    {t('teams.editTeam')}
                   </button>
                 ) : null}
                 {onDeleteTeam ? (
@@ -344,7 +348,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                     onClick={() => onDeleteTeam(team.teamId)}
                     type="button"
                   >
-                    Delete Team
+                    {t('teams.deleteTeam')}
                   </button>
                 ) : null}
               </div>
@@ -354,14 +358,16 @@ export const TeamList: React.FC<TeamListProps> = ({
               <div className="intern-dropdown-wrapper">
                 <div style={{ position: 'relative', flex: 1, minWidth: 220 }}>
                   <input
-                    aria-label={`Add intern to ${team.teamName}`}
+                    aria-label={t('teams.addInternToTeam', {
+                      name: team.teamName,
+                    })}
                     className="team-add-intern-input"
                     onChange={(event) =>
                       handleInputChange(team.teamId, event.target.value)
                     }
                     onFocus={() => handleFocus(team.teamId)}
                     onBlur={() => handleBlur(team.teamId)}
-                    placeholder="Select intern from added list"
+                    placeholder={t('teams.selectInternFromAddedList')}
                     style={{
                       width: '100%',
                     }}
@@ -373,11 +379,11 @@ export const TeamList: React.FC<TeamListProps> = ({
                     <ul className="intern-dropdown" role="listbox">
                       {addedInterns.length === 0 ? (
                         <li className="intern-dropdown-empty">
-                          No interns available
+                          {t('interns.noInternsAvailable')}
                         </li>
                       ) : filtered.length === 0 ? (
                         <li className="intern-dropdown-empty">
-                          No matching interns
+                          {t('interns.noMatchingInterns')}
                         </li>
                       ) : (
                         filtered.map((intern) => (
@@ -413,7 +419,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                             </span>
                             {intern.alreadyInTeam ? (
                               <span className="intern-dropdown-badge">
-                                Already in a team
+                                {t('interns.alreadyInTeam')}
                               </span>
                             ) : null}
                           </li>
@@ -428,7 +434,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                   onClick={() => handleAddIntern(team.teamId)}
                   type="button"
                 >
-                  Add Intern
+                  {t('interns.addIntern')}
                 </button>
               </div>
             ) : null}

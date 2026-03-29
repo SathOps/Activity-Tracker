@@ -1,10 +1,26 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const DEBOUNCE_MS = 300;
 
 export interface Intern {
   id: string;
   name: string;
+  username?: string;
+  email?: string;
+  phone?: string;
+}
+
+function readSearchField(value: unknown): string | null {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (typeof value === 'number') {
+    return String(value);
+  }
+
+  return null;
 }
 
 /**
@@ -48,14 +64,53 @@ async function searchUsersFromCorpus(
           : [];
 
   return items
-    .map((item: unknown) => {
+    .map((item: unknown): Intern | null => {
+      if (!item || typeof item !== 'object') {
+        return null;
+      }
+
       const obj = item as Record<string, unknown>;
       // API returns { username: "..." } — use username as both id and name
-      const username = String(
-        obj.username ?? obj.name ?? obj.full_name ?? obj.id ?? ''
-      );
-      if (!username) return null;
-      return { id: username, name: username };
+      const profileId =
+        readSearchField(obj.username) ??
+        readSearchField(obj.user_id) ??
+        readSearchField(obj.id) ??
+        '';
+
+      const displayName =
+        readSearchField(obj.name) ??
+        readSearchField(obj.full_name) ??
+        readSearchField(obj.fullName) ??
+        readSearchField(obj.display_name) ??
+        readSearchField(obj.displayName) ??
+        profileId;
+
+      if (!profileId || !displayName) {
+        return null;
+      }
+
+      const usernameValue = readSearchField(obj.username);
+      const email =
+        readSearchField(obj.email) ??
+        readSearchField(obj.email_address) ??
+        readSearchField(obj.emailAddress) ??
+        '';
+      const phone =
+        readSearchField(obj.phone) ??
+        readSearchField(obj.phone_number) ??
+        readSearchField(obj.phoneNumber) ??
+        readSearchField(obj.mobile) ??
+        '';
+
+      const profile: Intern = {
+        id: profileId,
+        name: displayName,
+        username: usernameValue || profileId,
+        email: email || undefined,
+        phone: phone || undefined,
+      };
+
+      return profile;
     })
     .filter((intern): intern is Intern => intern !== null && intern.id !== '');
 }
@@ -78,6 +133,9 @@ const InternSearch: React.FC<InternSearchProps> = ({
   addedInterns,
   onInternsChange,
 }) => {
+  const { t } = useTranslation();
+  const emailLabel = t('interns.email');
+  const phoneLabel = t('interns.phone');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Intern[]>([]);
   const [localInternsList, setLocalInternsList] = useState<Intern[]>([]);
@@ -154,7 +212,7 @@ const InternSearch: React.FC<InternSearchProps> = ({
     }
 
     debounceTimerRef.current = setTimeout(() => {
-      handleSearch(value);
+      void handleSearch(value);
     }, DEBOUNCE_MS);
   };
 
@@ -201,16 +259,16 @@ const InternSearch: React.FC<InternSearchProps> = ({
   return (
     <div className="intern-search">
       {/* ── Add Intern Input ── */}
-      <h3 className="intern-search-label">Add Intern</h3>
+      <h3 className="intern-search-label">{t('interns.addIntern')}</h3>
 
       <div className="intern-dropdown-wrapper">
         <div className="intern-search-input-wrapper">
           <input
             id="intern-search-input"
             className="intern-search-input"
-            aria-label="Search intern by name"
+            aria-label={t('interns.searchByNameAria')}
             type="text"
-            placeholder="Search intern by name…"
+            placeholder={t('interns.searchByNamePlaceholder')}
             value={searchQuery}
             onChange={handleInputChange}
             onFocus={handleFocus}
@@ -221,12 +279,19 @@ const InternSearch: React.FC<InternSearchProps> = ({
           {showDropdown && hasQuery ? (
             <ul className="intern-dropdown" role="listbox">
               {isLoading ? (
-                <li className="intern-dropdown-empty">Searching…</li>
+                <li className="intern-dropdown-empty">
+                  {t('interns.searching')}
+                </li>
               ) : searchResults.length === 0 ? (
-                <li className="intern-dropdown-empty">No interns found</li>
+                <li className="intern-dropdown-empty">
+                  {t('interns.noInternsFound')}
+                </li>
               ) : (
                 searchResults.map((intern) => {
                   const added = isAlreadyAdded(intern.id);
+                  const displayUsername = `@${intern.username ?? intern.id}`;
+                  const hasMeta = !!(intern.email || intern.phone);
+
                   return (
                     <li
                       key={intern.id}
@@ -250,12 +315,44 @@ const InternSearch: React.FC<InternSearchProps> = ({
                         }
                       }}
                     >
-                      <span className="intern-dropdown-name">
-                        {intern.name}
-                      </span>
-                      <span className="intern-dropdown-id">{intern.id}</span>
+                      <div className="intern-dropdown-details">
+                        <div className="intern-dropdown-title-row">
+                          <span className="intern-dropdown-name">
+                            {intern.name}
+                          </span>
+                          <span className="intern-dropdown-username">
+                            {displayUsername}
+                          </span>
+                        </div>
+                        {hasMeta ? (
+                          <div className="intern-dropdown-meta">
+                            {intern.email ? (
+                              <span className="intern-dropdown-meta-item">
+                                <span className="intern-dropdown-meta-label">
+                                  {emailLabel}
+                                </span>
+                                <span className="intern-dropdown-meta-value">
+                                  {intern.email}
+                                </span>
+                              </span>
+                            ) : null}
+                            {intern.phone ? (
+                              <span className="intern-dropdown-meta-item">
+                                <span className="intern-dropdown-meta-label">
+                                  {phoneLabel}
+                                </span>
+                                <span className="intern-dropdown-meta-value">
+                                  {intern.phone}
+                                </span>
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </div>
                       {added ? (
-                        <span className="intern-dropdown-badge">Added</span>
+                        <span className="intern-dropdown-badge">
+                          {t('interns.added')}
+                        </span>
                       ) : (
                         <button
                           type="button"
@@ -266,7 +363,7 @@ const InternSearch: React.FC<InternSearchProps> = ({
                             handleAddIntern(intern);
                           }}
                         >
-                          Add
+                          {t('button.add')}
                         </button>
                       )}
                     </li>
