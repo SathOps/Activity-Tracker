@@ -1,11 +1,4 @@
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  test,
-  vi,
-} from 'vite-plus/test';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { InternAudioMetadata } from '../src/services/corpus/corpusService.ts';
 import { getInternAudios } from '../src/services/corpus';
@@ -19,18 +12,8 @@ vi.mock('../src/services/corpus', () => ({
 }));
 
 const mockedGetInternAudios = vi.mocked(getInternAudios);
-const globalScope = globalThis as {
-  process?: {
-    env?: Record<string, string | undefined>;
-  };
-};
-const processEnv =
-  globalScope.process?.env ??
-  ((globalScope.process ??= {
-    env: {},
-  }).env ??= {});
-const ORIGINAL_STANDUP_ALIASES = processEnv.STANDUP_LABEL_ALIASES;
-const ORIGINAL_INTERNSHIP_ALIASES = processEnv.INTERNSHIP_LABEL_ALIASES;
+const ORIGINAL_STANDUP_ALIASES = process.env.STANDUP_LABEL_ALIASES;
+const ORIGINAL_INTERNSHIP_ALIASES = process.env.INTERNSHIP_LABEL_ALIASES;
 
 function buildAudio(
   overrides: Partial<InternAudioMetadata> = {}
@@ -48,21 +31,21 @@ function buildAudio(
 describe('verifyStandup', () => {
   beforeEach(() => {
     mockedGetInternAudios.mockReset();
-    delete processEnv.STANDUP_LABEL_ALIASES;
-    delete processEnv.INTERNSHIP_LABEL_ALIASES;
+    delete process.env.STANDUP_LABEL_ALIASES;
+    delete process.env.INTERNSHIP_LABEL_ALIASES;
   });
 
   afterEach(() => {
     if (ORIGINAL_STANDUP_ALIASES === undefined) {
-      delete processEnv.STANDUP_LABEL_ALIASES;
+      delete process.env.STANDUP_LABEL_ALIASES;
     } else {
-      processEnv.STANDUP_LABEL_ALIASES = ORIGINAL_STANDUP_ALIASES;
+      process.env.STANDUP_LABEL_ALIASES = ORIGINAL_STANDUP_ALIASES;
     }
 
     if (ORIGINAL_INTERNSHIP_ALIASES === undefined) {
-      delete processEnv.INTERNSHIP_LABEL_ALIASES;
+      delete process.env.INTERNSHIP_LABEL_ALIASES;
     } else {
-      processEnv.INTERNSHIP_LABEL_ALIASES = ORIGINAL_INTERNSHIP_ALIASES;
+      process.env.INTERNSHIP_LABEL_ALIASES = ORIGINAL_INTERNSHIP_ALIASES;
     }
   });
 
@@ -210,8 +193,8 @@ describe('verifyStandup', () => {
   });
 
   test('verifyStandupSubmission reads label aliases from environment variables', async () => {
-    processEnv.STANDUP_LABEL_ALIASES = 'daily-standup';
-    processEnv.INTERNSHIP_LABEL_ALIASES = 'internship-track';
+    process.env.STANDUP_LABEL_ALIASES = 'daily-standup';
+    process.env.INTERNSHIP_LABEL_ALIASES = 'internship-track';
 
     mockedGetInternAudios.mockResolvedValue([
       buildAudio({

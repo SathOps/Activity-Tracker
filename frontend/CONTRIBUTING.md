@@ -45,7 +45,6 @@ Notes:
 - `CORPUS_TOKEN` is used by the local proxy only when an outgoing request has no `Authorization` header.
 - In production on Vercel, `/api/*` is rewritten using `vercel.json`.
 - `npm install` runs `prepare`, which configures Git to use the committed hooks in `.githooks/`.
-- The npm scripts in this repo are thin wrappers around Vite+ commands.
 
 ## Local Development
 
@@ -106,23 +105,22 @@ npm run format
 Type-check:
 
 ```bash
-npm run typecheck
+npx tsc -b
 ```
 
-Recommended full local validation:
+Recommended pre-push validation:
 
 ```bash
 npm run format:check
 npm run lint
-npm run validate:i18n
-npm run typecheck
+npx tsc -b
 npm test
 ```
 
 Installed Git hooks:
 
-- `pre-commit`: runs `npm run validate:staged`, then full validation through `npm run validate`
-- `pre-push`: no-op
+- `pre-commit`: runs staged-file formatting plus ESLint autofix on staged JS/TS files, then restages the changes
+- `pre-push`: runs `npm run validate`
 
 If hooks are not active in an existing clone, run:
 
@@ -162,15 +160,13 @@ Common types:
 ## Changelog Process
 
 - Update `CHANGELOG.md` for any user-visible or contributor-relevant change.
-- Run `npm run changelog` to auto-add an entry under `## [Unreleased]` from your staged (or working tree) file changes.
-- For a custom message, run `npm run changelog:update -- --message "your change summary" --section Changed`.
 - Add changes under `## [Unreleased]` in the appropriate section (`Added`, `Changed`, `Fixed`, `Removed`).
 - Move unreleased entries into a version section during release.
 
 ## Code Guidelines
 
 - Use TypeScript throughout.
-- Follow the Vite+ lint/format configuration in `vite.config.ts`.
+- Follow the existing ESLint and Prettier configuration.
 - Prefer small, isolated changes.
 - Add/update tests when behavior changes in parsing, verification, state handling, or API parsing.
 - Keep architecture boundaries:
@@ -182,12 +178,6 @@ Common types:
 
 GitLab CI currently runs:
 
-- `npm run format:check`
-- `npm run lint`
-- `npm run typecheck`
-- `npm run knip`
-- `npm run validate:i18n`
-- `npm run i18n:replace`
 - `npm run test:coverage`
 - `npm run build`
 
@@ -208,7 +198,7 @@ Do not commit generated or local-only artifacts such as:
 - [ ] Changes are scoped to the task
 - [ ] `npm run format:check` passes
 - [ ] `npm run lint` passes
-- [ ] `npm run typecheck` passes
+- [ ] `npx tsc -b` passes
 - [ ] `npm test` passes
 - [ ] Tests were added/updated where behavior changed
 - [ ] Generated files and caches are not included

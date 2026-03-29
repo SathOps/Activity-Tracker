@@ -4,5 +4,13 @@ set -eu
 repo_root=$(git rev-parse --show-toplevel)
 cd "$repo_root"
 
+# Check if any i18n translation files are staged
+i18n_files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E 'src/i18n/locales/.*\.json$' || true)
+
+# If i18n files are staged, validate them
+if [ -n "$i18n_files" ]; then
+  echo "Validating i18n translations..."
+  node scripts/validateI18n.mjs
+fi
+
 npm run validate:staged
-npm run validate

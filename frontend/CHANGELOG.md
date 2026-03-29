@@ -8,13 +8,12 @@ The format is based on Keep a Changelog, and this project follows a simple relea
 
 ### Added
 
-- Dead code detection tool Knip for identifying unused files, exports, and dependencies
 - Comprehensive user manual at `docs/USER_MANUAL.md` covering setup, workflows, CSV seed formats, verification rules, API endpoints, troubleshooting, and FAQ
 - ESLint and Prettier project tooling
 - `lint`, `format`, and `format:check` npm scripts
 - contribution guide for local development and project workflow
-- repo-managed Git hooks for pre-commit staged formatting/linting and commit-time full validation
-- `scripts/updateChangelog.js` plus `npm run changelog` (auto mode) and `npm run changelog:update` (manual mode) to append notes to the changelog without manual edits
+- repo-managed Git hooks for pre-commit staged formatting/linting and pre-push validation
+- `scripts/updateChangelog.js` plus `npm run changelog:update` to append notes to the changelog without manual edits
 - i18n infrastructure with `i18next`, `react-i18next`, and browser language detection
 - Locale resource files for English (`en`), Telugu (`te`), and Hindi (`hi`) under `src/i18n/locales/`
 - `scripts/validateI18n.mjs` and `npm run validate:i18n` to enforce translation key consistency and non-empty values
@@ -22,7 +21,6 @@ The format is based on Keep a Changelog, and this project follows a simple relea
 
 ### Changed
 
-- Updated GitLab CI/CD pipeline and package.json scripts with Knip validation
 - `README.md` now links directly to the user manual for easier discoverability
 - `CONTRIBUTING.md` was restructured and updated with current commands, type-check guidance (`npx tsc -b`), changelog process, and current environment variable usage
 - Expanded lint coverage to source files, tests, and config files
@@ -34,16 +32,10 @@ The format is based on Keep a Changelog, and this project follows a simple relea
 - Dashboard status summaries now retry each intern fetch up to three times, fail fast instead of showing partial data, remove the partial-data warning, and surface a refresh error when any request still fails
 - App bootstrap now initializes i18n through `I18nextProvider` in `src/main.tsx`
 - User-facing UI text across app, dashboard, intern, audio, and team management components now resolves through translation keys (excluding dynamic intern names/data values)
-- Pre-commit workflow now runs staged-file autofixes and then full validation (`format:check`, `lint`, `typecheck`, `validate:i18n`, and tests)
-- Added `npm run changelog` command to auto-generate changelog entries from local changed files when no manual message is provided
 - Pre-commit workflow now conditionally runs i18n validation when locale JSON files are staged before running the existing staged checks
-- Dashboard home tabs now prioritize `Status` by rendering it first in the tab row and setting it as the default active view after login
-- Seed CSV intern identifiers were normalized across `public/assets/interns.csv` and `public/assets/team_members.csv` (including `kaveri1` and `pavani_pothuganti_5305`) to keep preload mapping consistent
-- `package-lock.json` metadata refreshed with npm peer flags (`"peer": true`) on dependency entries
 
 ### Fixed
 
-- Updated `ests/corpusService.test.ts`
 - React hook cleanup warning in the team list component
 
 ## [1.0.0]
