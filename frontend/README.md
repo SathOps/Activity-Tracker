@@ -157,6 +157,8 @@ Frontend:
 npm install
 npm run dev
 
+Project scripts are powered by Vite+ under the hood.
+
 Backend (if applicable):
 pip install -r requirements.txt
 uvicorn main:app --reload
@@ -170,7 +172,7 @@ uvicorn main:app --reload
 4. Vercel deployment:
 
 - This project uses `/api/...` routes in the frontend.
-- `vite.config.ts` proxy works only in `npm run dev`.
+- `vite.config.ts` proxy works only in local dev via `npm run dev`.
 - For production, `vercel.json` rewrites `/api/*` to `https://api.corpus.swecha.org/api/*`.
 - Ensure Vercel Framework Preset is **Vite**, Build Command is `npm run build`, and Output Directory is `dist`.
 

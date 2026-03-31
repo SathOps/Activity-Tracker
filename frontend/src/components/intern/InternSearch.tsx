@@ -8,6 +8,18 @@ export interface Intern {
   name: string;
 }
 
+function readSearchField(value: unknown): string | null {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (typeof value === 'number') {
+    return String(value);
+  }
+
+  return null;
+}
+
 /**
  * Calls GET /api/v1/users/search?query=... via the Vite proxy.
  * Includes Authorization header from logged-in user session.
@@ -50,11 +62,19 @@ async function searchUsersFromCorpus(
 
   return items
     .map((item: unknown) => {
+      if (!item || typeof item !== 'object') {
+        return null;
+      }
+
       const obj = item as Record<string, unknown>;
       // API returns { username: "..." } — use username as both id and name
-      const username = String(
-        obj.username ?? obj.name ?? obj.full_name ?? obj.id ?? ''
-      );
+      const username =
+        readSearchField(obj.username) ??
+        readSearchField(obj.name) ??
+        readSearchField(obj.full_name) ??
+        readSearchField(obj.id) ??
+        '';
+
       if (!username) return null;
       return { id: username, name: username };
     })
@@ -156,7 +176,7 @@ const InternSearch: React.FC<InternSearchProps> = ({
     }
 
     debounceTimerRef.current = setTimeout(() => {
-      handleSearch(value);
+      void handleSearch(value);
     }, DEBOUNCE_MS);
   };
 

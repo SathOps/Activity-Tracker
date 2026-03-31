@@ -1,4 +1,4 @@
-import { afterEach, expect, test, vi } from 'vitest';
+import { afterEach, expect, test, vi } from 'vite-plus/test';
 
 import {
   configureCorpusService,
@@ -126,13 +126,13 @@ test('configureCorpusService preserves the current fetcher when fetcher is omitt
 });
 
 test('corpus service resolves without a global fetch implementation', async () => {
-  const globalScope = globalThis as typeof globalThis & {
+  const globalScope = globalThis as {
     fetch?: typeof globalThis.fetch;
   };
   const originalFetch = globalScope.fetch;
 
   vi.resetModules();
-  delete globalScope.fetch;
+  globalScope.fetch = undefined;
 
   try {
     const corpusModule =
@@ -140,7 +140,9 @@ test('corpus service resolves without a global fetch implementation', async () =
 
     await expect(
       corpusModule.searchInternById('intern_no_fetch')
-    ).resolves.toEqual({ id: 'intern_no_fetch' });
+    ).resolves.toEqual({
+      id: 'intern_no_fetch',
+    });
   } finally {
     globalScope.fetch = originalFetch;
     vi.resetModules();

@@ -1474,9 +1474,7 @@ function renderTeamHeatmap(
                 return (
                   <div
                     key={`${teamId}-${dateKey}`}
-                    title={`${team.teamName} | ${formatMonthDay(
-                      dateKey
-                    )}: ${count}/4 uploads`}
+                    title={`${team.teamName} | ${formatMonthDay(dateKey)}: ${count}/4 uploads`}
                     style={{
                       width: 18,
                       height: 18,

@@ -113,7 +113,7 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
       }}
     >
       {/* Audio-only content; captions track not available for these short standup clips. */}
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      {/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
       <audio ref={audioRef} src={audioUrl} autoPlay />
 
       {hasError ? (

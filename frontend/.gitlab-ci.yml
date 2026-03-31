@@ -26,16 +26,9 @@ quality_checks:
   stage: quality
   script:
     - npm run format:check
-    # Generate GitLab Code Quality report, don't fail yet
-    - npm run lint -- -f gitlab -o gl-codequality.json || true
-    # Run lint again so standard output is visible in logs, fails pipeline if there are errors
     - npm run lint
     - npm run typecheck
     - npm run knip
-  artifacts:
-    reports:
-      codequality: gl-codequality.json
-    expire_in: 7 days
 
 i18n_validation:
   stage: i18n
@@ -50,7 +43,6 @@ test_cases:
 
 test_coverage:
   stage: test
-  # Matches vitest text reporter output
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
   script:
     - npm run test:coverage

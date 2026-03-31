@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest';
+import { expect, test } from 'vite-plus/test';
 
 import * as corpus from '../src/services/corpus/index.ts';
 import * as corpusService from '../src/services/corpus/corpusService.ts';

@@ -218,7 +218,7 @@ function getMockAudios(_internId: string): InternAudioMetadata[] {
   return [];
 }
 
-async function requestCorpusApi(path: string): Promise<unknown | undefined> {
+async function requestCorpusApi(path: string): Promise<unknown> {
   const fetcher = runtimeConfig.fetcher;
   const baseUrl = trimTrailingSlash(runtimeConfig.baseUrl);
 
@@ -525,9 +525,9 @@ function splitLabelText(value: string): string[] {
 
       return (
         trimmedPart
-          // eslint-disable-next-line no-useless-escape
+          // oxlint-disable-next-line no-useless-escape
           .replace(/^[\[\(\{'"`]+/, '')
-          // eslint-disable-next-line no-useless-escape
+          // oxlint-disable-next-line no-useless-escape
           .replace(/[\]\)\}'"`]+$/, '')
           .trim()
       );
