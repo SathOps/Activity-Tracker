@@ -15,9 +15,9 @@ export interface DashboardHomeProps {
 }
 
 const TABS: { key: ActiveView; label: string; icon: string }[] = [
+  { key: 'status', label: 'Status', icon: '📊' },
   { key: 'interns', label: 'Interns', icon: '👤' },
   { key: 'teams', label: 'Team Dashboard', icon: '👥' },
-  { key: 'status', label: 'Status', icon: '📊' },
   { key: 'analytics', label: 'Analytics', icon: '📈' },
 ];
 
@@ -28,7 +28,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
   onInternsChange,
   onRemoveIntern,
 }) => {
-  const [activeView, setActiveView] = useState<ActiveView>('interns');
+  const [activeView, setActiveView] = useState<ActiveView>('status');
 
   return (
     <>
