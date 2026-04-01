@@ -6,6 +6,9 @@ const DEBOUNCE_MS = 300;
 export interface Intern {
   id: string;
   name: string;
+  username?: string;
+  email?: string;
+  phone?: string;
 }
 
 function readSearchField(value: unknown): string | null {
@@ -61,22 +64,53 @@ async function searchUsersFromCorpus(
           : [];
 
   return items
-    .map((item: unknown) => {
+    .map((item: unknown): Intern | null => {
       if (!item || typeof item !== 'object') {
         return null;
       }
 
       const obj = item as Record<string, unknown>;
       // API returns { username: "..." } — use username as both id and name
-      const username =
+      const profileId =
         readSearchField(obj.username) ??
-        readSearchField(obj.name) ??
-        readSearchField(obj.full_name) ??
+        readSearchField(obj.user_id) ??
         readSearchField(obj.id) ??
         '';
 
-      if (!username) return null;
-      return { id: username, name: username };
+      const displayName =
+        readSearchField(obj.name) ??
+        readSearchField(obj.full_name) ??
+        readSearchField(obj.fullName) ??
+        readSearchField(obj.display_name) ??
+        readSearchField(obj.displayName) ??
+        profileId;
+
+      if (!profileId || !displayName) {
+        return null;
+      }
+
+      const usernameValue = readSearchField(obj.username);
+      const email =
+        readSearchField(obj.email) ??
+        readSearchField(obj.email_address) ??
+        readSearchField(obj.emailAddress) ??
+        '';
+      const phone =
+        readSearchField(obj.phone) ??
+        readSearchField(obj.phone_number) ??
+        readSearchField(obj.phoneNumber) ??
+        readSearchField(obj.mobile) ??
+        '';
+
+      const profile: Intern = {
+        id: profileId,
+        name: displayName,
+        username: usernameValue || profileId,
+        email: email || undefined,
+        phone: phone || undefined,
+      };
+
+      return profile;
     })
     .filter((intern): intern is Intern => intern !== null && intern.id !== '');
 }
@@ -100,6 +134,8 @@ const InternSearch: React.FC<InternSearchProps> = ({
   onInternsChange,
 }) => {
   const { t } = useTranslation();
+  const emailLabel = t('interns.email');
+  const phoneLabel = t('interns.phone');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Intern[]>([]);
   const [localInternsList, setLocalInternsList] = useState<Intern[]>([]);
@@ -253,6 +289,9 @@ const InternSearch: React.FC<InternSearchProps> = ({
               ) : (
                 searchResults.map((intern) => {
                   const added = isAlreadyAdded(intern.id);
+                  const displayUsername = `@${intern.username ?? intern.id}`;
+                  const hasMeta = !!(intern.email || intern.phone);
+
                   return (
                     <li
                       key={intern.id}
@@ -276,10 +315,40 @@ const InternSearch: React.FC<InternSearchProps> = ({
                         }
                       }}
                     >
-                      <span className="intern-dropdown-name">
-                        {intern.name}
-                      </span>
-                      <span className="intern-dropdown-id">{intern.id}</span>
+                      <div className="intern-dropdown-details">
+                        <div className="intern-dropdown-title-row">
+                          <span className="intern-dropdown-name">
+                            {intern.name}
+                          </span>
+                          <span className="intern-dropdown-username">
+                            {displayUsername}
+                          </span>
+                        </div>
+                        {hasMeta ? (
+                          <div className="intern-dropdown-meta">
+                            {intern.email ? (
+                              <span className="intern-dropdown-meta-item">
+                                <span className="intern-dropdown-meta-label">
+                                  {emailLabel}
+                                </span>
+                                <span className="intern-dropdown-meta-value">
+                                  {intern.email}
+                                </span>
+                              </span>
+                            ) : null}
+                            {intern.phone ? (
+                              <span className="intern-dropdown-meta-item">
+                                <span className="intern-dropdown-meta-label">
+                                  {phoneLabel}
+                                </span>
+                                <span className="intern-dropdown-meta-value">
+                                  {intern.phone}
+                                </span>
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </div>
                       {added ? (
                         <span className="intern-dropdown-badge">
                           {t('interns.added')}

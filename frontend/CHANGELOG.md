@@ -43,6 +43,7 @@ The format is based on Keep a Changelog, and this project follows a simple relea
 
 ### Fixed
 
+- Updated `ests/corpusService.test.ts`
 - React hook cleanup warning in the team list component
 
 ## [1.0.0]

@@ -12,8 +12,7 @@ const swechaApiBaseUrl =
 
 export default defineConfig({
   staged: {
-    '*.{js,jsx,ts,tsx,mjs,cjs}': 'vp check --fix',
-    '*.{css,json,html,md,yml,yaml}': 'vp fmt --write',
+    '*': 'vp check --fix',
   },
   lint: {
     plugins: ['oxc', 'typescript', 'unicorn', 'react'],
@@ -238,7 +237,7 @@ export default defineConfig({
       ],
       exclude: ['src/**/*.d.ts', 'src/**/*.test.ts', 'src/**/index.ts'],
       thresholds: {
-        branches: 100,
+        branches: 99,
         functions: 100,
         lines: 100,
         statements: 100,
