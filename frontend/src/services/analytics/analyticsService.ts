@@ -94,7 +94,7 @@ export function buildDailyLeaderboardRows<
 >(rows: T[]): DailyLeaderboardRow[] {
   return rows
     .map((row) => {
-      const summary = summarizeSlotStatuses(row.slotStatuses, 'ALL');
+      const summary = summarizeSlotStatuses(row.slotStatuses);
 
       return {
         teamId: row.teamId,
@@ -123,10 +123,7 @@ export function buildWeeklyLeaderboardRows<
       const totalDaysCount = row.dayStatuses.length;
       const weeklySummary = row.dayStatuses.reduce<WeeklyLeaderboardRow>(
         (summary, dayStatus) => {
-          const daySummary = summarizeSlotStatuses(
-            dayStatus.slotStatuses,
-            'ALL'
-          );
+          const daySummary = summarizeSlotStatuses(dayStatus.slotStatuses);
 
           return {
             ...summary,
@@ -345,8 +342,7 @@ export function buildLeaderboardMetrics<T extends LeaderboardMetricSummary>(
 }
 
 function summarizeSlotStatuses(
-  slotStatuses: StandupSlotResult[],
-  qualityFilter: QualityAnalyticsFilter
+  slotStatuses: StandupSlotResult[]
 ): LeaderboardMetricSummary {
   const summary = {
     goodCount: 0,
@@ -364,9 +360,7 @@ function summarizeSlotStatuses(
       summary.missingCount += 1;
     }
 
-    if (qualityFilter === 'ALL' || slot.status === qualityFilter) {
-      summary.matchedQualityCount += 1;
-    }
+    summary.matchedQualityCount += 1;
   }
 
   return summary;
@@ -391,23 +385,14 @@ function compareWeeklyLeaderboardRows(
   right: WeeklyLeaderboardRow
 ): number {
   const fieldComparison = compareLeaderboardFields(left, right);
-
-  if (fieldComparison !== 0) {
-    return fieldComparison;
-  }
-
   const completedDaysComparison =
     right.completedDaysCount - left.completedDaysCount;
+  const pendingDaysComparison =
+    Number(left.hasPendingDays) - Number(right.hasPendingDays);
 
-  if (completedDaysComparison !== 0) {
-    return completedDaysComparison;
-  }
-
-  if (left.hasPendingDays === right.hasPendingDays) {
-    return 0;
-  }
-
-  return left.hasPendingDays ? 1 : -1;
+  return (
+    fieldComparison || completedDaysComparison || pendingDaysComparison || 0
+  );
 }
 
 function compareLeaderboardFields(

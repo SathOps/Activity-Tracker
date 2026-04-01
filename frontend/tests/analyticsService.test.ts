@@ -348,6 +348,7 @@ describe('analyticsService', () => {
     expect(filterDailyLeaderboardRows(rows, 'MISSING', 'COMPLETED')).toEqual(
       []
     );
+    expect(filterDailyLeaderboardRows(rows, 'ALL', 'ALL')).toEqual(rows);
   });
 
   test('builds weekly leaderboard rows with slot and day totals', () => {
@@ -501,5 +502,315 @@ describe('analyticsService', () => {
         tone: 'warn',
       },
     ]);
+  });
+
+  test('builds leaderboard metrics for all quality with missing slots present', () => {
+    expect(
+      buildLeaderboardMetrics(
+        [
+          {
+            teamId: 'alpha',
+            teamName: 'Alpha',
+            score: 4,
+            isCompleted: false,
+            goodCount: 1,
+            delayedCount: 1,
+            missingCount: 2,
+            matchedQualityCount: 4,
+          },
+        ],
+        'ALL'
+      )
+    ).toEqual([
+      {
+        label: 'Teams In View',
+        value: '1',
+        helperText: 'Teams after current filters',
+        tone: 'neutral',
+      },
+      {
+        label: 'Good Slots',
+        value: '1',
+        helperText: 'On-time standup uploads',
+        tone: 'good',
+      },
+      {
+        label: 'Delayed Slots',
+        value: '1',
+        helperText: 'Late but accepted uploads',
+        tone: 'warn',
+      },
+      {
+        label: 'Missing Slots',
+        value: '2',
+        helperText: 'Slots still missing uploads',
+        tone: 'warn',
+      },
+    ]);
+  });
+
+  test('builds leaderboard metrics for good filter with neutral unmatched tone', () => {
+    expect(
+      buildLeaderboardMetrics(
+        [
+          {
+            teamId: 'alpha',
+            teamName: 'Alpha',
+            score: 0,
+            isCompleted: false,
+            goodCount: 0,
+            delayedCount: 0,
+            missingCount: 0,
+            matchedQualityCount: 0,
+          },
+        ],
+        'GOOD'
+      )
+    ).toEqual([
+      {
+        label: 'Teams In View',
+        value: '1',
+        helperText: 'Teams after current filters',
+        tone: 'neutral',
+      },
+      {
+        label: 'Good Slots',
+        value: '0',
+        helperText: 'On-time standup uploads',
+        tone: 'neutral',
+      },
+      {
+        label: 'Delayed Slots',
+        value: '0',
+        helperText: 'Late but accepted uploads',
+        tone: 'neutral',
+      },
+      {
+        label: 'Matched Slots',
+        value: '0',
+        helperText: 'good slot(s) in the current view',
+        tone: 'neutral',
+      },
+    ]);
+  });
+
+  test('breaks weekly leaderboard ties by completed days and pending state', () => {
+    const rows = buildWeeklyLeaderboardRows([
+      {
+        teamId: 'beta',
+        teamName: 'Shared',
+        completedDaysCount: 1,
+        dayStatuses: [
+          {
+            isCompleted: true,
+            slotStatuses: [
+              {
+                slotId: 'S1',
+                label: 'S1',
+                windowLabel: '09:00-09:30',
+                status: 'GOOD',
+              },
+              {
+                slotId: 'S2',
+                label: 'S2',
+                windowLabel: '12:00-12:30',
+                status: 'MISSING',
+              },
+            ],
+          },
+          {
+            isCompleted: false,
+            slotStatuses: [
+              {
+                slotId: 'S1',
+                label: 'S1',
+                windowLabel: '09:00-09:30',
+                status: 'DELAYED',
+              },
+              {
+                slotId: 'S2',
+                label: 'S2',
+                windowLabel: '12:00-12:30',
+                status: 'MISSING',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        teamId: 'alpha',
+        teamName: 'Shared',
+        completedDaysCount: 2,
+        dayStatuses: [
+          {
+            isCompleted: true,
+            slotStatuses: [
+              {
+                slotId: 'S1',
+                label: 'S1',
+                windowLabel: '09:00-09:30',
+                status: 'GOOD',
+              },
+              {
+                slotId: 'S2',
+                label: 'S2',
+                windowLabel: '12:00-12:30',
+                status: 'MISSING',
+              },
+            ],
+          },
+          {
+            isCompleted: true,
+            slotStatuses: [
+              {
+                slotId: 'S1',
+                label: 'S1',
+                windowLabel: '09:00-09:30',
+                status: 'DELAYED',
+              },
+              {
+                slotId: 'S2',
+                label: 'S2',
+                windowLabel: '12:00-12:30',
+                status: 'MISSING',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        teamId: 'gamma',
+        teamName: 'Shared',
+        completedDaysCount: 2,
+        dayStatuses: [
+          {
+            isCompleted: true,
+            slotStatuses: [
+              {
+                slotId: 'S1',
+                label: 'S1',
+                windowLabel: '09:00-09:30',
+                status: 'GOOD',
+              },
+              {
+                slotId: 'S2',
+                label: 'S2',
+                windowLabel: '12:00-12:30',
+                status: 'MISSING',
+              },
+            ],
+          },
+          {
+            isCompleted: true,
+            slotStatuses: [
+              {
+                slotId: 'S1',
+                label: 'S1',
+                windowLabel: '09:00-09:30',
+                status: 'DELAYED',
+              },
+              {
+                slotId: 'S2',
+                label: 'S2',
+                windowLabel: '12:00-12:30',
+                status: 'MISSING',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    expect(rows.map((row) => row.teamId)).toEqual(['alpha', 'gamma', 'beta']);
+  });
+
+  test('orders weekly leaderboard by score before fallback tie breakers', () => {
+    const rows = buildWeeklyLeaderboardRows([
+      {
+        teamId: 'beta',
+        teamName: 'Beta',
+        completedDaysCount: 1,
+        dayStatuses: [
+          {
+            isCompleted: true,
+            slotStatuses: [
+              {
+                slotId: 'S1',
+                label: 'S1',
+                windowLabel: '09:00-09:30',
+                status: 'DELAYED',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        teamId: 'alpha',
+        teamName: 'Alpha',
+        completedDaysCount: 1,
+        dayStatuses: [
+          {
+            isCompleted: true,
+            slotStatuses: [
+              {
+                slotId: 'S1',
+                label: 'S1',
+                windowLabel: '09:00-09:30',
+                status: 'GOOD',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    expect(rows.map((row) => row.teamId)).toEqual(['alpha', 'beta']);
+  });
+
+  test('prefers weekly rows without pending days when all other fields tie', () => {
+    const rows = buildWeeklyLeaderboardRows([
+      {
+        teamId: 'pending',
+        teamName: 'Shared',
+        completedDaysCount: 1,
+        dayStatuses: [
+          {
+            isCompleted: true,
+            slotStatuses: [
+              {
+                slotId: 'S1',
+                label: 'S1',
+                windowLabel: '09:00-09:30',
+                status: 'GOOD',
+              },
+            ],
+          },
+          {
+            isCompleted: false,
+            slotStatuses: [],
+          },
+        ],
+      },
+      {
+        teamId: 'complete',
+        teamName: 'Shared',
+        completedDaysCount: 1,
+        dayStatuses: [
+          {
+            isCompleted: true,
+            slotStatuses: [
+              {
+                slotId: 'S1',
+                label: 'S1',
+                windowLabel: '09:00-09:30',
+                status: 'GOOD',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    expect(rows.map((row) => row.teamId)).toEqual(['complete', 'pending']);
   });
 });
