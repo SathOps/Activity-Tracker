@@ -19,6 +19,7 @@ import { RecordStandupModal } from '../RecordStandupModal';
 
 type DashboardView = 'TEAMS' | 'INTERNS' | 'COMPLETED';
 type StatusView = 'DAILY' | 'WEEKLY';
+type AnalyticsQualityFilter = 'ALL' | 'GOOD' | 'DELAYED' | 'MISSING';
 
 interface TeamDailyStatusRow {
   teamId: string;
@@ -39,6 +40,7 @@ interface WeeklyDayStatus {
   requiredStandupCount: number;
   remainingStandupCount: number;
   isCompleted: boolean;
+  slotStatuses: StandupSlotResult[];
   contributorDetails: ContributorUploadDetail[];
 }
 
@@ -49,6 +51,15 @@ interface TeamWeeklyStatusRow {
   completedDaysCount: number;
   pendingDayDetails: string[];
   totalRemainingStandups: number;
+}
+
+interface TeamAnalyticsQualityRow {
+  teamId: string;
+  teamName: string;
+  goodCount: number;
+  delayedCount: number;
+  missingCount: number;
+  score: number;
 }
 
 interface SubmissionAliasCriteria {
@@ -115,6 +126,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   );
   const [isStatusModalOpen, setIsStatusModalOpen] = React.useState(false);
   const [statusView, setStatusView] = React.useState<StatusView>('DAILY');
+  const [analyticsQualityFilter, setAnalyticsQualityFilter] =
+    React.useState<AnalyticsQualityFilter>('ALL');
   const [activeAudioId, setActiveAudioId] = React.useState<string | null>(null);
   const [statusLoading, setStatusLoading] = React.useState(false);
   const [statusError, setStatusError] = React.useState<string | null>(null);
@@ -126,6 +139,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   >([]);
   const [analyticsTeamDailyTotals, setAnalyticsTeamDailyTotals] =
     React.useState<Map<string, Map<string, number>>>(new Map());
+  const [analyticsQualityRows, setAnalyticsQualityRows] = React.useState<
+    TeamAnalyticsQualityRow[]
+  >([]);
   const [analyticsLoading, setAnalyticsLoading] = React.useState(false);
   const [analyticsError, setAnalyticsError] = React.useState<string | null>(
     null
@@ -232,6 +248,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         intern.teamName.toLowerCase().includes(normalizedQuery)
     );
   }, [activeView, allInternRows, normalizedQuery]);
+  const rankedAnalyticsTeams = React.useMemo(() => {
+    const teamById = new Map(managedTeams.map((team) => [team.teamId, team]));
+
+    return rankAnalyticsQualityRows(
+      analyticsQualityRows,
+      analyticsQualityFilter
+    )
+      .map((row) => teamById.get(row.teamId))
+      .filter((team): team is Team => team !== undefined);
+  }, [analyticsQualityFilter, analyticsQualityRows, managedTeams]);
 
   const handleCreateTeam = () => {
     const teamName = newTeamName.trim();
@@ -464,6 +490,17 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     setSelectedDateKey(nextDateKey);
   };
 
+  const handleShiftAnalyticsRange = (days: number) => {
+    const currentDate = new Date(`${selectedDateKey}T00:00:00`);
+
+    if (Number.isNaN(currentDate.getTime())) {
+      return;
+    }
+
+    currentDate.setDate(currentDate.getDate() + days);
+    setSelectedDateKey(getLocalDateKey(currentDate));
+  };
+
   const handleUpdateTeamName = (teamId: string, newName: string) => {
     const trimmedName = newName.trim();
 
@@ -558,6 +595,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
     if (validTeams.length === 0) {
       setAnalyticsTeamDailyTotals(new Map());
+      setAnalyticsQualityRows([]);
       setAnalyticsError(null);
       setAnalyticsLoading(false);
       return;
@@ -573,17 +611,19 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       );
       const targetDateKeys = new Set<string>(analyticsDateKeys);
       const uniqueInternIds = collectUniqueTeamInternIds(validTeams);
-      const { countsByInternByDate } = await buildInternSubmissionSnapshot(
-        uniqueInternIds,
-        targetDateKeys,
-        aliasCriteria
-      );
+      const { countsByInternByDate, audiosByInternByDate } =
+        await buildInternSubmissionSnapshot(
+          uniqueInternIds,
+          targetDateKeys,
+          aliasCriteria
+        );
 
       if (analyticsLoadRequestId.current !== requestId) {
         return;
       }
 
       const teamTotals = new Map<string, Map<string, number>>();
+      const qualityRows: TeamAnalyticsQualityRow[] = [];
 
       for (const team of validTeams) {
         const teamId = normalizeTeamId(team.teamId);
@@ -602,9 +642,17 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         }
 
         teamTotals.set(teamId, teamDateCounts);
+        qualityRows.push(
+          buildTeamAnalyticsQualityRow(
+            team,
+            analyticsDateKeys,
+            audiosByInternByDate
+          )
+        );
       }
 
       setAnalyticsTeamDailyTotals(teamTotals);
+      setAnalyticsQualityRows(qualityRows);
     } catch (error) {
       if (analyticsLoadRequestId.current !== requestId) {
         return;
@@ -613,6 +661,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       console.error('Unable to load analytics', error);
       setAnalyticsError(t('dashboard.unableToLoadAnalytics'));
       setAnalyticsTeamDailyTotals(new Map());
+      setAnalyticsQualityRows([]);
     } finally {
       if (analyticsLoadRequestId.current === requestId) {
         setAnalyticsLoading(false);
@@ -989,69 +1038,158 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     </>
   );
 
-  const renderAnalyticsContent = () => (
-    <section style={{ display: 'grid', gap: 16 }}>
-      <header
-        style={{
-          alignItems: 'center',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 12,
-          justifyContent: 'space-between',
-        }}
-      >
-        <div style={{ display: 'grid', gap: 4 }}>
-          <h2 style={{ color: '#0f172a', fontSize: 20, margin: 0 }}>
-            {t('dashboard.teamAnalytics')}
-          </h2>
-          <p style={{ color: '#475569', fontSize: 13, margin: 0 }}>
-            {t('dashboard.dailyUploadsAcrossAllTeamsRange', {
-              start: formatDateForDisplay(analyticsDateKeys[0]),
-              end: formatDateForDisplay(
-                analyticsDateKeys[analyticsDateKeys.length - 1]
-              ),
-            })}
-          </p>
-        </div>
-        <button
-          className="ghost-button"
-          disabled={analyticsLoading}
-          onClick={() => {
-            void loadAnalytics();
+  const renderAnalyticsContent = () => {
+    return (
+      <section style={{ display: 'grid', gap: 16 }}>
+        <header
+          style={{
+            alignItems: 'center',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 12,
+            justifyContent: 'space-between',
           }}
-          type="button"
         >
-          {analyticsLoading ? t('dashboard.refreshing') : t('button.refresh')}
-        </button>
-      </header>
+          <div style={{ display: 'grid', gap: 4 }}>
+            <h2 style={{ color: '#0f172a', fontSize: 20, margin: 0 }}>
+              {t('dashboard.teamAnalytics')}
+            </h2>
+            <p style={{ color: '#475569', fontSize: 13, margin: 0 }}>
+              {t('dashboard.dailyUploadsAcrossAllTeamsRange', {
+                start: formatDateForDisplay(analyticsDateKeys[0]),
+                end: formatDateForDisplay(
+                  analyticsDateKeys[analyticsDateKeys.length - 1]
+                ),
+              })}
+            </p>
+          </div>
+          <div
+            style={{
+              alignItems: 'end',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+            }}
+          >
+            <label
+              style={{
+                color: '#475569',
+                display: 'grid',
+                fontSize: 12,
+                gap: 4,
+                minWidth: 170,
+              }}
+            >
+              <span>{t('dashboard.customDate')}</span>
+              <input
+                aria-label={t('dashboard.customDate')}
+                className="date-input"
+                onChange={handleSelectedDateChange}
+                type="date"
+                value={selectedDateKey}
+              />
+            </label>
+            <button
+              className="ghost-button"
+              onClick={() => handleShiftAnalyticsRange(-30)}
+              type="button"
+            >
+              {t('dashboard.previousRange')}
+            </button>
+            <button
+              className="ghost-button"
+              onClick={() => handleShiftAnalyticsRange(30)}
+              type="button"
+            >
+              {t('dashboard.nextRange')}
+            </button>
+            <button
+              className="ghost-button"
+              disabled={analyticsLoading}
+              onClick={() => {
+                void loadAnalytics();
+              }}
+              type="button"
+            >
+              {analyticsLoading
+                ? t('dashboard.refreshing')
+                : t('button.refresh')}
+            </button>
+          </div>
+        </header>
 
-      {analyticsLoading ? (
-        <p className="team-empty">{t('dashboard.loadingAnalytics')}</p>
-      ) : null}
-      {!analyticsLoading && analyticsError ? (
-        <p className="team-empty">{analyticsError}</p>
-      ) : null}
+        {analyticsLoading ? (
+          <p className="team-empty">{t('dashboard.loadingAnalytics')}</p>
+        ) : null}
+        {!analyticsLoading && analyticsError ? (
+          <p className="team-empty">{analyticsError}</p>
+        ) : null}
 
-      {!analyticsLoading && !analyticsError ? (
-        <section className="team-card" style={{ backgroundColor: '#f8fafc' }}>
-          <h3 className="team-name" style={{ marginBottom: 8 }}>
-            {t('dashboard.memberActivityHeatmap')}
-          </h3>
-          <p className="team-id" style={{ marginBottom: 12 }}>
-            {t('dashboard.dailyUploadsPerTeamMax')}
-          </p>
-          {renderTeamHeatmap(
-            managedTeams,
-            analyticsDateKeys,
-            analyticsTeamDailyTotals,
-            t('dashboard.noActivityData'),
-            t('dashboard.scrollToViewMore'),
-            t('dashboard.teamColumn')
-          )}
-        </section>
-      ) : null}
-    </section>
-  );
+        {!analyticsLoading && !analyticsError ? (
+          <section className="team-card" style={{ backgroundColor: '#f8fafc' }}>
+            <div
+              style={{
+                alignItems: 'center',
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 8,
+                justifyContent: 'space-between',
+                marginBottom: 12,
+              }}
+            >
+              <div style={{ display: 'grid', gap: 4 }}>
+                <div
+                  style={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 8,
+                  }}
+                >
+                  <h3 className="team-name" style={{ margin: 0 }}>
+                    {t('dashboard.memberActivityHeatmap')}
+                  </h3>
+                  {(
+                    [
+                      ['ALL', t('dashboard.filterAll')],
+                      ['GOOD', t('dashboard.filterGood')],
+                      ['DELAYED', t('dashboard.filterDelayed')],
+                      ['MISSING', t('dashboard.filterMissing')],
+                    ] as Array<[AnalyticsQualityFilter, string]>
+                  ).map(([filterKey, label]) => {
+                    const isActive = analyticsQualityFilter === filterKey;
+
+                    return (
+                      <button
+                        key={filterKey}
+                        onClick={() => setAnalyticsQualityFilter(filterKey)}
+                        style={getFilterButtonStyle(isActive)}
+                        type="button"
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="team-id" style={{ margin: 0 }}>
+                  {t('dashboard.dailyUploadsPerTeamMax')}
+                </p>
+              </div>
+            </div>
+
+            {renderTeamHeatmap(
+              rankedAnalyticsTeams,
+              analyticsDateKeys,
+              analyticsTeamDailyTotals,
+              t('dashboard.noLeaderboardResults'),
+              t('dashboard.scrollToViewMore'),
+              t('dashboard.teamColumn')
+            )}
+          </section>
+        ) : null}
+      </section>
+    );
+  };
 
   return (
     <main className="dashboard-container">
@@ -1701,6 +1839,7 @@ function buildTeamWeeklyStatusRow(
       requiredStandupCount,
       remainingStandupCount,
       isCompleted: totalStandupCount >= requiredStandupCount,
+      slotStatuses,
       contributorDetails,
     };
   });
@@ -1726,6 +1865,89 @@ function buildTeamWeeklyStatusRow(
     pendingDayDetails,
     totalRemainingStandups,
   };
+}
+
+function buildTeamAnalyticsQualityRow(
+  team: Team,
+  dateKeys: string[],
+  audiosByInternByDate: Map<string, Map<string, InternAudioMetadata[]>>
+): TeamAnalyticsQualityRow {
+  let goodCount = 0;
+  let delayedCount = 0;
+  let missingCount = 0;
+
+  for (const dateKey of dateKeys) {
+    const slotStatuses = buildStandupSlotResults(
+      collectTeamAudiosForDate(team, dateKey, audiosByInternByDate),
+      dateKey
+    );
+
+    for (const slotStatus of slotStatuses) {
+      if (slotStatus.status === 'GOOD') {
+        goodCount += 1;
+      } else if (slotStatus.status === 'DELAYED') {
+        delayedCount += 1;
+      } else {
+        missingCount += 1;
+      }
+    }
+  }
+
+  return {
+    teamId: team.teamId,
+    teamName: team.teamName,
+    goodCount,
+    delayedCount,
+    missingCount,
+    score: goodCount * 2 + delayedCount,
+  };
+}
+
+function rankAnalyticsQualityRows(
+  rows: TeamAnalyticsQualityRow[],
+  filter: AnalyticsQualityFilter
+): TeamAnalyticsQualityRow[] {
+  const filteredRows =
+    filter === 'ALL'
+      ? rows
+      : rows.filter((row) => getAnalyticsQualityCount(row, filter) > 0);
+
+  return [...filteredRows].sort((left, right) => {
+    const primaryComparison =
+      getAnalyticsQualityCount(right, filter) -
+      getAnalyticsQualityCount(left, filter);
+
+    if (primaryComparison !== 0) {
+      return primaryComparison;
+    }
+
+    return (
+      right.score - left.score ||
+      right.goodCount - left.goodCount ||
+      right.delayedCount - left.delayedCount ||
+      left.missingCount - right.missingCount ||
+      left.teamName.localeCompare(right.teamName)
+    );
+  });
+}
+
+function getAnalyticsQualityCount(
+  row: TeamAnalyticsQualityRow,
+  filter: AnalyticsQualityFilter
+): number {
+  if (filter === 'GOOD') {
+    return row.goodCount;
+  }
+
+  if (filter === 'DELAYED') {
+    return row.delayedCount;
+  }
+
+  if (filter === 'MISSING') {
+    return row.missingCount;
+  }
+
+  return row.score;
 }
 
 function collectTeamAudiosForDate(
@@ -1885,6 +2107,19 @@ function formatContributorTooltip(
       (contributor) => `${contributor.internName}: ${contributor.uploadCount}`
     )
     .join(' | ');
+}
+
+function getFilterButtonStyle(isActive: boolean): React.CSSProperties {
+  return {
+    backgroundColor: isActive ? 'var(--accent)' : 'var(--surface-1)',
+    border: '1px solid var(--border)',
+    borderRadius: 8,
+    color: isActive ? '#ffffff' : 'var(--text-main)',
+    cursor: 'pointer',
+    fontSize: 13,
+    fontWeight: 600,
+    padding: '8px 12px',
+  };
 }
 
 function getStatusSlotBackground(status: StandupSlotResult['status']): string {
