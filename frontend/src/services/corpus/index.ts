@@ -2,7 +2,6 @@ export {
   configureCorpusService,
   getInternAudios,
   searchInternById,
-  getCurrentUser,
   searchInternsByName,
 } from './corpusService';
 

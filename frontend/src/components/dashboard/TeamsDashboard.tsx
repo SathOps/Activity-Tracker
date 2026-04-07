@@ -7,12 +7,14 @@ export interface TeamsDashboardProps {
   addedInterns: Intern[];
   preloadedTeams?: Team[];
   mode?: 'teams' | 'status' | 'analytics';
+  authToken?: string;
 }
 
 const TeamsDashboard: React.FC<TeamsDashboardProps> = ({
   addedInterns,
   preloadedTeams,
   mode = 'teams',
+  authToken,
 }) => {
   return (
     <DashboardLayout
@@ -20,6 +22,7 @@ const TeamsDashboard: React.FC<TeamsDashboardProps> = ({
       teams={preloadedTeams}
       mode={mode}
       statusDisplay={mode === 'status' ? 'inline' : 'modal'}
+      authToken={authToken}
     />
   );
 };

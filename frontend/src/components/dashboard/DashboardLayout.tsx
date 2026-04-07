@@ -15,6 +15,7 @@ import {
 } from '../../utils/verification';
 import { getInternAudios } from '../../services/corpus';
 import type { InternAudioMetadata } from '../../services/corpus';
+import { RecordStandupModal } from '../RecordStandupModal';
 
 type DashboardView = 'TEAMS' | 'INTERNS' | 'COMPLETED';
 type StatusView = 'DAILY' | 'WEEKLY';
@@ -67,6 +68,7 @@ export interface DashboardLayoutProps {
   title?: string;
   statusDisplay?: 'modal' | 'inline';
   mode?: 'teams' | 'status' | 'analytics';
+  authToken?: string;
 }
 
 const DEFAULT_VIEW: DashboardView = 'TEAMS';
@@ -94,6 +96,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   title,
   statusDisplay = 'modal',
   mode = 'teams',
+  authToken,
 }) => {
   const { t } = useTranslation();
   const [managedTeams, setManagedTeams] = React.useState<Team[]>(
@@ -127,6 +130,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [analyticsError, setAnalyticsError] = React.useState<string | null>(
     null
   );
+  const [isRecordModalOpen, setIsRecordModalOpen] = React.useState(false);
   const hasInitializedDateSelection = React.useRef(false);
   const statusLoadRequestId = React.useRef(0);
   const analyticsLoadRequestId = React.useRef(0);
@@ -438,6 +442,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         ),
       }))
     );
+  };
+
+  const handleUploadSuccess = () => {
+    setIsRecordModalOpen(false);
   };
 
   const handleDeleteTeam = (teamId: string) => {
@@ -1054,13 +1062,22 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             : resolvedTitle}
         </h1>
         {!isInlineStatusView ? (
-          <button
-            className="primary-button"
-            onClick={() => setIsCreatingTeam((prev) => !prev)}
-            type="button"
-          >
-            {isCreatingTeam ? t('button.cancel') : t('teams.createTeam')}
-          </button>
+          <div className="dashboard-header-actions">
+            <button
+              className="secondary-button"
+              onClick={() => setIsRecordModalOpen(true)}
+              type="button"
+            >
+              Record Standup
+            </button>
+            <button
+              className="primary-button"
+              onClick={() => setIsCreatingTeam((prev) => !prev)}
+              type="button"
+            >
+              {isCreatingTeam ? t('button.cancel') : t('teams.createTeam')}
+            </button>
+          </div>
         ) : null}
       </header>
 
@@ -1253,6 +1270,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             {renderStatusPanelContent(true)}
           </section>
         </div>
+      ) : null}
+
+      {isRecordModalOpen && authToken ? (
+        <RecordStandupModal
+          authToken={authToken}
+          onClose={() => setIsRecordModalOpen(false)}
+          onSuccess={handleUploadSuccess}
+        />
       ) : null}
     </main>
   );
