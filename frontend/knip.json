@@ -2,7 +2,6 @@
   "$schema": "https://unpkg.com/knip/schema.json",
   "entry": ["src/scripts/verifyIntern.ts"],
   "project": ["src/**/*.{ts,tsx}"],
-  "ignoreDependencies": ["tsx"],
   "rules": {
     "exports": "off",
     "types": "off",

@@ -64,7 +64,6 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
                 : 'teams'
           }
           preloadedTeams={preloadedTeams}
-          authToken={authToken}
         />
       )}
     </>

@@ -25,7 +25,6 @@ variables:
 quality_checks:
   stage: quality
   script:
-    - export NODE_OPTIONS="--import tsx"
     - npm run format:check
     - npm run lint
     - npm run typecheck
