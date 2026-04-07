@@ -3,6 +3,9 @@ import { toIsoTimestamp } from '../../utils/timestamps';
 export interface InternSummary {
   id: string;
   name?: string;
+  username?: string;
+  email?: string;
+  phone?: string;
 }
 
 export interface InternAudioMetadata {
@@ -98,6 +101,20 @@ export async function searchInternById(
   }
 
   return parseInternSummary(payload, normalizedInternId);
+}
+
+export async function getCurrentUser(fallbackId = ''): Promise<InternSummary> {
+  if (runtimeConfig.useMock) {
+    return { id: fallbackId || 'current-user' };
+  }
+
+  const payload = await requestCorpusApi('/api/v1/auth/me');
+
+  if (!payload) {
+    return { id: fallbackId };
+  }
+
+  return parseInternSummary(payload, fallbackId);
 }
 
 export async function searchInternsByName(
@@ -280,11 +297,51 @@ function parseInternSummary(
     'username',
   ]);
 
-  if (!name) {
-    return { id };
+  const username = pickString(primaryObject, [
+    'username',
+    'user_name',
+    'userName',
+    'login',
+  ]);
+
+  const email = pickString(primaryObject, [
+    'email',
+    'email_address',
+    'emailAddress',
+    'contact_email',
+    'contactEmail',
+  ]);
+
+  const phone = pickString(primaryObject, [
+    'phone',
+    'phone_number',
+    'phoneNumber',
+    'mobile',
+    'mobile_no',
+    'mobileNo',
+    'contact_number',
+    'contactNumber',
+  ]);
+
+  const result: InternSummary = { id };
+
+  if (name) {
+    result.name = name;
   }
 
-  return { id, name };
+  if (username) {
+    result.username = username;
+  }
+
+  if (email) {
+    result.email = email;
+  }
+
+  if (phone) {
+    result.phone = phone;
+  }
+
+  return result;
 }
 
 function extractAudioItems(payload: unknown): InternAudioMetadata[] {
