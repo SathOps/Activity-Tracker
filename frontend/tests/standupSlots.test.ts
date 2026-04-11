@@ -10,6 +10,7 @@ import {
 
 describe('standupSlots', () => {
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -54,9 +55,35 @@ describe('standupSlots', () => {
   });
 
   test('returns missing statuses when there are no uploads for the day', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-02-11T00:00:00.000Z'));
+
     const slots = buildStandupSlotResults([], '2026-02-10');
 
     expect(slots.every((slot) => slot.status === 'MISSING')).toBe(true);
+  });
+
+  test('marks all slots as upcoming when selected day is in the future', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-02-10T03:00:00.000Z'));
+
+    const slots = buildStandupSlotResults([], '2026-02-11');
+
+    expect(slots.every((slot) => slot.status === 'UPCOMING')).toBe(true);
+  });
+
+  test('marks only not-yet-started slots as upcoming for the current day', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-02-10T04:15:00.000Z'));
+
+    const slots = buildStandupSlotResults([], '2026-02-10');
+
+    expect(slots.map((slot) => slot.status)).toEqual([
+      'MISSING',
+      'UPCOMING',
+      'UPCOMING',
+      'UPCOMING',
+    ]);
   });
 
   test('marks 09:10 IST as S1 GOOD', () => {
@@ -310,6 +337,9 @@ describe('standupSlots', () => {
   });
 
   test('ignores uploads outside the selected day in IST', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-02-11T00:00:00.000Z'));
+
     const slots = buildStandupSlotResults(
       [{ id: 'other-day', uploadedAt: '2026-02-10T18:45:00.000Z' }],
       '2026-02-10'
