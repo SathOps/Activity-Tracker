@@ -44,17 +44,17 @@
   --danger-border: #f4c1c8;
   --danger-text: #8f2532;
 
-  --slot-good-bg: #d6f3e2;
-  --slot-good-border: #8fd7af;
-  --slot-good-text: #155239;
+  --slot-good-bg: #6acb96;
+  --slot-good-border: #35ae6f;
+  --slot-good-text: #0f4a2f;
 
-  --slot-delayed-bg: #f8ecb8;
-  --slot-delayed-border: #e8d277;
-  --slot-delayed-text: #5f4a00;
+  --slot-delayed-bg: #f2cf4a;
+  --slot-delayed-border: #d8b22b;
+  --slot-delayed-text: #4f3d00;
 
-  --slot-missing-bg: #f9d5d8;
-  --slot-missing-border: #e8a4aa;
-  --slot-missing-text: #7b1f2b;
+  --slot-missing-bg: #dc2626;
+  --slot-missing-border: #b91c1c;
+  --slot-missing-text: #ffffff;
 
   --slot-upcoming-bg: #edf2f7;
   --slot-upcoming-border: #cbd5e1;
@@ -854,6 +854,105 @@ select {
   padding: 14px;
 }
 
+.team-heatmap-box {
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 8px;
+  width: 100%;
+}
+
+.team-heatmap-wrap {
+  max-width: 100%;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scrollbar-gutter: stable;
+  touch-action: pan-x;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.team-heatmap-wrap::-webkit-scrollbar {
+  height: 10px;
+}
+
+.team-heatmap-wrap::-webkit-scrollbar-track {
+  background: var(--surface-2);
+  border-radius: 9999px;
+}
+
+.team-heatmap-wrap::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 9999px;
+}
+
+.team-heatmap-wrap {
+  scrollbar-color: var(--border-strong) var(--surface-2);
+  scrollbar-width: thin;
+}
+
+.team-heatmap-scroll-hint {
+  color: var(--text-soft);
+  font-size: 11px;
+  margin-bottom: 6px;
+  padding-right: 2px;
+  text-align: right;
+}
+
+.team-heatmap-grid {
+  --heatmap-team-col-width: 160px;
+  --heatmap-cell-size: 18px;
+  --heatmap-gap: 6px;
+
+  align-items: center;
+  display: grid;
+  gap: var(--heatmap-gap);
+  grid-template-columns: var(--heatmap-team-col-width) repeat(
+      var(--heatmap-days),
+      var(--heatmap-cell-size)
+    );
+  min-width: max-content;
+  width: max-content;
+}
+
+.team-heatmap-team-header,
+.team-heatmap-team-name {
+  background: var(--surface-0);
+  color: var(--text-subtle);
+  left: 0;
+  overflow: hidden;
+  padding-right: 6px;
+  position: sticky;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.team-heatmap-team-header {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.team-heatmap-team-name {
+  color: var(--text-main);
+  font-size: 12px;
+}
+
+.team-heatmap-day-header {
+  color: var(--text-soft);
+  font-size: 10px;
+  text-align: center;
+}
+
+.team-heatmap-cell {
+  border: 1px solid transparent;
+  border-radius: 4px;
+  height: var(--heatmap-cell-size);
+  width: var(--heatmap-cell-size);
+}
+
 .status-glance-panel {
   background: linear-gradient(
     155deg,
@@ -1551,6 +1650,12 @@ select {
 }
 
 @media (max-width: 760px) {
+  html,
+  body,
+  #root {
+    overflow-x: hidden;
+  }
+
   .app-shell {
     padding: 12px 10px 20px;
   }
@@ -1600,6 +1705,25 @@ select {
 
   .status-glance-grid {
     grid-template-columns: 1fr;
+  }
+
+  .team-heatmap-grid {
+    --heatmap-team-col-width: 108px;
+    --heatmap-cell-size: 14px;
+    --heatmap-gap: 4px;
+  }
+
+  .team-heatmap-scroll-hint {
+    font-size: 10px;
+  }
+
+  .team-heatmap-team-header,
+  .team-heatmap-team-name {
+    font-size: 11px;
+  }
+
+  .team-heatmap-day-header {
+    font-size: 9px;
   }
 
   .team-ring {

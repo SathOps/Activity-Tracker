@@ -216,10 +216,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       ),
     [managedTeams]
   );
-  const pendingDailyRows = React.useMemo(
-    () => teamDailyStatusRows.filter((row) => !row.isCompleted),
-    [teamDailyStatusRows]
-  );
   const pendingWeeklyRows = React.useMemo(
     () =>
       teamWeeklyStatusRows.filter((row) => row.pendingDayDetails.length > 0),
@@ -882,7 +878,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </section>
       ) : null}
 
-      {!statusLoading && !statusError && statusView === 'DAILY' ? (
+      {!statusLoading &&
+      !statusError &&
+      statusView === 'DAILY' &&
+      (!isInlineStatusView || !showDailyChart) ? (
         <section style={{ display: 'grid', gap: 14 }}>
           {teamDailyStatusRows.length === 0 ? (
             <p className="team-empty">
@@ -954,34 +953,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               ))}
             </section>
           )}
-
-          <section
-            className="team-card"
-            style={{ backgroundColor: 'var(--surface-1)' }}
-          >
-            <h3 className="team-name" style={{ marginBottom: 8 }}>
-              {t('dashboard.dailyPendingSummary')}
-            </h3>
-            {pendingDailyRows.length === 0 ? (
-              <p className="team-id">
-                {t('dashboard.allTeamsCompletedRequiredDailyStandups')}
-              </p>
-            ) : (
-              <ul
-                style={{ display: 'grid', gap: 6, margin: 0, paddingLeft: 18 }}
-              >
-                {pendingDailyRows.map((row) => (
-                  <li
-                    key={row.teamId}
-                    style={{ color: 'var(--text-subtle)', fontSize: 13 }}
-                  >
-                    {row.teamName}: {row.remainingStandupCount}{' '}
-                    {t('dashboard.standupsPending')}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
         </section>
       ) : null}
 
@@ -1190,7 +1161,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         ) : null}
 
         {!analyticsLoading && !analyticsError ? (
-          <section className="team-card" style={{ backgroundColor: '#f8fafc' }}>
+          <section
+            className="team-card"
+            style={{ backgroundColor: '#f8fafc', overflowX: 'hidden' }}
+          >
             <div
               style={{
                 alignItems: 'center',
@@ -1643,78 +1617,51 @@ function renderTeamHeatmap(
   }
 
   return (
-    <div style={{ overflowX: 'auto' }}>
-      <div
-        style={{
-          color: '#64748b',
-          fontSize: 11,
-          marginBottom: 6,
-          textAlign: 'right',
-        }}
-      >
-        {scrollToViewMoreLabel}
-      </div>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: `160px repeat(${dateKeys.length}, 22px)`,
-          gap: 6,
-          alignItems: 'center',
-        }}
-      >
-        <div style={{ color: '#475569', fontSize: 11 }}>{teamColumnLabel}</div>
-        {dateKeys.map((dateKey) => (
-          <div
-            key={dateKey}
-            style={{
-              color: '#64748b',
-              fontSize: 10,
-              textAlign: 'center',
-            }}
-          >
-            {formatWeekdayShort(dateKey)}
-          </div>
-        ))}
+    <div className="team-heatmap-box">
+      <div className="team-heatmap-scroll-hint">{scrollToViewMoreLabel}</div>
+      <div className="team-heatmap-wrap">
+        <div
+          className="team-heatmap-grid"
+          style={
+            { '--heatmap-days': `${dateKeys.length}` } as React.CSSProperties
+          }
+        >
+          <div className="team-heatmap-team-header">{teamColumnLabel}</div>
+          {dateKeys.map((dateKey) => (
+            <div className="team-heatmap-day-header" key={dateKey}>
+              {formatWeekdayShort(dateKey)}
+            </div>
+          ))}
 
-        {rows.map((team) => {
-          const teamId = normalizeTeamId(team.teamId);
-          const teamDateCounts = teamTotals.get(teamId) ?? new Map();
+          {rows.map((team) => {
+            const teamId = normalizeTeamId(team.teamId);
+            const teamDateCounts = teamTotals.get(teamId) ?? new Map();
 
-          return (
-            <React.Fragment key={teamId}>
-              <div
-                style={{
-                  color: '#0f172a',
-                  fontSize: 12,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-                title={team.teamName}
-              >
-                {team.teamName}
-              </div>
-              {dateKeys.map((dateKey) => {
-                const count = teamDateCounts.get(dateKey) ?? 0;
-                const intensity = getTeamHeatmapIntensity(count);
+            return (
+              <React.Fragment key={teamId}>
+                <div className="team-heatmap-team-name" title={team.teamName}>
+                  {team.teamName}
+                </div>
+                {dateKeys.map((dateKey) => {
+                  const count = teamDateCounts.get(dateKey) ?? 0;
+                  const intensity = getTeamHeatmapIntensity(count);
 
-                return (
-                  <div
-                    key={`${teamId}-${dateKey}`}
-                    title={`${team.teamName} | ${formatMonthDay(dateKey)}: ${count}/4 uploads`}
-                    style={{
-                      width: 18,
-                      height: 18,
-                      borderRadius: 4,
-                      backgroundColor: intensity.background,
-                      border: `1px solid ${intensity.border}`,
-                    }}
-                  />
-                );
-              })}
-            </React.Fragment>
-          );
-        })}
+                  return (
+                    <div
+                      className="team-heatmap-cell"
+                      key={`${teamId}-${dateKey}`}
+                      title={`${team.teamName} | ${formatMonthDay(dateKey)}: ${count}/4 uploads`}
+                      style={{
+                        backgroundColor: intensity.background,
+                        borderColor: intensity.border,
+                      }}
+                    />
+                  );
+                })}
+              </React.Fragment>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
