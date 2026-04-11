@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import TeamList, { Team } from './TeamList';
-import TeamStatusRing from './TeamStatusRing';
 import InternCard from '../intern/InternCard';
 import type { Intern } from '../intern/InternSearch';
 import { parseTimestamp } from '../../utils/timestamps';
@@ -129,7 +128,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [statusView, setStatusView] = React.useState<StatusView>('DAILY');
   const [analyticsQualityFilter, setAnalyticsQualityFilter] =
     React.useState<AnalyticsQualityFilter>('ALL');
-  const [showDailyChart, setShowDailyChart] = React.useState(false);
   const [activeAudioId, setActiveAudioId] = React.useState<string | null>(null);
   const [statusLoading, setStatusLoading] = React.useState(false);
   const [statusError, setStatusError] = React.useState<string | null>(null);
@@ -208,13 +206,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const analyticsDateKeys = React.useMemo(
     () => getTrailingDateKeys(selectedDateKey, 29),
     [selectedDateKey]
-  );
-  const teamMemberNamesById = React.useMemo(
-    () =>
-      new Map(
-        managedTeams.map((team) => [team.teamId, getTeamMemberNames(team)])
-      ),
-    [managedTeams]
   );
   const pendingDailyRows = React.useMemo(
     () => teamDailyStatusRows.filter((row) => !row.isCompleted),
@@ -740,7 +731,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             })}
           </p>
         </div>
-        <div style={{ display: 'grid', gap: 8, justifyItems: 'end' }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button
             className="ghost-button"
             disabled={statusLoading}
@@ -791,54 +782,34 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </label>
       </section>
 
-      <section
-        style={{
-          alignItems: 'center',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 8,
-          justifyContent: 'space-between',
-        }}
-      >
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {(['DAILY', 'WEEKLY'] as const).map((viewKey) => {
-            const isActive = statusView === viewKey;
+      <section style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {(['DAILY', 'WEEKLY'] as const).map((viewKey) => {
+          const isActive = statusView === viewKey;
 
-            return (
-              <button
-                key={viewKey}
-                onClick={() => setStatusView(viewKey)}
-                style={{
-                  backgroundColor: isActive
-                    ? 'var(--accent)'
-                    : 'var(--surface-1)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 8,
-                  color: isActive ? '#ffffff' : 'var(--text-main)',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  padding: '8px 12px',
-                }}
-                type="button"
-              >
-                {viewKey === 'DAILY'
-                  ? 'Daily Standup Status'
-                  : 'Weekly Standup Status'}
-              </button>
-            );
-          })}
-        </div>
-
-        {isInlineStatusView && statusView === 'DAILY' ? (
-          <button
-            className="ghost-button"
-            onClick={() => setShowDailyChart((prev) => !prev)}
-            type="button"
-          >
-            {showDailyChart ? 'Hide Chart' : 'Show Chart'}
-          </button>
-        ) : null}
+          return (
+            <button
+              key={viewKey}
+              onClick={() => setStatusView(viewKey)}
+              style={{
+                backgroundColor: isActive
+                  ? 'var(--accent)'
+                  : 'var(--surface-1)',
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+                color: isActive ? '#ffffff' : 'var(--text-main)',
+                cursor: 'pointer',
+                fontSize: 13,
+                fontWeight: 600,
+                padding: '8px 12px',
+              }}
+              type="button"
+            >
+              {viewKey === 'DAILY'
+                ? t('dashboard.dailyStandupStatus')
+                : t('dashboard.weeklyStandupStatus')}
+            </button>
+          );
+        })}
       </section>
 
       {statusLoading ? (
@@ -847,41 +818,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {!statusLoading && statusError ? (
         <p className="team-empty">{statusError}</p>
       ) : null}
-
-      {!statusLoading &&
-      !statusError &&
-      isInlineStatusView &&
-      statusView === 'DAILY' &&
-      showDailyChart &&
-      teamDailyStatusRows.length > 0 ? (
-        <section
-          className="status-glance-panel"
-          aria-label={t('dashboard.atAGlanceStatisticsAria')}
-        >
-          <header className="status-glance-header">
-            <h3 className="status-glance-title">
-              {t('dashboard.atAGlanceStatisticsTitle')}
-            </h3>
-            <p className="status-glance-copy">
-              {t('dashboard.hoverTeamRingToViewMembers')}
-            </p>
-          </header>
-
-          <section className="status-glance-grid">
-            {teamDailyStatusRows.map((row) => (
-              <TeamStatusRing
-                key={row.teamId}
-                memberNames={teamMemberNamesById.get(row.teamId) ?? []}
-                requiredStandupCount={row.requiredStandupCount}
-                slotStatuses={row.slotStatuses}
-                standupCount={row.standupCount}
-                teamName={row.teamName}
-              />
-            ))}
-          </section>
-        </section>
-      ) : null}
-
       {!statusLoading && !statusError && statusView === 'DAILY' ? (
         <section style={{ display: 'grid', gap: 14 }}>
           {teamDailyStatusRows.length === 0 ? (
@@ -2188,58 +2124,38 @@ function getFilterButtonStyle(isActive: boolean): React.CSSProperties {
 
 function getStatusSlotBackground(status: StandupSlotResult['status']): string {
   if (status === 'GOOD') {
-    return 'var(--slot-good-bg)';
+    return '#dcfce7';
   }
 
   if (status === 'DELAYED') {
-    return 'var(--slot-delayed-bg)';
+    return '#fef3c7';
   }
 
-  if (status === 'UPCOMING') {
-    return 'var(--slot-upcoming-bg)';
-  }
-
-  return 'var(--slot-missing-bg)';
+  return '#f1f5f9';
 }
 
 function getStatusSlotBorder(status: StandupSlotResult['status']): string {
   if (status === 'GOOD') {
-    return 'var(--slot-good-border)';
+    return '#86efac';
   }
 
   if (status === 'DELAYED') {
-    return 'var(--slot-delayed-border)';
+    return '#fcd34d';
   }
 
-  if (status === 'UPCOMING') {
-    return 'var(--slot-upcoming-border)';
-  }
-
-  return 'var(--slot-missing-border)';
+  return '#cbd5e1';
 }
 
 function getStatusSlotColor(status: StandupSlotResult['status']): string {
   if (status === 'GOOD') {
-    return 'var(--slot-good-text)';
+    return '#166534';
   }
 
   if (status === 'DELAYED') {
-    return 'var(--slot-delayed-text)';
+    return '#92400e';
   }
 
-  if (status === 'UPCOMING') {
-    return 'var(--slot-upcoming-text)';
-  }
-
-  return 'var(--slot-missing-text)';
-}
-
-function getTeamMemberNames(team: Team): string[] {
-  return team.interns
-    .map((intern) =>
-      (intern.internName || intern.corpusUserId || intern.internId || '').trim()
-    )
-    .filter((memberName) => memberName.length > 0);
+  return '#475569';
 }
 
 async function fetchInternContributionWithRetries(
