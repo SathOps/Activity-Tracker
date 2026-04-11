@@ -384,7 +384,9 @@ export default function App() {
             }
             type="button"
           >
-            {themeMode === 'dark' ? t('theme.light') : t('theme.dark')}
+            <span aria-hidden="true" className="theme-toggle-icon">
+              {themeMode === 'dark' ? '☀' : '☾'}
+            </span>
           </button>
 
           <button
