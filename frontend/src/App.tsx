@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DashboardHome from './components/dashboard/DashboardHome';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import swechaDarkLogo from '../images/Swecha-lite.png';
+import swechaLightLogo from '../images/swecha-dark.png';
 import type { Team } from './components/dashboard/TeamList';
 import type { Intern } from './components/intern/InternSearch';
 import {
@@ -108,6 +110,9 @@ export default function App() {
 
     document.documentElement.setAttribute('data-theme', themeMode);
   }, [themeMode]);
+
+  const swechaLogoSrc = themeMode === 'dark' ? swechaDarkLogo : swechaLightLogo;
+  const currentYear = new Date().getFullYear();
 
   // Preload interns and team seed data from CSV on login success
   useEffect(() => {
@@ -369,9 +374,13 @@ export default function App() {
           </div>
           <div>
             <h1 className="app-brand-title">{t('app.title')}</h1>
-            <p className="app-brand-subtitle">{t('app.operationsConsole')}</p>
           </div>
         </div>
+
+        <div className="app-toolbar-center" aria-label="Swecha">
+          <img alt="Swecha" className="swecha-logo-image" src={swechaLogoSrc} />
+        </div>
+
         <div className="profile-menu-container">
           <LanguageSwitcher />
           <button
@@ -451,6 +460,10 @@ export default function App() {
         onRemoveIntern={handleRemoveIntern}
         preloadedTeams={preloadedTeams}
       />
+
+      <footer className="app-footer">
+        Swecha {currentYear} © All Rights Reserved.
+      </footer>
     </div>
   );
 }

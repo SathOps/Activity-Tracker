@@ -1086,7 +1086,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           }}
         >
           <div style={{ display: 'grid', gap: 4 }}>
-            <h2 style={{ color: '#0f172a', fontSize: 20, margin: 0 }}>
+            <h2 style={{ color: 'var(--text-main)', fontSize: 20, margin: 0 }}>
               {t('dashboard.teamAnalytics')}
             </h2>
             <p style={{ color: '#475569', fontSize: 13, margin: 0 }}>
@@ -1217,7 +1217,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
             {renderTeamHeatmap(
               rankedAnalyticsTeams,
-              analyticsDateKeys,
+              [...analyticsDateKeys].reverse(),
               analyticsTeamDailyTotals,
               t('dashboard.noLeaderboardResults'),
               t('dashboard.scrollToViewMore'),

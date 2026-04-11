@@ -185,8 +185,8 @@ select {
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   margin-bottom: 20px;
   min-height: 84px;
   padding: 14px 16px;
@@ -197,6 +197,32 @@ select {
   align-items: center;
   display: flex;
   gap: 12px;
+  justify-self: start;
+}
+
+.app-toolbar-center {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  justify-self: center;
+  min-height: 40px;
+  min-width: 140px;
+}
+
+.swecha-logo-image {
+  display: block;
+  height: 36px;
+  max-width: min(220px, 35vw);
+  object-fit: contain;
+  width: auto;
+}
+
+.swecha-logo-fallback {
+  color: var(--text-main);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .app-brand-mark {
@@ -236,7 +262,15 @@ select {
   align-items: center;
   display: flex;
   gap: 10px;
+  justify-self: end;
   position: relative;
+}
+
+.app-footer {
+  color: var(--text-soft);
+  font-size: 12px;
+  margin: 18px 0 2px;
+  text-align: center;
 }
 
 .language-switcher {
@@ -1661,15 +1695,33 @@ select {
   }
 
   .app-toolbar {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: center;
     gap: 12px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+  }
+
+  .app-branding {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .app-toolbar-center {
+    justify-self: start;
+    grid-column: 1 / 2;
+    min-width: 0;
+  }
+
+  .swecha-logo-image {
+    height: 30px;
+    max-width: 160px;
   }
 
   .profile-menu-container {
-    align-self: stretch;
+    align-self: center;
+    grid-column: 2 / 3;
     justify-content: flex-end;
-    width: 100%;
+    width: auto;
   }
 
   .profile-menu-dropdown {
