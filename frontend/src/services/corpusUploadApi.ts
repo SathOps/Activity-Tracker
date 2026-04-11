@@ -46,12 +46,29 @@ export interface UploadRecordParams {
   maxRetriesPerChunk?: number;
   backoffMs?: number;
   timeoutMs?: number;
+  signal?: AbortSignal;
 }
 
 function buildAuthHeaders(token: string): Record<string, string> {
   return {
     Authorization: `Bearer ${token}`,
   };
+}
+
+function toPrimitiveString(value: unknown): string {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    typeof value === 'bigint'
+  ) {
+    return String(value);
+  }
+
+  return '';
 }
 
 export function createTimeoutSignal(timeoutMs: number): {
@@ -279,6 +296,7 @@ export async function uploadAudioRecord(
     maxRetriesPerChunk = MAX_UPLOAD_RETRIES,
     backoffMs = DEFAULT_BACKOFF_MS,
     timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
+    signal,
   } = params;
 
   const uploadUuid = crypto.randomUUID();
@@ -304,6 +322,7 @@ export async function uploadAudioRecord(
         maxRetries: maxRetriesPerChunk,
         backoffMs,
         timeoutMs,
+        signal,
       });
 
       onChunkProgress?.({
@@ -427,7 +446,20 @@ export async function verifyLocation(
   });
 
   if (!response.ok) {
-    throw new Error(`Location verification failed: ${response.status}`);
+    let errorDetail = '';
+
+    try {
+      errorDetail = await response.text();
+    } catch {
+      errorDetail = '';
+    }
+
+    const trimmedDetail = errorDetail.trim();
+    throw new Error(
+      trimmedDetail
+        ? `Location verification failed: ${response.status} ${trimmedDetail}`
+        : `Location verification failed: ${response.status}`
+    );
   }
 
   const data = (await response.json()) as Record<string, unknown>;
