@@ -473,7 +473,11 @@ function getSlotStatusBackground(status: StandupSlotResult['status']): string {
     return '#fef3c7';
   }
 
-  return '#f1f5f9';
+  if (status === 'UPCOMING') {
+    return '#f1f5f9';
+  }
+
+  return '#fee2e2';
 }
 
 function getSlotStatusBorder(status: StandupSlotResult['status']): string {
@@ -485,7 +489,11 @@ function getSlotStatusBorder(status: StandupSlotResult['status']): string {
     return '#fcd34d';
   }
 
-  return '#cbd5e1';
+  if (status === 'UPCOMING') {
+    return '#cbd5e1';
+  }
+
+  return '#fca5a5';
 }
 
 function getSlotStatusColor(status: StandupSlotResult['status']): string {
@@ -497,7 +505,11 @@ function getSlotStatusColor(status: StandupSlotResult['status']): string {
     return '#92400e';
   }
 
-  return '#475569';
+  if (status === 'UPCOMING') {
+    return '#475569';
+  }
+
+  return '#991b1b';
 }
 
 export default TeamList;
