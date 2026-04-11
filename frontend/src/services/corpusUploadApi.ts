@@ -430,7 +430,20 @@ export async function verifyLocation(
   });
 
   if (!response.ok) {
-    throw new Error(`Location verification failed: ${response.status}`);
+    let errorDetail = '';
+
+    try {
+      errorDetail = await response.text();
+    } catch {
+      errorDetail = '';
+    }
+
+    const trimmedDetail = errorDetail.trim();
+    throw new Error(
+      trimmedDetail
+        ? `Location verification failed: ${response.status} ${trimmedDetail}`
+        : `Location verification failed: ${response.status}`
+    );
   }
 
   const data = (await response.json()) as Record<string, unknown>;
