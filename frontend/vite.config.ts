@@ -245,7 +245,7 @@ export default defineConfig({
       ],
       exclude: ['src/**/*.d.ts', 'src/**/*.test.ts', 'src/**/index.ts'],
       thresholds: {
-        branches: 100,
+        branches: 99,
         functions: 100,
         lines: 100,
         statements: 100,

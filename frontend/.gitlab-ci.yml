@@ -1,4 +1,4 @@
-image: node:22
+image: node:20
 
 stages:
   - quality
@@ -36,6 +36,11 @@ i18n_validation:
   script:
     - npm run validate:i18n
     - npm run i18n:replace
+
+test_cases:
+  stage: test
+  script:
+    - npm test
 
 test_coverage:
   stage: test
