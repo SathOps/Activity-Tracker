@@ -1,5 +1,4 @@
 import { configDefaults, defineConfig } from 'vite-plus';
-import react from '@vitejs/plugin-react';
 import { loadEnv } from 'vite-plus';
 
 const mode = process.env.MODE || process.env.NODE_ENV || 'development';
@@ -223,7 +222,6 @@ export default defineConfig({
     printWidth: 80,
     sortPackageJson: false,
   },
-  plugins: [react()],
   test: {
     include: [
       'tests/**/*.{test,spec}.{ts,tsx}',
