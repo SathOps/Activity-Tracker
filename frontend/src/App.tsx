@@ -377,8 +377,12 @@ export default function App() {
           </div>
         </div>
 
-        <div className="app-toolbar-center" aria-label="Swecha">
-          <img alt="Swecha" className="swecha-logo-image" src={swechaLogoSrc} />
+        <div className="app-toolbar-center" aria-label={t('app.swecha')}>
+          <img
+            alt={t('app.swecha')}
+            className="swecha-logo-image"
+            src={swechaLogoSrc}
+          />
         </div>
 
         <div className="profile-menu-container">
