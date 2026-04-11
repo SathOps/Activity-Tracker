@@ -46,6 +46,7 @@ export interface UploadRecordParams {
   maxRetriesPerChunk?: number;
   backoffMs?: number;
   timeoutMs?: number;
+  signal?: AbortSignal;
 }
 
 function buildAuthHeaders(token: string): Record<string, string> {
@@ -279,6 +280,7 @@ export async function uploadAudioRecord(
     maxRetriesPerChunk = MAX_UPLOAD_RETRIES,
     backoffMs = DEFAULT_BACKOFF_MS,
     timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
+    signal,
   } = params;
 
   const uploadUuid = crypto.randomUUID();
@@ -304,6 +306,7 @@ export async function uploadAudioRecord(
         maxRetries: maxRetriesPerChunk,
         backoffMs,
         timeoutMs,
+        signal,
       });
 
       onChunkProgress?.({

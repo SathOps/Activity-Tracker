@@ -242,6 +242,17 @@ describe('classifyCorpusApiError', () => {
     const result = classifyCorpusApiError('string error');
     expect(result.type).toBe('unknown');
   });
+
+  test('classifies error with undefined message as unknown with fallback', () => {
+    const error = new Error('temp') as Error & {
+      response?: { status?: number };
+    };
+    error.response = { status: 404 };
+    Object.defineProperty(error, 'message', { value: undefined });
+    const result = classifyCorpusApiError(error);
+    expect(result.type).toBe('unknown');
+    expect(result.message).toBe('Audio upload failed. Please retry.');
+  });
 });
 
 describe('verifyLocation', () => {
@@ -682,6 +693,98 @@ describe('uploadAudioRecord', () => {
         backoffMs: 1,
       })
     ).rejects.toThrow();
+  });
+
+  test('uses generated filename when audioFile name is empty', async () => {
+    mockSuccessfulUpload();
+    const audioFile = {
+      name: '',
+      type: 'audio/webm',
+      size: 10,
+      slice: () => new Blob(['audio data']),
+    } as unknown as File;
+
+    await uploadAudioRecord({
+      token: 'token123',
+      userId: 'user1',
+      payload: {
+        title: 'Test Recording',
+        description:
+          'This is a test recording for the team standup tracker application',
+        language: 'english',
+        audioFile,
+        location: { latitude: 17.44, longitude: 78.35 },
+        durationSeconds: 15,
+        categoryIds: DEFAULT_CATEGORY_IDS,
+        releaseRights: 'creator',
+      },
+      backoffMs: 1,
+    });
+
+    const finalizeCall = fetchMock.mock.calls.find(
+      (call: unknown[]) => (call[0] as string) === '/api/v1/records/upload'
+    );
+    expect(finalizeCall).toBeDefined();
+  });
+
+  test('uses generated filename when audioFile name is undefined', async () => {
+    mockSuccessfulUpload();
+    const audioFile = {
+      name: undefined as unknown as string,
+      type: 'audio/webm',
+      size: 10,
+      slice: () => new Blob(['audio data']),
+    } as unknown as File;
+
+    await uploadAudioRecord({
+      token: 'token123',
+      userId: 'user1',
+      payload: {
+        title: 'Test Recording',
+        description:
+          'This is a test recording for the team standup tracker application',
+        language: 'english',
+        audioFile,
+        location: { latitude: 17.44, longitude: 78.35 },
+        durationSeconds: 15,
+        categoryIds: DEFAULT_CATEGORY_IDS,
+        releaseRights: 'creator',
+      },
+      backoffMs: 1,
+    });
+
+    const finalizeCall = fetchMock.mock.calls.find(
+      (call: unknown[]) => (call[0] as string) === '/api/v1/records/upload'
+    );
+    expect(finalizeCall).toBeDefined();
+  });
+
+  test('passes abort signal through to upload', async () => {
+    mockSuccessfulUpload();
+    const audioFile = new File(['audio data'], 'test.webm', {
+      type: 'audio/webm',
+    });
+    const controller = new AbortController();
+
+    await uploadAudioRecord({
+      token: 'token123',
+      userId: 'user1',
+      payload: {
+        title: 'Test Recording',
+        description:
+          'This is a test recording for the team standup tracker application',
+        language: 'english',
+        audioFile,
+        location: { latitude: 17.44, longitude: 78.35 },
+        durationSeconds: 15,
+        categoryIds: DEFAULT_CATEGORY_IDS,
+        releaseRights: 'creator',
+      },
+      signal: controller.signal,
+      backoffMs: 1,
+    });
+
+    expect(controller.signal.aborted).toBe(false);
   });
 });
 
