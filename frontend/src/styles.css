@@ -1570,18 +1570,6 @@ select {
   gap: 8px;
 }
 
-.upload-form-location-presets {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.upload-form-location-preset.is-selected {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
 .upload-form-actions {
   display: flex;
   flex-wrap: wrap;

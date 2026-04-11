@@ -20,7 +20,7 @@
     "validate:i18n:usage": "node scripts/validateI18nUsage.mjs",
     "i18n:replace": "node scripts/validateI18nUsage.mjs",
     "validate": "vp check && node scripts/validateI18n.mjs && vp test run",
-    "validate:staged": "vp staged",
+    "validate:staged": "node scripts/validateStaged.mjs",
     "prepare": "node scripts/setupGitHooks.mjs",
     "knip": "knip",
     "knip:fix": "knip --fix",

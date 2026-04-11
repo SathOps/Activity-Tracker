@@ -376,20 +376,29 @@ export async function fetchCategories(token: string): Promise<Category[]> {
         item && typeof item === 'object' && item.approved === true
     )
     .map((item: Record<string, unknown>) => ({
-      id: typeof item.id === 'string' ? item.id : String(item.id ?? ''),
-      name: typeof item.name === 'string' ? item.name : String(item.name ?? ''),
+      id: getSafeString(item.id),
+      name: getSafeString(item.name),
       title:
         typeof item.title === 'string'
           ? item.title
           : typeof item.name === 'string'
             ? item.name
-            : String(item.title ?? ''),
+            : getSafeString(item.title),
       description:
         typeof item.description === 'string'
           ? item.description
-          : String(item.description ?? ''),
+          : getSafeString(item.description),
       approved: item.approved === true,
     }));
+}
+
+function getSafeString(value: unknown): string {
+  return typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    typeof value === 'bigint'
+    ? String(value)
+    : '';
 }
 
 export interface LocationInfo {
@@ -418,20 +427,7 @@ export async function verifyLocation(
   });
 
   if (!response.ok) {
-    let errorDetail = '';
-
-    try {
-      errorDetail = await response.text();
-    } catch {
-      errorDetail = '';
-    }
-
-    const trimmedDetail = errorDetail.trim();
-    throw new Error(
-      trimmedDetail
-        ? `Location verification failed: ${response.status} ${trimmedDetail}`
-        : `Location verification failed: ${response.status}`
-    );
+    throw new Error(`Location verification failed: ${response.status}`);
   }
 
   const data = (await response.json()) as Record<string, unknown>;
@@ -440,7 +436,7 @@ export async function verifyLocation(
     formattedAddress:
       typeof data.formatted_address === 'string'
         ? data.formatted_address
-        : String(data.formatted_address ?? ''),
+        : getSafeString(data.formatted_address),
     country: (data.country as string | null) ?? null,
     state: (data.state as string | null) ?? null,
     city: (data.city as string | null) ?? null,
