@@ -1,7 +1,7 @@
 import { parseTimestamp } from '../timestamps';
 
 export type StandupSlotId = 'S1' | 'S2' | 'S3' | 'S4';
-export type StandupSlotStatus = 'GOOD' | 'DELAYED' | 'MISSING' | 'UPCOMING';
+export type StandupSlotStatus = 'GOOD' | 'DELAYED' | 'MISSING';
 
 export interface StandupSlotDefinition {
   slotId: StandupSlotId;
@@ -28,7 +28,6 @@ interface SlotParts {
 }
 
 const DEFAULT_TIME_ZONE = 'Asia/Kolkata';
-const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 export const STANDUP_SLOT_DEFINITIONS: StandupSlotDefinition[] = [
   {
@@ -70,7 +69,6 @@ export function buildStandupSlotResults(
   targetDateKey: string,
   timeZone: string = DEFAULT_TIME_ZONE
 ): StandupSlotResult[] {
-  const nowParts = getZonedDateParts(new Date(), timeZone);
   const results = new Map<StandupSlotId, StandupSlotResult>(
     STANDUP_SLOT_DEFINITIONS.map((slot) => [
       slot.slotId,
@@ -78,7 +76,7 @@ export function buildStandupSlotResults(
         slotId: slot.slotId,
         label: slot.label,
         windowLabel: slot.windowLabel,
-        status: getDefaultSlotStatus(slot, targetDateKey, nowParts),
+        status: 'MISSING' as const,
       },
     ])
   );
@@ -98,7 +96,7 @@ export function buildStandupSlotResults(
       timeZone,
       new Set(
         Array.from(results.entries())
-          .filter(([, result]) => isSubmittedStatus(result.status))
+          .filter(([, result]) => result.status !== 'MISSING')
           .map(([slotId]) => slotId)
       )
     );
@@ -128,7 +126,7 @@ export function resolveSlotForTimestamp(
 ):
   | {
       slot: StandupSlotDefinition;
-      status: Exclude<StandupSlotStatus, 'MISSING' | 'UPCOMING'>;
+      status: Exclude<StandupSlotStatus, 'MISSING'>;
     }
   | undefined {
   if (!uploadedAt) {
@@ -195,7 +193,7 @@ export function resolveStandupSlot(
 export function countCompletedStandupSlots(
   slotStatuses: StandupSlotResult[]
 ): number {
-  return slotStatuses.filter((slot) => isSubmittedStatus(slot.status)).length;
+  return slotStatuses.filter((slot) => slot.status !== 'MISSING').length;
 }
 
 function resolveCurrentStandupSlot(
@@ -218,36 +216,9 @@ function resolveCurrentStandupSlot(
 function getSlotStatusForTimestamp(
   totalSeconds: number,
   slot: StandupSlotDefinition
-): Exclude<StandupSlotStatus, 'MISSING' | 'UPCOMING'> {
+): Exclude<StandupSlotStatus, 'MISSING'> {
   return totalSeconds < slot.endMinutes * 60 ? 'GOOD' : 'DELAYED';
 }
-
-function isSubmittedStatus(status: StandupSlotStatus): boolean {
-  return status === 'GOOD' || status === 'DELAYED';
-}
-
-function getDefaultSlotStatus(
-  slot: StandupSlotDefinition,
-  targetDateKey: string,
-  nowParts: SlotParts | undefined
-): Extract<StandupSlotStatus, 'MISSING' | 'UPCOMING'> {
-  if (!DATE_KEY_PATTERN.test(targetDateKey) || !nowParts) {
-    return 'MISSING';
-  }
-
-  if (targetDateKey > nowParts.dateKey) {
-    return 'UPCOMING';
-  }
-
-  if (targetDateKey < nowParts.dateKey) {
-    return 'MISSING';
-  }
-
-  return nowParts.totalSeconds < slot.startMinutes * 60
-    ? 'UPCOMING'
-    : 'MISSING';
-}
-
 function getZonedDateParts(
   date: Date,
   timeZone: string
