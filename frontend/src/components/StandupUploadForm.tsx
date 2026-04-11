@@ -43,22 +43,6 @@ const CORPUS_LANGUAGES = [
   'telugu',
   'urdu',
 ] as const;
-const LOCATION_PRESETS = [
-  {
-    id: 'swecha',
-    label: 'Use Swecha Coordinates',
-    hint: 'Swecha Office',
-    latitude: 17.43599116105621,
-    longitude: 78.3605121153426,
-  },
-  {
-    id: 'iiit-hyd',
-    label: 'Use IIIT Hyderabad Coordinates',
-    hint: 'IIIT Hyderabad',
-    latitude: 17.44792233934321,
-    longitude: 78.3485249693148,
-  },
-] as const;
 
 interface StandupUploadFormProps {
   audioBlob: Blob | null;
@@ -162,7 +146,6 @@ export function StandupUploadForm({
   const [location, setLocation] = useState<CorpusUploadLocation | null>(null);
   const [locationInfo, setLocationInfo] = useState<LocationInfo | null>(null);
   const [locationError, setLocationError] = useState('');
-  const [locationSourceLabel, setLocationSourceLabel] = useState('');
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [retryValues, setRetryValues] = useState<{
@@ -193,31 +176,10 @@ export function StandupUploadForm({
     isAudioDurationValid &&
     !isFileTooLarge;
 
-  const selectedPreset = location
-    ? LOCATION_PRESETS.find(
-        (preset) =>
-          preset.latitude === location.latitude &&
-          preset.longitude === location.longitude
-      )
-    : undefined;
-
-  const handleUseLocationPreset = (
-    preset: (typeof LOCATION_PRESETS)[number]
-  ) => {
-    setLocation({
-      latitude: preset.latitude,
-      longitude: preset.longitude,
-    });
-    setLocationInfo(null);
-    setLocationError('');
-    setLocationSourceLabel(preset.hint);
-  };
-
   const handleGetLocation = async () => {
     setIsFetchingLocation(true);
     setLocationError('');
     setLocationInfo(null);
-    setLocationSourceLabel('');
 
     console.log('[Location] Starting location fetch...');
 
@@ -237,19 +199,12 @@ export function StandupUploadForm({
           longitude: verified.longitude,
         });
         setLocationInfo(verified);
-        setLocationSourceLabel('Current device location');
       } catch (verifyErr) {
         console.log(
           '[Location] Corpus verify failed, using raw coords:',
           verifyErr
         );
         setLocation(coords);
-        setLocationSourceLabel('Current device coordinates');
-        setLocationError(
-          verifyErr instanceof Error
-            ? `${verifyErr.message}. Using device coordinates only.`
-            : 'Location verification failed. Using device coordinates only.'
-        );
       }
     } catch (geoErr) {
       console.log('[Location] Browser geolocation failed:', geoErr);
@@ -328,7 +283,6 @@ export function StandupUploadForm({
       setLanguage('');
       setLocation(null);
       setLocationInfo(null);
-      setLocationSourceLabel('');
       setRetryValues(null);
       onSuccess();
     } catch (error) {
@@ -438,35 +392,11 @@ export function StandupUploadForm({
               : t('upload.useCurrentLocation')}
           </button>
         </div>
-        <div className="upload-form-location-presets">
-          {LOCATION_PRESETS.map((preset) => {
-            const isSelected = selectedPreset?.id === preset.id;
-
-            return (
-              <button
-                key={preset.id}
-                type="button"
-                className={`ghost-button upload-form-location-preset${isSelected ? ' is-selected' : ''}`}
-                onClick={() => handleUseLocationPreset(preset)}
-                disabled={isFetchingLocation || isUploading}
-              >
-                {preset.label}
-              </button>
-            );
-          })}
-        </div>
-        <p className="upload-form-hint">
-          If current location does not work, choose one of the saved coordinates
-          above.
-        </p>
         {locationInfo && (
           <p className="upload-form-hint">
             {locationInfo.formattedAddress ||
               `${locationInfo.city ?? ''}, ${locationInfo.state ?? ''}, ${locationInfo.country ?? ''}`}
           </p>
-        )}
-        {!locationInfo && locationSourceLabel && (
-          <p className="upload-form-hint">{locationSourceLabel}</p>
         )}
         {location && !locationInfo && (
           <p className="upload-form-hint">
