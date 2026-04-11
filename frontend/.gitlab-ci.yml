@@ -20,6 +20,7 @@ default:
 
 variables:
   CI: 'true'
+  GIT_CLEAN_FLAGS: none
   NPM_CONFIG_CACHE: '.npm'
 
 quality_checks:
