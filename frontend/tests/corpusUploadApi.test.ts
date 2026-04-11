@@ -332,6 +332,18 @@ describe('verifyLocation', () => {
     );
   });
 
+  test('throws error with detail text on failed response', async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 400,
+      text: async () => 'Invalid coordinates provided',
+    });
+
+    await expect(verifyLocation('token', 17.44, 78.35)).rejects.toThrow(
+      'Location verification failed: 400 Invalid coordinates provided'
+    );
+  });
+
   test('handles null fields gracefully', async () => {
     fetchMock.mockResolvedValue({
       ok: true,
