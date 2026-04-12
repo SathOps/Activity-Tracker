@@ -218,7 +218,7 @@ export function useRecorder(): UseRecorderResult {
       mediaRecorderRef.current = recorder;
       recordingStartRef.current = Date.now();
       setDurationSeconds(0);
-      recorder.start(500);
+      recorder.start();
       setIsRecording(true);
 
       intervalRef.current = window.setInterval(() => {
