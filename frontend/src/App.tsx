@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DashboardHome from './components/dashboard/DashboardHome';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import swechaBirdsIcon from '../images/swecha-birds-icon.png';
 import swechaDarkLogo from '../images/Swecha-lite.png';
 import swechaLightLogo from '../images/swecha-dark.png';
 import type { Team } from './components/dashboard/TeamList';
@@ -370,7 +371,11 @@ export default function App() {
       <div className="app-toolbar">
         <div className="app-branding">
           <div className="app-brand-mark" aria-hidden="true">
-            ST
+            <img
+              alt=""
+              className="app-brand-mark-image"
+              src={swechaBirdsIcon}
+            />
           </div>
           <div>
             <h1 className="app-brand-title">{t('app.title')}</h1>
