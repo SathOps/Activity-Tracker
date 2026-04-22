@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { configDefaults, defineConfig } from 'vite-plus';
 import { loadEnv } from 'vite-plus';
 
@@ -258,8 +259,10 @@ export default defineConfig({
         target: swechaApiBaseUrl,
         changeOrigin: true,
         secure: true,
-        configure: (proxy) => {
-          proxy.on('proxyReq', (proxyReq, req) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        configure: (proxy: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          proxy.on('proxyReq', (proxyReq: any, req: any) => {
             const requestAuthHeader = proxyReq.getHeader('authorization');
             const requestPath = req.url || '';
             const isAuthRoute = requestPath.startsWith('/api/v1/auth/');
