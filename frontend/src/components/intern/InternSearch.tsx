@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { buildCorpusApiUrl } from '../../services/corpus/apiUrl';
 
 const DEBOUNCE_MS = 300;
 
@@ -24,14 +25,16 @@ function readSearchField(value: unknown): string | null {
 }
 
 /**
- * Calls GET /api/v1/users/search?query=... via the Vite proxy.
+ * Calls the Corpus search endpoint using the configured runtime API base URL.
  * Includes Authorization header from logged-in user session.
  */
 async function searchUsersFromCorpus(
   query: string,
   authToken: string
 ): Promise<Intern[]> {
-  const url = `/api/v1/users/search?query=${encodeURIComponent(query)}`;
+  const url = buildCorpusApiUrl(
+    `/api/v1/users/search?query=${encodeURIComponent(query)}`
+  );
   const headers: Record<string, string> = {
     Accept: 'application/json',
   };

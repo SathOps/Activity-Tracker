@@ -12,6 +12,10 @@ import {
   getCurrentUser,
   type InternSummary,
 } from './services/corpus';
+import {
+  buildCorpusApiUrl,
+  getCorpusApiBaseUrl,
+} from './services/corpus/apiUrl';
 import { parseInternsCSV } from './utils/parseInternsCSV';
 import {
   buildPreloadedTeams,
@@ -26,11 +30,7 @@ const THEME_STORAGE_KEY = 'standup_theme_mode';
 type ThemeMode = 'light' | 'dark';
 
 const CORPUS_DEFAULT_BASE =
-  (
-    import.meta.env.VITE_SWECHA_API_BASE_URL ||
-    import.meta.env.SWECHA_API_BASE_URL ||
-    ''
-  ).trim() || 'https://api.corpus.swecha.org';
+  getCorpusApiBaseUrl() || 'https://api.corpus.swecha.org';
 
 export default function App() {
   const { t } = useTranslation();
@@ -219,7 +219,7 @@ export default function App() {
       let lastStatus = 0;
 
       for (const loginPhone of phoneCandidates) {
-        const response = await fetch('/api/v1/auth/login', {
+        const response = await fetch(buildCorpusApiUrl('/api/v1/auth/login'), {
           method: 'POST',
           headers: {
             Accept: 'application/json',

@@ -4,6 +4,7 @@ import type {
   CorpusUploadProgress,
   Category,
 } from '../types/corpusUpload';
+import { buildCorpusApiUrl } from './corpus/apiUrl';
 
 export const DEFAULT_CHUNK_SIZE_BYTES = 5 * 1024 * 1024;
 export const MAX_AUDIO_FILE_SIZE_BYTES = 10 * 1024 * 1024;
@@ -199,12 +200,15 @@ async function uploadChunk(params: UploadChunkParams): Promise<void> {
   const timeoutSignal = signal ? null : createTimeoutSignal(timeoutMs);
 
   try {
-    const response = await fetch('/api/v1/records/upload/chunk', {
-      method: 'POST',
-      headers: buildAuthHeaders(token),
-      body: chunkFormData,
-      signal: signal ?? timeoutSignal?.signal,
-    });
+    const response = await fetch(
+      buildCorpusApiUrl('/api/v1/records/upload/chunk'),
+      {
+        method: 'POST',
+        headers: buildAuthHeaders(token),
+        body: chunkFormData,
+        signal: signal ?? timeoutSignal?.signal,
+      }
+    );
 
     if (!response.ok) {
       const error = new Error(
@@ -345,12 +349,15 @@ export async function uploadAudioRecord(
     const timeoutSignal = createTimeoutSignal(timeoutMs);
 
     try {
-      const response = await fetch('/api/v1/records/upload', {
-        method: 'POST',
-        headers: buildAuthHeaders(token),
-        body: finalizePayload,
-        signal: timeoutSignal.signal,
-      });
+      const response = await fetch(
+        buildCorpusApiUrl('/api/v1/records/upload'),
+        {
+          method: 'POST',
+          headers: buildAuthHeaders(token),
+          body: finalizePayload,
+          signal: timeoutSignal.signal,
+        }
+      );
 
       if (!response.ok) {
         const error = new Error(
@@ -372,7 +379,7 @@ export async function uploadAudioRecord(
 }
 
 export async function fetchCategories(token: string): Promise<Category[]> {
-  const response = await fetch('/api/v1/categories/', {
+  const response = await fetch(buildCorpusApiUrl('/api/v1/categories/'), {
     headers: {
       ...buildAuthHeaders(token),
       Accept: 'application/json',
@@ -426,15 +433,18 @@ export async function verifyLocation(
   latitude: number,
   longitude: number
 ): Promise<LocationInfo> {
-  const response = await fetch('/api/v1/location/verify-location', {
-    method: 'POST',
-    headers: {
-      ...buildAuthHeaders(token),
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify({ latitude, longitude }),
-  });
+  const response = await fetch(
+    buildCorpusApiUrl('/api/v1/location/verify-location'),
+    {
+      method: 'POST',
+      headers: {
+        ...buildAuthHeaders(token),
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({ latitude, longitude }),
+    }
+  );
 
   if (!response.ok) {
     let errorDetail = '';
