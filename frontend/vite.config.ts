@@ -1,16 +1,29 @@
 /// <reference types="vitest" />
 import { configDefaults, defineConfig } from 'vite-plus';
 import { loadEnv } from 'vite-plus';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const mode = process.env.MODE || process.env.NODE_ENV || 'development';
 const env = loadEnv(mode, process.cwd(), '');
 const corpusToken = env.CORPUS_TOKEN || '';
+const rootDir = fileURLToPath(new URL('.', import.meta.url));
 const swechaApiBaseUrl =
   env.SWECHA_API_BASE_URL ||
   env.VITE_SWECHA_API_BASE_URL ||
   'https://api.corpus.swecha.org';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@tanstack/react-query': path.resolve(
+        rootDir,
+        'src/shims/react-query.ts'
+      ),
+      'lucide-react': path.resolve(rootDir, 'src/shims/lucide-react.tsx'),
+      'react-hot-toast': path.resolve(rootDir, 'src/shims/react-hot-toast.tsx'),
+    },
+  },
   staged: {
     '*': 'vp check --fix',
   },

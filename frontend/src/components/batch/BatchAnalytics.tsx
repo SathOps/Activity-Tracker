@@ -1,0 +1,227 @@
+import { useState, useRef } from 'react';
+import { Play, Upload, RotateCcw, FolderSearch } from 'lucide-react';
+import { useBatchStream } from '../../hooks/useBatchStream';
+import { resolveProjects } from '../../api';
+import { Alert } from '../ui/Alert';
+import { Accordion } from '../ui/Accordion';
+import { BatchProgress } from './BatchProgress';
+import { BatchTable } from './BatchTable';
+import type { BatchUserRow } from '../../types';
+
+export function BatchAnalytics() {
+  const [usernameText, setUsernameText] = useState('');
+  const [repoText, setRepoText] = useState('');
+  const [fileUsernames, setFileUsernames] = useState<string[]>([]);
+  const [repoError, setRepoError] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const stream = useBatchStream();
+
+  function collectUsernames(): string[] {
+    const fromText = usernameText
+      .split('\n')
+      .map((u) => u.trim())
+      .filter(Boolean);
+    return [...new Set([...fromText, ...fileUsernames])];
+  }
+
+  async function handleRun() {
+    const usernames = collectUsernames();
+    if (!usernames.length) return;
+
+    stream.reset();
+    setRepoError('');
+
+    const repoPaths = repoText
+      .split('\n')
+      .map((p) => p.trim())
+      .filter(Boolean);
+
+    // Resolve repo paths first if provided, then stream
+    if (repoPaths.length) {
+      const result = await resolveProjects(repoPaths);
+      if (result.failed.length)
+        setRepoError(`Could not resolve: ${result.failed.join(', ')}`);
+      stream.start(
+        usernames,
+        result.resolved.length ? result.resolved : undefined
+      );
+    } else {
+      stream.start(usernames);
+    }
+  }
+
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const result =
+        typeof ev.target?.result === 'string' ? ev.target.result : '';
+      const lines = result
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean);
+      setFileUsernames(lines);
+    };
+    reader.readAsText(file);
+  }
+
+  const allUsernames = collectUsernames();
+  const finalRows = stream.results
+    .filter((r) => r.username)
+    .map((r) => r as unknown as BatchUserRow);
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-slate-800">📊 Batch Analytics</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Comprehensive report: General Stats + Authored Issue Quality +
+          Authored MR Quality. Results stream in live as each user completes.
+        </p>
+      </div>
+
+      {/* Config */}
+      <Accordion title="🛠️ Configuration" defaultOpen>
+        <div className="space-y-4 pt-2">
+          <div className="grid grid-cols-2 gap-4">
+            {/* Username text area */}
+            <div>
+              <label
+                className="block mb-1.5 text-xs font-semibold text-slate-600"
+                htmlFor="batch-usernames"
+              >
+                ⌨️ Enter Usernames (one per line)
+              </label>
+              <textarea
+                id="batch-usernames"
+                value={usernameText}
+                onChange={(e) => setUsernameText(e.target.value)}
+                placeholder={'user1\nuser2\nuser3'}
+                rows={6}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-300 resize-y"
+              />
+            </div>
+
+            {/* File upload */}
+            <div>
+              <label
+                className="block mb-1.5 text-xs font-semibold text-slate-600"
+                htmlFor="batch-file"
+              >
+                📂 Upload Usernames (.txt)
+              </label>
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="flex flex-col items-center justify-center h-32 rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 cursor-pointer hover:border-brand-300 hover:bg-brand-50 transition-colors"
+              >
+                <Upload size={20} className="text-slate-300 mb-1" />
+                <p className="text-xs text-slate-400">
+                  Click to upload .txt file
+                </p>
+                {fileUsernames.length > 0 && (
+                  <p className="mt-1 text-xs text-brand-600 font-medium">
+                    {fileUsernames.length} users loaded
+                  </p>
+                )}
+              </button>
+              <input
+                id="batch-file"
+                ref={fileRef}
+                type="file"
+                accept=".txt"
+                className="hidden"
+                onChange={handleFileUpload}
+              />
+            </div>
+          </div>
+
+          {/* Repo filter */}
+          <div>
+            <label
+              className="block mb-1.5 text-xs font-semibold text-slate-600"
+              htmlFor="batch-repos"
+            >
+              <FolderSearch size={12} className="inline mr-1" />
+              Filter by Project Repos{' '}
+              <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <textarea
+              id="batch-repos"
+              value={repoText}
+              onChange={(e) => {
+                setRepoText(e.target.value);
+                setRepoError('');
+              }}
+              placeholder={
+                'tools/gitlab-compliance-checker\ngroup/another-repo'
+              }
+              rows={3}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-300 resize-y"
+            />
+            {repoError && (
+              <p className="mt-1 text-xs text-amber-600">⚠️ {repoError}</p>
+            )}
+          </div>
+        </div>
+      </Accordion>
+
+      {/* Action bar */}
+      <div className="my-4 flex items-center gap-3">
+        <button
+          onClick={handleRun}
+          disabled={stream.isRunning || allUsernames.length === 0}
+          className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50 transition-colors"
+        >
+          <Play size={15} />🚀 Run Unified Analysis
+          {allUsernames.length > 0 && (
+            <span className="rounded-full bg-brand-500 px-2 py-0.5 text-xs">
+              {allUsernames.length}
+            </span>
+          )}
+        </button>
+        {(stream.results.length > 0 || stream.error) && (
+          <button
+            onClick={stream.reset}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+          >
+            <RotateCcw size={14} /> Reset
+          </button>
+        )}
+      </div>
+
+      {/* Errors */}
+      {stream.error && (
+        <Alert variant="error" className="mb-4">
+          {stream.error}
+        </Alert>
+      )}
+
+      {/* Progress */}
+      {stream.isRunning && (
+        <div className="mb-4">
+          <BatchProgress
+            progress={stream.progress}
+            current={Math.round(stream.progress * stream.total)}
+            total={stream.total}
+            results={stream.results}
+          />
+        </div>
+      )}
+
+      {/* Results table */}
+      {finalRows.length > 0 && !stream.isRunning && (
+        <BatchTable rows={finalRows} />
+      )}
+
+      {/* In-progress preview table while streaming */}
+      {finalRows.length > 0 && stream.isRunning && (
+        <div className="opacity-60 pointer-events-none">
+          <BatchTable rows={finalRows} />
+        </div>
+      )}
+    </div>
+  );
+}

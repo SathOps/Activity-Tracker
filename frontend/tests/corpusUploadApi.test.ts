@@ -22,6 +22,8 @@ import {
   verifyLocation,
 } from '../src/services/corpusUploadApi.ts';
 
+const CORPUS_BASE_URL = 'https://api.corpus.swecha.org';
+
 describe('corpusUploadApi constants', () => {
   test('DEFAULT_CHUNK_SIZE_BYTES is 5MB', () => {
     expect(DEFAULT_CHUNK_SIZE_BYTES).toBe(5 * 1024 * 1024);
@@ -299,15 +301,18 @@ describe('verifyLocation', () => {
 
     await verifyLocation('token123', 17.44, 78.35);
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/location/verify-location', {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer token123',
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({ latitude: 17.44, longitude: 78.35 }),
-    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${CORPUS_BASE_URL}/api/v1/location/verify-location`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer token123',
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ latitude: 17.44, longitude: 78.35 }),
+      }
+    );
   });
 
   test('returns location info on success', async () => {
@@ -419,10 +424,10 @@ describe('uploadAudioRecord', () => {
 
   function mockSuccessfulUpload() {
     fetchMock.mockImplementation(async (url: string) => {
-      if (url === '/api/v1/records/upload/chunk') {
+      if (url === `${CORPUS_BASE_URL}/api/v1/records/upload/chunk`) {
         return { ok: true };
       }
-      if (url === '/api/v1/records/upload') {
+      if (url === `${CORPUS_BASE_URL}/api/v1/records/upload`) {
         return { ok: true };
       }
       return { ok: false, status: 404 };
@@ -496,14 +501,14 @@ describe('uploadAudioRecord', () => {
   test('retries failed chunks', async () => {
     let chunkAttempts = 0;
     fetchMock.mockImplementation(async (url: string) => {
-      if (url === '/api/v1/records/upload/chunk') {
+      if (url === `${CORPUS_BASE_URL}/api/v1/records/upload/chunk`) {
         chunkAttempts += 1;
         if (chunkAttempts === 1) {
           return { ok: false, status: 500 };
         }
         return { ok: true };
       }
-      if (url === '/api/v1/records/upload') {
+      if (url === `${CORPUS_BASE_URL}/api/v1/records/upload`) {
         return { ok: true };
       }
       return { ok: false, status: 404 };
@@ -571,10 +576,10 @@ describe('uploadAudioRecord', () => {
 
   test('throws on finalize failure', async () => {
     fetchMock.mockImplementation(async (url: string) => {
-      if (url === '/api/v1/records/upload/chunk') {
+      if (url === `${CORPUS_BASE_URL}/api/v1/records/upload/chunk`) {
         return { ok: true };
       }
-      if (url === '/api/v1/records/upload') {
+      if (url === `${CORPUS_BASE_URL}/api/v1/records/upload`) {
         return { ok: false, status: 500 };
       }
       return { ok: false, status: 404 };
@@ -657,7 +662,8 @@ describe('uploadAudioRecord', () => {
     });
 
     const finalizeCall = fetchMock.mock.calls.find(
-      (call: unknown[]) => (call[0] as string) === '/api/v1/records/upload'
+      (call: unknown[]) =>
+        (call[0] as string) === `${CORPUS_BASE_URL}/api/v1/records/upload`
     );
     expect(finalizeCall).toBeDefined();
   });
@@ -696,7 +702,7 @@ describe('uploadAudioRecord', () => {
 
     const chunkCall = fetchMock.mock.calls.find(
       (call: unknown[]) =>
-        (call[0] as string) === '/api/v1/records/upload/chunk'
+        (call[0] as string) === `${CORPUS_BASE_URL}/api/v1/records/upload/chunk`
     );
     expect(chunkCall).toBeDefined();
     expect((chunkCall?.[1] as RequestInit | undefined)?.signal).toBe(
@@ -704,7 +710,8 @@ describe('uploadAudioRecord', () => {
     );
 
     const finalizeCall = fetchMock.mock.calls.find(
-      (call: unknown[]) => (call[0] as string) === '/api/v1/records/upload'
+      (call: unknown[]) =>
+        (call[0] as string) === `${CORPUS_BASE_URL}/api/v1/records/upload`
     );
     expect(finalizeCall).toBeDefined();
     const finalizeBody = (finalizeCall?.[1] as RequestInit | undefined)
@@ -802,7 +809,8 @@ describe('uploadAudioRecord', () => {
     });
 
     const finalizeCall = fetchMock.mock.calls.find(
-      (call: unknown[]) => (call[0] as string) === '/api/v1/records/upload'
+      (call: unknown[]) =>
+        (call[0] as string) === `${CORPUS_BASE_URL}/api/v1/records/upload`
     );
     expect(finalizeCall).toBeDefined();
   });
@@ -834,7 +842,8 @@ describe('uploadAudioRecord', () => {
     });
 
     const finalizeCall = fetchMock.mock.calls.find(
-      (call: unknown[]) => (call[0] as string) === '/api/v1/records/upload'
+      (call: unknown[]) =>
+        (call[0] as string) === `${CORPUS_BASE_URL}/api/v1/records/upload`
     );
     expect(finalizeCall).toBeDefined();
   });
@@ -959,12 +968,15 @@ describe('fetchCategories', () => {
 
     await fetchCategories('my-token');
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/categories/', {
-      headers: {
-        Authorization: 'Bearer my-token',
-        Accept: 'application/json',
-      },
-    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${CORPUS_BASE_URL}/api/v1/categories/`,
+      {
+        headers: {
+          Authorization: 'Bearer my-token',
+          Accept: 'application/json',
+        },
+      }
+    );
   });
 
   test('handles categories with missing description', async () => {

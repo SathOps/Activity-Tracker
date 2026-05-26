@@ -1609,7 +1609,7 @@ function renderTeamHeatmap(
   noActivityLabel: string,
   scrollToViewMoreLabel: string,
   teamColumnLabel: string
-): JSX.Element {
+): React.ReactElement {
   const rows = teams.filter((team) => normalizeTeamId(team.teamId));
 
   if (rows.length === 0 || dateKeys.length === 0) {
