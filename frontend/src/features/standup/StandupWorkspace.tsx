@@ -1,17 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DashboardHome from '../../components/dashboard/DashboardHome';
-import LanguageSwitcher from '../../components/LanguageSwitcher';
-import swechaBirdsIcon from '../../../images/swecha-birds-icon.png';
-import swechaDarkLogo from '../../../images/Swecha-lite.png';
-import swechaLightLogo from '../../../images/swecha-dark.png';
 import type { Team } from '../../components/dashboard/TeamList';
 import type { Intern } from '../../components/intern/InternSearch';
-import {
-  configureCorpusService,
-  getCurrentUser,
-  type InternSummary,
-} from '../../services/corpus';
+import { configureCorpusService } from '../../services/corpus';
 import { getCorpusApiBaseUrl } from '../../services/corpus/apiUrl';
 import { useConfigStore } from '../../stores/configStore';
 import { parseInternsCSV } from '../../utils/parseInternsCSV';
@@ -21,25 +13,13 @@ import {
   parseTeamsCSV,
 } from '../../utils/parseTeamSeedCSV';
 
-const THEME_STORAGE_KEY = 'standup_theme_mode';
-
-type ThemeMode = 'light' | 'dark';
-
-const CORPUS_DEFAULT_BASE =
-  getCorpusApiBaseUrl() || 'https://api.corpus.swecha.org';
+const CORPUS_DEFAULT_BASE = getCorpusApiBaseUrl();
 
 export default function StandupWorkspace() {
   const { t } = useTranslation();
   const authToken = useConfigStore((state) => state.corpusToken);
-  const username = useConfigStore((state) => state.corpusUser);
-  const clearCorpusToken = useConfigStore((state) => state.clearCorpusToken);
   const [addedInterns, setAddedInterns] = useState<Intern[]>([]);
   const [preloadedTeams, setPreloadedTeams] = useState<Team[]>([]);
-  const [userProfile, setUserProfile] = useState<InternSummary | null>(null);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [themeMode, setThemeMode] = useState<ThemeMode>(() =>
-    readStoredThemeMode()
-  );
 
   useEffect(() => {
     configureCorpusService({
@@ -48,59 +28,6 @@ export default function StandupWorkspace() {
       authToken,
     });
   }, [authToken]);
-
-  useEffect(() => {
-    if (!authToken) {
-      setUserProfile(null);
-      return;
-    }
-
-    let isCancelled = false;
-    const fallbackId = username.trim();
-
-    const loadProfile = async () => {
-      try {
-        const profile = await getCurrentUser(fallbackId);
-        if (!isCancelled) {
-          setUserProfile(profile);
-        }
-      } catch (error) {
-        console.error('Failed to load profile details', error);
-        if (!isCancelled) {
-          setUserProfile(null);
-        }
-      }
-    };
-
-    void loadProfile();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [authToken, username]);
-
-  const profileDisplayName = useMemo(
-    () => userProfile?.name || userProfile?.username || username.trim() || '',
-    [userProfile, username]
-  );
-
-  const profileInitial = useMemo(() => {
-    const trimmed = profileDisplayName.trim();
-    return trimmed ? trimmed.charAt(0).toUpperCase() : 'U';
-  }, [profileDisplayName]);
-
-  useEffect(() => {
-    persistThemeMode(themeMode);
-
-    if (typeof document === 'undefined') {
-      return;
-    }
-
-    document.documentElement.setAttribute('data-theme', themeMode);
-  }, [themeMode]);
-
-  const swechaLogoSrc = themeMode === 'dark' ? swechaDarkLogo : swechaLightLogo;
-  const currentYear = new Date().getFullYear();
 
   // Preload interns and team seed data from CSV on login success
   useEffect(() => {
@@ -180,159 +107,42 @@ export default function StandupWorkspace() {
     setAddedInterns((prev) => prev.filter((i) => i.id !== internId));
   };
 
-  const handleLogout = () => {
-    clearCorpusToken();
-    setAddedInterns([]);
-    setPreloadedTeams([]);
-    setIsProfileMenuOpen(false);
-    setUserProfile(null);
-  };
-
-  useEffect(() => {
-    if (!isProfileMenuOpen) {
-      return;
-    }
-
-    const handleDocumentClick = (event: MouseEvent) => {
-      if (
-        event.target instanceof Element &&
-        event.target.closest('.profile-menu-container')
-      ) {
-        return;
-      }
-
-      setIsProfileMenuOpen(false);
-    };
-
-    document.addEventListener('click', handleDocumentClick);
-    return () => {
-      document.removeEventListener('click', handleDocumentClick);
-    };
-  }, [isProfileMenuOpen]);
-
   if (!authToken) {
     return (
-      <main className="auth-shell">
-        <section className="auth-stage">
-          <section className="auth-intro-panel">
-            <p className="auth-kicker">{t('app.title')}</p>
-            <h1 className="auth-intro-title">{t('auth.introTitle')}</h1>
-            <p className="auth-intro-copy">{t('auth.introCopy')}</p>
-            <ul
-              className="auth-intro-points"
-              aria-label={t('auth.highlightsAria')}
-            >
-              <li>{t('auth.highlight1')}</li>
-              <li>{t('auth.highlight2')}</li>
-              <li>{t('auth.highlight3')}</li>
-            </ul>
-          </section>
-
-          <section className="auth-card">
-            <h2 className="auth-title">{t('auth.loginTitle')}</h2>
-            <p className="auth-subtitle">
+      <section className="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="max-w-3xl space-y-4">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+            Standup Access
+          </p>
+          <h2 className="text-3xl font-bold text-slate-900">
+            {t('auth.introTitle')}
+          </h2>
+          <p className="text-base leading-7 text-slate-600">
+            {t('auth.introCopy')}
+          </p>
+          <p className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+            {t('auth.loginTitle')}.{' '}
+            <span className="font-medium">
               Use the Corpus Login section in the sidebar to open the dashboard.
-            </p>
-          </section>
-        </section>
-      </main>
+            </span>
+          </p>
+        </div>
+      </section>
     );
   }
 
   return (
-    <div className="app-shell">
-      <div className="app-toolbar">
-        <div className="app-branding">
-          <div className="app-brand-mark" aria-hidden="true">
-            <img
-              alt=""
-              className="app-brand-mark-image"
-              src={swechaBirdsIcon}
-            />
-          </div>
-          <div>
-            <h1 className="app-brand-title">{t('app.title')}</h1>
-          </div>
-        </div>
-
-        <div className="app-toolbar-center" aria-label={t('app.swecha')}>
-          <img
-            alt={t('app.swecha')}
-            className="swecha-logo-image"
-            src={swechaLogoSrc}
-          />
-        </div>
-
-        <div className="profile-menu-container">
-          <LanguageSwitcher />
-          <button
-            aria-label={t('theme.switchMode', {
-              mode: themeMode === 'dark' ? t('theme.light') : t('theme.dark'),
-            })}
-            className="theme-toggle-button"
-            onClick={() =>
-              setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'))
-            }
-            type="button"
-          >
-            <span aria-hidden="true" className="theme-toggle-icon">
-              {themeMode === 'dark' ? '☀' : '☾'}
-            </span>
-          </button>
-
-          <button
-            aria-label={t('profile.openMenu')}
-            className="profile-icon-button"
-            onClick={(event) => {
-              event.stopPropagation();
-              setIsProfileMenuOpen((prev) => !prev);
-            }}
-            type="button"
-          >
-            <span aria-hidden="true" className="profile-avatar-icon">
-              {profileInitial}
-            </span>
-          </button>
-
-          {isProfileMenuOpen ? (
-            <div
-              className="profile-menu-dropdown profile-menu-card"
-              role="dialog"
-            >
-              <div className="profile-card-top">
-                <span className="profile-card-avatar">{profileInitial}</span>
-                <div>
-                  <div className="profile-card-name">{profileDisplayName}</div>
-                  <div className="profile-card-username">
-                    {userProfile?.username
-                      ? `@${userProfile.username}`
-                      : username
-                        ? `@${username.trim()}`
-                        : t('common.unavailable')}
-                  </div>
-                </div>
-              </div>
-              <div className="profile-card-body">
-                <div className="profile-card-row">
-                  <span className="profile-card-label">
-                    {t('profile.phoneLabel')}
-                  </span>
-                  <span className="profile-card-value">
-                    {userProfile?.phone ?? username ?? t('common.unavailable')}
-                  </span>
-                </div>
-              </div>
-              <div className="profile-card-footer">
-                <button
-                  className="secondary-button profile-menu-logout"
-                  onClick={handleLogout}
-                  type="button"
-                >
-                  {t('auth.logout')}
-                </button>
-              </div>
-            </div>
-          ) : null}
+    <section className="space-y-6">
+      <div className="rounded-lg border border-slate-200 bg-white px-6 py-5 shadow-sm">
+        <div className="space-y-2">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+            Standup Operations
+          </p>
+          <h2 className="text-xl font-bold text-slate-900">{t('app.title')}</h2>
+          <p className="max-w-3xl text-sm leading-6 text-slate-500">
+            Review submission progress, verify team completion, and manage daily
+            standup activity from the same shared workspace.
+          </p>
         </div>
       </div>
       <DashboardHome
@@ -342,34 +152,8 @@ export default function StandupWorkspace() {
         onRemoveIntern={handleRemoveIntern}
         preloadedTeams={preloadedTeams}
       />
-
-      <footer className="app-footer">
-        Swecha {currentYear} © All Rights Reserved.
-      </footer>
-    </div>
+    </section>
   );
-}
-
-function readStoredThemeMode(): ThemeMode {
-  if (typeof window === 'undefined') {
-    return 'dark';
-  }
-
-  const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-
-  if (stored === 'dark' || stored === 'light') {
-    return stored;
-  }
-
-  return 'dark';
-}
-
-function persistThemeMode(mode: ThemeMode): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  window.localStorage.setItem(THEME_STORAGE_KEY, mode);
 }
 
 async function fetchCsvText(

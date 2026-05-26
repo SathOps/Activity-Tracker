@@ -1,3 +1,5 @@
+import { CorpusLoginPage } from './components/auth/CorpusLoginPage';
+import { GitComplianceWorkspace } from './components/compliance/GitComplianceWorkspace';
 import { Layout } from './components/layout/Layout';
 import { UserProfile } from './components/profile/UserProfile';
 import { BatchAnalytics } from './components/batch/BatchAnalytics';
@@ -11,9 +13,19 @@ import { Toaster } from 'react-hot-toast';
 function PageRouter() {
   const activeMode = useConfigStore((state) => state.activeMode);
 
+  if (activeMode !== 'standup') {
+    return (
+      <GitComplianceWorkspace>
+        <ComplianceRoutes activeMode={activeMode} />
+      </GitComplianceWorkspace>
+    );
+  }
+
+  return <StandupWorkspace />;
+}
+
+function ComplianceRoutes({ activeMode }: { activeMode: string }) {
   switch (activeMode) {
-    case 'standup':
-      return <StandupWorkspace />;
     case 'profile':
       return <UserProfile />;
     case 'batch':
@@ -25,16 +37,22 @@ function PageRouter() {
     case 'roster':
       return <RosterManagement />;
     default:
-      return <StandupWorkspace />;
+      return <UserProfile />;
   }
 }
 
 export default function App() {
+  const corpusToken = useConfigStore((state) => state.corpusToken);
+
   return (
     <>
-      <Layout>
-        <PageRouter />
-      </Layout>
+      {corpusToken ? (
+        <Layout>
+          <PageRouter />
+        </Layout>
+      ) : (
+        <CorpusLoginPage />
+      )}
       <Toaster />
     </>
   );
