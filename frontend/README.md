@@ -85,7 +85,7 @@ The app communicates with Corpus APIs in real time, keeping all state in-memory 
 - Custom audio player with play/pause, 10s skip forward/back, and seek bar.
 - **Record Standup Modal**: browser `MediaRecorder` with start/pause/resume/stop/cancel.
 - **Upload form**: title, description, language selector (23 Indian languages), location (device GPS or presets for Swecha/IIIT Hyderabad), category display.
-- **Chunked upload** with retry, exponential backoff, and progress tracking (5MB chunks, 10MB max file size, 10s minimum duration).
+- **Chunked upload** with retry, exponential backoff, and progress tracking (5MB chunks, 1GB max file size, 10s minimum duration).
 
 ### Internationalization (i18n)
 

@@ -248,7 +248,7 @@
   "upload.fetchingLocation": "స్థానం తెస్తోంది...",
   "upload.audioDuration": "ఆడియో నిడివి: {{seconds}}సె",
   "upload.tooShort": "ఆడియో 10 సెకన్ల కంటే ఎక్కువ ఉండాలి.",
-  "upload.tooLarge": "ఆడియో ఫైల్ 10MB పరిమితిని మించింది. దయచేసి చిన్న క్లిప్ రికార్డ్ చేయండి.",
+  "upload.tooLarge": "ఆడియో ఫైల్ 1GB పరిమితిని మించింది. దయచేసి చిన్న క్లిప్‌ను అప్లోడ్ చేయండి.",
   "upload.uploadingChunks": "అప్‌లోడ్ చేస్తోంది: {{uploaded}}/{{total}} ({{percentage}}%)",
   "upload.finalizing": "అప్‌లోడ్ పూర్తి చేస్తోంది...",
   "upload.uploadAudio": "ఆడియో అప్‌లోడ్ చేయండి",

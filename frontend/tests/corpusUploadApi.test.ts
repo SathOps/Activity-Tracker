@@ -27,8 +27,8 @@ describe('corpusUploadApi constants', () => {
     expect(DEFAULT_CHUNK_SIZE_BYTES).toBe(5 * 1024 * 1024);
   });
 
-  test('MAX_AUDIO_FILE_SIZE_BYTES is 10MB', () => {
-    expect(MAX_AUDIO_FILE_SIZE_BYTES).toBe(10 * 1024 * 1024);
+  test('MAX_AUDIO_FILE_SIZE_BYTES is 1GB', () => {
+    expect(MAX_AUDIO_FILE_SIZE_BYTES).toBe(1024 * 1024 * 1024);
   });
 
   test('MIN_RECORDING_DURATION_SECONDS is 10', () => {

@@ -7,7 +7,7 @@ import type {
 import { buildCorpusApiUrl } from './corpus/apiUrl';
 
 export const DEFAULT_CHUNK_SIZE_BYTES = 5 * 1024 * 1024;
-export const MAX_AUDIO_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+export const MAX_AUDIO_FILE_SIZE_BYTES = 1024 * 1024 * 1024;
 export const MIN_RECORDING_DURATION_SECONDS = 10;
 export const MAX_UPLOAD_RETRIES = 3;
 export const DEFAULT_BACKOFF_MS = 400;
@@ -120,7 +120,8 @@ export function classifyCorpusApiError(error: unknown): CorpusUploadError {
     if (status === 413) {
       return {
         type: 'file-size',
-        message: 'Audio file is too large. Please record a shorter clip.',
+        message:
+          'Audio file exceeds the 1GB limit. Please upload a smaller clip.',
         statusCode: status,
       };
     }

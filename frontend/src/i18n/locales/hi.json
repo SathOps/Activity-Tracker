@@ -248,7 +248,7 @@
   "upload.fetchingLocation": "स्थान लाया जा रहा है...",
   "upload.audioDuration": "ऑडियो अवधि: {{seconds}}से",
   "upload.tooShort": "ऑडियो 10 सेकंड से लंबा होना चाहिए।",
-  "upload.tooLarge": "ऑडियो फ़ाइल 10MB सीमा से अधिक है। कृपया छोटी क्लिप रिकॉर्ड करें।",
+  "upload.tooLarge": "ऑडियो फ़ाइल 1GB सीमा से अधिक है। कृपया छोटी क्लिप अपलोड करें।",
   "upload.uploadingChunks": "अपलोड हो रहा है: {{uploaded}}/{{total}} ({{percentage}}%)",
   "upload.finalizing": "अपलोड अंतिम रूप दिया जा रहा है...",
   "upload.uploadAudio": "ऑडियो अपलोड करें",

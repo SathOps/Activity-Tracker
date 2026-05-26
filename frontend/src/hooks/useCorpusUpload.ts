@@ -70,10 +70,10 @@ export function useCorpusUpload(
       setUploadStep('error');
       setUploadErrorType('file-size');
       setUploadError(
-        'Audio file exceeds 10MB limit. Please record a shorter clip.'
+        'Audio file exceeds the 1GB limit. Please upload a smaller clip.'
       );
       throw new Error(
-        'Audio file exceeds 10MB limit. Please record a shorter clip.'
+        'Audio file exceeds the 1GB limit. Please upload a smaller clip.'
       );
     }
 

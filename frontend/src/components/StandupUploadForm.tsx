@@ -296,7 +296,7 @@ export function StandupUploadForm({
 
     if (audioBlob.size > MAX_AUDIO_FILE_SIZE_BYTES) {
       setErrorMessage(
-        'Audio file exceeds 10MB limit. Please record a shorter clip.'
+        'Audio file exceeds the 1GB limit. Please upload a smaller clip.'
       );
       return;
     }

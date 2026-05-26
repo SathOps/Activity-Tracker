@@ -248,7 +248,7 @@
   "upload.fetchingLocation": "Fetching Location...",
   "upload.audioDuration": "Audio duration: {{seconds}}s",
   "upload.tooShort": "Audio must be longer than 10 seconds.",
-  "upload.tooLarge": "Audio file exceeds 10MB limit. Please record a shorter clip.",
+  "upload.tooLarge": "Audio file exceeds the 1GB limit. Please upload a smaller clip.",
   "upload.uploadingChunks": "Uploading: {{uploaded}}/{{total}} ({{percentage}}%)",
   "upload.finalizing": "Finalizing upload...",
   "upload.uploadAudio": "Upload Audio",
