@@ -376,7 +376,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                   />
 
                   {state.showDropdown ? (
-                    <ul className="intern-dropdown" role="listbox">
+                    <ul className="intern-dropdown">
                       {addedInterns.length === 0 ? (
                         <li className="intern-dropdown-empty">
                           {t('interns.noInternsAvailable')}
@@ -389,9 +389,6 @@ export const TeamList: React.FC<TeamListProps> = ({
                         filtered.map((intern) => (
                           <li
                             key={intern.id}
-                            role="option"
-                            aria-selected={state.selectedInternId === intern.id}
-                            aria-disabled={intern.alreadyInTeam}
                             className={`intern-dropdown-item${intern.alreadyInTeam ? ' disabled' : ''}`}
                             tabIndex={intern.alreadyInTeam ? -1 : 0}
                             onMouseDown={(event) => {
