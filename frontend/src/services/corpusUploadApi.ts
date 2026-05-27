@@ -4,7 +4,7 @@ import type {
   CorpusUploadProgress,
   Category,
 } from '../types/corpusUpload';
-import { buildCorpusApiUrl } from './corpus/apiUrl';
+import { getCorpusRuntimeBaseUrl } from '../api';
 
 export const DEFAULT_CHUNK_SIZE_BYTES = 5 * 1024 * 1024;
 export const MAX_AUDIO_FILE_SIZE_BYTES = 1024 * 1024 * 1024;
@@ -50,10 +50,9 @@ export interface UploadRecordParams {
   signal?: AbortSignal;
 }
 
-function buildAuthHeaders(token: string): Record<string, string> {
-  return {
-    Authorization: `Bearer ${token}`,
-  };
+function buildCorpusProxyUrl(path: string): string {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${getCorpusRuntimeBaseUrl()}/corpus${normalizedPath}`;
 }
 
 function toPrimitiveString(value: unknown): string {
@@ -190,6 +189,7 @@ async function uploadChunk(params: UploadChunkParams): Promise<void> {
     timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
     signal,
   } = params;
+  void token;
 
   const chunkFormData = new FormData();
   chunkFormData.append('chunk', chunk, filename);
@@ -201,15 +201,12 @@ async function uploadChunk(params: UploadChunkParams): Promise<void> {
   const timeoutSignal = signal ? null : createTimeoutSignal(timeoutMs);
 
   try {
-    const response = await fetch(
-      buildCorpusApiUrl('/api/v1/records/upload/chunk'),
-      {
-        method: 'POST',
-        headers: buildAuthHeaders(token),
-        body: chunkFormData,
-        signal: signal ?? timeoutSignal?.signal,
-      }
-    );
+    const response = await fetch(buildCorpusProxyUrl('/records/upload/chunk'), {
+      method: 'POST',
+      credentials: 'include',
+      body: chunkFormData,
+      signal: signal ?? timeoutSignal?.signal,
+    });
 
     if (!response.ok) {
       const error = new Error(
@@ -350,15 +347,12 @@ export async function uploadAudioRecord(
     const timeoutSignal = createTimeoutSignal(timeoutMs);
 
     try {
-      const response = await fetch(
-        buildCorpusApiUrl('/api/v1/records/upload'),
-        {
-          method: 'POST',
-          headers: buildAuthHeaders(token),
-          body: finalizePayload,
-          signal: timeoutSignal.signal,
-        }
-      );
+      const response = await fetch(buildCorpusProxyUrl('/records/upload'), {
+        method: 'POST',
+        credentials: 'include',
+        body: finalizePayload,
+        signal: timeoutSignal.signal,
+      });
 
       if (!response.ok) {
         const error = new Error(
@@ -380,12 +374,16 @@ export async function uploadAudioRecord(
 }
 
 export async function fetchCategories(token: string): Promise<Category[]> {
-  const response = await fetch(buildCorpusApiUrl('/api/v1/categories/'), {
-    headers: {
-      ...buildAuthHeaders(token),
-      Accept: 'application/json',
-    },
-  });
+  void token;
+  const response = await fetch(
+    `${getCorpusRuntimeBaseUrl()}/corpus/proxy/api/v1/categories/`,
+    {
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+      },
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`Failed to fetch categories: ${response.status}`);
@@ -434,12 +432,13 @@ export async function verifyLocation(
   latitude: number,
   longitude: number
 ): Promise<LocationInfo> {
+  void token;
   const response = await fetch(
-    buildCorpusApiUrl('/api/v1/location/verify-location'),
+    buildCorpusProxyUrl('/location/verify-location'),
     {
       method: 'POST',
+      credentials: 'include',
       headers: {
-        ...buildAuthHeaders(token),
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },

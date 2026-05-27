@@ -1,5 +1,5 @@
 /**
- * useHealth — validates the GitLab token by calling GET /api/health.
+ * useHealth — validates the server-side GitLab session by calling GET /api/health.
  * Re-runs automatically whenever the token or URL changes.
  *
  * Also syncs the user's role (admin | intern | mentor) from the health
@@ -12,11 +12,10 @@ import { useConfigStore } from '../stores/configStore';
 import { useEffect } from 'react';
 
 export function useHealth() {
-  const { gitlabToken, gitlabUrl, setIsAuthenticated, setUserRole } =
-    useConfigStore();
+  const { gitlabToken, setIsAuthenticated, setUserRole } = useConfigStore();
 
   const query = useQuery({
-    queryKey: ['health', gitlabUrl, gitlabToken],
+    queryKey: ['health', gitlabToken],
     queryFn: checkHealth,
     enabled: !!gitlabToken.trim(),
     retry: false,

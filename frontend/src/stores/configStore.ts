@@ -102,6 +102,8 @@ function persistState(): void {
     activeMode: stateFields.activeMode,
     userRole: stateFields.userRole,
     isAuthenticated: stateFields.isAuthenticated,
+    corpusToken: stateFields.corpusToken,
+    corpusUser: stateFields.corpusUser,
   };
 
   window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(persisted));

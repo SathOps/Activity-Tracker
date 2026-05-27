@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { buildCorpusApiUrl } from '../../services/corpus/apiUrl';
+import { getCorpusRuntimeBaseUrl } from '../../api';
 
 const DEBOUNCE_MS = 300;
 
@@ -25,27 +25,22 @@ function readSearchField(value: unknown): string | null {
 }
 
 /**
- * Calls the Corpus search endpoint using the configured runtime API base URL.
- * Includes Authorization header from logged-in user session.
+ * Calls Corpus through the backend session proxy.
  */
 async function searchUsersFromCorpus(
   query: string,
-  authToken: string
+  _authToken: string
 ): Promise<Intern[]> {
-  const url = buildCorpusApiUrl(
-    `/api/v1/users/search?query=${encodeURIComponent(query)}`
+  const url = new URL(
+    `${getCorpusRuntimeBaseUrl()}/corpus/proxy/api/v1/users/search`,
+    window.location.origin
   );
-  const headers: Record<string, string> = {
-    Accept: 'application/json',
-  };
+  url.searchParams.set('query', query);
 
-  if (authToken) {
-    headers.Authorization = `Bearer ${authToken}`;
-  }
-
-  const response = await fetch(url, {
+  const response = await fetch(url.toString(), {
     method: 'GET',
-    headers,
+    headers: { Accept: 'application/json' },
+    credentials: 'include',
   });
 
   if (!response.ok) {

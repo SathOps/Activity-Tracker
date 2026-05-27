@@ -13,6 +13,7 @@ import {
 import { useState } from 'react';
 import { useConfigStore } from '../../stores/configStore';
 import { useHealth } from '../../hooks/useHealth';
+import { corpusLogout, storeGitlabToken } from '../../api';
 import { cn } from '../../lib/utils';
 import type { AppMode, UserRole } from '../../types';
 
@@ -95,12 +96,47 @@ export function Sidebar() {
 
   const { data: health, isLoading, refetch } = useHealth();
   const [showToken, setShowToken] = useState(false);
+  const [gitlabTokenInput, setGitlabTokenInput] = useState('');
+  const [gitlabError, setGitlabError] = useState<string | null>(null);
+  const [gitlabSubmitting, setGitlabSubmitting] = useState(false);
 
   const authenticated = !!health;
   const isComplianceMode = activeMode !== 'standup';
   const visibleComplianceModes = COMPLIANCE_MODES.filter((mode) =>
     mode.roles.includes(userRole)
   );
+
+  async function handleCorpusLogout() {
+    await corpusLogout().catch(() => undefined);
+    clearCorpusToken();
+    setGitlabToken('');
+  }
+
+  async function handleGitlabSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!gitlabTokenInput.trim()) return;
+    setGitlabSubmitting(true);
+    setGitlabError(null);
+    try {
+      const result = await storeGitlabToken(gitlabTokenInput.trim(), gitlabUrl);
+      setGitlabToken('session');
+      setUserRoleFromHealth(result.role);
+      setGitlabTokenInput('');
+      await refetch();
+    } catch (caught) {
+      setGitlabToken('');
+      setGitlabError(
+        caught instanceof Error ? caught.message : 'GitLab validation failed'
+      );
+    } finally {
+      setGitlabSubmitting(false);
+    }
+  }
+
+  function setUserRoleFromHealth(role: UserRole) {
+    useConfigStore.getState().setUserRole(role);
+    useConfigStore.getState().setIsAuthenticated(true);
+  }
 
   return (
     <aside className="flex h-screen w-64 flex-shrink-0 flex-col border-r border-slate-200 bg-white">
@@ -131,7 +167,7 @@ export function Sidebar() {
                 </p>
               </div>
               <button
-                onClick={clearCorpusToken}
+                onClick={() => void handleCorpusLogout()}
                 className="text-indigo-500 hover:text-indigo-700"
                 title="Logout from Corpus"
               >
@@ -212,49 +248,65 @@ export function Sidebar() {
               </p>
 
               {/* GitLab URL */}
-              <div className="mb-3">
-                <label
-                  className="block mb-1 text-xs font-medium text-slate-600"
-                  htmlFor="gitlab-url"
-                >
-                  GitLab URL
-                </label>
-                <input
-                  id="gitlab-url"
-                  type="url"
-                  value={gitlabUrl}
-                  onChange={(e) => setGitlabUrl(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                  placeholder="https://code.swecha.org"
-                />
-              </div>
-
-              {/* GitLab Token */}
-              <div className="mb-3">
-                <label
-                  className="block mb-1 text-xs font-medium text-slate-600"
-                  htmlFor="gitlab-token"
-                >
-                  GitLab Token
-                </label>
-                <div className="relative">
-                  <input
-                    id="gitlab-token"
-                    type={showToken ? 'text' : 'password'}
-                    value={gitlabToken}
-                    onChange={(e) => setGitlabToken(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-1.5 pr-8 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    placeholder="glpat-xxxxxxxxxxxx"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowToken(!showToken)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              <form className="space-y-3" onSubmit={handleGitlabSubmit}>
+                <div>
+                  <label
+                    className="block mb-1 text-xs font-medium text-slate-600"
+                    htmlFor="gitlab-url"
                   >
-                    {showToken ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
+                    GitLab URL
+                  </label>
+                  <input
+                    id="gitlab-url"
+                    type="url"
+                    value={gitlabUrl}
+                    onChange={(e) => setGitlabUrl(e.target.value)}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    placeholder="https://code.swecha.org"
+                  />
                 </div>
-              </div>
+
+                {/* GitLab Token */}
+                <div className="mb-3">
+                  <label
+                    className="block mb-1 text-xs font-medium text-slate-600"
+                    htmlFor="gitlab-token"
+                  >
+                    GitLab Token
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="gitlab-token"
+                      type={showToken ? 'text' : 'password'}
+                      value={gitlabTokenInput}
+                      onChange={(e) => setGitlabTokenInput(e.target.value)}
+                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 pr-8 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      placeholder="glpat-xxxxxxxxxxxx"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowToken(!showToken)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      {showToken ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                  </div>
+                </div>
+
+                {gitlabError && (
+                  <p className="rounded bg-red-50 px-2 py-1 text-[10px] text-red-600">
+                    {gitlabError}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={!gitlabTokenInput.trim() || gitlabSubmitting}
+                  className="w-full rounded bg-blue-600 px-2 py-1.5 text-[11px] font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                >
+                  {gitlabSubmitting ? 'Connecting…' : 'Connect GitLab'}
+                </button>
+              </form>
 
               {/* Auth status + role badge */}
               <div
@@ -281,7 +333,7 @@ export function Sidebar() {
                     : isLoading
                       ? 'Verifying…'
                       : gitlabToken
-                        ? 'Invalid token'
+                        ? 'Not verified'
                         : 'Not connected'}
                 </span>
                 <span className="flex items-center gap-1.5">

@@ -21,6 +21,7 @@ interface FetchRequestInit {
   method?: string;
   headers?: Record<string, string>;
   body?: string;
+  credentials?: RequestCredentials;
   cache?:
     | 'default'
     | 'force-cache'
@@ -254,6 +255,7 @@ async function requestCorpusApi(path: string): Promise<unknown> {
   const requestUrl = baseUrl ? `${baseUrl}${path}` : path;
   const response = await fetcher(requestUrl, {
     cache: 'no-store',
+    credentials: 'include',
     method: 'GET',
     headers,
   });

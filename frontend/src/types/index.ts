@@ -237,21 +237,32 @@ export interface BatchRecord {
 export interface TeamRecord {
   id: number;
   name: string;
+  batch_id?: number;
   batch_name: string;
+  start_date?: string;
+  end_date?: string;
+  is_active?: boolean;
   member_count: number;
+  created_by?: number | null;
 }
 
 export interface MemberRecord {
   id: number;
   name: string;
-  gitlab_username: string;
+  corpus_username: string;
+  email?: string;
+  institution_id?: string;
+  institution_name?: string;
+  gitlab_username?: string;
   gitlab_email?: string;
-  corpus_username?: string;
+  role?: UserRole;
   global_username?: string;
   global_email?: string;
   date_of_joining?: string;
   college_name?: string;
+  team_id?: number | null;
   team_name: string;
+  batch_id?: number | null;
   batch_name?: string;
 }
 

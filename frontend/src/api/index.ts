@@ -1,12 +1,9 @@
-import {
-  buildCorpusApiUrl,
-  getCorpusApiBaseUrl,
-} from '../services/corpus/apiUrl';
 import { useConfigStore } from '../stores/configStore';
 import type {
   BatchRecord,
   HealthResponse,
   MemberRecord,
+  TeamRecord,
   Team,
   TeamResult,
   UserProfileData,
@@ -24,17 +21,13 @@ function buildApiUrl(path: string): string {
 }
 
 function buildHeaders(): HeadersInit {
-  const { gitlabToken, gitlabUrl } = useConfigStore.getState();
+  const { gitlabUrl } = useConfigStore.getState();
   const headers: Record<string, string> = {
     Accept: 'application/json',
   };
 
   if (gitlabUrl) {
     headers['x-gitlab-url'] = gitlabUrl;
-  }
-
-  if (gitlabToken) {
-    headers['x-gitlab-token'] = gitlabToken;
   }
 
   return headers;
@@ -61,6 +54,7 @@ async function parseJson<T>(response: Response): Promise<T> {
 async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(buildApiUrl(path), {
     headers: buildHeaders(),
+    credentials: 'include',
   });
   return parseJson<T>(response);
 }
@@ -72,6 +66,7 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
       ...(buildHeaders() as Record<string, string>),
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify(body),
   });
   return parseJson<T>(response);
@@ -81,6 +76,7 @@ async function deleteJson(path: string): Promise<void> {
   const response = await fetch(buildApiUrl(path), {
     method: 'DELETE',
     headers: buildHeaders(),
+    credentials: 'include',
   });
   await parseJson<unknown>(response);
 }
@@ -122,12 +118,13 @@ export async function corpusLogin(
 
   for (const candidate of candidates) {
     try {
-      const response = await fetch(buildCorpusApiUrl('/api/v1/auth/login'), {
+      const response = await fetch(buildApiUrl('/corpus/login'), {
         method: 'POST',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           phone: candidate,
           password,
@@ -153,6 +150,20 @@ export async function corpusLogin(
   }
 
   throw new Error(lastError);
+}
+
+export async function corpusLogout(): Promise<void> {
+  await postJson('/corpus/logout', {});
+}
+
+export async function storeGitlabToken(
+  token: string,
+  gitlabUrl: string
+): Promise<HealthResponse> {
+  return postJson<HealthResponse>('/auth/gitlab-token', {
+    token,
+    gitlab_url: gitlabUrl,
+  });
 }
 
 export async function getUserProfile(
@@ -209,6 +220,20 @@ export async function getMembers(): Promise<MemberRecord[]> {
   return payload.members;
 }
 
+export async function getRosterTeams(
+  activeOnly = false
+): Promise<TeamRecord[]> {
+  const params = new URLSearchParams();
+  if (activeOnly) {
+    params.set('active_only', 'true');
+  }
+  const query = params.toString();
+  const payload = await getJson<{ teams: TeamRecord[] }>(
+    `/roster/teams${query ? `?${query}` : ''}`
+  );
+  return payload.teams;
+}
+
 export async function deleteMember(memberId: number): Promise<void> {
   return deleteJson(`/roster/members/${memberId}`);
 }
@@ -222,6 +247,7 @@ export async function bulkImportMembers(
   const response = await fetch(buildApiUrl(`/roster/import/${batchId}`), {
     method: 'POST',
     headers: buildHeaders(),
+    credentials: 'include',
     body: form,
   });
   return parseJson(response);
@@ -294,5 +320,5 @@ export function buildBatchStreamUrl(
 }
 
 export function getCorpusRuntimeBaseUrl(): string {
-  return getCorpusApiBaseUrl();
+  return getApiBaseUrl();
 }

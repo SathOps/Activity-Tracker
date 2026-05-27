@@ -48,7 +48,7 @@ const INITIAL: StreamState = {
 export function useBatchStream(): UseBatchStreamReturn {
   const [state, setState] = useState<StreamState>(INITIAL);
   const abortRef = useRef<AbortController | null>(null);
-  const { gitlabUrl, gitlabToken } = useConfigStore();
+  const { gitlabUrl } = useConfigStore();
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
@@ -85,9 +85,9 @@ export function useBatchStream(): UseBatchStreamReturn {
           buildBatchStreamUrl(usernames, projectIds, since, until),
           {
             signal: ctrl.signal,
+            credentials: 'include',
             headers: {
               'x-gitlab-url': gitlabUrl,
-              'x-gitlab-token': gitlabToken,
             },
           }
         );
@@ -156,7 +156,7 @@ export function useBatchStream(): UseBatchStreamReturn {
         }));
       }
     },
-    [gitlabUrl, gitlabToken]
+    [gitlabUrl]
   );
 
   return { ...state, start, reset };

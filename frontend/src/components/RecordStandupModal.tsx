@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { StandupAudioRecorder } from './StandupAudioRecorder';
 import { StandupUploadForm } from './StandupUploadForm';
 import { useCorpusUpload } from '../hooks/useCorpusUpload';
+import { useConfigStore } from '../stores/configStore';
 
 interface RecordStandupModalProps {
   authToken: string;
@@ -35,10 +36,15 @@ export function RecordStandupModal({
   onSuccess,
 }: RecordStandupModalProps) {
   const { t } = useTranslation();
+  const corpusUser = useConfigStore((state) => state.corpusUser);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioDurationSeconds, setAudioDurationSeconds] = useState(0);
 
   const userId = useMemo(() => {
+    if (authToken === 'session') {
+      return corpusUser;
+    }
+
     const payload = decodeJwtPayload(authToken);
     return (
       (typeof payload?.sub === 'string' && payload.sub) ||
@@ -46,7 +52,7 @@ export function RecordStandupModal({
       (typeof payload?.userId === 'string' && payload.userId) ||
       ''
     );
-  }, [authToken]);
+  }, [authToken, corpusUser]);
 
   const handleUnauthorized = useCallback(() => {
     onClose();

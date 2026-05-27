@@ -3,17 +3,11 @@ import { useTranslation } from 'react-i18next';
 import DashboardHome from '../../components/dashboard/DashboardHome';
 import type { Team } from '../../components/dashboard/TeamList';
 import type { Intern } from '../../components/intern/InternSearch';
+import { getCorpusRuntimeBaseUrl, getMembers, getRosterTeams } from '../../api';
 import { configureCorpusService } from '../../services/corpus';
-import { getCorpusApiBaseUrl } from '../../services/corpus/apiUrl';
 import { useConfigStore } from '../../stores/configStore';
-import { parseInternsCSV } from '../../utils/parseInternsCSV';
-import {
-  buildPreloadedTeams,
-  parseTeamMembersCSV,
-  parseTeamsCSV,
-} from '../../utils/parseTeamSeedCSV';
 
-const CORPUS_DEFAULT_BASE = getCorpusApiBaseUrl();
+const CORPUS_PROXY_BASE = `${getCorpusRuntimeBaseUrl()}/corpus/proxy`;
 
 export default function StandupWorkspace() {
   const { t } = useTranslation();
@@ -23,80 +17,80 @@ export default function StandupWorkspace() {
 
   useEffect(() => {
     configureCorpusService({
-      baseUrl: CORPUS_DEFAULT_BASE,
+      baseUrl: CORPUS_PROXY_BASE,
       useMock: false,
-      authToken,
+      authToken: '',
     });
   }, [authToken]);
 
-  // Preload interns and team seed data from CSV on login success
+  // Roster data is owned by the backend; the frontend only renders it.
   useEffect(() => {
     if (!authToken) {
+      setAddedInterns([]);
       setPreloadedTeams([]);
       return;
     }
 
     let isCancelled = false;
 
-    const preloadFromCsv = async () => {
-      const [internsResult, teamsResult, teamMembersResult] =
-        await Promise.allSettled([
-          fetchCsvText('assets/interns.csv', ['intern_id', 'intern_name']),
-          fetchCsvText('assets/teams.csv', ['team_id', 'team_name']),
-          fetchCsvText('assets/team_members.csv', [
-            'team_id',
-            'intern_id',
-            'student_name',
-          ]),
-        ]);
+    const loadRoster = async () => {
+      const [members, teams] = await Promise.all([
+        getMembers(),
+        getRosterTeams(true),
+      ]);
 
       if (isCancelled) {
         return;
       }
 
-      const preloadedInterns =
-        internsResult.status === 'fulfilled'
-          ? parseInternsCSV(internsResult.value)
-          : [];
+      const interns = members.map((member): Intern => {
+        const identifier =
+          member.corpus_username || member.gitlab_username || String(member.id);
 
-      if (preloadedInterns.length > 0) {
-        setAddedInterns((prev) =>
-          mergeInternCollections(prev, preloadedInterns)
-        );
-      }
+        return {
+          id: identifier,
+          name: member.name || identifier,
+          username: identifier,
+          email: member.email || member.gitlab_email || undefined,
+        };
+      });
 
-      const teamRows =
-        teamsResult.status === 'fulfilled'
-          ? parseTeamsCSV(teamsResult.value)
-          : [];
-      const teamMemberRows =
-        teamMembersResult.status === 'fulfilled'
-          ? parseTeamMembersCSV(teamMembersResult.value)
-          : [];
+      setAddedInterns(interns);
       setPreloadedTeams(
-        buildPreloadedTeams(teamRows, teamMemberRows, preloadedInterns)
+        teams.map((team): Team => {
+          const teamMembers = members.filter(
+            (member) =>
+              member.team_id === team.id || member.team_name === team.name
+          );
+
+          return {
+            teamId: String(team.id),
+            teamName: team.name,
+            interns: teamMembers.map((member) => {
+              const identifier =
+                member.corpus_username ||
+                member.gitlab_username ||
+                String(member.id);
+
+              return {
+                internId: identifier,
+                corpusUserId: identifier,
+                internName: member.name || identifier,
+                status: 'PENDING',
+              };
+            }),
+          };
+        })
       );
-
-      if (internsResult.status === 'rejected') {
-        console.warn(
-          'Could not preload interns from CSV:',
-          internsResult.reason
-        );
-      }
-
-      if (teamsResult.status === 'rejected') {
-        console.warn('Could not preload teams from CSV:', teamsResult.reason);
-      }
-
-      if (teamMembersResult.status === 'rejected') {
-        console.warn(
-          'Could not preload team members from CSV:',
-          teamMembersResult.reason
-        );
-      }
     };
 
-    void preloadFromCsv();
+    void loadRoster().catch((error) => {
+      if (!isCancelled) {
+        console.error('Could not load roster from backend:', error);
+        setAddedInterns([]);
+        setPreloadedTeams([]);
+      }
+    });
 
     return () => {
       isCancelled = true;
@@ -154,163 +148,4 @@ export default function StandupWorkspace() {
       />
     </section>
   );
-}
-
-async function fetchCsvText(
-  path: string,
-  expectedHeaders: string[]
-): Promise<string> {
-  const normalizedPath = path.replace(/^\/+/, '');
-  const candidates = buildAssetFetchCandidates(normalizedPath);
-  const errorMessages: string[] = [];
-
-  for (const candidate of candidates) {
-    try {
-      const response = await fetch(candidate);
-
-      if (!response.ok) {
-        errorMessages.push(`${candidate} -> ${response.status}`);
-        continue;
-      }
-
-      const text = await response.text();
-
-      if (isValidCsvPayload(text, expectedHeaders)) {
-        return text;
-      }
-
-      const firstLine = text.split(/\r?\n/, 1)[0] || '';
-      const sanitizedFirstLine = firstLine.trim().slice(0, 80);
-      errorMessages.push(
-        `${candidate} -> invalid CSV payload (first line: "${sanitizedFirstLine}")`
-      );
-    } catch (error) {
-      errorMessages.push(`${candidate} -> ${(error as Error).message}`);
-    }
-  }
-
-  throw new Error(
-    `CSV fetch failed for ${normalizedPath}: ${errorMessages.join(', ')}`
-  );
-}
-
-function isValidCsvPayload(text: string, expectedHeaders: string[]): boolean {
-  if (!text.trim()) {
-    return false;
-  }
-
-  const firstLine = text
-    .split(/\r?\n/, 1)[0]
-    ?.replace(/^\uFEFF/, '')
-    .trim()
-    .toLowerCase();
-
-  if (
-    !firstLine ||
-    firstLine.startsWith('<!doctype') ||
-    firstLine.startsWith('<html')
-  ) {
-    return false;
-  }
-
-  const normalizedExpectedHeaders = expectedHeaders.map((header) =>
-    header.trim().toLowerCase()
-  );
-  return normalizedExpectedHeaders.some((header) => firstLine.includes(header));
-}
-
-function mergeInternCollections(
-  existing: Intern[],
-  incoming: Intern[]
-): Intern[] {
-  const byId = new Map(existing.map((intern) => [intern.id, intern]));
-
-  for (const intern of incoming) {
-    if (!byId.has(intern.id)) {
-      byId.set(intern.id, intern);
-    }
-  }
-
-  return Array.from(byId.values());
-}
-
-function buildAssetFetchCandidates(path: string): string[] {
-  const baseUrl = normalizeBaseUrl(import.meta.env.BASE_URL || '/');
-  const fileName = path.split('/').pop() || path;
-  const candidates = [`${baseUrl}${path}`, `/${path}`, `./${path}`];
-
-  if (typeof window !== 'undefined') {
-    const currentDirectoryPath = window.location.pathname.replace(/[^/]*$/, '');
-    if (currentDirectoryPath) {
-      candidates.push(`${currentDirectoryPath}${path}`);
-    }
-
-    if (window.location.pathname.includes('/dist/')) {
-      candidates.push(`/dist/${path}`);
-      candidates.push(`./dist/${path}`);
-    }
-
-    const assetDirectory = resolveLoadedAssetDirectory();
-    if (assetDirectory) {
-      candidates.push(`${assetDirectory}${path}`);
-      candidates.push(`${assetDirectory}${fileName}`);
-    }
-
-    candidates.push(new URL(path, window.location.href).toString());
-  }
-
-  return Array.from(new Set(candidates));
-}
-
-function normalizeBaseUrl(baseUrl: string): string {
-  const trimmedBaseUrl = baseUrl.trim();
-
-  if (!trimmedBaseUrl || trimmedBaseUrl === '/') {
-    return '/';
-  }
-
-  const prefixed = trimmedBaseUrl.startsWith('/')
-    ? trimmedBaseUrl
-    : `/${trimmedBaseUrl}`;
-  return prefixed.endsWith('/') ? prefixed : `${prefixed}/`;
-}
-
-function resolveLoadedAssetDirectory(): string {
-  if (typeof document === 'undefined' || typeof window === 'undefined') {
-    return '';
-  }
-
-  const scriptOrLink = Array.from(
-    document.querySelectorAll<HTMLScriptElement | HTMLLinkElement>(
-      'script[src*="/assets/"],link[href*="/assets/"]'
-    )
-  );
-
-  for (const element of scriptOrLink) {
-    const candidateUrl =
-      element instanceof HTMLScriptElement
-        ? element.src
-        : element instanceof HTMLLinkElement
-          ? element.href
-          : '';
-
-    if (!candidateUrl) {
-      continue;
-    }
-
-    try {
-      const parsed = new URL(candidateUrl, window.location.href);
-      const directoryPath = parsed.pathname.replace(/[^/]*$/, '');
-
-      if (!directoryPath.includes('/assets/')) {
-        continue;
-      }
-
-      return `${parsed.origin}${directoryPath}`;
-    } catch {
-      // Ignore malformed URLs and continue to other candidates.
-    }
-  }
-
-  return '';
 }

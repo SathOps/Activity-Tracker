@@ -20,7 +20,7 @@ export function CorpusLoginPage() {
 
     try {
       const response = await corpusLogin(phone.trim(), password.trim());
-      setCorpusToken(response.access_token, response.username || phone.trim());
+      setCorpusToken('session', response.username || phone.trim());
       setPassword('');
     } catch (caught) {
       setError(

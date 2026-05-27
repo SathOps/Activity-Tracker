@@ -257,7 +257,7 @@ function MembersPanel() {
     (m) =>
       !search ||
       m.name.toLowerCase().includes(search.toLowerCase()) ||
-      m.gitlab_username.toLowerCase().includes(search.toLowerCase()) ||
+      (m.gitlab_username || '').toLowerCase().includes(search.toLowerCase()) ||
       m.team_name.toLowerCase().includes(search.toLowerCase())
   );
 
