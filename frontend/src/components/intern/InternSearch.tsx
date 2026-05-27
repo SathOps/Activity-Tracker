@@ -275,7 +275,7 @@ const InternSearch: React.FC<InternSearchProps> = ({
 
           {/* ── Search Results Dropdown ── */}
           {showDropdown && hasQuery ? (
-            <ul className="intern-dropdown">
+            <ul className="intern-dropdown" role="listbox">
               {isLoading ? (
                 <li className="intern-dropdown-empty">
                   {t('interns.searching')}
@@ -293,6 +293,9 @@ const InternSearch: React.FC<InternSearchProps> = ({
                   return (
                     <li
                       key={intern.id}
+                      role="option"
+                      aria-selected={false}
+                      aria-disabled={added}
                       className={`intern-dropdown-item${added ? ' disabled' : ''}`}
                       tabIndex={added ? -1 : 0}
                       onMouseDown={(e) => e.preventDefault()}
