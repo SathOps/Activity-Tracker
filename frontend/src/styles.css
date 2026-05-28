@@ -167,7 +167,7 @@ body {
   color: var(--text-main);
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 44px);
+  height: fit-content;
   overflow: hidden;
   padding: 12px;
   width: 258px;
@@ -403,7 +403,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 34px;
   box-shadow: var(--shadow-soft);
-  min-height: calc(100vh - 44px);
+  height: fit-content;
   padding: 18px;
 }
 
