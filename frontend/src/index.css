@@ -1,45 +1,65 @@
 :root {
-  --brand-50: #f5f3ff;
-  --brand-100: #ede9fe;
-  --brand-200: #ddd6fe;
-  --brand-300: #c4b5fd;
-  --brand-500: #8b5cf6;
-  --brand-600: #7c3aed;
-  --brand-700: #6d28d9;
-  --slate-50: #f8fafc;
-  --slate-100: #f1f5f9;
-  --slate-200: #e2e8f0;
-  --slate-300: #cbd5e1;
-  --slate-400: #94a3b8;
-  --slate-500: #64748b;
-  --slate-600: #475569;
-  --slate-700: #334155;
-  --slate-800: #1e293b;
-  --slate-900: #0f172a;
-  --blue-50: #eff6ff;
-  --blue-100: #dbeafe;
-  --blue-300: #93c5fd;
+  /* ── Typography ─────────────────────────────────────────────────── */
+  --font-body:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+
+  /* ── Brand palette ──────────────────────────────────────────────── */
+  --brand-50: #f0f0ff;
+  --brand-100: #e0e0ff;
+  --brand-200: #c7c4ff;
+  --brand-300: #a5a0fb;
+  --brand-500: #7c6bf5;
+  --brand-600: #6c54e8;
+  --brand-700: #5a3dd5;
+
+  /* ── Slate ──────────────────────────────────────────────────────── */
+  --slate-50: #f8f9fc;
+  --slate-100: #f0f2f7;
+  --slate-200: #e2e5ee;
+  --slate-300: #c8cdd8;
+  --slate-400: #8f96a8;
+  --slate-500: #64697e;
+  --slate-600: #474d63;
+  --slate-700: #2f3549;
+  --slate-800: #1c2035;
+  --slate-900: #0e1121;
+
+  /* ── Blue ───────────────────────────────────────────────────────── */
+  --blue-50: #eef4ff;
+  --blue-100: #dae8ff;
+  --blue-300: #7eb8ff;
   --blue-500: #3b82f6;
   --blue-600: #2563eb;
   --blue-700: #1d4ed8;
-  --green-50: #f0fdf4;
-  --green-100: #dcfce7;
-  --green-200: #bbf7d0;
-  --green-500: #22c55e;
-  --green-600: #16a34a;
-  --green-700: #15803d;
+
+  /* ── Green ──────────────────────────────────────────────────────── */
+  --green-50: #edfcf2;
+  --green-100: #d1fae2;
+  --green-200: #a7f3c9;
+  --green-500: #10b981;
+  --green-600: #059669;
+  --green-700: #047857;
+
+  /* ── Amber ──────────────────────────────────────────────────────── */
   --amber-50: #fffbeb;
   --amber-100: #fef3c7;
   --amber-400: #fbbf24;
   --amber-600: #d97706;
-  --red-50: #fef2f2;
-  --red-100: #fee2e2;
-  --red-500: #ef4444;
-  --red-600: #dc2626;
-  --red-700: #b91c1c;
+
+  /* ── Red ────────────────────────────────────────────────────────── */
+  --red-50: #fff1f2;
+  --red-100: #ffe4e6;
+  --red-500: #f43f5e;
+  --red-600: #e11d48;
+  --red-700: #be123c;
+
+  /* ── Purple ─────────────────────────────────────────────────────── */
   --purple-100: #f3e8ff;
   --purple-400: #c084fc;
   --purple-700: #7e22ce;
+
+  /* ── Indigo ─────────────────────────────────────────────────────── */
   --indigo-50: #eef2ff;
   --indigo-200: #c7d2fe;
   --indigo-300: #a5b4fc;
@@ -47,11 +67,98 @@
   --indigo-500: #6366f1;
   --indigo-600: #4f46e5;
   --indigo-700: #4338ca;
-  --shadow-lg: 0 18px 48px rgba(15, 23, 42, 0.18);
+
+  /* ── Shadows ────────────────────────────────────────────────────── */
+  --shadow-sm:
+    0 1px 3px rgba(15, 20, 40, 0.04), 0 1px 2px rgba(15, 20, 40, 0.06);
+  --shadow-md:
+    0 4px 16px rgba(15, 20, 40, 0.06), 0 1px 4px rgba(15, 20, 40, 0.04);
+  --shadow-lg:
+    0 16px 48px rgba(15, 20, 40, 0.1), 0 4px 12px rgba(15, 20, 40, 0.06);
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+
+  /* ── Glass ──────────────────────────────────────────────────────── */
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-blur: 12px;
+
+  /* ── Sidebar ────────────────────────────────────────────────────── */
+  --sidebar-bg: linear-gradient(180deg, #0f1629 0%, #131a33 50%, #0e1528 100%);
+  --sidebar-border: rgba(99, 102, 241, 0.12);
+  --sidebar-text: rgba(203, 213, 232, 0.85);
+  --sidebar-text-bright: #e8ecf5;
+  --sidebar-hover: rgba(99, 102, 241, 0.08);
+  --sidebar-active: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.18),
+    rgba(139, 92, 246, 0.12)
+  );
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  background: var(--slate-50);
+  font-family: var(--font-body);
+  background: linear-gradient(135deg, #f0f2f8 0%, #e8ecf5 50%, #f0f0fa 100%);
+  background-attachment: fixed;
+  color: var(--slate-800);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--slate-300);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--slate-400);
+}
+
+/* ── Glass utilities ──────────────────────────────────────────────── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    var(--shadow-md),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    var(--shadow-lg),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .toast-stack {
@@ -838,8 +945,11 @@ body {
 .shadow-lg {
   box-shadow: var(--shadow-lg);
 }
+.shadow-md {
+  box-shadow: var(--shadow-md);
+}
 .shadow-sm {
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-sm);
 }
 .object-cover {
   object-fit: cover;

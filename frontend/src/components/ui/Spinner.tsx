@@ -1,41 +1,45 @@
 import { cn } from '../../lib/utils';
 
 interface Props {
+  label?: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
-  label?: string;
 }
 
-const sizes = { sm: 'h-4 w-4', md: 'h-6 w-6', lg: 'h-10 w-10' };
+export function Spinner({ label, size = 'md', className }: Props) {
+  const sizes = { sm: 20, md: 32, lg: 48 };
+  const dim = sizes[size];
 
-export function Spinner({ size = 'md', className, label = 'Loading…' }: Props) {
   return (
-    <span
-      className={cn('inline-flex items-center gap-2', className)}
-      role="status"
+    <div
+      className={cn(
+        'flex flex-col items-center justify-center gap-3 py-12',
+        className
+      )}
     >
-      <svg
-        className={cn('animate-spin text-brand-600', sizes[size])}
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        />
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-        />
-      </svg>
-      {label && <span className="text-sm text-slate-500">{label}</span>}
-    </span>
+      <div
+        style={{
+          width: dim,
+          height: dim,
+          borderRadius: '50%',
+          border: '3px solid rgba(99, 102, 241, 0.12)',
+          borderTopColor: '#6366f1',
+          animation: 'spin 0.8s linear infinite',
+          boxShadow: '0 0 16px rgba(99, 102, 241, 0.15)',
+        }}
+      />
+      {label && (
+        <p
+          style={{
+            margin: 0,
+            fontSize: 13,
+            color: 'var(--slate-400)',
+            fontWeight: 500,
+          }}
+        >
+          {label}
+        </p>
+      )}
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Download } from 'lucide-react';
 import { getUserProfile } from '../../api';
@@ -12,10 +12,20 @@ import { MRsPanel } from './MRsPanel';
 import { IssuesPanel } from './IssuesPanel';
 import { ProfileReadme } from './ProfileReadme';
 import type { UserProfileData } from '../../types';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function UserProfile() {
+  const { user } = useAuth();
+  const isIntern = user?.role === 'intern';
   const [input, setInput] = useState('');
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(user?.gitlabUsername || '');
+
+  useEffect(() => {
+    if (isIntern && user?.gitlabUsername) {
+      setInput(user.gitlabUsername);
+      setUsername(user.gitlabUsername);
+    }
+  }, [isIntern, user?.gitlabUsername]);
 
   const { data, isLoading, isError, error } = useQuery<UserProfileData>({
     queryKey: ['profile', username],
@@ -28,6 +38,13 @@ export function UserProfile() {
   function handleSearch() {
     const u = input.trim();
     if (u) setUsername(u);
+  }
+
+  function handleInternLoad() {
+    if (user?.gitlabUsername) {
+      setUsername(user.gitlabUsername);
+      setInput(user.gitlabUsername);
+    }
   }
 
   const d = data?.data;
@@ -44,8 +61,9 @@ export function UserProfile() {
           👤 User Profile Overview
         </h2>
         <p className="mt-1 text-sm text-slate-500">
-          Fetch comprehensive GitLab activity for any user — projects, commits
-          (IST), groups, MRs and issues.
+          {isIntern
+            ? 'Review your GitLab projects, commits (IST), groups, merge requests, and issues.'
+            : 'Fetch comprehensive GitLab activity for any user — projects, commits (IST), groups, MRs and issues.'}
         </p>
       </div>
 
@@ -55,16 +73,23 @@ export function UserProfile() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          placeholder="Enter GitLab username…"
+          placeholder={
+            isIntern ? 'Your GitLab username' : 'Enter GitLab username…'
+          }
+          disabled={isIntern}
           className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
         />
         <button
-          onClick={handleSearch}
-          disabled={!input.trim() || isLoading}
+          onClick={isIntern ? handleInternLoad : handleSearch}
+          disabled={
+            isIntern
+              ? !user?.gitlabUsername || isLoading
+              : !input.trim() || isLoading
+          }
           className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50 transition-colors"
         >
           {isLoading ? <Spinner size="sm" label="" /> : <Search size={15} />}
-          Search
+          {isIntern ? 'Load My Profile' : 'Search'}
         </button>
       </div>
 

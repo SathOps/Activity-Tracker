@@ -1,30 +1,66 @@
 import { cn } from '../../lib/utils';
 
-type Variant = 'default' | 'success' | 'error' | 'warning' | 'info' | 'purple';
-
 interface Props {
+  variant?: 'default' | 'success' | 'warning' | 'error' | 'info' | 'purple';
   children: React.ReactNode;
-  variant?: Variant;
   className?: string;
 }
 
-const styles: Record<Variant, string> = {
-  default: 'bg-slate-100 text-slate-700',
-  success: 'bg-green-100 text-green-700',
-  error: 'bg-red-100   text-red-700',
-  warning: 'bg-amber-100 text-amber-700',
-  info: 'bg-blue-100  text-blue-700',
-  purple: 'bg-purple-100 text-purple-700',
+const BADGE_STYLES: Record<
+  string,
+  { bg: string; color: string; border: string }
+> = {
+  default: {
+    bg: 'rgba(99,102,241,0.08)',
+    color: 'var(--indigo-600)',
+    border: 'rgba(99,102,241,0.12)',
+  },
+  success: {
+    bg: 'rgba(16,185,129,0.08)',
+    color: 'var(--green-600)',
+    border: 'rgba(16,185,129,0.12)',
+  },
+  warning: {
+    bg: 'rgba(251,191,36,0.1)',
+    color: 'var(--amber-600)',
+    border: 'rgba(251,191,36,0.15)',
+  },
+  error: {
+    bg: 'rgba(244,63,94,0.08)',
+    color: 'var(--red-600)',
+    border: 'rgba(244,63,94,0.12)',
+  },
+  info: {
+    bg: 'rgba(59,130,246,0.08)',
+    color: 'var(--blue-600)',
+    border: 'rgba(59,130,246,0.12)',
+  },
+  purple: {
+    bg: 'rgba(139,92,246,0.08)',
+    color: 'var(--purple-700)',
+    border: 'rgba(139,92,246,0.12)',
+  },
 };
 
-export function Badge({ children, variant = 'default', className }: Props) {
+export function Badge({ variant = 'default', children, className }: Props) {
+  const s = BADGE_STYLES[variant];
+
   return (
     <span
-      className={cn(
-        'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
-        styles[variant],
-        className
-      )}
+      className={cn(className)}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        padding: '3px 10px',
+        borderRadius: 99,
+        fontSize: 11,
+        fontWeight: 600,
+        letterSpacing: '0.02em',
+        background: s.bg,
+        color: s.color,
+        border: `1px solid ${s.border}`,
+        whiteSpace: 'nowrap',
+      }}
     >
       {children}
     </span>

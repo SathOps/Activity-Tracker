@@ -81,6 +81,7 @@ export interface DashboardLayoutProps {
   statusDisplay?: 'modal' | 'inline';
   mode?: 'teams' | 'status' | 'analytics';
   authToken?: string;
+  canManageStandup?: boolean;
 }
 
 const DEFAULT_VIEW: DashboardView = 'TEAMS';
@@ -109,6 +110,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   statusDisplay = 'modal',
   mode = 'teams',
   authToken,
+  canManageStandup = false,
 }) => {
   const { t } = useTranslation();
   const [managedTeams, setManagedTeams] = React.useState<Team[]>(
@@ -1246,13 +1248,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             >
               Record Standup
             </button>
-            <button
-              className="primary-button"
-              onClick={() => setIsCreatingTeam((prev) => !prev)}
-              type="button"
-            >
-              {isCreatingTeam ? t('button.cancel') : t('teams.createTeam')}
-            </button>
+            {canManageStandup ? (
+              <button
+                className="primary-button"
+                onClick={() => setIsCreatingTeam((prev) => !prev)}
+                type="button"
+              >
+                {isCreatingTeam ? t('button.cancel') : t('teams.createTeam')}
+              </button>
+            ) : null}
           </div>
         ) : null}
       </header>
@@ -1287,7 +1291,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             })}
           </section>
 
-          {isCreatingTeam ? (
+          {isCreatingTeam && canManageStandup ? (
             <section
               style={{
                 alignItems: 'center',
@@ -1357,11 +1361,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           {activeView === 'TEAMS' ? (
             <TeamList
               addedInterns={addedInterns}
-              onAddInternToTeam={handleAddInternToTeam}
-              onDeleteIntern={handleDeleteIntern}
-              onDeleteTeam={handleDeleteTeam}
-              onUpdateIntern={handleUpdateIntern}
-              onUpdateTeamName={handleUpdateTeamName}
+              onAddInternToTeam={
+                canManageStandup ? handleAddInternToTeam : undefined
+              }
+              onDeleteIntern={canManageStandup ? handleDeleteIntern : undefined}
+              onDeleteTeam={canManageStandup ? handleDeleteTeam : undefined}
+              onUpdateIntern={canManageStandup ? handleUpdateIntern : undefined}
+              onUpdateTeamName={
+                canManageStandup ? handleUpdateTeamName : undefined
+              }
               onVerifyTeam={(teamId) => {
                 void handleVerifyTeam(teamId);
               }}

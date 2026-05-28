@@ -21,8 +21,8 @@ export function GitComplianceWorkspace({ children }: Props) {
           </h2>
           <p className="text-base leading-7 text-slate-600">
             Use the GitLab URL and personal access token in the sidebar. After
-            validation, profile, weekly performance, batch analytics,
-            leaderboard, and roster views will be available here.
+            validation, profile, weekly performance, mentor groups, batch
+            analytics, and leaderboard views will be available here.
           </p>
         </div>
       </section>

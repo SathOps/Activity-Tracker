@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { corpusLogin } from '../../api';
+import { useRouter } from '../../lib/router';
 import { useConfigStore } from '../../stores/configStore';
 
 export function CorpusLoginPage() {
   const setCorpusToken = useConfigStore((state) => state.setCorpusToken);
+  const { navigate } = useRouter();
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,6 +24,7 @@ export function CorpusLoginPage() {
       const response = await corpusLogin(phone.trim(), password.trim());
       setCorpusToken('session', response.username || phone.trim());
       setPassword('');
+      navigate('/standup');
     } catch (caught) {
       setError(
         caught instanceof Error ? caught.message : 'Corpus login failed'

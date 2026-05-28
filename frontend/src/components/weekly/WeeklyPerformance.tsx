@@ -9,7 +9,7 @@
  * are also fetched and displayed per day (matching Streamlit behaviour).
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Clock,
@@ -20,6 +20,7 @@ import {
   Mic,
 } from 'lucide-react';
 import { getWeeklyPerformance, downloadJson } from '../../api';
+import { useAuth } from '../../contexts/AuthContext';
 import { useConfigStore } from '../../stores/configStore';
 import { Spinner } from '../ui/Spinner';
 import { Alert } from '../ui/Alert';
@@ -265,10 +266,12 @@ function SummaryCards({ activity }: { activity: WeeklyActivity }) {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function WeeklyPerformance() {
+  const { user } = useAuth();
+  const isIntern = user?.role === 'intern';
   const { corpusToken } = useConfigStore();
 
-  const [username, setUsername] = useState('');
-  const [corpusUid, setCorpusUid] = useState('');
+  const [username, setUsername] = useState(user?.gitlabUsername || '');
+  const [corpusUid, setCorpusUid] = useState(user?.corpusUsername || '');
   const [startDate, setStartDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() - 30);
@@ -293,6 +296,29 @@ export function WeeklyPerformance() {
     retry: 1,
   });
 
+  useEffect(() => {
+    if (!isIntern || !user?.gitlabUsername) {
+      return;
+    }
+
+    setUsername(user.gitlabUsername);
+    setCorpusUid(user.corpusUsername);
+  }, [isIntern, user?.corpusUsername, user?.gitlabUsername]);
+
+  function handleLoadMine() {
+    if (!user?.gitlabUsername) return;
+    setUsername(user.gitlabUsername);
+    setCorpusUid(user.corpusUsername);
+    setParams({
+      gitlab_username: user.gitlabUsername,
+      corpus_uid: user.corpusUsername,
+      start_date: startDate,
+      end_date: endDate,
+      corpus_token: corpusToken || undefined,
+    });
+    setSubmitted(true);
+  }
+
   function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
     if (!username.trim()) return;
@@ -315,9 +341,10 @@ export function WeeklyPerformance() {
           📅 Weekly Performance Tracker
         </h2>
         <p className="text-sm text-slate-500 mt-0.5">
-          Per-day activity breakdown — commits, MRs, issues, time spent, active
-          hours
-          {corpusToken ? ', and corpus audio recordings.' : '.'}
+          {isIntern
+            ? 'Review your own daily GitLab activity pattern, weekly consistency, and linked corpus audio uploads.'
+            : 'Per-day activity breakdown — commits, MRs, issues, time spent, active hours'}
+          {!isIntern && (corpusToken ? ', and corpus audio recordings.' : '.')}
         </p>
       </div>
 
@@ -347,6 +374,7 @@ export function WeeklyPerformance() {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              disabled={isIntern}
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
               placeholder="e.g. john_doe"
               required
@@ -367,6 +395,7 @@ export function WeeklyPerformance() {
               type="text"
               value={corpusUid}
               onChange={(e) => setCorpusUid(e.target.value)}
+              disabled={isIntern}
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
               placeholder="corpus username"
             />
@@ -414,8 +443,22 @@ export function WeeklyPerformance() {
           className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           disabled={isLoading}
         >
-          {isLoading ? 'Fetching…' : '🔍 Fetch Activity'}
+          {isLoading
+            ? 'Fetching…'
+            : isIntern
+              ? '🔍 Fetch My Activity'
+              : '🔍 Fetch Activity'}
         </button>
+        {isIntern ? (
+          <button
+            type="button"
+            onClick={handleLoadMine}
+            disabled={!user?.gitlabUsername || isLoading}
+            className="ml-3 rounded-lg border border-slate-200 px-5 py-2 text-sm font-medium text-slate-700"
+          >
+            Load My Activity
+          </button>
+        ) : null}
       </form>
 
       {isLoading && (

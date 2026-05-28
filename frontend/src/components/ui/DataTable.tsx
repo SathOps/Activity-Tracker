@@ -90,13 +90,10 @@ export function DataTable<T extends Record<string, unknown>>({
     );
   };
 
-  const cell = compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2.5 text-sm';
-  const head = compact ? 'px-3 py-2 text-xs' : 'px-4 py-3 text-xs';
-
   return (
     <div className={cn('w-full', className)}>
       {searchable && (
-        <div className="relative mb-3">
+        <div className="relative mb-4">
           <Search
             size={15}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -108,26 +105,55 @@ export function DataTable<T extends Record<string, unknown>>({
               setPage(1);
             }}
             placeholder="Search…"
-            className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-300"
+            style={{
+              width: '100%',
+              paddingLeft: 36,
+              paddingRight: 14,
+              paddingTop: 10,
+              paddingBottom: 10,
+              borderRadius: 14,
+              border: '1px solid rgba(255,255,255,0.6)',
+              background: 'rgba(255,255,255,0.65)',
+              backdropFilter: 'blur(12px)',
+              fontSize: 14,
+              color: 'var(--slate-800)',
+              outline: 'none',
+            }}
           />
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-lg border border-slate-200">
-        <table className="min-w-full divide-y divide-slate-200">
-          <thead className="bg-slate-50">
-            <tr>
+      <div
+        style={{
+          borderRadius: 18,
+          overflow: 'hidden',
+          background: 'rgba(255,255,255,0.72)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,255,255,0.6)',
+          boxShadow: 'var(--shadow-sm)',
+        }}
+      >
+        <table className="min-w-full" style={{ borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: 'rgba(99,102,241,0.04)' }}>
               {columns.map((col) => (
                 <th
                   key={String(col.key)}
                   scope="col"
-                  style={col.width ? { width: col.width } : undefined}
-                  className={cn(
-                    head,
-                    'font-semibold uppercase tracking-wide text-slate-500 text-left',
-                    col.sortable &&
-                      'cursor-pointer select-none hover:bg-slate-100'
-                  )}
+                  style={{
+                    ...(col.width ? { width: col.width } : {}),
+                    textAlign: 'left',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    color: 'var(--slate-400)',
+                    padding: compact ? '10px 12px' : '12px 18px',
+                    borderBottom: '1px solid rgba(0,0,0,0.04)',
+                    cursor: col.sortable ? 'pointer' : 'default',
+                    userSelect: col.sortable ? 'none' : 'auto',
+                    fontFamily: 'var(--font-display)',
+                  }}
                   onClick={() => col.sortable && handleSort(String(col.key))}
                 >
                   <span className="inline-flex items-center gap-1">
@@ -138,28 +164,42 @@ export function DataTable<T extends Record<string, unknown>>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 bg-white">
+          <tbody>
             {pageData.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="py-8 text-center text-sm text-slate-400"
+                  style={{
+                    padding: '40px 18px',
+                    textAlign: 'center',
+                    fontSize: 14,
+                    color: 'var(--slate-400)',
+                  }}
                 >
                   No data found.
                 </td>
               </tr>
             ) : (
-              pageData.map((row) => (
+              pageData.map((row, idx) => (
                 <tr
                   key={keyFn(row)}
-                  className="hover:bg-slate-50 transition-colors"
+                  style={{
+                    background:
+                      idx % 2 === 0 ? 'transparent' : 'rgba(99,102,241,0.015)',
+                    transition: 'background 0.15s',
+                    borderBottom: '1px solid rgba(0,0,0,0.03)',
+                  }}
                 >
                   {columns.map((col) => {
                     const raw = row[col.key as keyof T];
                     return (
                       <td
                         key={String(col.key)}
-                        className={cn(cell, 'text-slate-700')}
+                        style={{
+                          padding: compact ? '8px 12px' : '12px 18px',
+                          fontSize: compact ? 12 : 14,
+                          color: 'var(--slate-700)',
+                        }}
                       >
                         {col.render
                           ? col.render(raw, row)
@@ -176,25 +216,54 @@ export function DataTable<T extends Record<string, unknown>>({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-3 flex items-center justify-between text-sm text-slate-500">
+        <div
+          style={{
+            marginTop: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: 13,
+            color: 'var(--slate-400)',
+          }}
+        >
           <span>
             {sorted.length} row{sorted.length !== 1 ? 's' : ''}
           </span>
-          <div className="flex items-center gap-2">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <button
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
-              className="rounded px-2 py-1 hover:bg-slate-100 disabled:opacity-30"
+              style={{
+                padding: '6px 14px',
+                borderRadius: 10,
+                border: '1px solid var(--slate-200)',
+                background: 'rgba(255,255,255,0.6)',
+                fontSize: 12,
+                fontWeight: 500,
+                cursor: page === 1 ? 'default' : 'pointer',
+                opacity: page === 1 ? 0.3 : 1,
+                color: 'var(--slate-600)',
+              }}
             >
               ← Prev
             </button>
-            <span>
-              Page {page} / {totalPages}
+            <span style={{ fontSize: 12, fontWeight: 500 }}>
+              {page} / {totalPages}
             </span>
             <button
               disabled={page === totalPages}
               onClick={() => setPage(page + 1)}
-              className="rounded px-2 py-1 hover:bg-slate-100 disabled:opacity-30"
+              style={{
+                padding: '6px 14px',
+                borderRadius: 10,
+                border: '1px solid var(--slate-200)',
+                background: 'rgba(255,255,255,0.6)',
+                fontSize: 12,
+                fontWeight: 500,
+                cursor: page === totalPages ? 'default' : 'pointer',
+                opacity: page === totalPages ? 0.3 : 1,
+                color: 'var(--slate-600)',
+              }}
             >
               Next →
             </button>

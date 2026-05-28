@@ -8,6 +8,7 @@ export interface TeamsDashboardProps {
   preloadedTeams?: Team[];
   mode?: 'teams' | 'status' | 'analytics';
   authToken?: string;
+  canManageStandup?: boolean;
 }
 
 const TeamsDashboard: React.FC<TeamsDashboardProps> = ({
@@ -15,6 +16,7 @@ const TeamsDashboard: React.FC<TeamsDashboardProps> = ({
   preloadedTeams,
   mode = 'teams',
   authToken,
+  canManageStandup = false,
 }) => {
   return (
     <DashboardLayout
@@ -23,6 +25,7 @@ const TeamsDashboard: React.FC<TeamsDashboardProps> = ({
       mode={mode}
       statusDisplay={mode === 'status' ? 'inline' : 'modal'}
       authToken={authToken}
+      canManageStandup={canManageStandup}
     />
   );
 };

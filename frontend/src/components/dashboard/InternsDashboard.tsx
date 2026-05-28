@@ -7,6 +7,7 @@ export interface InternsDashboardProps {
   authToken: string;
   onInternsChange: (interns: Intern[]) => void;
   onRemoveIntern: (internId: string) => void;
+  canManageInterns?: boolean;
 }
 
 const InternsDashboard: React.FC<InternsDashboardProps> = ({
@@ -14,6 +15,7 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
   authToken,
   onInternsChange,
   onRemoveIntern,
+  canManageInterns = true,
 }) => {
   const { t } = useTranslation();
   const [listSearchQuery, setListSearchQuery] = useState('');
@@ -71,6 +73,7 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
                     aria-label={t('interns.removeAria', { name: intern.name })}
                     title={t('interns.removeTitle')}
                     onClick={() => onRemoveIntern(intern.id)}
+                    disabled={!canManageInterns}
                   >
                     ✕
                   </button>
@@ -82,13 +85,22 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
       </section>
 
       {/* ── Right: Add Intern ── */}
-      <aside className="interns-add-panel">
-        <InternSearch
-          addedInterns={addedInterns}
-          authToken={authToken}
-          onInternsChange={onInternsChange}
-        />
-      </aside>
+      {canManageInterns ? (
+        <aside className="interns-add-panel">
+          <InternSearch
+            addedInterns={addedInterns}
+            authToken={authToken}
+            onInternsChange={onInternsChange}
+          />
+        </aside>
+      ) : (
+        <aside className="interns-add-panel">
+          <div className="rounded-lg border border-slate-200 bg-white px-4 py-6 text-sm text-slate-500">
+            Intern list is visible here, but roster edits require admin-granted
+            standup edit permission.
+          </div>
+        </aside>
+      )}
     </div>
   );
 };

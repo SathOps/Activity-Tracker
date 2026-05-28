@@ -2061,21 +2061,39 @@ select {
   }
 }
 
+@keyframes login-gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
 .portal-login-page {
   align-items: center;
   background:
     radial-gradient(
-      circle at top left,
-      rgba(68, 124, 255, 0.22),
-      transparent 28%
+      circle at 20% 20%,
+      rgba(99, 102, 241, 0.15),
+      transparent 40%
     ),
     radial-gradient(
-      circle at bottom right,
-      rgba(14, 165, 233, 0.18),
-      transparent 24%
+      circle at 80% 80%,
+      rgba(139, 92, 246, 0.12),
+      transparent 40%
     ),
-    linear-gradient(180deg, #eff5ff 0%, #f7fbff 48%, #edf3fb 100%);
+    radial-gradient(
+      circle at 60% 10%,
+      rgba(14, 165, 233, 0.1),
+      transparent 30%
+    ),
+    linear-gradient(135deg, #eef0fa 0%, #e8ecf5 40%, #eff0fa 100%);
+  background-size: 200% 200%;
+  animation: login-gradient-shift 15s ease infinite;
   display: flex;
+  font-family: var(--font-body);
   justify-content: center;
   min-height: 100vh;
   overflow: hidden;
@@ -2209,11 +2227,15 @@ select {
 
 .portal-login-panel {
   align-self: center;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(190, 208, 233, 0.9);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 30px;
-  box-shadow: 0 26px 70px rgba(37, 99, 235, 0.14);
-  padding: 32px;
+  box-shadow:
+    0 26px 70px rgba(37, 99, 235, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  padding: 36px;
 }
 
 .portal-login-panel-header {

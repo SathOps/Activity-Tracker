@@ -3,8 +3,13 @@ import type {
   BatchRecord,
   HealthResponse,
   MemberRecord,
+  MentorGroupRecord,
+  MentorBatchesResponse,
+  MyProfileResponse,
+  MyTeamResponse,
   TeamRecord,
   Team,
+  TeamDetailRecord,
   TeamResult,
   UserProfileData,
   WeeklyActivity,
@@ -79,6 +84,32 @@ async function deleteJson(path: string): Promise<void> {
     credentials: 'include',
   });
   await parseJson<unknown>(response);
+}
+
+async function putJson<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetch(buildApiUrl(path), {
+    method: 'PUT',
+    headers: {
+      ...(buildHeaders() as Record<string, string>),
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(body),
+  });
+  return parseJson<T>(response);
+}
+
+async function patchJson<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetch(buildApiUrl(path), {
+    method: 'PATCH',
+    headers: {
+      ...(buildHeaders() as Record<string, string>),
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(body),
+  });
+  return parseJson<T>(response);
 }
 
 interface CorpusLoginResponse {
@@ -156,6 +187,10 @@ export async function corpusLogout(): Promise<void> {
   await postJson('/corpus/logout', {});
 }
 
+export async function getMyProfile(): Promise<MyProfileResponse> {
+  return getJson<MyProfileResponse>('/me');
+}
+
 export async function storeGitlabToken(
   token: string,
   gitlabUrl: string
@@ -164,6 +199,10 @@ export async function storeGitlabToken(
     token,
     gitlab_url: gitlabUrl,
   });
+}
+
+export async function getMyTeam(): Promise<MyTeamResponse> {
+  return getJson<MyTeamResponse>('/me/team');
 }
 
 export async function getUserProfile(
@@ -200,24 +239,32 @@ export async function getTeams(): Promise<Team[]> {
 }
 
 export async function getBatches(): Promise<BatchRecord[]> {
-  const payload = await getJson<{ batches: BatchRecord[] }>('/roster/batches');
+  const payload = await getJson<{ batches: BatchRecord[] }>('/batches/');
   return payload.batches;
 }
 
 export async function createBatch(
   name: string,
-  date?: string
+  start_date?: string,
+  end_date?: string
 ): Promise<BatchRecord> {
-  return postJson('/roster/batches', { name, date });
+  return postJson('/batches/', { name, start_date, end_date });
 }
 
 export async function deleteBatch(batchId: number): Promise<void> {
-  return deleteJson(`/roster/batches/${batchId}`);
+  return deleteJson(`/batches/${batchId}`);
+}
+
+export async function updateBatch(
+  batchId: number,
+  updates: { name?: string; start_date?: string; end_date?: string }
+): Promise<BatchRecord> {
+  return putJson(`/batches/${batchId}`, updates);
 }
 
 export async function getMembers(): Promise<MemberRecord[]> {
-  const payload = await getJson<{ members: MemberRecord[] }>('/roster/members');
-  return payload.members;
+  const payload = await getJson<{ users: MemberRecord[] }>('/members/');
+  return payload.users;
 }
 
 export async function getRosterTeams(
@@ -229,13 +276,20 @@ export async function getRosterTeams(
   }
   const query = params.toString();
   const payload = await getJson<{ teams: TeamRecord[] }>(
-    `/roster/teams${query ? `?${query}` : ''}`
+    `/teams/${query ? `?${query}` : ''}`
   );
   return payload.teams;
 }
 
 export async function deleteMember(memberId: number): Promise<void> {
-  return deleteJson(`/roster/members/${memberId}`);
+  return deleteJson(`/members/${memberId}`);
+}
+
+export async function searchMembers(query: string): Promise<MemberRecord[]> {
+  const payload = await getJson<{ users: MemberRecord[] }>(
+    `/members/search?q=${encodeURIComponent(query)}`
+  );
+  return payload.users;
 }
 
 export async function bulkImportMembers(
@@ -244,13 +298,185 @@ export async function bulkImportMembers(
 ): Promise<{ imported: number; errors: string[] }> {
   const form = new FormData();
   form.append('file', file);
-  const response = await fetch(buildApiUrl(`/roster/import/${batchId}`), {
+  const response = await fetch(buildApiUrl(`/members/import/${batchId}`), {
     method: 'POST',
     headers: buildHeaders(),
     credentials: 'include',
     body: form,
   });
   return parseJson(response);
+}
+
+export async function createMember(payload: {
+  name: string;
+  corpus_username: string;
+  batch_id: number;
+  role?: string;
+  team_name?: string;
+  email?: string;
+  institution_id?: string;
+  institution_name?: string;
+  gitlab_username?: string;
+  global_username?: string;
+  global_email?: string;
+  date_of_joining?: string;
+}): Promise<MemberRecord> {
+  return postJson('/members/', payload);
+}
+
+export async function updateMember(
+  memberId: number,
+  payload: {
+    name: string;
+    batch_id: number;
+    role?: string;
+    team_name?: string;
+    email?: string;
+    institution_id?: string;
+    institution_name?: string;
+    gitlab_username?: string;
+    global_username?: string;
+    global_email?: string;
+    date_of_joining?: string;
+  }
+): Promise<MemberRecord> {
+  return putJson(`/members/${memberId}`, payload);
+}
+
+export async function assignMemberRole(
+  memberId: number,
+  role: string
+): Promise<MemberRecord> {
+  return patchJson(`/members/${memberId}/role`, { role });
+}
+
+export async function updateMemberPermissions(
+  memberId: number,
+  canEditStandup: boolean
+): Promise<MemberRecord> {
+  return patchJson(`/members/${memberId}/permissions`, {
+    can_edit_standup: canEditStandup,
+  });
+}
+
+export async function getMentorBatches(
+  memberId: number
+): Promise<MentorBatchesResponse> {
+  return getJson<MentorBatchesResponse>(`/members/${memberId}/batches`);
+}
+
+export async function assignMentorBatches(
+  memberId: number,
+  batchIds: number[]
+): Promise<MentorBatchesResponse> {
+  return postJson(`/members/${memberId}/batches`, { batch_ids: batchIds });
+}
+
+export async function removeMentorBatch(
+  memberId: number,
+  batchId: number
+): Promise<void> {
+  return deleteJson(`/members/${memberId}/batches/${batchId}`);
+}
+
+export async function getMentorGroups(): Promise<MentorGroupRecord[]> {
+  const payload = await getJson<{ groups: MentorGroupRecord[] }>(
+    '/mentor-groups/'
+  );
+  return payload.groups;
+}
+
+export async function createMentorGroup(payload: {
+  name: string;
+  mentor_id: number;
+  batch_id?: number;
+}): Promise<MentorGroupRecord> {
+  return postJson('/mentor-groups/', payload);
+}
+
+export async function updateMentorGroup(
+  groupId: number,
+  payload: {
+    name?: string;
+    mentor_id?: number;
+    batch_id?: number | null;
+  }
+): Promise<MentorGroupRecord> {
+  return putJson(`/mentor-groups/${groupId}`, payload);
+}
+
+export async function deleteMentorGroup(groupId: number): Promise<void> {
+  return deleteJson(`/mentor-groups/${groupId}`);
+}
+
+export async function getMentorGroupMembers(
+  groupId: number
+): Promise<MemberRecord[]> {
+  return getJson<MemberRecord[]>(`/mentor-groups/${groupId}/members`);
+}
+
+export async function addMentorGroupMember(
+  groupId: number,
+  userId: number
+): Promise<MemberRecord> {
+  return postJson(`/mentor-groups/${groupId}/members`, { user_id: userId });
+}
+
+export async function removeMentorGroupMember(
+  groupId: number,
+  userId: number
+): Promise<void> {
+  return deleteJson(`/mentor-groups/${groupId}/members/${userId}`);
+}
+
+export async function createTeam(payload: {
+  name: string;
+  batch_id: number;
+}): Promise<TeamRecord> {
+  return postJson('/teams/', payload);
+}
+
+export async function updateTeam(
+  teamId: number,
+  name: string
+): Promise<TeamRecord> {
+  return putJson(`/teams/${teamId}`, { name });
+}
+
+export async function deleteTeam(teamId: number): Promise<void> {
+  return deleteJson(`/teams/${teamId}`);
+}
+
+export async function getTeamDetail(teamId: number): Promise<TeamDetailRecord> {
+  return getJson<TeamDetailRecord>(`/teams/${teamId}/breakdown`);
+}
+
+export async function joinTeam(
+  teamId: number,
+  force = false
+): Promise<{ status: string; team?: Record<string, unknown> | null }> {
+  const suffix = force ? '?force=true' : '';
+  return postJson(`/teams/${teamId}/join${suffix}`, {});
+}
+
+export async function leaveTeam(teamId: number): Promise<void> {
+  await postJson(`/teams/${teamId}/leave`, {});
+}
+
+export async function addMemberToTeam(
+  teamId: number,
+  corpusUsername: string
+): Promise<MemberRecord> {
+  return postJson(`/teams/${teamId}/members`, {
+    corpus_username: corpusUsername,
+  });
+}
+
+export async function removeMemberFromTeam(
+  teamId: number,
+  memberId: number
+): Promise<void> {
+  return deleteJson(`/teams/${teamId}/members/${memberId}`);
 }
 
 export async function getWeeklyPerformance(params: {

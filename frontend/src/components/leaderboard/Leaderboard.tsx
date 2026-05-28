@@ -2,13 +2,13 @@
  * Team Leaderboard
  *
  * Teams are loaded from the DB roster (read-only here).
- * Use Roster Management to add/edit/delete teams and members.
+ * Mentors organize intern monitoring through mentor groups in Compliance.
  */
 
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Play, Trophy, Briefcase, Database } from 'lucide-react';
-import { getTeams, analyzeTeams } from '../../api';
+import { analyzeTeams, getMentorGroupMembers, getTeams } from '../../api';
 import { useLeaderboardStore } from '../../stores/leaderboardStore';
 import { Spinner } from '../ui/Spinner';
 import { Alert } from '../ui/Alert';
@@ -17,13 +17,20 @@ import { DateFilter } from './DateFilter';
 import { MemberTable } from './MemberTable';
 import { RankingTable } from './RankingTable';
 import { cn } from '../../lib/utils';
-import { useConfigStore } from '../../stores/configStore';
+import { useRouter } from '../../lib/router';
 import type { Team, TeamResult } from '../../types';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
+import { useMentorGroupStore } from '../../stores/mentorGroupStore';
 
 type Page = 'workspace' | 'ranking';
 
 export function Leaderboard() {
+  const { user } = useAuth();
+  const { navigate } = useRouter();
+  const { setTeams } = useLeaderboardStore();
+  const activeGroup = useMentorGroupStore((state) => state.activeGroup);
+  const isMentor = user?.role === 'mentor';
   const [page, setPage] = useState<Page>('workspace');
   const [since, setSince] = useState('');
   const [until, setUntil] = useState('');
@@ -32,29 +39,57 @@ export function Leaderboard() {
   );
   const [selectedTeams, setSelectedTeams] = useState<Set<string>>(new Set());
 
-  const { setTeams } = useLeaderboardStore();
-  const setActiveMode = useConfigStore((s) => s.setActiveMode);
-
-  // Load teams from DB roster
   const teamsQuery = useQuery({
     queryKey: ['teams'],
     queryFn: getTeams,
+    enabled: !isMentor,
+  });
+  const mentorGroupMembersQuery = useQuery({
+    queryKey: ['mentor-group-members', activeGroup?.id],
+    queryFn: () => getMentorGroupMembers(activeGroup?.id as number),
+    enabled: isMentor && !!activeGroup?.id,
   });
 
-  const teams: Team[] = teamsQuery.data ?? [];
+  const mentorMembersWithGitlab = useMemo(
+    () =>
+      (mentorGroupMembersQuery.data ?? []).filter((member) =>
+        Boolean(member.gitlab_username?.trim())
+      ),
+    [mentorGroupMembersQuery.data]
+  );
 
-  // Sync to store
+  const mentorTeam = useMemo<Team[]>(
+    () =>
+      activeGroup?.id
+        ? [
+            {
+              team_name: activeGroup.name,
+              project_name: '',
+              scope: 'mentor-group',
+              members: mentorMembersWithGitlab.map((member) => ({
+                username: member.gitlab_username!.trim(),
+              })),
+            },
+          ]
+        : [],
+    [activeGroup?.id, activeGroup?.name, mentorMembersWithGitlab]
+  );
+
+  const teams = useMemo<Team[]>(
+    () => (isMentor ? mentorTeam : (teamsQuery.data ?? [])),
+    [isMentor, mentorTeam, teamsQuery.data]
+  );
+
   useEffect(() => {
-    if (teamsQuery.data) setTeams(teamsQuery.data);
-  }, [teamsQuery.data, setTeams]);
+    setTeams(teams);
+  }, [setTeams, teams]);
 
-  // Determine which teams to run analysis on
-  const teamsToRun =
-    selectedTeams.size > 0
+  const teamsToRun = isMentor
+    ? teams
+    : selectedTeams.size > 0
       ? teams.filter((t) => selectedTeams.has(t.team_name))
       : teams;
 
-  // Run analysis mutation
   const analyseMutation = useMutation({
     mutationFn: () => {
       const sinceISO = since ? new Date(since).toISOString() : undefined;
@@ -97,7 +132,6 @@ export function Leaderboard() {
         </p>
       </div>
 
-      {/* Page toggle */}
       <div className="mb-6 flex gap-2">
         {(
           [
@@ -125,50 +159,110 @@ export function Leaderboard() {
         ))}
       </div>
 
-      {/* ── Workspace ──────────────────────────────────────────────────────── */}
       {page === 'workspace' && (
         <div className="space-y-5">
-          {teamsQuery.isLoading && (
+          {!isMentor && teamsQuery.isLoading && (
             <Spinner label="Loading teams from roster…" />
           )}
-          {teamsQuery.isError && (
+          {isMentor && activeGroup?.id && mentorGroupMembersQuery.isLoading && (
+            <Spinner label="Loading active mentor group…" />
+          )}
+          {!isMentor && teamsQuery.isError && (
             <Alert variant="error">{(teamsQuery.error as Error).message}</Alert>
           )}
+          {isMentor && mentorGroupMembersQuery.isError && (
+            <Alert variant="error">
+              {(mentorGroupMembersQuery.error as Error).message}
+            </Alert>
+          )}
 
-          {/* Roster notice */}
           <div className="flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-4 py-2.5 text-xs text-blue-700">
             <Database size={13} />
             <span>
-              Teams are managed in{' '}
-              <button
-                className="font-semibold underline"
-                onClick={() => setActiveMode('roster')}
-              >
-                Roster Management
-              </button>
-              . Select teams below, then run analysis.
+              {isMentor ? (
+                <>
+                  Mentor analytics are scoped to your active{' '}
+                  <button
+                    className="font-semibold underline"
+                    onClick={() => navigate('/compliance/mentor-groups')}
+                  >
+                    Mentor Group
+                  </button>
+                  .
+                </>
+              ) : (
+                <>
+                  Teams are managed in{' '}
+                  <button
+                    className="font-semibold underline"
+                    onClick={() => navigate('/compliance/mentor-groups')}
+                  >
+                    Mentor Groups
+                  </button>
+                  . Select teams below, then run analysis.
+                </>
+              )}
             </span>
           </div>
 
-          {/* Teams checklist */}
-          {teams.length === 0 && !teamsQuery.isLoading && (
+          {isMentor && !activeGroup?.id && (
             <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center">
-              <Database size={32} className="mx-auto text-slate-200 mb-2" />
+              <Database size={32} className="mx-auto mb-2 text-slate-200" />
+              <p className="text-sm text-slate-500">
+                Select an active mentor group before running leaderboard
+                analytics.
+              </p>
+              <button
+                className="mt-2 text-sm text-brand-600 hover:underline"
+                onClick={() => navigate('/compliance/mentor-groups')}
+              >
+                Go to Mentor Groups →
+              </button>
+            </div>
+          )}
+
+          {!isMentor && teams.length === 0 && !teamsQuery.isLoading && (
+            <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center">
+              <Database size={32} className="mx-auto mb-2 text-slate-200" />
               <p className="text-sm text-slate-500">
                 No teams found in the roster.
               </p>
               <button
                 className="mt-2 text-sm text-brand-600 hover:underline"
-                onClick={() => setActiveMode('roster')}
+                onClick={() => navigate('/compliance/mentor-groups')}
               >
-                Go to Roster Management to add teams →
+                Go to Mentor Groups to organize interns →
               </button>
             </div>
           )}
 
-          {teams.length > 0 && (
-            <div className="rounded-xl border border-slate-200 bg-white divide-y divide-slate-100 overflow-hidden">
-              <div className="px-4 py-2.5 bg-slate-50 flex items-center justify-between">
+          {isMentor && activeGroup?.id && (
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">
+                    Active group: {activeGroup.name}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {mentorMembersWithGitlab.length} GitLab-linked intern(s)
+                    included
+                    {mentorGroupMembersQuery.data &&
+                    mentorGroupMembersQuery.data.length !==
+                      mentorMembersWithGitlab.length
+                      ? ` · ${mentorGroupMembersQuery.data.length - mentorMembersWithGitlab.length} skipped without GitLab usernames`
+                      : ''}
+                  </p>
+                </div>
+                <Badge variant="default">
+                  {mentorMembersWithGitlab.length}
+                </Badge>
+              </div>
+            </div>
+          )}
+
+          {!isMentor && teams.length > 0 && (
+            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white divide-y divide-slate-100">
+              <div className="flex items-center justify-between bg-slate-50 px-4 py-2.5">
                 <span className="text-xs font-semibold text-slate-600">
                   Teams ({teams.length})
                 </span>
@@ -190,7 +284,7 @@ export function Leaderboard() {
               {teams.map((team) => (
                 <label
                   key={team.team_name}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer"
+                  className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-slate-50"
                 >
                   <input
                     type="checkbox"
@@ -212,8 +306,7 @@ export function Leaderboard() {
             </div>
           )}
 
-          {/* Date filter */}
-          {teams.length > 0 && (
+          {teams.length > 0 && (!isMentor || !!activeGroup?.id) && (
             <>
               <DateFilter
                 since={since}
@@ -228,8 +321,12 @@ export function Leaderboard() {
 
               <button
                 onClick={() => analyseMutation.mutate()}
-                disabled={analyseMutation.isPending || teamsToRun.length === 0}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 py-3 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50 transition-colors"
+                disabled={
+                  analyseMutation.isPending ||
+                  teamsToRun.length === 0 ||
+                  (isMentor && mentorMembersWithGitlab.length === 0)
+                }
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
               >
                 {analyseMutation.isPending ? (
                   <Spinner size="sm" label="" />
@@ -238,7 +335,9 @@ export function Leaderboard() {
                 )}
                 {analyseMutation.isPending
                   ? 'Running Analysis…'
-                  : `▶️ Run Analysis (${teamsToRun.length} team${teamsToRun.length !== 1 ? 's' : ''})`}
+                  : isMentor
+                    ? `▶️ Run Analysis (${activeGroup?.name})`
+                    : `▶️ Run Analysis (${teamsToRun.length} team${teamsToRun.length !== 1 ? 's' : ''})`}
               </button>
 
               {analyseMutation.isError && (
@@ -249,7 +348,6 @@ export function Leaderboard() {
             </>
           )}
 
-          {/* Per-team tables after analysis */}
           {analysisResult && (
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-slate-700">
@@ -268,13 +366,12 @@ export function Leaderboard() {
         </div>
       )}
 
-      {/* ── Ranking ────────────────────────────────────────────────────────── */}
       {page === 'ranking' &&
         (analysisResult ? (
           <RankingTable teams={analysisResult} />
         ) : (
           <div className="rounded-xl border border-dashed border-slate-200 p-12 text-center">
-            <Trophy size={40} className="mx-auto text-slate-200 mb-3" />
+            <Trophy size={40} className="mx-auto mb-3 text-slate-200" />
             <p className="text-sm text-slate-500">No analysis data yet.</p>
             <button
               onClick={() => setPage('workspace')}

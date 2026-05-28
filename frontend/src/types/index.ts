@@ -26,6 +26,42 @@ export interface HealthResponse {
   };
 }
 
+export interface MyProfileResponse {
+  id: number;
+  name: string;
+  corpus_username: string;
+  email?: string | null;
+  institution_id?: string | null;
+  institution_name?: string | null;
+  gitlab_username?: string | null;
+  global_username?: string | null;
+  global_email?: string | null;
+  date_of_joining?: string | null;
+  role: UserRole;
+  can_edit_standup: boolean;
+  team_id?: number | null;
+  team_name: string;
+  batch_id?: number | null;
+  batch_name?: string | null;
+}
+
+export interface MyTeamResponse {
+  team_id?: number | null;
+  team_name: string;
+  batch_name?: string | null;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  members: Array<{
+    id: number;
+    name: string;
+    corpus_username: string;
+    gitlab_username?: string | null;
+    global_email?: string | null;
+    role: UserRole;
+  }>;
+}
+
 // ── User Profile ──────────────────────────────────────────────────────────
 
 export interface CommitStats {
@@ -230,6 +266,8 @@ export interface BatchRecord {
   id: number;
   name: string;
   date?: string;
+  start_date?: string;
+  end_date?: string;
   team_count: number;
   member_count: number;
 }
@@ -246,6 +284,29 @@ export interface TeamRecord {
   created_by?: number | null;
 }
 
+export interface AppMemberSummary {
+  id: number;
+  name: string;
+  corpus_username: string;
+  gitlab_username?: string;
+  role: UserRole;
+  joined_at?: string;
+  left_at?: string;
+}
+
+export interface TeamDetailRecord {
+  id: number;
+  name: string;
+  batch_id: number;
+  batch_name: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  member_count: number;
+  members: AppMemberSummary[];
+  history: AppMemberSummary[];
+}
+
 export interface MemberRecord {
   id: number;
   name: string;
@@ -260,10 +321,32 @@ export interface MemberRecord {
   global_email?: string;
   date_of_joining?: string;
   college_name?: string;
+  can_edit_standup?: boolean;
   team_id?: number | null;
   team_name: string;
   batch_id?: number | null;
   batch_name?: string;
+}
+
+export interface MentorBatchEntry {
+  id: number;
+  name: string;
+  date?: string | null;
+}
+
+export interface MentorBatchesResponse {
+  mentor_id: number;
+  batches: MentorBatchEntry[];
+}
+
+export interface MentorGroupRecord {
+  id: number;
+  name: string;
+  mentor_id: number;
+  mentor_name: string;
+  batch_id?: number | null;
+  batch_name?: string | null;
+  member_count: number;
 }
 
 // ── Weekly Performance ────────────────────────────────────────────────────

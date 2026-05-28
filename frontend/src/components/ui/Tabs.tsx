@@ -21,8 +21,19 @@ export function Tabs({ tabs, defaultTab, children, className }: TabsProps) {
     <div className={cn('w-full', className)}>
       {/* Tab bar */}
       <div
-        className="flex overflow-x-auto border-b border-slate-200 no-scrollbar"
         role="tablist"
+        style={{
+          display: 'flex',
+          gap: 4,
+          padding: 4,
+          borderRadius: 14,
+          background: 'rgba(255, 255, 255, 0.5)',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid rgba(255, 255, 255, 0.6)',
+          marginBottom: 20,
+          overflowX: 'auto',
+        }}
+        className="no-scrollbar"
       >
         {tabs.map((tab) => (
           <button
@@ -30,12 +41,29 @@ export function Tabs({ tabs, defaultTab, children, className }: TabsProps) {
             role="tab"
             aria-selected={active === tab.id}
             onClick={() => setActive(tab.id)}
-            className={cn(
-              'flex items-center gap-1.5 whitespace-nowrap px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors',
-              active === tab.id
-                ? 'border-brand-600 text-brand-700'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-            )}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 16px',
+              borderRadius: 10,
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: active === tab.id ? 600 : 500,
+              fontFamily: 'var(--font-display)',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.2s ease',
+              background:
+                active === tab.id
+                  ? 'linear-gradient(135deg, #4f46e5, #6366f1)'
+                  : 'transparent',
+              color: active === tab.id ? '#fff' : 'var(--slate-500)',
+              boxShadow:
+                active === tab.id
+                  ? '0 2px 8px rgba(79, 70, 229, 0.25)'
+                  : 'none',
+            }}
           >
             {tab.icon}
             {tab.label}
@@ -44,7 +72,7 @@ export function Tabs({ tabs, defaultTab, children, className }: TabsProps) {
       </div>
 
       {/* Panel */}
-      <div className="pt-4">{children(active)}</div>
+      <div>{children(active)}</div>
     </div>
   );
 }

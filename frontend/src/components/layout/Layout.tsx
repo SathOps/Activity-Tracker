@@ -4,6 +4,8 @@ import LanguageSwitcher from '../LanguageSwitcher';
 import { Sidebar } from './Sidebar';
 import { useConfigStore } from '../../stores/configStore';
 import { Alert } from '../ui/Alert';
+import { getRouteMeta } from '../../lib/appRoutes';
+import { useRouter } from '../../lib/router';
 
 interface Props {
   children: React.ReactNode;
@@ -13,50 +15,17 @@ const THEME_STORAGE_KEY = 'standup_theme_mode';
 
 type ThemeMode = 'light' | 'dark';
 
-const MODE_META = {
-  standup: {
-    section: 'Standup Tracker',
-    title: 'Standup Tracker',
-    description:
-      'Manage daily standup submissions, verification, audio evidence, and team progress.',
-  },
-  profile: {
-    section: 'Git Compliance Checker',
-    title: 'User Profile',
-    description:
-      'Developer activity, merge requests, issues, and contribution summary.',
-  },
-  weekly: {
-    section: 'Git Compliance Checker',
-    title: 'Weekly Performance',
-    description: 'Track daily activity patterns and weekly consistency.',
-  },
-  batch: {
-    section: 'Git Compliance Checker',
-    title: 'Batch Analytics',
-    description: 'Review activity and progress across multiple developers.',
-  },
-  leaderboard: {
-    section: 'Git Compliance Checker',
-    title: 'Team Leaderboard',
-    description: 'Compare team performance, scoring, and contribution trends.',
-  },
-  roster: {
-    section: 'Git Compliance Checker',
-    title: 'Roster Management',
-    description: 'Manage team composition, groups, and batch membership.',
-  },
-} as const;
-
 export function Layout({ children }: Props) {
   const { t } = useTranslation();
-  const { gitlabToken, activeMode, corpusUser } = useConfigStore();
+  const { pathname } = useRouter();
+  const { gitlabToken, corpusUser } = useConfigStore();
   const [themeMode, setThemeMode] = useState<ThemeMode>(() =>
     readStoredThemeMode()
   );
-  const modeMeta = MODE_META[activeMode] ?? MODE_META.standup;
+  const modeMeta = getRouteMeta(pathname);
   const corpusUserLabel = corpusUser.trim();
-  const isStandupMode = activeMode === 'standup';
+  const isStandupMode = modeMeta.workspace === 'standup';
+  const isComplianceMode = modeMeta.workspace === 'compliance';
 
   useEffect(() => {
     persistThemeMode(themeMode);
@@ -69,29 +38,68 @@ export function Layout({ children }: Props) {
   }, [themeMode]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
-        <div className="p-6 max-w-7xl mx-auto">
-          <header className="mb-6 rounded-lg border border-slate-200 bg-white px-6 py-5 shadow-sm">
+      <main
+        className="flex-1 overflow-y-auto"
+        style={{
+          background:
+            'linear-gradient(135deg, #f0f2f8 0%, #e8ecf5 50%, #f0f0fa 100%)',
+        }}
+      >
+        <div style={{ padding: '24px 32px', maxWidth: 1200, margin: '0 auto' }}>
+          {/* Glass header */}
+          <header
+            style={{
+              marginBottom: 28,
+              borderRadius: 20,
+              padding: '20px 28px',
+              background: 'rgba(255, 255, 255, 0.65)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255, 255, 255, 0.6)',
+              boxShadow:
+                '0 4px 24px rgba(15, 20, 40, 0.05), inset 0 1px 0 rgba(255,255,255,0.6)',
+            }}
+          >
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="space-y-1">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-                  Internship Activity Tracker
-                </p>
-                <h1 className="text-2xl font-bold text-slate-900">
+              <div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.16em',
+                    color: 'var(--indigo-400)',
+                    fontFamily: 'var(--font-display)',
+                  }}
+                >
                   {modeMeta.section}
+                </p>
+                <h1
+                  style={{
+                    margin: '6px 0 0',
+                    fontSize: 26,
+                    fontWeight: 800,
+                    fontFamily: 'var(--font-display)',
+                    color: 'var(--slate-900)',
+                    letterSpacing: '-0.02em',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {modeMeta.title}
                 </h1>
-                <p className="max-w-3xl text-sm text-slate-500">
+                <p
+                  style={{
+                    margin: '6px 0 0',
+                    fontSize: 14,
+                    color: 'var(--slate-500)',
+                    maxWidth: '60ch',
+                  }}
+                >
                   {modeMeta.description}
                 </p>
-                {!isStandupMode ? (
-                  <div className="pt-2">
-                    <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
-                      Current view: {modeMeta.title}
-                    </span>
-                  </div>
-                ) : null}
               </div>
 
               <div className="flex items-center gap-3">
@@ -104,7 +112,19 @@ export function Layout({ children }: Props) {
                           ? t('theme.light')
                           : t('theme.dark'),
                     })}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-base text-slate-600 transition-colors hover:bg-slate-100"
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      border: '1px solid rgba(0,0,0,0.06)',
+                      background: 'rgba(255,255,255,0.7)',
+                      fontSize: 16,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s',
+                    }}
                     onClick={() =>
                       setThemeMode((prev) =>
                         prev === 'dark' ? 'light' : 'dark'
@@ -118,15 +138,27 @@ export function Layout({ children }: Props) {
                   </button>
                 ) : null}
                 {corpusUserLabel ? (
-                  <div className="rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700">
-                    Corpus: {corpusUserLabel}
+                  <div
+                    style={{
+                      borderRadius: 99,
+                      padding: '8px 18px',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      background:
+                        'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.06))',
+                      color: 'var(--indigo-600)',
+                      border: '1px solid rgba(99,102,241,0.12)',
+                      fontFamily: 'var(--font-display)',
+                    }}
+                  >
+                    {corpusUserLabel}
                   </div>
                 ) : null}
               </div>
             </div>
           </header>
 
-          {!isStandupMode && !gitlabToken && (
+          {isComplianceMode && !gitlabToken && (
             <Alert
               variant="warning"
               title="GitLab Token Required"

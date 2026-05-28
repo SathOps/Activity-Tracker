@@ -22,7 +22,8 @@ import {
   verifyLocation,
 } from '../src/services/corpusUploadApi.ts';
 
-const CORPUS_PROXY_BASE_URL = '/api/corpus';
+const API_BASE_URL = 'http://localhost:8000/api';
+const CORPUS_PROXY_BASE_URL = `${API_BASE_URL}/corpus`;
 const CORPUS_UPLOAD_CHUNK_URL = `${CORPUS_PROXY_BASE_URL}/records/upload/chunk`;
 const CORPUS_UPLOAD_URL = `${CORPUS_PROXY_BASE_URL}/records/upload`;
 const CORPUS_CATEGORIES_URL = `${CORPUS_PROXY_BASE_URL}/proxy/api/v1/categories/`;

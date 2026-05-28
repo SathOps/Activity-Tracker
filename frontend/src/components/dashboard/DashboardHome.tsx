@@ -12,6 +12,7 @@ export interface DashboardHomeProps {
   authToken: string;
   onInternsChange: (interns: Intern[]) => void;
   onRemoveIntern: (internId: string) => void;
+  canManageInterns?: boolean;
 }
 
 const TABS: { key: ActiveView; label: string; icon: string }[] = [
@@ -27,6 +28,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
   authToken,
   onInternsChange,
   onRemoveIntern,
+  canManageInterns = true,
 }) => {
   const [activeView, setActiveView] = useState<ActiveView>('status');
 
@@ -52,10 +54,12 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
           authToken={authToken}
           onInternsChange={onInternsChange}
           onRemoveIntern={onRemoveIntern}
+          canManageInterns={canManageInterns}
         />
       ) : (
         <TeamsDashboard
           addedInterns={addedInterns}
+          canManageStandup={canManageInterns}
           mode={
             activeView === 'status'
               ? 'status'
