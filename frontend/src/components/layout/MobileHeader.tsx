@@ -1,7 +1,6 @@
 import React from 'react';
 import { LogOut, User, Globe, Moon, Sun, Mic, BarChart3 } from 'lucide-react';
 import { useConfigStore } from '../../stores/configStore';
-import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 interface MobileHeaderProps {
@@ -10,7 +9,6 @@ interface MobileHeaderProps {
 }
 
 export function MobileHeader({ themeMode, onToggleTheme }: MobileHeaderProps) {
-  const { t } = useTranslation();
   const { activeMode, corpusUser, setActiveMode, clearCorpusToken } =
     useConfigStore();
 
@@ -20,12 +18,14 @@ export function MobileHeader({ themeMode, onToggleTheme }: MobileHeaderProps) {
     <header className="mobile-header">
       <div className="mobile-header__top">
         <div className="mobile-header__user-group">
-          <div
+          <button
             className="mobile-header__profile-icon"
+            onClick={() => setActiveMode('profile')}
             title={corpusUser || 'User'}
+            type="button"
           >
             <User size={18} />
-          </div>
+          </button>
           <button
             className="mobile-header__logout-btn"
             onClick={clearCorpusToken}
