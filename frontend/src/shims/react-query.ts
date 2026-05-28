@@ -16,6 +16,7 @@ interface MutationResult<TData, TError, TVariables> {
   isPending: boolean;
   isError: boolean;
   error: TError | null;
+  variables: TVariables | undefined;
 }
 
 const listeners = new Map<string, Set<() => void>>();
@@ -136,12 +137,14 @@ export function useMutation<TData, TError = Error, TVariables = void>(options: {
 
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<TError | null>(null);
+  const [variables, setVariables] = useState<TVariables | undefined>(undefined);
 
-  const mutate = useCallback(async (variables?: TVariables) => {
+  const mutate = useCallback(async (vars?: TVariables) => {
     setIsPending(true);
     setError(null);
+    setVariables(vars);
     try {
-      const result = await mutationFnRef.current(variables as TVariables);
+      const result = await mutationFnRef.current(vars as TVariables);
       onSuccessRef.current?.(result);
       setIsPending(false);
       return result;
@@ -161,6 +164,7 @@ export function useMutation<TData, TError = Error, TVariables = void>(options: {
     isPending,
     isError: error !== null,
     error,
+    variables,
   };
 }
 

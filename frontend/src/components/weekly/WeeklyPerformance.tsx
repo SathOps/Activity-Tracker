@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import {
   Clock,
   GitCommit,
@@ -12,14 +11,28 @@ import {
   ExternalLink,
   Video,
 } from 'lucide-react';
-import { getWeeklyPerformance, downloadJson } from '../../api';
+import {
+  getWeeklyPerformance,
+  getWeeklyPerformanceBatch,
+  buildBatchCommitsStreamUrl,
+  downloadJson,
+} from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
-import { useConfigStore } from '../../stores/configStore';
+import {
+  HierarchicalSelector,
+  type SelectorOutput,
+} from '../shared/HierarchicalSelector';
 import { Spinner } from '../ui/Spinner';
 import { Alert } from '../ui/Alert';
 import { MetricCard } from '../ui/MetricCard';
 import { cn, toDisplayText } from '../../lib/utils';
-import type { WeeklyActivity, DailyData, EventDetail } from '../../types';
+import type {
+  WeeklyActivity,
+  DailyData,
+  EventDetail,
+  CommitEntry,
+  SSEProgressEvent,
+} from '../../types';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -327,7 +340,15 @@ function MediaRecord({
 
 // ── Day row ───────────────────────────────────────────────────────────────────
 
-function DayRow({ date, day }: { date: string; day: DailyData }) {
+function DayRow({
+  date,
+  day,
+  commits = [],
+}: {
+  date: string;
+  day: DailyData;
+  commits?: CommitEntry[];
+}) {
   const gl = day.gitlab;
   // Normalise to strings so Set.has() works regardless of whether
   // the backend returns numbers or strings in active_hours.
@@ -444,6 +465,42 @@ function DayRow({ date, day }: { date: string; day: DailyData }) {
           ))}
         </div>
       )}
+
+      {/* Commits */}
+      {commits.length > 0 && (
+        <div className="pt-2 border-t border-slate-100 space-y-1">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+            Commits ({commits.length})
+          </p>
+          {commits.map((c, i) => (
+            <a
+              key={i}
+              href={c.web_url || '#'}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 group"
+            >
+              <GitCommit
+                size={10}
+                className="mt-0.5 flex-shrink-0 text-blue-400"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-slate-700 group-hover:text-blue-700 line-clamp-2 leading-snug">
+                  {c.message}
+                </p>
+                <p className="text-[10px] text-slate-400 mt-0.5">
+                  {c.project_name} · {c.time}
+                  {c.sha ? ` · ${c.sha.slice(0, 7)}` : ''}
+                </p>
+              </div>
+              <ExternalLink
+                size={10}
+                className="flex-shrink-0 mt-0.5 text-slate-300 group-hover:text-blue-400"
+              />
+            </a>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -483,68 +540,135 @@ function SummaryCards({ activity }: { activity: WeeklyActivity }) {
 export function WeeklyPerformance() {
   const { user } = useAuth();
   const isIntern = user?.role === 'intern';
-  const { corpusToken } = useConfigStore();
 
-  const [username, setUsername] = useState(user?.gitlabUsername || '');
-  const [corpusUid, setCorpusUid] = useState(user?.corpusUsername || '');
-  const [startDate, setStartDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 30);
-    return d.toISOString().split('T')[0];
-  });
-  const [endDate, setEndDate] = useState(
-    () => new Date().toISOString().split('T')[0]
+  const [results, setResults] = useState<WeeklyActivity[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
+  const [commitsMap, setCommitsMap] = useState<Map<string, CommitEntry[]>>(
+    new Map()
   );
-  const [submitted, setSubmitted] = useState(false);
-  const [params, setParams] = useState<null | {
-    gitlab_username: string;
-    corpus_uid: string;
-    start_date: string;
-    end_date: string;
-    corpus_token?: string;
-  }>(null);
+  const [commitsLoading, setCommitsLoading] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
 
-  const { data, isLoading, error, isError } = useQuery({
-    queryKey: ['weekly', params],
-    queryFn: () => getWeeklyPerformance(params!),
-    enabled: !!params && submitted,
-    retry: 1,
-  });
+  useEffect(
+    () => () => {
+      abortRef.current?.abort();
+    },
+    []
+  );
 
-  useEffect(() => {
-    if (!isIntern || !user?.gitlabUsername) return;
-    setUsername(user.gitlabUsername);
-    setCorpusUid(user.corpusUsername);
-  }, [isIntern, user?.corpusUsername, user?.gitlabUsername]);
+  async function handleRun(output: SelectorOutput) {
+    if (!output.members.length) return;
+    abortRef.current?.abort();
 
-  function handleSubmit(e: React.SyntheticEvent) {
-    e.preventDefault();
-    if (!username.trim()) return;
-    setParams({
-      gitlab_username: username.trim(),
-      corpus_uid: corpusUid.trim(),
-      start_date: startDate,
-      end_date: endDate,
-      corpus_token: corpusToken || undefined,
-    });
-    setSubmitted(true);
+    setIsLoading(true);
+    setFetchError(null);
+    setResults([]);
+    setCommitsMap(new Map());
+    setActiveTab(0);
+    setCommitsLoading(false);
+
+    try {
+      if (output.members.length === 1) {
+        const result = await getWeeklyPerformance({
+          start_date: output.startDate,
+          end_date: output.endDate,
+        });
+        setResults([result]);
+      } else {
+        const batchResults = await getWeeklyPerformanceBatch({
+          interns: output.members.map((m) => ({
+            gitlab_username: m.gitlab_username,
+          })),
+          start_date: output.startDate,
+          end_date: output.endDate,
+        });
+        setResults(batchResults);
+      }
+    } catch (e) {
+      setFetchError((e as Error).message ?? 'Failed to fetch activity');
+    } finally {
+      setIsLoading(false);
+    }
+
+    // Stream commits for all selected members
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
+    setCommitsLoading(true);
+
+    const since = output.startDate
+      ? new Date(output.startDate).toISOString()
+      : undefined;
+    const until = output.endDate
+      ? new Date(output.endDate + 'T23:59:59').toISOString()
+      : undefined;
+    const url = buildBatchCommitsStreamUrl(
+      output.members.map((m) => m.gitlab_username),
+      undefined,
+      since,
+      until
+    );
+
+    fetch(url, { signal: ctrl.signal, credentials: 'include' })
+      .then(async (res) => {
+        if (!res.ok || !res.body) {
+          setCommitsLoading(false);
+          return;
+        }
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const lines = buf.split('\n');
+          buf = lines.pop() ?? '';
+          for (const line of lines) {
+            if (!line.startsWith('data:')) continue;
+            const raw = line.slice('data:'.length).trim();
+            if (!raw) continue;
+            try {
+              const ev = JSON.parse(raw) as SSEProgressEvent;
+              if (ev.type === 'done') {
+                setCommitsLoading(false);
+                return;
+              }
+              if (ev.type === 'progress' && ev.username && ev.result) {
+                const r = ev.result as { commits?: CommitEntry[] };
+                const list = r.commits ?? [];
+                setCommitsMap((prev) => new Map(prev).set(ev.username!, list));
+              }
+            } catch {
+              // skip malformed SSE line
+            }
+          }
+        }
+        setCommitsLoading(false);
+      })
+      .catch((err: unknown) => {
+        if ((err as Error)?.name !== 'AbortError') setCommitsLoading(false);
+      });
   }
 
-  function handleLoadMine() {
-    if (!user?.gitlabUsername) return;
-    setParams({
-      gitlab_username: user.gitlabUsername,
-      corpus_uid: user.corpusUsername,
-      start_date: startDate,
-      end_date: endDate,
-      corpus_token: corpusToken || undefined,
-    });
-    setSubmitted(true);
+  const activeResult = results[activeTab] ?? null;
+
+  // Group commits by date for the currently active intern tab
+  const commitsByDate = new Map<string, CommitEntry[]>();
+  if (activeResult) {
+    for (const c of commitsMap.get(activeResult.gitlab_username) ?? []) {
+      const bucket = commitsByDate.get(c.date) ?? [];
+      bucket.push(c);
+      commitsByDate.set(c.date, bucket);
+    }
   }
 
-  const sortedDates = data ? Object.keys(data.daily_data).sort() : [];
+  const sortedDates = activeResult
+    ? Object.keys(activeResult.daily_data).sort()
+    : [];
   const activeDayCount = sortedDates.filter((d) => {
-    const gl = data!.daily_data[d].gitlab;
+    const gl = activeResult!.daily_data[d].gitlab;
     return (
       gl.commits > 0 ||
       gl.mrs > 0 ||
@@ -566,93 +690,13 @@ export function WeeklyPerformance() {
         </p>
       </div>
 
-      {/* Input form */}
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-xl border border-slate-200 bg-white p-4 space-y-4"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label className="block" htmlFor="weekly-gitlab-username">
-            <span className="text-xs font-medium text-slate-600 mb-1 block">
-              GitLab Username *
-            </span>
-            <input
-              id="weekly-gitlab-username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              disabled={isIntern}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:bg-slate-50"
-              placeholder="e.g. john_doe"
-              required
-            />
-          </label>
-
-          <label className="block" htmlFor="weekly-corpus-uid">
-            <span className="text-xs font-medium text-slate-600 mb-1 block">
-              Corpus UID
-              <span className="ml-1 text-slate-400 font-normal">
-                (optional)
-              </span>
-            </span>
-            <input
-              id="weekly-corpus-uid"
-              type="text"
-              value={corpusUid}
-              onChange={(e) => setCorpusUid(e.target.value)}
-              disabled={isIntern}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:bg-slate-50"
-              placeholder="corpus username"
-            />
-          </label>
-
-          <label className="block" htmlFor="weekly-start-date">
-            <span className="text-xs font-medium text-slate-600 mb-1 block">
-              Start Date
-            </span>
-            <input
-              id="weekly-start-date"
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            />
-          </label>
-
-          <label className="block" htmlFor="weekly-end-date">
-            <span className="text-xs font-medium text-slate-600 mb-1 block">
-              End Date
-            </span>
-            <input
-              id="weekly-end-date"
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            />
-          </label>
-        </div>
-
-        <div className="flex items-center gap-3 flex-wrap">
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-          >
-            {isLoading ? 'Fetching…' : 'Fetch Activity'}
-          </button>
-          {isIntern && (
-            <button
-              type="button"
-              onClick={handleLoadMine}
-              disabled={!user?.gitlabUsername || isLoading}
-              className="rounded-lg border border-slate-200 px-5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-colors"
-            >
-              Load My Activity
-            </button>
-          )}
-        </div>
-      </form>
+      <HierarchicalSelector
+        runLabel="Fetch Activity"
+        isRunning={isLoading}
+        onRun={(output) => {
+          void handleRun(output);
+        }}
+      />
 
       {isLoading && (
         <div className="flex justify-center py-12">
@@ -660,90 +704,127 @@ export function WeeklyPerformance() {
         </div>
       )}
 
-      {isError && (
+      {fetchError && (
         <Alert variant="error" title="Failed to fetch activity">
-          {(error as Error)?.message ?? 'Unknown error'}
+          {fetchError}
         </Alert>
       )}
 
-      {data && (
+      {results.length > 0 && !isLoading && (
         <div className="space-y-4">
-          {/* Header */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 className="text-base font-semibold text-slate-800">
-                {data.intern_name}
-                <span className="ml-2 text-sm font-normal text-slate-500">
-                  @{data.gitlab_username}
-                </span>
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {sortedDates[0]} → {sortedDates[sortedDates.length - 1]}
-                {' · '}
-                <span className="text-green-600 font-medium">
-                  {activeDayCount} active
-                </span>
-                {' / '}
-                {sortedDates.length} days
-                {data.audio_fetched && (
-                  <span className="ml-2 text-indigo-500">
-                    · recordings fetched
-                  </span>
-                )}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() =>
-                downloadJson(data, `weekly_${data.gitlab_username}.json`)
-              }
-              className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 transition-colors"
-            >
-              <Download size={13} /> Export JSON
-            </button>
-          </div>
-
-          {/* Summary cards */}
-          <SummaryCards activity={data} />
-
-          {/* Legend */}
-          <div className="flex flex-wrap items-center gap-4 rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5 text-[10px] text-slate-500">
-            <span className="font-semibold text-slate-600">Legend:</span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-3 w-3 rounded bg-gradient-to-b from-green-400 to-green-600 inline-block" />
-              Active hour (click to see events)
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-blue-500 inline-block" />
-              Commit
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-purple-500 inline-block" />
-              Merge Request
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-amber-500 inline-block" />
-              Issue
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Mic size={10} className="text-indigo-500" /> Audio recording
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Video size={10} className="text-purple-500" /> Video link
-            </span>
-          </div>
-
-          {/* Day rows */}
-          {sortedDates.length === 0 ? (
-            <p className="text-sm text-slate-500 text-center py-8">
-              No activity found in this date range.
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {sortedDates.map((date) => (
-                <DayRow key={date} date={date} day={data.daily_data[date]} />
+          {/* Intern tabs — only shown when multiple selected */}
+          {results.length > 1 && (
+            <div className="flex flex-wrap gap-2">
+              {results.map((r, i) => (
+                <button
+                  key={r.gitlab_username}
+                  type="button"
+                  onClick={() => setActiveTab(i)}
+                  className={cn(
+                    'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                    i === activeTab
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  )}
+                >
+                  {r.intern_name || r.gitlab_username}
+                </button>
               ))}
             </div>
+          )}
+
+          {activeResult && (
+            <>
+              {/* Header */}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-base font-semibold text-slate-800">
+                    {activeResult.intern_name}
+                    <span className="ml-2 text-sm font-normal text-slate-500">
+                      @{activeResult.gitlab_username}
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {sortedDates[0]} → {sortedDates[sortedDates.length - 1]}
+                    {' · '}
+                    <span className="text-green-600 font-medium">
+                      {activeDayCount} active
+                    </span>
+                    {' / '}
+                    {sortedDates.length} days
+                    {activeResult.audio_fetched && (
+                      <span className="ml-2 text-indigo-500">
+                        · recordings fetched
+                      </span>
+                    )}
+                    {commitsLoading && (
+                      <span className="ml-2 text-blue-400">
+                        · commits loading…
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    downloadJson(
+                      activeResult,
+                      `weekly_${activeResult.gitlab_username}.json`
+                    )
+                  }
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                  <Download size={13} /> Export JSON
+                </button>
+              </div>
+
+              <SummaryCards activity={activeResult} />
+
+              {/* Legend */}
+              <div className="flex flex-wrap items-center gap-4 rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5 text-[10px] text-slate-500">
+                <span className="font-semibold text-slate-600">Legend:</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-3 w-3 rounded bg-gradient-to-b from-green-400 to-green-600 inline-block" />
+                  Active hour (click to see events)
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-blue-500 inline-block" />
+                  Commit
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-purple-500 inline-block" />
+                  Merge Request
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-amber-500 inline-block" />
+                  Issue
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Mic size={10} className="text-indigo-500" /> Audio recording
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Video size={10} className="text-purple-500" /> Video link
+                </span>
+              </div>
+
+              {/* Day rows */}
+              {sortedDates.length === 0 ? (
+                <p className="text-sm text-slate-500 text-center py-8">
+                  No activity found in this date range.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {sortedDates.map((date) => (
+                    <DayRow
+                      key={date}
+                      date={date}
+                      day={activeResult.daily_data[date]}
+                      commits={commitsByDate.get(date)}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

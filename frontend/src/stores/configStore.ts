@@ -1,10 +1,11 @@
 import { useSyncExternalStore } from 'react';
-import type { AppMode, UserRole } from '../types';
+import type { AppMode, StandupPanel, UserRole } from '../types';
 
 interface ConfigState {
   gitlabUrl: string;
   gitlabToken: string;
   activeMode: AppMode;
+  activeStandupPanel: StandupPanel;
   isAuthenticated: boolean;
   userRole: UserRole;
   corpusToken: string;
@@ -13,6 +14,7 @@ interface ConfigState {
   setGitlabUrl: (url: string) => void;
   setGitlabToken: (token: string) => void;
   setActiveMode: (mode: AppMode) => void;
+  setActiveStandupPanel: (panel: StandupPanel) => void;
   setIsAuthenticated: (auth: boolean) => void;
   setUserRole: (role: UserRole) => void;
   resetCredentials: () => void;
@@ -28,6 +30,7 @@ type ConfigFields = Omit<
   | 'setGitlabUrl'
   | 'setGitlabToken'
   | 'setActiveMode'
+  | 'setActiveStandupPanel'
   | 'setIsAuthenticated'
   | 'setUserRole'
   | 'resetCredentials'
@@ -64,6 +67,7 @@ function buildFields(partial: Partial<ConfigFields> = {}): ConfigFields {
     gitlabUrl: partial.gitlabUrl ?? defaultGitlabUrl,
     gitlabToken: partial.gitlabToken ?? '',
     activeMode: partial.activeMode ?? 'standup',
+    activeStandupPanel: partial.activeStandupPanel ?? 'status',
     isAuthenticated: partial.isAuthenticated ?? false,
     userRole: partial.userRole ?? 'intern',
     corpusToken: partial.corpusToken ?? '',
@@ -79,6 +83,8 @@ const actions = {
   setGitlabUrl: (url: string) => setState({ gitlabUrl: url }),
   setGitlabToken: (token: string) => setState({ gitlabToken: token }),
   setActiveMode: (mode: AppMode) => setState({ activeMode: mode }),
+  setActiveStandupPanel: (panel: StandupPanel) =>
+    setState({ activeStandupPanel: panel }),
   setIsAuthenticated: (auth: boolean) => setState({ isAuthenticated: auth }),
   setUserRole: (role: UserRole) => setState({ userRole: role }),
   resetCredentials: () =>
@@ -109,6 +115,7 @@ function persistState(): void {
     gitlabUrl: stateFields.gitlabUrl,
     gitlabToken: stateFields.gitlabToken,
     activeMode: stateFields.activeMode,
+    activeStandupPanel: stateFields.activeStandupPanel,
     userRole: stateFields.userRole,
     isAuthenticated: stateFields.isAuthenticated,
     corpusToken: stateFields.corpusToken,
