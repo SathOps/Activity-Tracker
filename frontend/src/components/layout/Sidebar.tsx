@@ -68,6 +68,12 @@ const SUBNAV_ITEMS: Record<Exclude<WorkspaceId, 'standup'>, NavItem[]> = {
       icon: <Calendar size={16} />,
     },
     {
+      path: '/compliance/mentor-groups',
+      label: 'Mentor Groups',
+      desc: 'DB-backed intern groups',
+      icon: <Users size={16} />,
+    },
+    {
       path: '/compliance/batch',
       label: 'Batch Analytics',
       desc: 'Bulk developer reports',
@@ -92,6 +98,12 @@ const SUBNAV_ITEMS: Record<Exclude<WorkspaceId, 'standup'>, NavItem[]> = {
       label: 'Roles',
       desc: 'Roles and standup edit permission',
       icon: <Database size={16} />,
+    },
+    {
+      path: '/manage/mentor-groups',
+      label: 'Mentor Groups',
+      desc: 'Assign interns to mentors',
+      icon: <Users size={16} />,
     },
   ],
 };

@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import toast from 'react-hot-toast';
-import { BatchSelectionPage } from './components/auth/BatchSelectionPage';
 import { CorpusLoginPage } from './components/auth/CorpusLoginPage';
 import { ProfileCompletionPage } from './components/auth/ProfileCompletionPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -10,6 +9,7 @@ import { Layout } from './components/layout/Layout';
 import { BatchAnalytics } from './components/batch/BatchAnalytics';
 import { Leaderboard } from './components/leaderboard/Leaderboard';
 import { BatchesPage } from './components/manage/BatchesPage';
+import { MentorGroupsPage } from './components/manage/MentorGroupsPage';
 import { RolesPage } from './components/manage/RolesPage';
 import { UserProfile } from './components/profile/UserProfile';
 import { WeeklyPerformance } from './components/weekly/WeeklyPerformance';
@@ -67,11 +67,6 @@ function AppContent() {
 
   if (!isAuthenticated) {
     return <CorpusLoginPage />;
-  }
-
-  // Intern with no batch assigned yet — must pick a batch before continuing
-  if (!isLoading && user && user.role === 'intern' && user.batchId == null) {
-    return <BatchSelectionPage />;
   }
 
   // Enforce profile setup before accessing any workspace
@@ -132,6 +127,16 @@ function AppContent() {
           </ComplianceRoute>
         </Layout>
       );
+    case '/compliance/mentor-groups':
+      return (
+        <Layout>
+          <ComplianceRoute>
+            <ProtectedRoute allowedRoles={['admin', 'mentor']}>
+              <MentorGroupsPage />
+            </ProtectedRoute>
+          </ComplianceRoute>
+        </Layout>
+      );
     case '/compliance/batch':
       return (
         <Layout>
@@ -165,6 +170,14 @@ function AppContent() {
         <Layout>
           <ProtectedRoute allowedRoles={['admin']}>
             <RolesPage />
+          </ProtectedRoute>
+        </Layout>
+      );
+    case '/manage/mentor-groups':
+      return (
+        <Layout>
+          <ProtectedRoute allowedRoles={['admin']}>
+            <MentorGroupsPage />
           </ProtectedRoute>
         </Layout>
       );

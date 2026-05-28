@@ -1,54 +1,102 @@
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { Trophy, Briefcase } from 'lucide-react';
-import { analyzeTeams } from '../../api';
+/**
+ * Team Leaderboard
+ *
+ * Teams are loaded from the DB roster (read-only here).
+ * Mentors organize intern monitoring through mentor groups in Compliance.
+ */
+
+import { useEffect, useMemo, useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Play, Trophy, Briefcase, Database } from 'lucide-react';
+import { analyzeTeams, getMentorGroupMembers, getTeams } from '../../api';
+import { useLeaderboardStore } from '../../stores/leaderboardStore';
 import { Spinner } from '../ui/Spinner';
 import { Alert } from '../ui/Alert';
+import { Badge } from '../ui/Badge';
+import { DateFilter } from './DateFilter';
 import { MemberTable } from './MemberTable';
 import { RankingTable } from './RankingTable';
-import {
-  HierarchicalSelector,
-  type SelectorOutput,
-} from '../shared/HierarchicalSelector';
 import { cn } from '../../lib/utils';
+import { useRouter } from '../../lib/router';
 import type { Team, TeamResult } from '../../types';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
+import { useMentorGroupStore } from '../../stores/mentorGroupStore';
 
 type Page = 'workspace' | 'ranking';
 
 export function Leaderboard() {
+  const { user } = useAuth();
+  const { navigate } = useRouter();
+  const { setTeams } = useLeaderboardStore();
+  const activeGroup = useMentorGroupStore((state) => state.activeGroup);
+  const isMentor = user?.role === 'mentor';
   const [page, setPage] = useState<Page>('workspace');
+  const [since, setSince] = useState('');
+  const [until, setUntil] = useState('');
   const [analysisResult, setAnalysisResult] = useState<TeamResult[] | null>(
     null
   );
+  const [selectedTeams, setSelectedTeams] = useState<Set<string>>(new Set());
+
+  const teamsQuery = useQuery({
+    queryKey: ['teams'],
+    queryFn: getTeams,
+    enabled: !isMentor,
+  });
+  const mentorGroupMembersQuery = useQuery({
+    queryKey: ['mentor-group-members', activeGroup?.id],
+    queryFn: () => getMentorGroupMembers(activeGroup?.id as number),
+    enabled: isMentor && !!activeGroup?.id,
+  });
+
+  const mentorMembersWithGitlab = useMemo(
+    () =>
+      (mentorGroupMembersQuery.data ?? []).filter((member) =>
+        Boolean(member.gitlab_username?.trim())
+      ),
+    [mentorGroupMembersQuery.data]
+  );
+
+  const mentorTeam = useMemo<Team[]>(
+    () =>
+      activeGroup?.id
+        ? [
+            {
+              team_name: activeGroup.name,
+              project_name: '',
+              scope: 'mentor-group',
+              members: mentorMembersWithGitlab.map((member) => ({
+                username: member.gitlab_username!.trim(),
+              })),
+            },
+          ]
+        : [],
+    [activeGroup?.id, activeGroup?.name, mentorMembersWithGitlab]
+  );
+
+  const teams = useMemo<Team[]>(
+    () => (isMentor ? mentorTeam : (teamsQuery.data ?? [])),
+    [isMentor, mentorTeam, teamsQuery.data]
+  );
+
+  useEffect(() => {
+    setTeams(teams);
+  }, [setTeams, teams]);
+
+  const teamsToRun = isMentor
+    ? teams
+    : selectedTeams.size > 0
+      ? teams.filter((t) => selectedTeams.has(t.team_name))
+      : teams;
 
   const analyseMutation = useMutation({
-    mutationFn: (output: SelectorOutput) => {
-      // Group selected members back into their teams
-      const teamMap = new Map<string, string[]>();
-      for (const member of output.members) {
-        if (!member.gitlab_username) continue;
-        const key = member.team_name || 'Unknown Team';
-        if (!teamMap.has(key)) teamMap.set(key, []);
-        teamMap.get(key)!.push(member.gitlab_username);
-      }
-
-      const teams: Team[] = Array.from(teamMap.entries()).map(
-        ([teamName, members]) => ({
-          team_name: teamName,
-          project_name: '',
-          members: members.map((username) => ({ username })),
-        })
-      );
-
-      const sinceISO = output.startDate
-        ? new Date(output.startDate).toISOString()
+    mutationFn: () => {
+      const sinceISO = since ? new Date(since).toISOString() : undefined;
+      const untilISO = until
+        ? new Date(until + 'T23:59:59').toISOString()
         : undefined;
-      const untilISO = output.endDate
-        ? new Date(output.endDate + 'T23:59:59').toISOString()
-        : undefined;
-
-      return analyzeTeams(teams, sinceISO, untilISO);
+      return analyzeTeams(teamsToRun, sinceISO, untilISO);
     },
     onSuccess: (results) => {
       setAnalysisResult(results);
@@ -58,6 +106,18 @@ export function Leaderboard() {
     onError: (e: Error) => toast.error(`Analysis failed: ${e.message}`),
   });
 
+  function toggleTeam(teamName: string) {
+    setSelectedTeams((prev) => {
+      const next = new Set(prev);
+      if (next.has(teamName)) {
+        next.delete(teamName);
+      } else {
+        next.add(teamName);
+      }
+      return next;
+    });
+  }
+
   return (
     <div>
       <div className="mb-6">
@@ -65,14 +125,13 @@ export function Leaderboard() {
           🏆 Team Leaderboard
         </h2>
         <p className="mt-1 text-sm text-slate-500">
-          Select batches, teams, and members to compare GitLab activity scores.{' '}
+          Run analytics to compare team productivity scores.{' '}
           <span className="font-medium text-slate-600">
             Score = Commits×1 + Merged MRs×5 + Total MRs×2 + Issues Closed×3
           </span>
         </p>
       </div>
 
-      {/* Page tabs */}
       <div className="mb-6 flex gap-2">
         {(
           [
@@ -82,7 +141,6 @@ export function Leaderboard() {
         ).map(([id, label, icon]) => (
           <button
             key={id}
-            type="button"
             onClick={() => setPage(id)}
             className={cn(
               'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
@@ -95,7 +153,7 @@ export function Leaderboard() {
               <Briefcase size={14} />
             ) : (
               <Trophy size={14} />
-            )}
+            )}{' '}
             {label}
           </button>
         ))}
@@ -103,28 +161,193 @@ export function Leaderboard() {
 
       {page === 'workspace' && (
         <div className="space-y-5">
-          {/* Hierarchical selector */}
-          <HierarchicalSelector
-            runLabel="Run Analysis"
-            isRunning={analyseMutation.isPending}
-            onRun={(output) => analyseMutation.mutate(output)}
-          />
-
-          {analyseMutation.isPending && (
-            <div className="flex items-center gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700">
-              <Spinner size="sm" label="" />
-              Analysing {analyseMutation.variables?.members.length ?? 0}{' '}
-              member(s)…
-            </div>
+          {!isMentor && teamsQuery.isLoading && (
+            <Spinner label="Loading teams from roster…" />
           )}
-
-          {analyseMutation.isError && (
+          {isMentor && activeGroup?.id && mentorGroupMembersQuery.isLoading && (
+            <Spinner label="Loading active mentor group…" />
+          )}
+          {!isMentor && teamsQuery.isError && (
+            <Alert variant="error">{(teamsQuery.error as Error).message}</Alert>
+          )}
+          {isMentor && mentorGroupMembersQuery.isError && (
             <Alert variant="error">
-              {(analyseMutation.error as Error).message}
+              {(mentorGroupMembersQuery.error as Error).message}
             </Alert>
           )}
 
-          {/* Inline results while on workspace tab */}
+          <div className="flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-4 py-2.5 text-xs text-blue-700">
+            <Database size={13} />
+            <span>
+              {isMentor ? (
+                <>
+                  Mentor analytics are scoped to your active{' '}
+                  <button
+                    className="font-semibold underline"
+                    onClick={() => navigate('/compliance/mentor-groups')}
+                  >
+                    Mentor Group
+                  </button>
+                  .
+                </>
+              ) : (
+                <>
+                  Teams are managed in{' '}
+                  <button
+                    className="font-semibold underline"
+                    onClick={() => navigate('/compliance/mentor-groups')}
+                  >
+                    Mentor Groups
+                  </button>
+                  . Select teams below, then run analysis.
+                </>
+              )}
+            </span>
+          </div>
+
+          {isMentor && !activeGroup?.id && (
+            <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center">
+              <Database size={32} className="mx-auto mb-2 text-slate-200" />
+              <p className="text-sm text-slate-500">
+                Select an active mentor group before running leaderboard
+                analytics.
+              </p>
+              <button
+                className="mt-2 text-sm text-brand-600 hover:underline"
+                onClick={() => navigate('/compliance/mentor-groups')}
+              >
+                Go to Mentor Groups →
+              </button>
+            </div>
+          )}
+
+          {!isMentor && teams.length === 0 && !teamsQuery.isLoading && (
+            <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center">
+              <Database size={32} className="mx-auto mb-2 text-slate-200" />
+              <p className="text-sm text-slate-500">
+                No teams found in the roster.
+              </p>
+              <button
+                className="mt-2 text-sm text-brand-600 hover:underline"
+                onClick={() => navigate('/compliance/mentor-groups')}
+              >
+                Go to Mentor Groups to organize interns →
+              </button>
+            </div>
+          )}
+
+          {isMentor && activeGroup?.id && (
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">
+                    Active group: {activeGroup.name}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {mentorMembersWithGitlab.length} GitLab-linked intern(s)
+                    included
+                    {mentorGroupMembersQuery.data &&
+                    mentorGroupMembersQuery.data.length !==
+                      mentorMembersWithGitlab.length
+                      ? ` · ${mentorGroupMembersQuery.data.length - mentorMembersWithGitlab.length} skipped without GitLab usernames`
+                      : ''}
+                  </p>
+                </div>
+                <Badge variant="default">
+                  {mentorMembersWithGitlab.length}
+                </Badge>
+              </div>
+            </div>
+          )}
+
+          {!isMentor && teams.length > 0 && (
+            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white divide-y divide-slate-100">
+              <div className="flex items-center justify-between bg-slate-50 px-4 py-2.5">
+                <span className="text-xs font-semibold text-slate-600">
+                  Teams ({teams.length})
+                </span>
+                <button
+                  className="text-xs text-blue-600 hover:underline"
+                  onClick={() =>
+                    setSelectedTeams(
+                      selectedTeams.size === teams.length
+                        ? new Set()
+                        : new Set(teams.map((t) => t.team_name))
+                    )
+                  }
+                >
+                  {selectedTeams.size === teams.length
+                    ? 'Deselect all'
+                    : 'Select all'}
+                </button>
+              </div>
+              {teams.map((team) => (
+                <label
+                  key={team.team_name}
+                  className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-slate-50"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedTeams.has(team.team_name)}
+                    onChange={() => toggleTeam(team.team_name)}
+                    className="h-3.5 w-3.5 rounded border-slate-300 text-brand-600"
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-slate-800">
+                      {team.team_name}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {team.members.length} member(s)
+                    </p>
+                  </div>
+                  <Badge variant="default">{team.members.length}</Badge>
+                </label>
+              ))}
+            </div>
+          )}
+
+          {teams.length > 0 && (!isMentor || !!activeGroup?.id) && (
+            <>
+              <DateFilter
+                since={since}
+                until={until}
+                onSince={setSince}
+                onUntil={setUntil}
+                onClear={() => {
+                  setSince('');
+                  setUntil('');
+                }}
+              />
+
+              <button
+                onClick={() => analyseMutation.mutate()}
+                disabled={
+                  analyseMutation.isPending ||
+                  teamsToRun.length === 0 ||
+                  (isMentor && mentorMembersWithGitlab.length === 0)
+                }
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
+              >
+                {analyseMutation.isPending ? (
+                  <Spinner size="sm" label="" />
+                ) : (
+                  <Play size={15} />
+                )}
+                {analyseMutation.isPending
+                  ? 'Running Analysis…'
+                  : isMentor
+                    ? `▶️ Run Analysis (${activeGroup?.name})`
+                    : `▶️ Run Analysis (${teamsToRun.length} team${teamsToRun.length !== 1 ? 's' : ''})`}
+              </button>
+
+              {analyseMutation.isError && (
+                <Alert variant="error">
+                  {(analyseMutation.error as Error).message}
+                </Alert>
+              )}
+            </>
+          )}
+
           {analysisResult && (
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-slate-700">
@@ -151,7 +374,6 @@ export function Leaderboard() {
             <Trophy size={40} className="mx-auto mb-3 text-slate-200" />
             <p className="text-sm text-slate-500">No analysis data yet.</p>
             <button
-              type="button"
               onClick={() => setPage('workspace')}
               className="mt-3 text-sm text-brand-600 hover:underline"
             >

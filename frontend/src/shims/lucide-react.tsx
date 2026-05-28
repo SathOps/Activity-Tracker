@@ -34,7 +34,6 @@ function icon(symbol: ReactNode) {
 }
 
 export const AlertCircle = icon('!');
-export const BarChart2 = icon('▥');
 export const BarChart3 = icon('▥');
 export const Briefcase = icon('▣');
 export const Calendar = icon('◫');
@@ -53,14 +52,11 @@ export const EyeOff = icon('○');
 export const FolderSearch = icon('⌕');
 export const GitCommit = icon('•');
 export const GitMerge = icon('⋈');
-export const Globe = icon('🌐');
 export const Info = icon('i');
 export const Layers = icon('☰');
-export const LayoutGrid = icon('▦');
 export const Loader2 = icon('◌');
 export const LogOut = icon('↩');
 export const Mic = icon('🎙');
-export const Moon = icon('☾');
 export const Pause = icon('⏸');
 export const Play = icon('▶');
 export const Video = icon('🎬');
@@ -70,12 +66,10 @@ export const RefreshCw = icon('↻');
 export const RotateCcw = icon('↺');
 export const Save = icon('💾');
 export const Search = icon('⌕');
-export const Sun = icon('☀');
 export const Trash2 = icon('🗑');
 export const TriangleAlert = icon('▲');
 export const Trophy = icon('🏆');
 export const Upload = icon('↑');
 export const User = icon('👤');
 export const Users = icon('👥');
-export const Users2 = icon('👥');
 export const X = icon('✕');

@@ -328,6 +328,27 @@ export interface MemberRecord {
   batch_name?: string;
 }
 
+export interface MentorBatchEntry {
+  id: number;
+  name: string;
+  date?: string | null;
+}
+
+export interface MentorBatchesResponse {
+  mentor_id: number;
+  batches: MentorBatchEntry[];
+}
+
+export interface MentorGroupRecord {
+  id: number;
+  name: string;
+  mentor_id: number;
+  mentor_name: string;
+  batch_id?: number | null;
+  batch_name?: string | null;
+  member_count: number;
+}
+
 // ── Weekly Performance ────────────────────────────────────────────────────
 
 export interface EventDetail {
@@ -384,5 +405,3 @@ export type AppMode =
   | 'leaderboard'
   | 'weekly'
   | 'roster';
-
-export type StandupPanel = 'status' | 'interns' | 'teams' | 'analytics';
