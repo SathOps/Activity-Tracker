@@ -2,6 +2,7 @@ import type { UserRole } from '../types';
 
 export type AppRoute =
   | '/standup'
+  | '/my-profile'
   | '/compliance/profile'
   | '/compliance/weekly'
   | '/compliance/mentor-groups'
@@ -31,6 +32,16 @@ export const ROUTES: RouteMeta[] = [
     section: 'Standup Tracker',
     description:
       'Manage daily standup submissions, verification, audio evidence, and team progress.',
+    roles: ['admin', 'mentor', 'intern'],
+    requiresGitlab: false,
+  },
+  {
+    path: '/my-profile',
+    workspace: 'standup',
+    title: 'My Profile',
+    section: 'Account',
+    description:
+      'View your account details, team assignment, and GitLab connection.',
     roles: ['admin', 'mentor', 'intern'],
     requiresGitlab: false,
   },

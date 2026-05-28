@@ -1,15 +1,4 @@
-/**
- * Weekly Performance Tracker
- *
- * Mirrors the Streamlit Weekly Performance Tracker page.
- * Shows a per-day activity grid (commits, MRs, issues, time spent, active hours)
- * for a given intern across a date range.
- *
- * If a Corpus JWT token is present in the config store, corpus audio records
- * are also fetched and displayed per day (matching Streamlit behaviour).
- */
-
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Clock,
@@ -18,6 +7,10 @@ import {
   AlertCircle,
   Download,
   Mic,
+  Play,
+  Pause,
+  ExternalLink,
+  Video,
 } from 'lucide-react';
 import { getWeeklyPerformance, downloadJson } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -26,7 +19,7 @@ import { Spinner } from '../ui/Spinner';
 import { Alert } from '../ui/Alert';
 import { MetricCard } from '../ui/MetricCard';
 import { cn, toDisplayText } from '../../lib/utils';
-import type { WeeklyActivity, DailyData } from '../../types';
+import type { WeeklyActivity, DailyData, EventDetail } from '../../types';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -42,7 +35,7 @@ function formatDate(dateStr: string): string {
   try {
     const d = new Date(dateStr + 'T00:00:00');
     return d.toLocaleDateString('en-IN', {
-      weekday: 'short',
+      weekday: 'long',
       month: 'short',
       day: 'numeric',
     });
@@ -51,7 +44,16 @@ function formatDate(dateStr: string): string {
   }
 }
 
-// Office hours 9 AM – 5 PM
+function isVideoUrl(url: string): boolean {
+  return (
+    /\.(mp4|webm|mov|avi|mkv|ogv)(\?|$)/i.test(url) ||
+    url.includes('video') ||
+    url.includes('youtube.com') ||
+    url.includes('youtu.be') ||
+    url.includes('vimeo.com')
+  );
+}
+
 const OFFICE_HOURS = [9, 10, 11, 12, 13, 14, 15, 16, 17];
 const HOUR_LABELS: Record<number, string> = {
   9: '9 AM',
@@ -65,7 +67,13 @@ const HOUR_LABELS: Record<number, string> = {
   17: '5 PM',
 };
 
-// ── Hour cell with popover ────────────────────────────────────────────────────
+const EVENT_COLOURS: Record<string, string> = {
+  commit: 'bg-blue-500',
+  mr: 'bg-purple-500',
+  issue: 'bg-amber-500',
+};
+
+// ── Hour cell ─────────────────────────────────────────────────────────────────
 
 function HourCell({
   hour,
@@ -73,31 +81,84 @@ function HourCell({
   active,
 }: {
   hour: number;
-  events?: { type: string; title: string; url: string }[];
+  events: EventDetail[];
   active: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const hasEvents = events && events.length > 0;
+  const ref = useRef<HTMLDivElement>(null);
+  const hasEvents = events.length > 0;
+
+  // Close popover when clicking outside
+  useEffect(() => {
+    if (!open) return;
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
 
   return (
-    <div className="relative">
+    <div ref={ref} className="relative">
       <button
-        onClick={() => hasEvents && setOpen(!open)}
-        className={cn(
-          'h-7 w-full rounded text-[9px] font-medium transition-colors border',
+        type="button"
+        onClick={() => hasEvents && setOpen((o) => !o)}
+        title={`${HOUR_LABELS[hour]}${events.length ? ` — ${events.length} event(s)` : ''}`}
+        style={
           active
-            ? 'bg-green-500 text-white border-green-600 hover:bg-green-600'
-            : 'bg-slate-50 text-slate-300 border-slate-200',
-          hasEvents ? 'cursor-pointer' : 'cursor-default'
+            ? {
+                background: '#22c55e',
+                borderColor: '#16a34a',
+                color: '#fff',
+                boxShadow: '0 1px 4px rgba(34,197,94,0.4)',
+              }
+            : {
+                background: '#f8fafc',
+                borderColor: '#e2e8f0',
+                color: '#cbd5e1',
+              }
+        }
+        className={cn(
+          'relative h-8 w-full rounded-md text-[9px] font-bold transition-all border flex items-center justify-center',
+          hasEvents ? 'cursor-pointer' : 'cursor-default',
+          active ? 'hover:opacity-90' : 'hover:bg-slate-100'
         )}
-        title={HOUR_LABELS[hour]}
       >
+        {active && events.length > 0 && (
+          <span
+            style={{
+              position: 'absolute',
+              top: -6,
+              right: -6,
+              height: 16,
+              width: 16,
+              borderRadius: '50%',
+              background: '#fff',
+              color: '#15803d',
+              fontSize: 8,
+              fontWeight: 700,
+              border: '1.5px solid #86efac',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+              lineHeight: 1,
+            }}
+          >
+            {events.length}
+          </span>
+        )}
         {active ? '●' : ''}
       </button>
+
+      {/* Popover */}
       {open && hasEvents && (
-        <div className="absolute z-50 left-0 top-8 w-64 rounded-lg border border-slate-200 bg-white shadow-lg p-2 space-y-1">
-          <p className="text-[10px] font-semibold text-slate-500 uppercase mb-1">
-            {HOUR_LABELS[hour]}
+        <div className="absolute z-50 left-0 top-10 w-72 rounded-xl border border-slate-200 bg-white shadow-xl p-3 space-y-1.5">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-2">
+            {HOUR_LABELS[hour]} · {events.length} event
+            {events.length > 1 ? 's' : ''}
           </p>
           {events.map((e, i) => (
             <a
@@ -105,20 +166,22 @@ function HourCell({
               href={e.url || '#'}
               target="_blank"
               rel="noreferrer"
-              className="block text-xs text-slate-700 hover:text-blue-600 truncate"
+              className="flex items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 group"
               title={e.title}
             >
               <span
                 className={cn(
-                  'inline-block w-2 h-2 rounded-full mr-1',
-                  e.type === 'commit'
-                    ? 'bg-blue-400'
-                    : e.type === 'mr'
-                      ? 'bg-purple-400'
-                      : 'bg-amber-400'
+                  'mt-0.5 h-2 w-2 rounded-full flex-shrink-0',
+                  EVENT_COLOURS[e.type] ?? 'bg-slate-400'
                 )}
               />
-              {e.title}
+              <span className="flex-1 text-xs text-slate-700 group-hover:text-blue-700 line-clamp-2 leading-snug">
+                {e.title}
+              </span>
+              <ExternalLink
+                size={10}
+                className="flex-shrink-0 mt-0.5 text-slate-300 group-hover:text-blue-400"
+              />
             </a>
           ))}
         </div>
@@ -127,36 +190,137 @@ function HourCell({
   );
 }
 
-// ── Audio records panel ───────────────────────────────────────────────────────
+// ── Audio / Video record ──────────────────────────────────────────────────────
 
-function AudioRecords({ audioUrls }: { audioUrls: Record<string, unknown>[] }) {
-  if (!audioUrls || audioUrls.length === 0) return null;
+function MediaRecord({
+  record,
+  index,
+}: {
+  record: Record<string, unknown>;
+  index: number;
+}) {
+  const url = toDisplayText(record.url ?? '');
+  const label = record.filename
+    ? toDisplayText(record.filename)
+    : record.title
+      ? toDisplayText(record.title)
+      : `Recording ${index + 1}`;
+
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  if (!url) return null;
+
+  if (isVideoUrl(url)) {
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        className="flex items-center gap-2 rounded-lg border border-purple-100 bg-purple-50 px-3 py-2 text-xs text-purple-800 hover:bg-purple-100 hover:text-purple-900 transition-colors group"
+        title={label}
+      >
+        <Video size={12} className="flex-shrink-0 text-purple-500" />
+        <span className="flex-1 truncate">{label}</span>
+        <ExternalLink
+          size={10}
+          className="flex-shrink-0 text-purple-400 group-hover:text-purple-600"
+        />
+      </a>
+    );
+  }
+
+  function togglePlay() {
+    if (!audioRef.current) return;
+    if (playing) {
+      audioRef.current.pause();
+    } else {
+      void audioRef.current.play();
+    }
+    setPlaying((p) => !p);
+  }
+
+  function handleTimeUpdate() {
+    const el = audioRef.current;
+    if (!el || !el.duration) return;
+    setProgress((el.currentTime / el.duration) * 100);
+  }
+
+  function handleSeek(e: React.ChangeEvent<HTMLInputElement>) {
+    const el = audioRef.current;
+    if (!el || !el.duration) return;
+    const pct = Number(e.target.value);
+    el.currentTime = (pct / 100) * el.duration;
+    setProgress(pct);
+  }
+
   return (
-    <div className="mt-2 pt-2 border-t border-slate-100">
-      <p className="text-[10px] font-semibold text-indigo-600 mb-1 flex items-center gap-1">
-        <Mic size={10} /> Corpus Recordings ({audioUrls.length})
-      </p>
-      <div className="space-y-1">
-        {audioUrls.map((a, i) => {
-          const url = toDisplayText(a.url ?? '');
-          const filename = a.filename
-            ? toDisplayText(a.filename)
-            : `Recording ${i + 1}`;
-          return (
-            <a
-              key={i}
-              href={url}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1.5 text-[10px] text-indigo-700 hover:text-indigo-900 truncate"
-              title={filename}
-            >
-              <Mic size={9} className="flex-shrink-0" />
-              {filename}
-            </a>
-          );
-        })}
+    <div className="rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-2 space-y-1.5">
+      {/* Title + open-in-browser link */}
+      <div className="flex items-center gap-2">
+        <Mic size={11} className="flex-shrink-0 text-indigo-500" />
+        <span className="flex-1 text-xs text-indigo-800 truncate" title={label}>
+          {label}
+        </span>
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          title="Open in browser"
+          className="text-indigo-400 hover:text-indigo-700"
+        >
+          <ExternalLink size={10} />
+        </a>
       </div>
+
+      {/* Player controls */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={togglePlay}
+          className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-white hover:bg-indigo-700 flex-shrink-0 transition-colors"
+          title={playing ? 'Pause' : 'Play'}
+        >
+          {playing ? <Pause size={12} /> : <Play size={12} />}
+        </button>
+
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={0.5}
+          value={progress}
+          onChange={handleSeek}
+          className="flex-1 h-1 accent-indigo-600 cursor-pointer"
+        />
+
+        {duration > 0 && (
+          <span className="text-[9px] text-indigo-500 flex-shrink-0 tabular-nums">
+            {Math.floor(((progress / 100) * duration) / 60)}:
+            {String(Math.floor(((progress / 100) * duration) % 60)).padStart(
+              2,
+              '0'
+            )}
+            {' / '}
+            {Math.floor(duration / 60)}:
+            {String(Math.floor(duration % 60)).padStart(2, '0')}
+          </span>
+        )}
+      </div>
+
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <audio
+        ref={audioRef}
+        src={url}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={() => setDuration(audioRef.current?.duration ?? 0)}
+        onEnded={() => {
+          setPlaying(false);
+          setProgress(0);
+        }}
+      />
     </div>
   );
 }
@@ -165,32 +329,75 @@ function AudioRecords({ audioUrls }: { audioUrls: Record<string, unknown>[] }) {
 
 function DayRow({ date, day }: { date: string; day: DailyData }) {
   const gl = day.gitlab;
-  const activeHoursSet = new Set(gl.active_hours);
-  const audioUrls = day.corpus?.audio_urls ?? [];
+  // Normalise to strings so Set.has() works regardless of whether
+  // the backend returns numbers or strings in active_hours.
+  const activeHoursSet = new Set(gl.active_hours.map(String));
+  const mediaRecords: Record<string, unknown>[] = day.corpus?.audio_urls ?? [];
+  const hasActivity =
+    gl.commits > 0 || gl.mrs > 0 || gl.issues > 0 || gl.active_hours.length > 0;
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3 space-y-2">
-      {/* Date + summary */}
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold text-slate-700">
-          {formatDate(date)}
-        </p>
-        <div className="flex items-center gap-3 text-[10px] text-slate-500">
-          <span className="flex items-center gap-1">
+    <div
+      className={cn(
+        'rounded-xl border p-4 space-y-3 transition-colors',
+        hasActivity
+          ? 'border-green-200 bg-white'
+          : 'border-slate-100 bg-slate-50'
+      )}
+    >
+      {/* Date header */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {hasActivity && (
+            <span className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0" />
+          )}
+          <p
+            className={cn(
+              'text-sm font-semibold',
+              hasActivity ? 'text-slate-800' : 'text-slate-400'
+            )}
+          >
+            {formatDate(date)}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 text-[10px] flex-wrap">
+          <span
+            className={cn(
+              'flex items-center gap-1',
+              gl.commits > 0 ? 'text-blue-600 font-semibold' : 'text-slate-300'
+            )}
+          >
             <GitCommit size={10} /> {gl.commits} commits
           </span>
-          <span className="flex items-center gap-1">
+          <span
+            className={cn(
+              'flex items-center gap-1',
+              gl.mrs > 0 ? 'text-purple-600 font-semibold' : 'text-slate-300'
+            )}
+          >
             <GitMerge size={10} /> {gl.mrs} MRs
           </span>
-          <span className="flex items-center gap-1">
+          <span
+            className={cn(
+              'flex items-center gap-1',
+              gl.issues > 0 ? 'text-amber-600 font-semibold' : 'text-slate-300'
+            )}
+          >
             <AlertCircle size={10} /> {gl.issues} issues
           </span>
-          <span className="flex items-center gap-1">
+          <span
+            className={cn(
+              'flex items-center gap-1',
+              gl.time_spent_seconds > 0 ? 'text-slate-600' : 'text-slate-300'
+            )}
+          >
             <Clock size={10} /> {formatSeconds(gl.time_spent_seconds)}
           </span>
-          {audioUrls.length > 0 && (
-            <span className="flex items-center gap-1 text-indigo-500">
-              <Mic size={10} /> {audioUrls.length}
+          {mediaRecords.length > 0 && (
+            <span className="flex items-center gap-1 text-indigo-500 font-semibold">
+              <Mic size={10} /> {mediaRecords.length} recording
+              {mediaRecords.length > 1 ? 's' : ''}
             </span>
           )}
         </div>
@@ -198,26 +405,25 @@ function DayRow({ date, day }: { date: string; day: DailyData }) {
 
       {/* Hour grid */}
       <div
-        className="grid gap-1"
+        className="grid gap-1.5"
         style={{ gridTemplateColumns: `repeat(${OFFICE_HOURS.length}, 1fr)` }}
       >
         {OFFICE_HOURS.map((hr) => {
-          const key = String(hr);
-          const events = gl.events_by_hour[key] || [];
+          const events: EventDetail[] = (gl.events_by_hour[String(hr)] ??
+            []) as EventDetail[];
+          // active_hours may contain numbers or strings — check both,
+          // and fall back to events presence so a slot is never grayed out
+          // when it clearly has activity.
+          const active = activeHoursSet.has(String(hr)) || events.length > 0;
           return (
-            <HourCell
-              key={hr}
-              hour={hr}
-              active={activeHoursSet.has(hr)}
-              events={events}
-            />
+            <HourCell key={hr} hour={hr} active={active} events={events} />
           );
         })}
       </div>
 
       {/* Hour labels */}
       <div
-        className="grid gap-1"
+        className="grid gap-1.5"
         style={{ gridTemplateColumns: `repeat(${OFFICE_HOURS.length}, 1fr)` }}
       >
         {OFFICE_HOURS.map((hr) => (
@@ -227,8 +433,17 @@ function DayRow({ date, day }: { date: string; day: DailyData }) {
         ))}
       </div>
 
-      {/* Corpus audio records */}
-      <AudioRecords audioUrls={audioUrls} />
+      {/* Media records */}
+      {mediaRecords.length > 0 && (
+        <div className="pt-2 border-t border-slate-100 space-y-2">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+            Recordings ({mediaRecords.length})
+          </p>
+          {mediaRecords.map((rec, i) => (
+            <MediaRecord key={i} record={rec} index={i} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -258,7 +473,7 @@ function SummaryCards({ activity }: { activity: WeeklyActivity }) {
       <MetricCard label="MRs" value={totalMrs} />
       <MetricCard label="Issues" value={totalIssues} />
       <MetricCard label="Active Days" value={`${activeDays}/${days.length}`} />
-      <MetricCard label="🎙 Recordings" value={totalAudio} />
+      <MetricCard label="Recordings" value={totalAudio} />
     </div>
   );
 }
@@ -297,27 +512,10 @@ export function WeeklyPerformance() {
   });
 
   useEffect(() => {
-    if (!isIntern || !user?.gitlabUsername) {
-      return;
-    }
-
+    if (!isIntern || !user?.gitlabUsername) return;
     setUsername(user.gitlabUsername);
     setCorpusUid(user.corpusUsername);
   }, [isIntern, user?.corpusUsername, user?.gitlabUsername]);
-
-  function handleLoadMine() {
-    if (!user?.gitlabUsername) return;
-    setUsername(user.gitlabUsername);
-    setCorpusUid(user.corpusUsername);
-    setParams({
-      gitlab_username: user.gitlabUsername,
-      corpus_uid: user.corpusUsername,
-      start_date: startDate,
-      end_date: endDate,
-      corpus_token: corpusToken || undefined,
-    });
-    setSubmitted(true);
-  }
 
   function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
@@ -332,29 +530,41 @@ export function WeeklyPerformance() {
     setSubmitted(true);
   }
 
+  function handleLoadMine() {
+    if (!user?.gitlabUsername) return;
+    setParams({
+      gitlab_username: user.gitlabUsername,
+      corpus_uid: user.corpusUsername,
+      start_date: startDate,
+      end_date: endDate,
+      corpus_token: corpusToken || undefined,
+    });
+    setSubmitted(true);
+  }
+
   const sortedDates = data ? Object.keys(data.daily_data).sort() : [];
+  const activeDayCount = sortedDates.filter((d) => {
+    const gl = data!.daily_data[d].gitlab;
+    return (
+      gl.commits > 0 ||
+      gl.mrs > 0 ||
+      gl.issues > 0 ||
+      gl.active_hours.length > 0
+    );
+  }).length;
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold text-slate-800">
-          📅 Weekly Performance Tracker
+          Weekly Performance Tracker
         </h2>
         <p className="text-sm text-slate-500 mt-0.5">
           {isIntern
-            ? 'Review your own daily GitLab activity pattern, weekly consistency, and linked corpus audio uploads.'
-            : 'Per-day activity breakdown — commits, MRs, issues, time spent, active hours'}
-          {!isIntern && (corpusToken ? ', and corpus audio recordings.' : '.')}
+            ? 'Your daily GitLab activity, active hours, and standup recordings.'
+            : 'Per-day breakdown — commits, MRs, issues, time, active hours, and recordings.'}
         </p>
       </div>
-
-      {/* Corpus login hint */}
-      {!corpusToken && (
-        <div className="flex items-center gap-2 rounded-lg bg-indigo-50 border border-indigo-200 px-4 py-2 text-xs text-indigo-700">
-          <Mic size={13} />
-          Login to Corpus in the sidebar to also see audio recordings.
-        </div>
-      )}
 
       {/* Input form */}
       <form
@@ -362,103 +572,86 @@ export function WeeklyPerformance() {
         className="rounded-xl border border-slate-200 bg-white p-4 space-y-4"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label
-              className="block text-xs font-medium text-slate-600 mb-1"
-              htmlFor="weekly-gitlab-username"
-            >
+          <label className="block" htmlFor="weekly-gitlab-username">
+            <span className="text-xs font-medium text-slate-600 mb-1 block">
               GitLab Username *
-            </label>
+            </span>
             <input
               id="weekly-gitlab-username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               disabled={isIntern}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:bg-slate-50"
               placeholder="e.g. john_doe"
               required
             />
-          </div>
-          <div>
-            <label
-              className="block text-xs font-medium text-slate-600 mb-1"
-              htmlFor="weekly-corpus-uid"
-            >
+          </label>
+
+          <label className="block" htmlFor="weekly-corpus-uid">
+            <span className="text-xs font-medium text-slate-600 mb-1 block">
               Corpus UID
-              <span className="ml-1 text-slate-400">
-                (auto-filled from roster if blank)
+              <span className="ml-1 text-slate-400 font-normal">
+                (optional)
               </span>
-            </label>
+            </span>
             <input
               id="weekly-corpus-uid"
               type="text"
               value={corpusUid}
               onChange={(e) => setCorpusUid(e.target.value)}
               disabled={isIntern}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:bg-slate-50"
               placeholder="corpus username"
             />
-          </div>
-          <div>
-            <label
-              className="block text-xs font-medium text-slate-600 mb-1"
-              htmlFor="weekly-start-date"
-            >
+          </label>
+
+          <label className="block" htmlFor="weekly-start-date">
+            <span className="text-xs font-medium text-slate-600 mb-1 block">
               Start Date
-            </label>
+            </span>
             <input
               id="weekly-start-date"
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
             />
-          </div>
-          <div>
-            <label
-              className="block text-xs font-medium text-slate-600 mb-1"
-              htmlFor="weekly-end-date"
-            >
+          </label>
+
+          <label className="block" htmlFor="weekly-end-date">
+            <span className="text-xs font-medium text-slate-600 mb-1 block">
               End Date
-            </label>
+            </span>
             <input
               id="weekly-end-date"
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
             />
-          </div>
+          </label>
         </div>
 
-        {corpusToken && (
-          <div className="flex items-center gap-2 text-xs text-indigo-600 bg-indigo-50 rounded-lg px-3 py-1.5">
-            <Mic size={11} /> Corpus audio records will be included in results.
-          </div>
-        )}
-
-        <button
-          type="submit"
-          className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-          disabled={isLoading}
-        >
-          {isLoading
-            ? 'Fetching…'
-            : isIntern
-              ? '🔍 Fetch My Activity'
-              : '🔍 Fetch Activity'}
-        </button>
-        {isIntern ? (
+        <div className="flex items-center gap-3 flex-wrap">
           <button
-            type="button"
-            onClick={handleLoadMine}
-            disabled={!user?.gitlabUsername || isLoading}
-            className="ml-3 rounded-lg border border-slate-200 px-5 py-2 text-sm font-medium text-slate-700"
+            type="submit"
+            disabled={isLoading}
+            className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
           >
-            Load My Activity
+            {isLoading ? 'Fetching…' : 'Fetch Activity'}
           </button>
-        ) : null}
+          {isIntern && (
+            <button
+              type="button"
+              onClick={handleLoadMine}
+              disabled={!user?.gitlabUsername || isLoading}
+              className="rounded-lg border border-slate-200 px-5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+            >
+              Load My Activity
+            </button>
+          )}
+        </div>
       </form>
 
       {isLoading && (
@@ -476,53 +669,67 @@ export function WeeklyPerformance() {
       {data && (
         <div className="space-y-4">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-base font-semibold text-slate-800">
                 {data.intern_name}
+                <span className="ml-2 text-sm font-normal text-slate-500">
+                  @{data.gitlab_username}
+                </span>
               </h3>
-              <p className="text-xs text-slate-500">
-                @{data.gitlab_username}
-                {data.corpus_uid ? ` · corpus: ${data.corpus_uid}` : ''}
-                {' · '}
+              <p className="text-xs text-slate-500 mt-0.5">
                 {sortedDates[0]} → {sortedDates[sortedDates.length - 1]}
+                {' · '}
+                <span className="text-green-600 font-medium">
+                  {activeDayCount} active
+                </span>
+                {' / '}
+                {sortedDates.length} days
                 {data.audio_fetched && (
-                  <span className="ml-2 text-indigo-500">🎙 corpus fetched</span>
+                  <span className="ml-2 text-indigo-500">
+                    · recordings fetched
+                  </span>
                 )}
               </p>
             </div>
             <button
+              type="button"
               onClick={() =>
                 downloadJson(data, `weekly_${data.gitlab_username}.json`)
               }
-              className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 transition-colors"
             >
               <Download size={13} /> Export JSON
             </button>
           </div>
 
-          {/* Summary metrics */}
+          {/* Summary cards */}
           <SummaryCards activity={data} />
 
           {/* Legend */}
-          <div className="flex items-center gap-4 text-[10px] text-slate-500 flex-wrap">
-            <span className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-blue-400 inline-block" />{' '}
+          <div className="flex flex-wrap items-center gap-4 rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5 text-[10px] text-slate-500">
+            <span className="font-semibold text-slate-600">Legend:</span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-3 w-3 rounded bg-gradient-to-b from-green-400 to-green-600 inline-block" />
+              Active hour (click to see events)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-blue-500 inline-block" />
               Commit
             </span>
-            <span className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-purple-400 inline-block" />{' '}
-              MR
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-purple-500 inline-block" />
+              Merge Request
             </span>
-            <span className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-amber-400 inline-block" />{' '}
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-amber-500 inline-block" />
               Issue
             </span>
-            <span className="flex items-center gap-1">
-              <Mic size={9} className="text-indigo-400" /> Corpus audio
+            <span className="flex items-center gap-1.5">
+              <Mic size={10} className="text-indigo-500" /> Audio recording
             </span>
-            <span className="text-slate-400 ml-2">
-              Click a green cell to see events
+            <span className="flex items-center gap-1.5">
+              <Video size={10} className="text-purple-500" /> Video link
             </span>
           </div>
 

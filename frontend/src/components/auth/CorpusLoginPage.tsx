@@ -1,15 +1,28 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { corpusLogin } from '../../api';
 import { useRouter } from '../../lib/router';
 import { useConfigStore } from '../../stores/configStore';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function CorpusLoginPage() {
   const setCorpusToken = useConfigStore((state) => state.setCorpusToken);
+  const setAccessToken = useConfigStore((state) => state.setAccessToken);
   const { navigate } = useRouter();
+  const queryClient = useQueryClient();
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Show any error from GitLab OIDC redirect (/login?error=...)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const gitlabError = params.get('error');
+    if (gitlabError) {
+      setError(`GitLab login failed: ${gitlabError}`);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -22,8 +35,10 @@ export function CorpusLoginPage() {
 
     try {
       const response = await corpusLogin(phone.trim(), password.trim());
+      setAccessToken(response.access_token);
       setCorpusToken('session', response.username || phone.trim());
       setPassword('');
+      queryClient.invalidateQueries({ queryKey: ['me'] });
       navigate('/standup');
     } catch (caught) {
       setError(

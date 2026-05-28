@@ -386,6 +386,16 @@ export interface WeeklyActivity {
   audio_fetched: boolean;
 }
 
+// ── Commits endpoint ──────────────────────────────────────
+
+export interface UserCommitsResponse {
+  username: string;
+  status: string;
+  error: string | null;
+  commits: CommitEntry[];
+  commit_stats: CommitStats;
+}
+
 // ── App routing ───────────────────────────────────────────────────────────
 
 export type AppMode =

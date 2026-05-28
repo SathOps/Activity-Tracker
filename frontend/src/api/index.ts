@@ -11,6 +11,7 @@ import type {
   Team,
   TeamDetailRecord,
   TeamResult,
+  UserCommitsResponse,
   UserProfileData,
   WeeklyActivity,
 } from '../types';
@@ -26,13 +27,13 @@ function buildApiUrl(path: string): string {
 }
 
 function buildHeaders(): HeadersInit {
-  const { gitlabUrl } = useConfigStore.getState();
+  const { accessToken } = useConfigStore.getState();
   const headers: Record<string, string> = {
     Accept: 'application/json',
   };
 
-  if (gitlabUrl) {
-    headers['x-gitlab-url'] = gitlabUrl;
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
   }
 
   return headers;
@@ -119,6 +120,25 @@ interface CorpusLoginResponse {
   username: string;
   phone: string;
   roles: string[];
+  profile?: {
+    corpus_username: string;
+    name: string;
+    email: string;
+    institution_id: string;
+    institution_name: string;
+  };
+}
+
+export interface GitlabMeResponse {
+  status: string;
+  gitlab_url: string;
+  access_token: string;
+  user: {
+    id: number;
+    username: string;
+    name: string;
+    avatar_url?: string;
+  };
 }
 
 function buildPhoneCandidates(phone: string): string[] {
@@ -191,6 +211,27 @@ export async function getMyProfile(): Promise<MyProfileResponse> {
   return getJson<MyProfileResponse>('/me');
 }
 
+export async function updateMyProfile(payload: {
+  gitlab_username?: string;
+  global_username?: string;
+  global_email?: string;
+  date_of_joining?: string;
+}): Promise<MyProfileResponse> {
+  return patchJson<MyProfileResponse>('/me', payload);
+}
+
+export async function setMyBatch(batchId: number): Promise<MyProfileResponse> {
+  return patchJson<MyProfileResponse>('/me/batch', { batch_id: batchId });
+}
+
+export async function getGitlabMe(): Promise<GitlabMeResponse> {
+  return getJson<GitlabMeResponse>('/auth/gitlab/me');
+}
+
+export function getGitlabAuthorizeUrl(): string {
+  return buildApiUrl('/auth/gitlab/authorize');
+}
+
 export async function storeGitlabToken(
   token: string,
   gitlabUrl: string
@@ -210,6 +251,21 @@ export async function getUserProfile(
 ): Promise<UserProfileData> {
   return getJson<UserProfileData>(
     `/users/${encodeURIComponent(username)}/profile`
+  );
+}
+
+export async function getUserCommits(
+  username: string,
+  params?: { since?: string; until?: string; project_ids?: number[] }
+): Promise<UserCommitsResponse> {
+  const qs = new URLSearchParams();
+  if (params?.since) qs.set('since', params.since);
+  if (params?.until) qs.set('until', params.until);
+  if (params?.project_ids?.length)
+    qs.set('project_ids', params.project_ids.join(','));
+  const query = qs.toString();
+  return getJson(
+    `/users/${encodeURIComponent(username)}/commits${query ? `?${query}` : ''}`
   );
 }
 
@@ -525,7 +581,7 @@ export function downloadCsv(
   URL.revokeObjectURL(url);
 }
 
-export function buildBatchStreamUrl(
+function buildStreamParams(
   usernames: string[],
   projectIds?: number[],
   since?: string,
@@ -533,16 +589,28 @@ export function buildBatchStreamUrl(
 ): string {
   const params = new URLSearchParams();
   params.set('usernames', usernames.join(','));
-  if (projectIds?.length) {
-    params.set('project_ids', projectIds.join(','));
-  }
-  if (since) {
-    params.set('since', since);
-  }
-  if (until) {
-    params.set('until', until);
-  }
-  return `${getApiBaseUrl()}/batch/stream?${params.toString()}`;
+  if (projectIds?.length) params.set('project_ids', projectIds.join(','));
+  if (since) params.set('since', since);
+  if (until) params.set('until', until);
+  return params.toString();
+}
+
+export function buildBatchStreamUrl(
+  usernames: string[],
+  projectIds?: number[],
+  since?: string,
+  until?: string
+): string {
+  return `${getApiBaseUrl()}/batch/stream?${buildStreamParams(usernames, projectIds, since, until)}`;
+}
+
+export function buildBatchCommitsStreamUrl(
+  usernames: string[],
+  projectIds?: number[],
+  since?: string,
+  until?: string
+): string {
+  return `${getApiBaseUrl()}/batch/commits/stream?${buildStreamParams(usernames, projectIds, since, until)}`;
 }
 
 export function getCorpusRuntimeBaseUrl(): string {

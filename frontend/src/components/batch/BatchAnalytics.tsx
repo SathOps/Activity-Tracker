@@ -291,6 +291,15 @@ export function BatchAnalytics() {
         </div>
       )}
 
+      {stream.commitsLoading && !stream.isRunning && finalRows.length > 0 && (
+        <div className="mb-3 flex items-center gap-2 text-sm text-slate-500">
+          <Spinner size="sm" label="" />
+          <span>
+            Commits loading in background — table will update when ready
+          </span>
+        </div>
+      )}
+
       {finalRows.length > 0 && !stream.isRunning && (
         <BatchTable rows={finalRows} />
       )}

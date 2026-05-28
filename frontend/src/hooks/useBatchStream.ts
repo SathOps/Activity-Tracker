@@ -1,22 +1,15 @@
 /**
- * useBatchStream — consumes the GET /api/batch/stream SSE endpoint.
+ * useBatchStream — opens two SSE streams in parallel:
+ *   GET /api/batch/stream              → profile data per user
+ *   GET /api/batch/commits/stream      → commits + commit_stats per user
  *
- * Uses the browser's native fetch() with a ReadableStream reader instead of
- * EventSource so we can attach the x-gitlab-token header (EventSource does
- * not support custom headers).
- *
- * Returns:
- *   - results   : accumulated processed user rows
- *   - progress  : 0–1 fraction
- *   - isRunning : whether the stream is active
- *   - error     : any terminal error message
- *   - start()   : kick off the stream
- *   - reset()   : clear all state
+ * Results from both streams are merged by username into a single results array.
+ * The profile stream resolves first (~3-5s); commits arrive later (~10-30s).
+ * Auth is handled by the iat_session cookie (credentials: 'include').
  */
 
 import { useState, useCallback, useRef } from 'react';
-import { useConfigStore } from '../stores/configStore';
-import { buildBatchStreamUrl } from '../api';
+import { buildBatchStreamUrl, buildBatchCommitsStreamUrl } from '../api';
 import type { SSEProgressEvent } from '../types';
 
 interface StreamState {
@@ -24,6 +17,7 @@ interface StreamState {
   progress: number;
   total: number;
   isRunning: boolean;
+  commitsLoading: boolean;
   error: string | null;
 }
 
@@ -42,13 +36,64 @@ const INITIAL: StreamState = {
   progress: 0,
   total: 0,
   isRunning: false,
+  commitsLoading: false,
   error: null,
 };
+
+async function consumeStream(
+  url: string,
+  signal: AbortSignal,
+  onProgress: (event: SSEProgressEvent) => void,
+  onDone: () => void,
+  onError: (msg: string) => void
+): Promise<void> {
+  const res = await fetch(url, { signal, credentials: 'include' });
+
+  if (!res.ok || !res.body) {
+    const text = await res.text().catch(() => 'Stream unavailable');
+    onError(`HTTP ${res.status}: ${text}`);
+    return;
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data:')) continue;
+      const raw = line.slice('data:'.length).trim();
+      if (!raw) continue;
+
+      try {
+        const event: SSEProgressEvent = JSON.parse(raw);
+        if (event.type === 'done') {
+          onDone();
+          return;
+        }
+        if (event.type === 'error') {
+          onError(event.message ?? 'Stream error');
+          return;
+        }
+        if (event.type === 'progress') onProgress(event);
+      } catch {
+        // malformed JSON — skip
+      }
+    }
+  }
+  onDone();
+}
 
 export function useBatchStream(): UseBatchStreamReturn {
   const [state, setState] = useState<StreamState>(INITIAL);
   const abortRef = useRef<AbortController | null>(null);
-  const { gitlabUrl } = useConfigStore();
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
@@ -56,7 +101,7 @@ export function useBatchStream(): UseBatchStreamReturn {
   }, []);
 
   const start = useCallback(
-    async (
+    (
       usernames: string[],
       projectIds?: number[],
       since?: string,
@@ -66,97 +111,102 @@ export function useBatchStream(): UseBatchStreamReturn {
       const ctrl = new AbortController();
       abortRef.current = ctrl;
 
-      const params = new URLSearchParams();
-      params.set('usernames', usernames.join(','));
-      if (projectIds?.length) params.set('project_ids', projectIds.join(','));
-      if (since) params.set('since', since);
-      if (until) params.set('until', until);
-
       setState({
         results: [],
         progress: 0,
         total: usernames.length,
         isRunning: true,
+        commitsLoading: true,
         error: null,
       });
 
-      try {
-        const res = await fetch(
-          buildBatchStreamUrl(usernames, projectIds, since, until),
-          {
-            signal: ctrl.signal,
-            credentials: 'include',
-            headers: {
-              'x-gitlab-url': gitlabUrl,
-            },
+      // Merge helper — updates the row for a given username
+      function mergeRow(username: string, patch: Record<string, unknown>) {
+        setState((s) => {
+          const idx = s.results.findIndex(
+            (r) => (r as { username?: string }).username === username
+          );
+          if (idx === -1) {
+            return { ...s, results: [...s.results, { username, ...patch }] };
           }
-        );
+          const next = [...s.results];
+          next[idx] = { ...next[idx], ...patch };
+          return { ...s, results: next };
+        });
+      }
 
-        if (!res.ok || !res.body) {
-          const text = await res.text().catch(() => 'Stream unavailable');
-          throw new Error(`HTTP ${res.status}: ${text}`);
-        }
+      // ── Profile stream ──────────────────────────────────────────────────
+      const profileUrl = buildBatchStreamUrl(
+        usernames,
+        projectIds,
+        since,
+        until
+      );
 
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() ?? '';
-
-          for (const line of lines) {
-            if (!line.startsWith('data:')) continue;
-            const raw = line.slice('data:'.length).trim();
-            if (!raw) continue;
-
-            try {
-              const event: SSEProgressEvent = JSON.parse(raw);
-
-              if (event.type === 'done') {
-                setState((s) => ({ ...s, isRunning: false, progress: 1 }));
-                return;
-              }
-
-              if (event.type === 'error') {
-                setState((s) => ({
-                  ...s,
-                  isRunning: false,
-                  error: event.message ?? 'Stream error',
-                }));
-                return;
-              }
-
-              if (event.type === 'progress' && event.result) {
-                setState((s) => ({
-                  ...s,
-                  results: [
-                    ...s.results,
-                    event.result as Record<string, unknown>,
-                  ],
-                  progress: (event.current ?? 0) / (event.total ?? 1),
-                  total: event.total ?? s.total,
-                }));
-              }
-            } catch {
-              // Malformed JSON line — skip
-            }
+      void consumeStream(
+        profileUrl,
+        ctrl.signal,
+        (event) => {
+          if (event.username && event.result) {
+            mergeRow(event.username, event.result as Record<string, unknown>);
           }
+          setState((s) => ({
+            ...s,
+            progress: (event.current ?? 0) / (event.total ?? 1),
+            total: event.total ?? s.total,
+          }));
+        },
+        () => {
+          setState((s) => ({ ...s, isRunning: false, progress: 1 }));
+        },
+        (msg) => {
+          setState((s) => ({ ...s, isRunning: false, error: msg }));
         }
-      } catch (err: unknown) {
+      ).catch((err: unknown) => {
         if ((err as Error)?.name === 'AbortError') return;
         setState((s) => ({
           ...s,
           isRunning: false,
-          error: (err as Error)?.message ?? 'Stream failed',
+          error: (err as Error)?.message ?? 'Profile stream failed',
         }));
-      }
+      });
+
+      // ── Commits stream ──────────────────────────────────────────────────
+      const commitsUrl = buildBatchCommitsStreamUrl(
+        usernames,
+        projectIds,
+        since,
+        until
+      );
+
+      void consumeStream(
+        commitsUrl,
+        ctrl.signal,
+        (event) => {
+          if (event.username && event.result) {
+            const r = event.result as {
+              commits?: unknown[];
+              commit_stats?: unknown;
+            };
+            mergeRow(event.username, {
+              commits: r.commits ?? [],
+              commit_stats: r.commit_stats ?? {},
+            });
+          }
+        },
+        () => {
+          setState((s) => ({ ...s, commitsLoading: false }));
+        },
+        () => {
+          // Commits stream error — don't block the profile data
+          setState((s) => ({ ...s, commitsLoading: false }));
+        }
+      ).catch((err: unknown) => {
+        if ((err as Error)?.name === 'AbortError') return;
+        setState((s) => ({ ...s, commitsLoading: false }));
+      });
     },
-    [gitlabUrl]
+    []
   );
 
   return { ...state, start, reset };

@@ -9,6 +9,7 @@ interface ConfigState {
   userRole: UserRole;
   corpusToken: string;
   corpusUser: string;
+  accessToken: string;
   setGitlabUrl: (url: string) => void;
   setGitlabToken: (token: string) => void;
   setActiveMode: (mode: AppMode) => void;
@@ -17,6 +18,8 @@ interface ConfigState {
   resetCredentials: () => void;
   setCorpusToken: (token: string, user?: string) => void;
   clearCorpusToken: () => void;
+  setAccessToken: (token: string) => void;
+  clearAccessToken: () => void;
 }
 
 type Selector<T> = (state: ConfigState) => T;
@@ -30,6 +33,8 @@ type ConfigFields = Omit<
   | 'resetCredentials'
   | 'setCorpusToken'
   | 'clearCorpusToken'
+  | 'setAccessToken'
+  | 'clearAccessToken'
 >;
 
 const SESSION_KEY = 'iat-config';
@@ -63,6 +68,7 @@ function buildFields(partial: Partial<ConfigFields> = {}): ConfigFields {
     userRole: partial.userRole ?? 'intern',
     corpusToken: partial.corpusToken ?? '',
     corpusUser: partial.corpusUser ?? '',
+    accessToken: partial.accessToken ?? '',
   };
 }
 
@@ -80,10 +86,13 @@ const actions = {
       gitlabToken: '',
       isAuthenticated: false,
       userRole: 'intern',
+      accessToken: '',
     }),
   setCorpusToken: (token: string, user = '') =>
     setState({ corpusToken: token, corpusUser: user }),
   clearCorpusToken: () => setState({ corpusToken: '', corpusUser: '' }),
+  setAccessToken: (token: string) => setState({ accessToken: token }),
+  clearAccessToken: () => setState({ accessToken: '' }),
 };
 
 let snapshot: ConfigState = {
@@ -104,6 +113,7 @@ function persistState(): void {
     isAuthenticated: stateFields.isAuthenticated,
     corpusToken: stateFields.corpusToken,
     corpusUser: stateFields.corpusUser,
+    accessToken: stateFields.accessToken,
   };
 
   window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(persisted));

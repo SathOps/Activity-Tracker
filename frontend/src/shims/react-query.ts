@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 type QueryKey = readonly unknown[] | unknown[];
 
@@ -60,6 +60,13 @@ export function useQuery<TData>(options: {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
+  // Keep queryFn in a ref so run() never needs to change when the caller
+  // passes an inline arrow function — prevents the infinite-fetch loop.
+  const queryFnRef = useRef(queryFn);
+  useEffect(() => {
+    queryFnRef.current = queryFn;
+  });
+
   useEffect(
     () =>
       subscribe(keyString, () => {
@@ -79,7 +86,7 @@ export function useQuery<TData>(options: {
 
     for (let attempt = 0; attempt < attempts; attempt += 1) {
       try {
-        const result = await queryFn();
+        const result = await queryFnRef.current();
         setData(result);
         setIsLoading(false);
         return;
@@ -92,7 +99,10 @@ export function useQuery<TData>(options: {
         }
       }
     }
-  }, [enabled, queryFn, retry]);
+    // queryFnRef is stable — intentionally omitted from deps.
+    // run only changes when enabled, retry, or the query key version changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, retry]);
 
   useEffect(() => {
     void run();
@@ -114,28 +124,37 @@ export function useMutation<TData, TError = Error, TVariables = void>(options: {
   onError?: (error: TError) => void;
 }): MutationResult<TData, TError, TVariables> {
   const { mutationFn, onSuccess, onError } = options;
+
+  const mutationFnRef = useRef(mutationFn);
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+  useEffect(() => {
+    mutationFnRef.current = mutationFn;
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  });
+
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<TError | null>(null);
 
-  const mutate = useCallback(
-    async (variables?: TVariables) => {
-      setIsPending(true);
-      setError(null);
-      try {
-        const data = await mutationFn(variables as TVariables);
-        onSuccess?.(data);
-        setIsPending(false);
-        return data;
-      } catch (caught) {
-        const nextError = caught as TError;
-        setError(nextError);
-        onError?.(nextError);
-        setIsPending(false);
-        return undefined;
-      }
-    },
-    [mutationFn, onError, onSuccess]
-  );
+  const mutate = useCallback(async (variables?: TVariables) => {
+    setIsPending(true);
+    setError(null);
+    try {
+      const result = await mutationFnRef.current(variables as TVariables);
+      onSuccessRef.current?.(result);
+      setIsPending(false);
+      return result;
+    } catch (caught) {
+      const nextError = caught as TError;
+      setError(nextError);
+      onErrorRef.current?.(nextError);
+      setIsPending(false);
+      return undefined;
+    }
+    // Refs are stable — callbacks in refs intentionally omitted from deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     mutate,

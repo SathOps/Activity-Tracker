@@ -1,6 +1,9 @@
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
+import { BatchSelectionPage } from './components/auth/BatchSelectionPage';
 import { CorpusLoginPage } from './components/auth/CorpusLoginPage';
+import { ProfileCompletionPage } from './components/auth/ProfileCompletionPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { GitComplianceWorkspace } from './components/compliance/GitComplianceWorkspace';
 import { Layout } from './components/layout/Layout';
@@ -13,6 +16,7 @@ import { UserProfile } from './components/profile/UserProfile';
 import { WeeklyPerformance } from './components/weekly/WeeklyPerformance';
 import { useAuth } from './contexts/AuthContext';
 import StandupWorkspace from './features/standup/StandupWorkspace';
+import { MyProfilePage } from './components/profile/MyProfilePage';
 import { DEFAULT_ROUTE_BY_ROLE, getRouteMeta } from './lib/appRoutes';
 import { useRouter } from './lib/router';
 
@@ -26,24 +30,85 @@ function ComplianceRoute({ children }: { children: React.ReactNode }) {
 
 function AppContent() {
   const { pathname, navigate } = useRouter();
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user, needsProfileSetup } = useAuth();
   const route = getRouteMeta(pathname);
 
+  // Show any GitLab OIDC error from URL params (e.g. /login?error=...)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const gitlabError = params.get('error');
+    if (gitlabError) {
+      toast.error(`GitLab login failed: ${gitlabError}`);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // After GitLab OIDC callback, backend redirects to /dashboard — redirect to standup
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && pathname === '/dashboard') {
+      navigate('/standup');
+    }
+  }, [isAuthenticated, isLoading, navigate, pathname]);
+
+  // Redirect authenticated users away from root based on role
   useEffect(() => {
     if (!isLoading && isAuthenticated && user && pathname === '/') {
       navigate(DEFAULT_ROUTE_BY_ROLE[user.role]);
     }
   }, [isAuthenticated, isLoading, navigate, pathname, user]);
 
+  if (isLoading) {
+    return (
+      <div className="auth-checking">
+        <p>Checking session…</p>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return <CorpusLoginPage />;
   }
 
-  if (pathname === '/') {
+  // Intern with no batch assigned yet — must pick a batch before continuing
+  if (!isLoading && user && user.role === 'intern' && user.batchId == null) {
+    return <BatchSelectionPage />;
+  }
+
+  // Enforce profile setup before accessing any workspace
+  if (needsProfileSetup && pathname !== '/profile-setup') {
+    return <ProfileCompletionPage />;
+  }
+
+  // First-time setup: full-page shell (no Layout)
+  if (pathname === '/profile-setup' && needsProfileSetup) {
+    return <ProfileCompletionPage />;
+  }
+
+  // Edit mode: render inside Layout
+  if (pathname === '/profile-setup') {
+    return (
+      <Layout>
+        <ProtectedRoute>
+          <ProfileCompletionPage />
+        </ProtectedRoute>
+      </Layout>
+    );
+  }
+
+  if (pathname === '/dashboard' || pathname === '/') {
     return null;
   }
 
   switch (route.path) {
+    case '/my-profile':
+      return (
+        <Layout>
+          <ProtectedRoute>
+            <MyProfilePage />
+          </ProtectedRoute>
+        </Layout>
+      );
     case '/standup':
       return (
         <Layout>

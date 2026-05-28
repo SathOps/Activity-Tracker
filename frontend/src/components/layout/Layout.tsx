@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../LanguageSwitcher';
 import { Sidebar } from './Sidebar';
 import { useConfigStore } from '../../stores/configStore';
-import { Alert } from '../ui/Alert';
+import { useAuth } from '../../contexts/AuthContext';
 import { getRouteMeta } from '../../lib/appRoutes';
 import { useRouter } from '../../lib/router';
 
@@ -18,7 +18,8 @@ type ThemeMode = 'light' | 'dark';
 export function Layout({ children }: Props) {
   const { t } = useTranslation();
   const { pathname } = useRouter();
-  const { gitlabToken, corpusUser } = useConfigStore();
+  const { corpusUser } = useConfigStore();
+  const { gitlabConnected } = useAuth();
   const [themeMode, setThemeMode] = useState<ThemeMode>(() =>
     readStoredThemeMode()
   );
@@ -158,20 +159,28 @@ export function Layout({ children }: Props) {
             </div>
           </header>
 
-          {isComplianceMode && !gitlabToken && (
-            <Alert
-              variant="warning"
-              title="GitLab Token Required"
-              className="mb-6"
+          {isComplianceMode && !gitlabConnected && (
+            <div
+              style={{
+                marginBottom: 24,
+                padding: '14px 20px',
+                borderRadius: 12,
+                background: '#fff7ed',
+                border: '1px solid #fed7aa',
+                fontSize: 13,
+                color: '#92400e',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+              }}
             >
-              Enter your GitLab Personal Access Token in the sidebar to get
-              started. Go to <strong>GitLab → Settings → Access Tokens</strong>{' '}
-              and create a token with at least{' '}
-              <code className="bg-amber-100 px-1 rounded text-xs">
-                read_api
-              </code>{' '}
-              scope.
-            </Alert>
+              <span style={{ fontSize: 16 }}>⚠</span>
+              <span>
+                GitLab account not connected. Use the{' '}
+                <strong>Connect with GitLab</strong> button in the sidebar to
+                enable compliance features.
+              </span>
+            </div>
           )}
           {children}
         </div>

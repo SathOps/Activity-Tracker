@@ -2,22 +2,18 @@ import {
   BarChart3,
   Calendar,
   Database,
-  Eye,
-  EyeOff,
   LogOut,
   Mic,
-  RefreshCw,
   Trophy,
   User,
   Users,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { corpusLogout, storeGitlabToken } from '../../api';
+import { useMemo } from 'react';
+import { getGitlabAuthorizeUrl } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
 import { ROUTES, type AppRoute, type WorkspaceId } from '../../lib/appRoutes';
 import { cn } from '../../lib/utils';
 import { useRouter } from '../../lib/router';
-import { useHealth } from '../../hooks/useHealth';
 import { useConfigStore } from '../../stores/configStore';
 
 interface NavItem {
@@ -143,21 +139,8 @@ function UserAvatar({ name }: { name: string }) {
 
 export function Sidebar() {
   const { pathname, navigate } = useRouter();
-  const { user } = useAuth();
-  const {
-    gitlabUrl,
-    gitlabToken,
-    corpusUser,
-    setGitlabUrl,
-    setGitlabToken,
-    clearCorpusToken,
-    resetCredentials,
-  } = useConfigStore();
-  const { data: health, isLoading, refetch } = useHealth();
-  const [showToken, setShowToken] = useState(false);
-  const [gitlabTokenInput, setGitlabTokenInput] = useState('');
-  const [gitlabError, setGitlabError] = useState<string | null>(null);
-  const [gitlabSubmitting, setGitlabSubmitting] = useState(false);
+  const { user, gitlabConnected } = useAuth();
+  const { corpusUser, clearCorpusToken, resetCredentials } = useConfigStore();
 
   const currentRoute =
     ROUTES.find((route) => route.path === pathname) ??
@@ -185,33 +168,9 @@ export function Sidebar() {
   }, [activeWorkspace, user?.role]);
 
   async function handleCorpusLogout() {
-    await corpusLogout().catch(() => undefined);
     clearCorpusToken();
     resetCredentials();
     navigate('/');
-  }
-
-  async function handleGitlabSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!gitlabTokenInput.trim()) {
-      return;
-    }
-
-    setGitlabSubmitting(true);
-    setGitlabError(null);
-    try {
-      await storeGitlabToken(gitlabTokenInput.trim(), gitlabUrl);
-      setGitlabToken('session');
-      setGitlabTokenInput('');
-      await refetch();
-    } catch (caught) {
-      setGitlabToken('');
-      setGitlabError(
-        caught instanceof Error ? caught.message : 'GitLab validation failed'
-      );
-    } finally {
-      setGitlabSubmitting(false);
-    }
   }
 
   const displayName = corpusUser || user?.corpusUsername || 'User';
@@ -325,8 +284,33 @@ export function Sidebar() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <UserAvatar name={displayName} />
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <button
+              type="button"
+              onClick={() => navigate('/my-profile')}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+              title="View my profile"
+            >
+              <UserAvatar name={displayName} />
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/my-profile')}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                textAlign: 'left',
+              }}
+            >
               <p
                 style={{
                   margin: 0,
@@ -358,7 +342,7 @@ export function Sidebar() {
               >
                 {user?.role || 'intern'}
               </span>
-            </div>
+            </button>
             <button
               type="button"
               onClick={() => void handleCorpusLogout()}
@@ -503,187 +487,98 @@ export function Sidebar() {
             >
               GitLab Access
             </p>
-            <form
+            <div
               style={{
-                padding: 14,
+                padding: '14px 16px',
                 borderRadius: 14,
                 background: 'rgba(255,255,255,0.03)',
                 border: '1px solid rgba(255,255,255,0.06)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 10,
+                gap: 12,
               }}
-              onSubmit={handleGitlabSubmit}
             >
-              <div>
-                <label
-                  htmlFor="gitlab-url"
+              {/* Status row */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span
                   style={{
-                    display: 'block',
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: 'var(--sidebar-text)',
-                    marginBottom: 4,
-                  }}
-                >
-                  GitLab URL
-                </label>
-                <input
-                  id="gitlab-url"
-                  type="url"
-                  value={gitlabUrl}
-                  onChange={(event) => setGitlabUrl(event.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: 10,
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    background: 'rgba(255,255,255,0.04)',
-                    color: 'var(--sidebar-text-bright)',
-                    fontSize: 13,
-                    outline: 'none',
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    background: gitlabConnected ? '#10b981' : '#94a3b8',
+                    flexShrink: 0,
                   }}
                 />
-              </div>
-              <div>
-                <label
-                  htmlFor="gitlab-token"
+                <span
                   style={{
-                    display: 'block',
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: 'var(--sidebar-text)',
-                    marginBottom: 4,
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: gitlabConnected ? '#10b981' : 'var(--sidebar-text)',
                   }}
                 >
-                  Personal access token
-                </label>
-                <div className="relative">
-                  <input
-                    id="gitlab-token"
-                    type={showToken ? 'text' : 'password'}
-                    value={gitlabTokenInput}
-                    onChange={(event) =>
-                      setGitlabTokenInput(event.target.value)
-                    }
-                    placeholder="glpat-xxxxxxxxxxxx"
-                    style={{
-                      width: '100%',
-                      padding: '8px 36px 8px 12px',
-                      borderRadius: 10,
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      background: 'rgba(255,255,255,0.04)',
-                      color: 'var(--sidebar-text-bright)',
-                      fontSize: 13,
-                      outline: 'none',
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowToken((current) => !current)}
-                    style={{
-                      position: 'absolute',
-                      right: 8,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--sidebar-text)',
-                      cursor: 'pointer',
-                      padding: 4,
-                      display: 'flex',
-                    }}
-                  >
-                    {showToken ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
-                </div>
+                  {gitlabConnected ? 'Connected' : 'Not connected'}
+                </span>
               </div>
-              <button
-                type="submit"
-                disabled={gitlabSubmitting || !gitlabTokenInput.trim()}
-                style={{
-                  padding: '8px 14px',
-                  borderRadius: 10,
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
-                  color: '#fff',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  opacity:
-                    gitlabSubmitting || !gitlabTokenInput.trim() ? 0.5 : 1,
-                  transition: 'opacity 0.2s',
-                }}
-              >
-                {gitlabSubmitting ? 'Validating…' : 'Connect GitLab'}
-              </button>
-              {gitlabError ? (
-                <p style={{ fontSize: 11, color: '#f87171', margin: 0 }}>
-                  {gitlabError}
-                </p>
-              ) : null}
-            </form>
 
-            <div
-              style={{
-                marginTop: 10,
-                padding: '12px 14px',
-                borderRadius: 12,
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.06)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <div>
+              {gitlabConnected ? (
                 <p
                   style={{
                     margin: 0,
-                    fontSize: 10,
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.1em',
-                    color: 'rgba(148, 163, 184, 0.5)',
+                    fontSize: 11,
+                    color: 'rgba(148,163,184,0.6)',
+                    lineHeight: 1.5,
                   }}
                 >
-                  Session
+                  GitLab session is active. Compliance tools are fully
+                  available.
                 </p>
-                <p
-                  style={{
-                    margin: '2px 0 0',
-                    fontSize: 12,
-                    fontWeight: 500,
-                    color: gitlabToken ? '#10b981' : 'var(--sidebar-text)',
-                  }}
-                >
-                  {gitlabToken
-                    ? health
-                      ? '● Connected'
-                      : '○ Pending'
-                    : '○ Not connected'}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => void refetch()}
-                disabled={!gitlabToken || isLoading}
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 8,
-                  padding: 6,
-                  cursor: 'pointer',
-                  color: 'var(--sidebar-text)',
-                  opacity: !gitlabToken || isLoading ? 0.4 : 1,
-                  display: 'flex',
-                }}
-              >
-                <RefreshCw
-                  size={13}
-                  className={isLoading ? 'animate-spin' : ''}
-                />
-              </button>
+              ) : (
+                <>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 11,
+                      color: 'rgba(148,163,184,0.6)',
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    Connect your GitLab account via OAuth to enable compliance
+                    features.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      window.location.href = getGitlabAuthorizeUrl();
+                    }}
+                    style={{
+                      padding: '9px 14px',
+                      borderRadius: 10,
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
+                      color: '#fff',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'opacity 0.2s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 7,
+                    }}
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M22.65 14.39L12 22.13 1.35 14.39a.84.84 0 0 1-.3-.94l1.22-3.78 2.44-7.51A.42.42 0 0 1 4.82 2a.43.43 0 0 1 .58 0 .42.42 0 0 1 .11.18l2.44 7.49h8.1l2.44-7.51A.42.42 0 0 1 18.6 2a.43.43 0 0 1 .58 0 .42.42 0 0 1 .11.18l2.44 7.51L23 13.45a.84.84 0 0 1-.35.94z" />
+                    </svg>
+                    Connect with GitLab
+                  </button>
+                </>
+              )}
             </div>
           </section>
         ) : null}
