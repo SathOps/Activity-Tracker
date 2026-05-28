@@ -1,7 +1,8 @@
 import React from 'react';
-import { LogOut, User, Globe, Moon, Sun, Mic, BarChart3 } from 'lucide-react';
+import { LogOut, User, Moon, Sun, Mic, BarChart3 } from 'lucide-react';
 import { useConfigStore } from '../../stores/configStore';
 import { cn } from '../../lib/utils';
+import LanguageSwitcher from '../LanguageSwitcher';
 
 interface MobileHeaderProps {
   themeMode: 'light' | 'dark';
@@ -38,9 +39,7 @@ export function MobileHeader({ themeMode, onToggleTheme }: MobileHeaderProps) {
         </div>
 
         <div className="mobile-header__actions">
-          <div className="mobile-header__icon-btn" title="Language">
-            <Globe size={18} />
-          </div>
+          <LanguageSwitcher />
           <button
             className="mobile-header__icon-btn"
             onClick={onToggleTheme}
