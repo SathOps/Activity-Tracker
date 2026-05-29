@@ -5,12 +5,10 @@ export type AppRoute =
   | '/my-profile'
   | '/compliance/profile'
   | '/compliance/weekly'
-  | '/compliance/mentor-groups'
   | '/compliance/batch'
   | '/compliance/leaderboard'
   | '/manage/batches'
-  | '/manage/roles'
-  | '/manage/mentor-groups';
+  | '/manage/roles';
 
 export type WorkspaceId = 'standup' | 'compliance' | 'management';
 
@@ -65,16 +63,6 @@ export const ROUTES: RouteMeta[] = [
     requiresGitlab: true,
   },
   {
-    path: '/compliance/mentor-groups',
-    workspace: 'compliance',
-    title: 'Mentor Groups',
-    section: 'Compliance Checker',
-    description:
-      'Create DB-backed intern groups to monitor scoped standup and compliance progress.',
-    roles: ['admin', 'mentor'],
-    requiresGitlab: true,
-  },
-  {
     path: '/compliance/batch',
     workspace: 'compliance',
     title: 'Batch Analytics',
@@ -109,16 +97,6 @@ export const ROUTES: RouteMeta[] = [
     description:
       'Assign application roles using Corpus usernames as the identity anchor.',
     roles: ['admin'],
-    requiresGitlab: false,
-  },
-  {
-    path: '/manage/mentor-groups',
-    workspace: 'management',
-    title: 'Mentor Groups',
-    section: 'Admin / Management',
-    description:
-      'Assign interns to mentor-owned groups for standup and compliance tracking.',
-    roles: ['admin', 'mentor'],
     requiresGitlab: false,
   },
 ];
