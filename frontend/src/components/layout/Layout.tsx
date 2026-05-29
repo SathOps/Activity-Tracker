@@ -1,7 +1,11 @@
+import { LogOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../LanguageSwitcher';
 import { Sidebar } from './Sidebar';
+import { MobileHeader } from './MobileHeader';
+import { MobileBottomNav } from './MobileBottomNav';
+import { RecordStandupModal } from '../RecordStandupModal';
 import { useConfigStore } from '../../stores/configStore';
 import { useAuth } from '../../contexts/AuthContext';
 import { getRouteMeta } from '../../lib/appRoutes';
@@ -18,11 +22,20 @@ type ThemeMode = 'light' | 'dark';
 export function Layout({ children }: Props) {
   const { t } = useTranslation();
   const { pathname } = useRouter();
-  const { corpusUser } = useConfigStore();
+  const {
+    gitlabToken,
+    activeMode,
+    corpusUser,
+    corpusToken,
+    activeStandupPanel,
+    clearCorpusToken,
+  } = useConfigStore();
   const { gitlabConnected } = useAuth();
   const [themeMode, setThemeMode] = useState<ThemeMode>(() =>
     readStoredThemeMode()
   );
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+
   const modeMeta = getRouteMeta(pathname);
   const corpusUserLabel = corpusUser.trim();
   const isStandupMode = modeMeta.workspace === 'standup';
@@ -104,55 +117,54 @@ export function Layout({ children }: Props) {
               </div>
 
               <div className="flex items-center gap-3">
-                {isStandupMode ? <LanguageSwitcher /> : null}
-                {isStandupMode ? (
-                  <button
-                    aria-label={t('theme.switchMode', {
-                      mode:
-                        themeMode === 'dark'
-                          ? t('theme.light')
-                          : t('theme.dark'),
-                    })}
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: '50%',
-                      border: '1px solid rgba(0,0,0,0.06)',
-                      background: 'rgba(255,255,255,0.7)',
-                      fontSize: 16,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'all 0.2s',
-                    }}
-                    onClick={() =>
-                      setThemeMode((prev) =>
-                        prev === 'dark' ? 'light' : 'dark'
-                      )
-                    }
-                    type="button"
-                  >
-                    <span aria-hidden="true">
-                      {themeMode === 'dark' ? '☀' : '☾'}
-                    </span>
-                  </button>
-                ) : null}
+                <LanguageSwitcher />
+                <button
+                  aria-label={t('theme.switchMode', {
+                    mode:
+                      themeMode === 'dark' ? t('theme.light') : t('theme.dark'),
+                  })}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '50%',
+                    border: '1px solid rgba(0,0,0,0.06)',
+                    background: 'rgba(255,255,255,0.7)',
+                    fontSize: 16,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s',
+                  }}
+                  onClick={() =>
+                    setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'))
+                  }
+                  type="button"
+                >
+                  <span aria-hidden="true">
+                    {themeMode === 'dark' ? '☀' : '☾'}
+                  </span>
+                </button>
                 {corpusUserLabel ? (
-                  <div
-                    style={{
-                      borderRadius: 99,
-                      padding: '8px 18px',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      background:
-                        'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.06))',
-                      color: 'var(--indigo-600)',
-                      border: '1px solid rgba(99,102,241,0.12)',
-                      fontFamily: 'var(--font-display)',
-                    }}
-                  >
-                    {corpusUserLabel}
+                  <div className="tracker-sidebar__session-card ml-2">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="text-left">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 leading-none mb-1">
+                          Corpus Session
+                        </p>
+                        <p className="truncate font-semibold text-indigo-700 leading-none">
+                          {corpusUserLabel}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={clearCorpusToken}
+                        className="rounded-lg bg-indigo-50 p-1.5 text-indigo-500 transition-colors hover:bg-indigo-100 hover:text-indigo-700"
+                        title="Logout"
+                      >
+                        <LogOut size={16} />
+                      </button>
+                    </div>
                   </div>
                 ) : null}
               </div>
@@ -182,9 +194,21 @@ export function Layout({ children }: Props) {
               </span>
             </div>
           )}
-          {children}
+          <div className="tracker-main__content">{children}</div>
         </div>
       </main>
+
+      {isStandupMode && (
+        <MobileBottomNav onRecordClick={() => setIsRecordModalOpen(true)} />
+      )}
+
+      {isRecordModalOpen && (
+        <RecordStandupModal
+          authToken={corpusToken}
+          onClose={() => setIsRecordModalOpen(false)}
+          onSuccess={() => setIsRecordModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

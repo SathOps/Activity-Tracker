@@ -160,18 +160,6 @@ export default function StandupWorkspace() {
 
   return (
     <section className="space-y-6">
-      <div className="rounded-lg border border-slate-200 bg-white px-6 py-5 shadow-sm">
-        <div className="space-y-2">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-            Standup Operations
-          </p>
-          <h2 className="text-xl font-bold text-slate-900">{t('app.title')}</h2>
-          <p className="max-w-3xl text-sm leading-6 text-slate-500">
-            Review submission progress, verify team completion, and manage daily
-            standup activity from the same shared workspace.
-          </p>
-        </div>
-      </div>
       <DashboardHome
         addedInterns={addedInterns}
         authToken={authToken}

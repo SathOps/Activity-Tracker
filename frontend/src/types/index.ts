@@ -384,3 +384,5 @@ export type AppMode =
   | 'leaderboard'
   | 'weekly'
   | 'roster';
+
+export type StandupPanel = 'status' | 'interns' | 'teams' | 'analytics';
