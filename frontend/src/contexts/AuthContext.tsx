@@ -33,6 +33,7 @@ interface AuthContextValue {
   needsProfileSetup: boolean;
   logout: () => Promise<void>;
   recheckGitlab: () => void;
+  refetchMe: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -153,6 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       recheckGitlab: () => {
         queryClient.invalidateQueries({ queryKey: ['gitlab-me'] });
       },
+      refetchMe: () => meQuery.refetch(),
     };
   }, [
     clearAccessToken,

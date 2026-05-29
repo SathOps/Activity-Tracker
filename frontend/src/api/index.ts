@@ -3,8 +3,6 @@ import type {
   BatchRecord,
   HealthResponse,
   MemberRecord,
-  MentorGroupRecord,
-  MentorBatchesResponse,
   MyProfileResponse,
   MyTeamResponse,
   TeamRecord,
@@ -220,6 +218,10 @@ export async function updateMyProfile(payload: {
   return patchJson<MyProfileResponse>('/me', payload);
 }
 
+export async function setMyBatch(batchId: number): Promise<MyProfileResponse> {
+  return patchJson<MyProfileResponse>('/me/batch', { batch_id: batchId });
+}
+
 export async function getGitlabMe(): Promise<GitlabMeResponse> {
   return getJson<GitlabMeResponse>('/auth/gitlab/me');
 }
@@ -319,6 +321,28 @@ export async function getMembers(): Promise<MemberRecord[]> {
   return payload.users;
 }
 
+export async function getTeamsByBatchIds(
+  batchIds: number[]
+): Promise<TeamRecord[]> {
+  const params = new URLSearchParams();
+  params.set('batch_ids', batchIds.join(','));
+  const payload = await getJson<{ teams: TeamRecord[] }>(
+    `/teams/?${params.toString()}`
+  );
+  return payload.teams;
+}
+
+export async function getMembersByTeamIds(
+  teamIds: number[]
+): Promise<MemberRecord[]> {
+  const params = new URLSearchParams();
+  params.set('team_ids', teamIds.join(','));
+  const payload = await getJson<{ users: MemberRecord[] }>(
+    `/members/?${params.toString()}`
+  );
+  return payload.users;
+}
+
 export async function getRosterTeams(
   activeOnly = false
 ): Promise<TeamRecord[]> {
@@ -411,76 +435,6 @@ export async function updateMemberPermissions(
   });
 }
 
-export async function getMentorBatches(
-  memberId: number
-): Promise<MentorBatchesResponse> {
-  return getJson<MentorBatchesResponse>(`/members/${memberId}/batches`);
-}
-
-export async function assignMentorBatches(
-  memberId: number,
-  batchIds: number[]
-): Promise<MentorBatchesResponse> {
-  return postJson(`/members/${memberId}/batches`, { batch_ids: batchIds });
-}
-
-export async function removeMentorBatch(
-  memberId: number,
-  batchId: number
-): Promise<void> {
-  return deleteJson(`/members/${memberId}/batches/${batchId}`);
-}
-
-export async function getMentorGroups(): Promise<MentorGroupRecord[]> {
-  const payload = await getJson<{ groups: MentorGroupRecord[] }>(
-    '/mentor-groups/'
-  );
-  return payload.groups;
-}
-
-export async function createMentorGroup(payload: {
-  name: string;
-  mentor_id: number;
-  batch_id?: number;
-}): Promise<MentorGroupRecord> {
-  return postJson('/mentor-groups/', payload);
-}
-
-export async function updateMentorGroup(
-  groupId: number,
-  payload: {
-    name?: string;
-    mentor_id?: number;
-    batch_id?: number | null;
-  }
-): Promise<MentorGroupRecord> {
-  return putJson(`/mentor-groups/${groupId}`, payload);
-}
-
-export async function deleteMentorGroup(groupId: number): Promise<void> {
-  return deleteJson(`/mentor-groups/${groupId}`);
-}
-
-export async function getMentorGroupMembers(
-  groupId: number
-): Promise<MemberRecord[]> {
-  return getJson<MemberRecord[]>(`/mentor-groups/${groupId}/members`);
-}
-
-export async function addMentorGroupMember(
-  groupId: number,
-  userId: number
-): Promise<MemberRecord> {
-  return postJson(`/mentor-groups/${groupId}/members`, { user_id: userId });
-}
-
-export async function removeMentorGroupMember(
-  groupId: number,
-  userId: number
-): Promise<void> {
-  return deleteJson(`/mentor-groups/${groupId}/members/${userId}`);
-}
-
 export async function createTeam(payload: {
   name: string;
   batch_id: number;
@@ -532,13 +486,18 @@ export async function removeMemberFromTeam(
 }
 
 export async function getWeeklyPerformance(params: {
-  gitlab_username: string;
-  corpus_uid?: string;
   start_date: string;
   end_date: string;
-  corpus_token?: string;
 }): Promise<WeeklyActivity> {
   return postJson('/weekly-performance/single', params);
+}
+
+export async function getWeeklyPerformanceBatch(params: {
+  start_date: string;
+  end_date: string;
+  interns: Array<{ gitlab_username: string }>;
+}): Promise<WeeklyActivity[]> {
+  return postJson('/weekly-performance/batch', params);
 }
 
 export function downloadJson(data: unknown, filename: string): void {

@@ -4,6 +4,7 @@ import { Search, Download } from 'lucide-react';
 import {
   getUserProfile,
   getUserCommits,
+  searchMembers,
   downloadCsv,
   getGitlabAuthorizeUrl,
 } from '../../api';
@@ -15,7 +16,11 @@ import { CommitsPanel } from './CommitsPanel';
 import { MRsPanel } from './MRsPanel';
 import { IssuesPanel } from './IssuesPanel';
 import { ProfileReadme } from './ProfileReadme';
-import type { UserProfileData, UserCommitsResponse } from '../../types';
+import type {
+  MemberRecord,
+  UserProfileData,
+  UserCommitsResponse,
+} from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 
 function isGitlabSessionError(err: unknown): boolean {
@@ -27,15 +32,244 @@ function isGitlabSessionError(err: unknown): boolean {
   );
 }
 
+// ── Member search dropdown (admin / mentor only) ──────────────────────────────
+
+function MemberSearchBox({
+  onSelect,
+}: {
+  onSelect: (gitlabUsername: string, displayName: string) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const [open, setOpen] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounce: wait 300 ms after the user stops typing before searching
+  useEffect(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setDebouncedQuery(query.trim());
+    }, 300);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [query]);
+
+  const { data: results, isLoading } = useQuery<MemberRecord[]>({
+    queryKey: ['member-search', debouncedQuery],
+    queryFn: () => searchMembers(debouncedQuery),
+    enabled: debouncedQuery.length >= 1,
+    retry: false,
+    staleTime: 30 * 1000,
+  });
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  function handleSelect(member: MemberRecord) {
+    if (!member.gitlab_username?.trim()) return;
+    setQuery(member.name || member.corpus_username);
+    setOpen(false);
+    onSelect(
+      member.gitlab_username.trim(),
+      member.name || member.corpus_username
+    );
+  }
+
+  const showDropdown = open && debouncedQuery.length >= 1;
+
+  return (
+    <div ref={containerRef} style={{ position: 'relative', flex: 1 }}>
+      <div className="flex gap-3">
+        <div style={{ position: 'relative', flex: 1 }}>
+          <input
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setOpen(true);
+            }}
+            onFocus={() => setOpen(true)}
+            placeholder="Search by name or corpus username…"
+            className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+          />
+          {isLoading && (
+            <span
+              style={{
+                position: 'absolute',
+                right: 12,
+                top: '50%',
+                transform: 'translateY(-50%)',
+              }}
+            >
+              <Spinner size="sm" label="" />
+            </span>
+          )}
+        </div>
+      </div>
+
+      {showDropdown && (results ?? []).length > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 4px)',
+            left: 0,
+            right: 0,
+            background: '#fff',
+            border: '1px solid #e2e8f0',
+            borderRadius: 10,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+            zIndex: 50,
+            maxHeight: 280,
+            overflowY: 'auto',
+          }}
+        >
+          {results!.map((member) => {
+            const hasGitlab = !!member.gitlab_username?.trim();
+            return (
+              <button
+                key={member.id}
+                type="button"
+                onClick={() => handleSelect(member)}
+                disabled={!hasGitlab}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '10px 14px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: '1px solid #f1f5f9',
+                  cursor: hasGitlab ? 'pointer' : 'not-allowed',
+                  opacity: hasGitlab ? 1 : 0.45,
+                  textAlign: 'left',
+                }}
+                className="hover:bg-slate-50"
+              >
+                {/* Avatar */}
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: '#fff',
+                    flexShrink: 0,
+                  }}
+                >
+                  {(member.name || member.corpus_username)[0]?.toUpperCase() ??
+                    '?'}
+                </div>
+
+                {/* Info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: '#1e293b',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {member.name || member.corpus_username}
+                  </p>
+                  <p style={{ margin: 0, fontSize: 11, color: '#94a3b8' }}>
+                    @{member.corpus_username}
+                    {member.gitlab_username
+                      ? ` · GitLab: ${member.gitlab_username}`
+                      : ' · No GitLab username'}
+                  </p>
+                </div>
+
+                {/* Role badge */}
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    padding: '2px 7px',
+                    borderRadius: 99,
+                    background:
+                      member.role === 'admin'
+                        ? '#fee2e2'
+                        : member.role === 'mentor'
+                          ? '#dbeafe'
+                          : '#d1fae5',
+                    color:
+                      member.role === 'admin'
+                        ? '#991b1b'
+                        : member.role === 'mentor'
+                          ? '#1e40af'
+                          : '#065f46',
+                    flexShrink: 0,
+                  }}
+                >
+                  {member.role ?? 'intern'}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {showDropdown &&
+        !isLoading &&
+        debouncedQuery.length >= 1 &&
+        (results ?? []).length === 0 && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 'calc(100% + 4px)',
+              left: 0,
+              right: 0,
+              background: '#fff',
+              border: '1px solid #e2e8f0',
+              borderRadius: 10,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+              zIndex: 50,
+              padding: '12px 16px',
+              fontSize: 13,
+              color: '#94a3b8',
+            }}
+          >
+            No members found for &quot;{debouncedQuery}&quot;
+          </div>
+        )}
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+
 export function UserProfile() {
   const { user, recheckGitlab } = useAuth();
   const isIntern = user?.role === 'intern';
 
   const internUsername = user?.gitlabUsername ?? '';
-  const [searchInput, setSearchInput] = useState('');
   const [queriedUsername, setQueriedUsername] = useState(
     isIntern ? internUsername : ''
   );
+  const [selectedName, setSelectedName] = useState('');
 
   const appliedRef = useRef(false);
   useEffect(() => {
@@ -45,7 +279,7 @@ export function UserProfile() {
     }
   }, [isIntern, internUsername]);
 
-  // ── Profile fetch (projects, MRs, issues, groups, readme) ────────────────
+  // ── Profile fetch ─────────────────────────────────────────────────────────
   const {
     data: profileData,
     isLoading: profileLoading,
@@ -60,7 +294,7 @@ export function UserProfile() {
     staleTime: 2 * 60 * 1000,
   });
 
-  // ── Commits fetch — runs in parallel, may resolve later ──────────────────
+  // ── Commits fetch — parallel, arrives later ───────────────────────────────
   const {
     data: commitsData,
     isLoading: commitsLoading,
@@ -68,16 +302,10 @@ export function UserProfile() {
   } = useQuery<UserCommitsResponse>({
     queryKey: ['gitlab-commits', queriedUsername],
     queryFn: () => getUserCommits(queriedUsername),
-    // Only start when the profile query is enabled (username known)
     enabled: !!queriedUsername,
     retry: false,
     staleTime: 2 * 60 * 1000,
   });
-
-  function handleSearch() {
-    const u = searchInput.trim();
-    if (u) setQueriedUsername(u);
-  }
 
   const d = profileData?.data;
   const profileOk = profileData?.status?.toLowerCase() === 'success' && !!d;
@@ -89,29 +317,24 @@ export function UserProfile() {
 
   return (
     <div>
-      {/* Search bar — admin / mentor only */}
+      {/* Search — admin / mentor: member search dropdown */}
       {!isIntern && (
-        <div className="mb-6 flex gap-3">
-          <input
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            placeholder="Enter GitLab username…"
-            className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        <div className="mb-6">
+          <MemberSearchBox
+            onSelect={(gitlabUsername, name) => {
+              setSelectedName(name);
+              setQueriedUsername(gitlabUsername);
+            }}
           />
-          <button
-            type="button"
-            onClick={handleSearch}
-            disabled={!searchInput.trim() || profileLoading}
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-          >
-            {profileLoading ? (
-              <Spinner size="sm" label="" />
-            ) : (
-              <Search size={15} />
-            )}
-            Search
-          </button>
+          {queriedUsername && selectedName && (
+            <p className="mt-2 text-xs text-slate-400">
+              Showing GitLab profile for{' '}
+              <strong className="text-slate-600">{selectedName}</strong> ·{' '}
+              <span className="font-mono text-indigo-500">
+                @{queriedUsername}
+              </span>
+            </p>
+          )}
         </div>
       )}
 
@@ -120,7 +343,7 @@ export function UserProfile() {
         <div className="flex flex-col items-center justify-center py-24 gap-2 text-slate-400">
           <Search size={36} />
           <p className="text-sm">
-            Enter a GitLab username above to load their profile.
+            Search a member above to load their GitLab profile.
           </p>
         </div>
       )}
@@ -133,7 +356,7 @@ export function UserProfile() {
         </Alert>
       )}
 
-      {/* Profile loading spinner */}
+      {/* Profile loading */}
       {profileLoading && (
         <div className="flex flex-col items-center justify-center py-24 gap-3">
           <Spinner size="lg" label="" />
@@ -205,7 +428,7 @@ export function UserProfile() {
           </Alert>
         ))}
 
-      {/* Backend returned non-success status */}
+      {/* Backend non-success */}
       {!profileLoading &&
         profileData &&
         profileData.status?.toLowerCase() !== 'success' && (
@@ -219,7 +442,7 @@ export function UserProfile() {
           </Alert>
         )}
 
-      {/* ── Profile data ───────────────────────────────────────────────────── */}
+      {/* ── Profile data ─────────────────────────────────────────────────── */}
       {!profileLoading && profileOk && (
         <div className="space-y-6">
           <ProfileHeader user={d.user} />
@@ -269,7 +492,7 @@ export function UserProfile() {
             />
           </div>
 
-          {/* Commits — separate loading state, arrives after profile */}
+          {/* Commits */}
           <div className="rounded-xl border border-slate-200 bg-white p-5">
             {commitsLoading ? (
               <div className="flex items-center gap-3 py-6">

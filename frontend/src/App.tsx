@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import toast from 'react-hot-toast';
+import { BatchSelectionPage } from './components/auth/BatchSelectionPage';
 import { CorpusLoginPage } from './components/auth/CorpusLoginPage';
 import { ProfileCompletionPage } from './components/auth/ProfileCompletionPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -67,6 +68,11 @@ function AppContent() {
 
   if (!isAuthenticated) {
     return <CorpusLoginPage />;
+  }
+
+  // Intern with no batch assigned yet — must pick a batch before continuing
+  if (!isLoading && user && user.role === 'intern' && user.batchId == null) {
+    return <BatchSelectionPage />;
   }
 
   // Enforce profile setup before accessing any workspace
