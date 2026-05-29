@@ -24,10 +24,10 @@ import {
 
 const API_BASE_URL = 'http://localhost:8000/api';
 const CORPUS_PROXY_BASE_URL = `${API_BASE_URL}/corpus`;
-const CORPUS_UPLOAD_CHUNK_URL = `${CORPUS_PROXY_BASE_URL}/records/upload/chunk`;
-const CORPUS_UPLOAD_URL = `${CORPUS_PROXY_BASE_URL}/records/upload`;
-const CORPUS_CATEGORIES_URL = `${CORPUS_PROXY_BASE_URL}/proxy/api/v1/categories/`;
-const CORPUS_LOCATION_URL = `${CORPUS_PROXY_BASE_URL}/location/verify-location`;
+const CORPUS_UPLOAD_CHUNK_URL = `/api/corpus/records/upload/chunk`;
+const CORPUS_UPLOAD_URL = `/api/corpus/records/upload`;
+const CORPUS_CATEGORIES_URL = `/api/corpus/proxy/api/v1/categories/`;
+const CORPUS_LOCATION_URL = `/api/corpus/location/verify-location`;
 
 describe('corpusUploadApi constants', () => {
   test('DEFAULT_CHUNK_SIZE_BYTES is 5MB', () => {

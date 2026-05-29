@@ -13,7 +13,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { id: 'status', label: 'Status', icon: <LayoutGrid size={20} /> },
   { id: 'interns', label: 'Interns', icon: <Users size={20} /> },
-  { id: 'teams', label: 'Team', icon: <Users2 size={20} /> },
+  { id: 'teams', label: 'Team Management', icon: <Users2 size={20} /> },
   { id: 'analytics', label: 'Analytics', icon: <BarChart2 size={20} /> },
 ];
 
