@@ -2,13 +2,13 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Save, Trash2, Users, X } from 'lucide-react';
 import {
-  addMemberToTeam,
+  addUserToTeam,
   createTeam,
   deleteTeam,
   getBatches,
   getRosterTeams,
   getTeamDetail,
-  removeMemberFromTeam,
+  removeUserFromTeam,
   updateTeam,
 } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -26,7 +26,7 @@ export function TeamsPage() {
   const [expandedTeamId, setExpandedTeamId] = useState<number | null>(null);
   const [editingTeamId, setEditingTeamId] = useState<number | null>(null);
   const [editingTeamName, setEditingTeamName] = useState('');
-  const [memberDrafts, setMemberDrafts] = useState<Record<number, string>>({});
+  const [userDrafts, setUserDrafts] = useState<Record<number, string>>({});
 
   const batchesQuery = useQuery({
     queryKey: ['batches'],
@@ -82,26 +82,26 @@ export function TeamsPage() {
     },
   });
 
-  const addMemberMutation = useMutation({
+  const addUserMutation = useMutation({
     mutationFn: ({
       teamId,
       corpusUsername,
     }: {
       teamId: number;
       corpusUsername: string;
-    }) => addMemberToTeam(teamId, corpusUsername),
+    }) => addUserToTeam(teamId, corpusUsername),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['team-detail', expandedTeamId] });
-      qc.invalidateQueries({ queryKey: ['members'] });
+      qc.invalidateQueries({ queryKey: ['users'] });
     },
   });
 
-  const removeMemberMutation = useMutation({
-    mutationFn: ({ teamId, memberId }: { teamId: number; memberId: number }) =>
-      removeMemberFromTeam(teamId, memberId),
+  const removeUserMutation = useMutation({
+    mutationFn: ({ teamId, userId }: { teamId: number; userId: number }) =>
+      removeUserFromTeam(teamId, userId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['team-detail', expandedTeamId] });
-      qc.invalidateQueries({ queryKey: ['members'] });
+      qc.invalidateQueries({ queryKey: ['users'] });
     },
   });
 
@@ -292,7 +292,7 @@ export function TeamsPage() {
                           {team.name}
                         </h3>
                         <p className="mt-1 text-sm text-slate-500">
-                          {team.batch_name} · {team.member_count} member(s)
+                          {team.batch_name} · {team.member_count} user(s)
                         </p>
                       </>
                     )}
@@ -355,7 +355,7 @@ export function TeamsPage() {
                         <div className="grid gap-3 md:grid-cols-3">
                           <div className="rounded-lg bg-white px-4 py-3">
                             <p className="text-xs uppercase tracking-wide text-slate-400">
-                              Active members
+                              Active users
                             </p>
                             <p className="mt-1 text-lg font-semibold text-slate-900">
                               {selectedTeamDetail.member_count}
@@ -383,11 +383,11 @@ export function TeamsPage() {
                           <div className="flex items-center justify-between gap-4">
                             <div>
                               <h4 className="text-sm font-semibold text-slate-900">
-                                Current members
+                                Current users
                               </h4>
                               <p className="mt-1 text-xs text-slate-500">
-                                Add members by Corpus username or remove current
-                                team members.
+                                Add users by Corpus username or remove current
+                                team users.
                               </p>
                             </div>
                             <Users size={16} className="text-slate-400" />
@@ -397,9 +397,9 @@ export function TeamsPage() {
                             <div className="mt-4 flex gap-2">
                               <input
                                 type="text"
-                                value={memberDrafts[team.id] || ''}
+                                value={userDrafts[team.id] || ''}
                                 onChange={(event) =>
-                                  setMemberDrafts((current) => ({
+                                  setUserDrafts((current) => ({
                                     ...current,
                                     [team.id]: event.target.value,
                                   }))
@@ -410,45 +410,45 @@ export function TeamsPage() {
                               <button
                                 type="button"
                                 onClick={() =>
-                                  void addMemberMutation.mutate({
+                                  void addUserMutation.mutate({
                                     teamId: team.id,
                                     corpusUsername: (
-                                      memberDrafts[team.id] || ''
+                                      userDrafts[team.id] || ''
                                     ).trim(),
                                   })
                                 }
                                 disabled={
-                                  !(memberDrafts[team.id] || '').trim() ||
-                                  addMemberMutation.isPending
+                                  !(userDrafts[team.id] || '').trim() ||
+                                  addUserMutation.isPending
                                 }
                                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
                               >
-                                Add member
+                                Add user
                               </button>
                             </div>
                           ) : null}
 
                           <div className="mt-4 space-y-2">
-                            {selectedTeamDetail.members.map((member) => (
+                            {selectedTeamDetail.users.map((appUser) => (
                               <div
-                                key={member.id}
+                                key={appUser.id}
                                 className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3"
                               >
                                 <div>
                                   <p className="text-sm font-medium text-slate-900">
-                                    {member.name}
+                                    {appUser.name}
                                   </p>
                                   <p className="text-xs text-slate-500">
-                                    {member.corpus_username} · {member.role}
+                                    {appUser.corpus_username} · {appUser.role}
                                   </p>
                                 </div>
                                 {isAdmin ? (
                                   <button
                                     type="button"
                                     onClick={() =>
-                                      void removeMemberMutation.mutate({
+                                      void removeUserMutation.mutate({
                                         teamId: team.id,
-                                        memberId: member.id,
+                                        userId: appUser.id,
                                       })
                                     }
                                     className="rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600"

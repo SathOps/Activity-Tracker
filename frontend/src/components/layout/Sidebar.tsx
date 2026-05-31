@@ -6,10 +6,9 @@ import {
   Mic,
   Trophy,
   User,
-  Users,
 } from 'lucide-react';
 import { useMemo } from 'react';
-import { getGitlabAuthorizeUrl } from '../../api';
+import { getGitlabLoginUrl } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
 import { ROUTES, type AppRoute, type WorkspaceId } from '../../lib/appRoutes';
 import { cn } from '../../lib/utils';
@@ -536,7 +535,7 @@ export function Sidebar() {
                   <button
                     type="button"
                     onClick={() => {
-                      window.location.href = getGitlabAuthorizeUrl();
+                      window.location.href = getGitlabLoginUrl();
                     }}
                     style={{
                       padding: '9px 14px',

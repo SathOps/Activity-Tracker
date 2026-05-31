@@ -1,7 +1,6 @@
 /**
- * useBatchStream — opens two SSE streams in parallel:
- *   GET /api/batch/stream              → profile data per user
- *   GET /api/batch/commits/stream      → commits + commit_stats per user
+ * useBatchStream — opens one SSE stream:
+ *   GET /api/batch/stream              → profile data, then commits per user
  *
  * Results from both streams are merged by username into a single results array.
  * The profile stream resolves first (~3-5s); commits arrive later (~10-30s).
@@ -9,7 +8,7 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
-import { buildBatchStreamUrl, buildBatchCommitsStreamUrl } from '../api';
+import { buildBatchStreamUrl } from '../api';
 import type { SSEProgressEvent } from '../types';
 
 interface StreamState {
@@ -135,8 +134,7 @@ export function useBatchStream(): UseBatchStreamReturn {
         });
       }
 
-      // ── Profile stream ──────────────────────────────────────────────────
-      const profileUrl = buildBatchStreamUrl(
+      const streamUrl = buildBatchStreamUrl(
         usernames,
         projectIds,
         since,
@@ -144,66 +142,55 @@ export function useBatchStream(): UseBatchStreamReturn {
       );
 
       void consumeStream(
-        profileUrl,
+        streamUrl,
         ctrl.signal,
         (event) => {
           if (event.username && event.result) {
-            mergeRow(event.username, event.result as Record<string, unknown>);
+            if (event.phase === 'commits') {
+              const r = event.result as {
+                commits?: unknown[];
+                commit_stats?: unknown;
+              };
+              mergeRow(event.username, {
+                commits: r.commits ?? [],
+                commit_stats: r.commit_stats ?? {},
+              });
+            } else {
+              mergeRow(event.username, event.result as Record<string, unknown>);
+            }
           }
-          setState((s) => ({
-            ...s,
-            progress: (event.current ?? 0) / (event.total ?? 1),
-            total: event.total ?? s.total,
-          }));
+          if (event.phase !== 'commits') {
+            setState((s) => ({
+              ...s,
+              progress: (event.current ?? 0) / (event.total ?? 1),
+              total: event.total ?? s.total,
+            }));
+          }
         },
         () => {
-          setState((s) => ({ ...s, isRunning: false, progress: 1 }));
+          setState((s) => ({
+            ...s,
+            isRunning: false,
+            commitsLoading: false,
+            progress: 1,
+          }));
         },
         (msg) => {
-          setState((s) => ({ ...s, isRunning: false, error: msg }));
+          setState((s) => ({
+            ...s,
+            isRunning: false,
+            commitsLoading: false,
+            error: msg,
+          }));
         }
       ).catch((err: unknown) => {
         if ((err as Error)?.name === 'AbortError') return;
         setState((s) => ({
           ...s,
           isRunning: false,
+          commitsLoading: false,
           error: (err as Error)?.message ?? 'Profile stream failed',
         }));
-      });
-
-      // ── Commits stream ──────────────────────────────────────────────────
-      const commitsUrl = buildBatchCommitsStreamUrl(
-        usernames,
-        projectIds,
-        since,
-        until
-      );
-
-      void consumeStream(
-        commitsUrl,
-        ctrl.signal,
-        (event) => {
-          if (event.username && event.result) {
-            const r = event.result as {
-              commits?: unknown[];
-              commit_stats?: unknown;
-            };
-            mergeRow(event.username, {
-              commits: r.commits ?? [],
-              commit_stats: r.commit_stats ?? {},
-            });
-          }
-        },
-        () => {
-          setState((s) => ({ ...s, commitsLoading: false }));
-        },
-        () => {
-          // Commits stream error — don't block the profile data
-          setState((s) => ({ ...s, commitsLoading: false }));
-        }
-      ).catch((err: unknown) => {
-        if ((err as Error)?.name === 'AbortError') return;
-        setState((s) => ({ ...s, commitsLoading: false }));
       });
     },
     []

@@ -4,9 +4,9 @@ import { Search, Download } from 'lucide-react';
 import {
   getUserProfile,
   getUserCommits,
-  searchMembers,
+  searchUsers,
   downloadCsv,
-  getGitlabAuthorizeUrl,
+  getGitlabLoginUrl,
 } from '../../api';
 import { Spinner } from '../ui/Spinner';
 import { Alert } from '../ui/Alert';
@@ -17,7 +17,7 @@ import { MRsPanel } from './MRsPanel';
 import { IssuesPanel } from './IssuesPanel';
 import { ProfileReadme } from './ProfileReadme';
 import type {
-  MemberRecord,
+  UserRecord,
   UserProfileData,
   UserCommitsResponse,
 } from '../../types';
@@ -32,9 +32,9 @@ function isGitlabSessionError(err: unknown): boolean {
   );
 }
 
-// ── Member search dropdown (admin / mentor only) ──────────────────────────────
+// ── User search dropdown (admin / mentor only) ───────────────────────────────
 
-function MemberSearchBox({
+function UserSearchBox({
   onSelect,
 }: {
   onSelect: (gitlabUsername: string, displayName: string) => void;
@@ -56,9 +56,9 @@ function MemberSearchBox({
     };
   }, [query]);
 
-  const { data: results, isLoading } = useQuery<MemberRecord[]>({
-    queryKey: ['member-search', debouncedQuery],
-    queryFn: () => searchMembers(debouncedQuery),
+  const { data: results, isLoading } = useQuery<UserRecord[]>({
+    queryKey: ['user-search', debouncedQuery],
+    queryFn: () => searchUsers(debouncedQuery),
     enabled: debouncedQuery.length >= 1,
     retry: false,
     staleTime: 30 * 1000,
@@ -78,13 +78,13 @@ function MemberSearchBox({
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  function handleSelect(member: MemberRecord) {
-    if (!member.gitlab_username?.trim()) return;
-    setQuery(member.name || member.corpus_username);
+  function handleSelect(appUser: UserRecord) {
+    if (!appUser.gitlab_username?.trim()) return;
+    setQuery(appUser.name || appUser.corpus_username);
     setOpen(false);
     onSelect(
-      member.gitlab_username.trim(),
-      member.name || member.corpus_username
+      appUser.gitlab_username.trim(),
+      appUser.name || appUser.corpus_username
     );
   }
 
@@ -135,13 +135,13 @@ function MemberSearchBox({
             overflowY: 'auto',
           }}
         >
-          {results!.map((member) => {
-            const hasGitlab = !!member.gitlab_username?.trim();
+          {results!.map((appUser) => {
+            const hasGitlab = !!appUser.gitlab_username?.trim();
             return (
               <button
-                key={member.id}
+                key={appUser.id}
                 type="button"
-                onClick={() => handleSelect(member)}
+                onClick={() => handleSelect(appUser)}
                 disabled={!hasGitlab}
                 style={{
                   width: '100%',
@@ -174,8 +174,8 @@ function MemberSearchBox({
                     flexShrink: 0,
                   }}
                 >
-                  {(member.name || member.corpus_username)[0]?.toUpperCase() ??
-                    '?'}
+                  {(appUser.name ||
+                    appUser.corpus_username)[0]?.toUpperCase() ?? '?'}
                 </div>
 
                 {/* Info */}
@@ -191,12 +191,12 @@ function MemberSearchBox({
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {member.name || member.corpus_username}
+                    {appUser.name || appUser.corpus_username}
                   </p>
                   <p style={{ margin: 0, fontSize: 11, color: '#94a3b8' }}>
-                    @{member.corpus_username}
-                    {member.gitlab_username
-                      ? ` · GitLab: ${member.gitlab_username}`
+                    @{appUser.corpus_username}
+                    {appUser.gitlab_username
+                      ? ` · GitLab: ${appUser.gitlab_username}`
                       : ' · No GitLab username'}
                   </p>
                 </div>
@@ -210,21 +210,21 @@ function MemberSearchBox({
                     padding: '2px 7px',
                     borderRadius: 99,
                     background:
-                      member.role === 'admin'
+                      appUser.role === 'admin'
                         ? '#fee2e2'
-                        : member.role === 'mentor'
+                        : appUser.role === 'mentor'
                           ? '#dbeafe'
                           : '#d1fae5',
                     color:
-                      member.role === 'admin'
+                      appUser.role === 'admin'
                         ? '#991b1b'
-                        : member.role === 'mentor'
+                        : appUser.role === 'mentor'
                           ? '#1e40af'
                           : '#065f46',
                     flexShrink: 0,
                   }}
                 >
-                  {member.role ?? 'intern'}
+                  {appUser.role ?? 'intern'}
                 </span>
               </button>
             );
@@ -252,7 +252,7 @@ function MemberSearchBox({
               color: '#94a3b8',
             }}
           >
-            No members found for &quot;{debouncedQuery}&quot;
+            No users found for &quot;{debouncedQuery}&quot;
           </div>
         )}
     </div>
@@ -317,10 +317,10 @@ export function UserProfile() {
 
   return (
     <div>
-      {/* Search — admin / mentor: member search dropdown */}
+      {/* Search — admin / mentor: user search dropdown */}
       {!isIntern && (
         <div className="mb-6">
-          <MemberSearchBox
+          <UserSearchBox
             onSelect={(gitlabUsername, name) => {
               setSelectedName(name);
               setQueriedUsername(gitlabUsername);
@@ -343,7 +343,7 @@ export function UserProfile() {
         <div className="flex flex-col items-center justify-center py-24 gap-2 text-slate-400">
           <Search size={36} />
           <p className="text-sm">
-            Search a member above to load their GitLab profile.
+            Search a user above to load their GitLab profile.
           </p>
         </div>
       )}
@@ -396,7 +396,7 @@ export function UserProfile() {
               type="button"
               onClick={() => {
                 recheckGitlab();
-                window.location.href = getGitlabAuthorizeUrl();
+                window.location.href = getGitlabLoginUrl();
               }}
               style={{
                 display: 'inline-flex',

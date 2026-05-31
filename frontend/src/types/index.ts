@@ -38,7 +38,6 @@ export interface MyProfileResponse {
   global_email?: string | null;
   date_of_joining?: string | null;
   role: UserRole;
-  can_edit_standup: boolean;
   team_id?: number | null;
   team_name: string;
   batch_id?: number | null;
@@ -46,20 +45,8 @@ export interface MyProfileResponse {
 }
 
 export interface MyTeamResponse {
-  team_id?: number | null;
-  team_name: string;
-  batch_name?: string | null;
-  start_date: string;
-  end_date: string;
-  is_active: boolean;
-  members: Array<{
-    id: number;
-    name: string;
-    corpus_username: string;
-    gitlab_username?: string | null;
-    global_email?: string | null;
-    role: UserRole;
-  }>;
+  team: TeamRecord | null;
+  users: UserRecord[];
 }
 
 // ── User Profile ──────────────────────────────────────────────────────────
@@ -199,6 +186,7 @@ export interface BatchUserRow {
 
 export interface SSEProgressEvent {
   type: 'progress' | 'done' | 'error';
+  phase?: 'profile' | 'commits';
   current?: number;
   total?: number;
   username?: string;
@@ -284,14 +272,13 @@ export interface TeamRecord {
   created_by?: number | null;
 }
 
-export interface AppMemberSummary {
+export interface MembershipRecord {
   id: number;
-  name: string;
-  corpus_username: string;
-  gitlab_username?: string;
-  role: UserRole;
-  joined_at?: string;
-  left_at?: string;
+  user_id: number;
+  team_id: number;
+  team_name: string;
+  joined_at: string;
+  left_at: string;
 }
 
 export interface TeamDetailRecord {
@@ -303,11 +290,11 @@ export interface TeamDetailRecord {
   end_date: string;
   is_active: boolean;
   member_count: number;
-  members: AppMemberSummary[];
-  history: AppMemberSummary[];
+  users: UserRecord[];
+  history: MembershipRecord[];
 }
 
-export interface MemberRecord {
+export interface UserRecord {
   id: number;
   name: string;
   corpus_username: string;
@@ -321,7 +308,6 @@ export interface MemberRecord {
   global_email?: string;
   date_of_joining?: string;
   college_name?: string;
-  can_edit_standup?: boolean;
   team_id?: number | null;
   team_name: string;
   batch_id?: number | null;

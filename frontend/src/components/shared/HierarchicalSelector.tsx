@@ -1,15 +1,15 @@
 /**
- * HierarchicalSelector — Batch → Team → Member cascading multi-select.
+ * HierarchicalSelector — Batch → Team → User cascading multi-select.
  *
  * Used by Leaderboard, Batch Analytics, and Weekly Performance pages.
  * Backend filters results by the caller's role automatically (admin sees all,
- * mentor sees only their assigned batches/teams/members).
+ * mentor sees only their assigned batches/teams/users).
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getBatches, getTeamsByBatchIds, getMembersByTeamIds } from '../../api';
-import type { BatchRecord, MemberRecord, TeamRecord } from '../../types';
+import { getBatches, getTeamsByBatchIds, getUsersByTeamIds } from '../../api';
+import type { BatchRecord, TeamRecord, UserRecord } from '../../types';
 import { Spinner } from '../ui/Spinner';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -25,7 +25,7 @@ export interface SelectedMember {
 }
 
 export interface SelectorOutput {
-  members: SelectedMember[];
+  users: SelectedMember[];
   startDate: string;
   endDate: string;
 }
@@ -259,7 +259,7 @@ export function HierarchicalSelector({
   const [selectedTeamIds, setSelectedTeamIds] = useState<Set<number>>(
     new Set()
   );
-  const [selectedMemberIds, setSelectedMemberIds] = useState<Set<number>>(
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<number>>(
     new Set()
   );
   const [startDate, setStartDate] = useState(() => {
@@ -290,32 +290,32 @@ export function HierarchicalSelector({
     staleTime: 2 * 60 * 1000,
   });
 
-  // Step 3 — Members: one fetch per selected team, merged together.
+  // Step 3 — Users: one fetch per selected team, merged together.
   // Using plain useEffect instead of useQuery because the custom query shim
   // does not re-trigger when only the query key changes.
   const teamIdList = useMemo(
     () => Array.from(selectedTeamIds).sort((a, b) => a - b),
     [selectedTeamIds]
   );
-  const [members, setMembers] = useState<MemberRecord[]>([]);
-  const [membersLoading, setMembersLoading] = useState(false);
+  const [users, setUsers] = useState<UserRecord[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
 
   useEffect(() => {
     if (teamIdList.length === 0) {
-      setMembers([]);
+      setUsers([]);
       return;
     }
     let cancelled = false;
-    setMembersLoading(true);
-    Promise.all(teamIdList.map((id) => getMembersByTeamIds([id])))
+    setUsersLoading(true);
+    Promise.all(teamIdList.map((id) => getUsersByTeamIds([id])))
       .then((results) => {
         if (!cancelled) {
-          setMembers(results.flat());
-          setMembersLoading(false);
+          setUsers(results.flat());
+          setUsersLoading(false);
         }
       })
       .catch(() => {
-        if (!cancelled) setMembersLoading(false);
+        if (!cancelled) setUsersLoading(false);
       });
     return () => {
       cancelled = true;
@@ -328,32 +328,34 @@ export function HierarchicalSelector({
   function handleBatchChange(next: Set<number>) {
     setSelectedBatchIds(next);
     setSelectedTeamIds(new Set());
-    setSelectedMemberIds(new Set());
+    setSelectedUserIds(new Set());
   }
 
   function handleTeamChange(next: Set<number>) {
     setSelectedTeamIds(next);
-    setSelectedMemberIds(new Set());
+    setSelectedUserIds(new Set());
   }
 
-  // Collect valid (has gitlab_username) selected members
-  const validMembers = members.filter((m) => !!m.gitlab_username?.trim());
-  const selectedMembers = validMembers.filter((m) =>
-    selectedMemberIds.has(m.id)
+  // Collect valid (has gitlab_username) selected users
+  const validUsers = users.filter(
+    (appUser) => !!appUser.gitlab_username?.trim()
+  );
+  const selectedUsers = validUsers.filter((appUser) =>
+    selectedUserIds.has(appUser.id)
   );
 
   const showMultipleBatches = selectedBatchIds.size > 1;
 
   function handleRun() {
     const output: SelectorOutput = {
-      members: selectedMembers.map((m) => ({
-        id: m.id,
-        name: m.name,
-        corpus_username: m.corpus_username,
-        gitlab_username: m.gitlab_username!.trim(),
-        team_id: m.team_id ?? 0,
-        team_name: m.team_name ?? '',
-        batch_name: m.batch_name ?? '',
+      users: selectedUsers.map((appUser) => ({
+        id: appUser.id,
+        name: appUser.name,
+        corpus_username: appUser.corpus_username,
+        gitlab_username: appUser.gitlab_username!.trim(),
+        team_id: appUser.team_id ?? 0,
+        team_name: appUser.team_name ?? '',
+        batch_name: appUser.batch_name ?? '',
       })),
       startDate,
       endDate,
@@ -362,7 +364,7 @@ export function HierarchicalSelector({
   }
 
   const canRun =
-    selectedMembers.length > 0 && !!startDate && !!endDate && !isRunning;
+    selectedUsers.length > 0 && !!startDate && !!endDate && !isRunning;
 
   return (
     <div
@@ -425,7 +427,7 @@ export function HierarchicalSelector({
         }
       />
 
-      {/* Step 3 — Members */}
+      {/* Step 3 — Users */}
       <div>
         <p
           style={{
@@ -437,14 +439,14 @@ export function HierarchicalSelector({
             marginBottom: 6,
           }}
         >
-          3. Select Members
+          3. Select Users
         </p>
 
         {selectedTeamIds.size === 0 ? (
           <p style={{ fontSize: 13, color: '#94a3b8', padding: '10px 0' }}>
-            Select a team to load members.
+            Select a team to load users.
           </p>
-        ) : membersLoading ? (
+        ) : usersLoading ? (
           <div
             style={{
               display: 'flex',
@@ -455,12 +457,12 @@ export function HierarchicalSelector({
           >
             <Spinner size="sm" label="" />
             <span style={{ fontSize: 13, color: '#94a3b8' }}>
-              Loading members…
+              Loading users…
             </span>
           </div>
-        ) : validMembers.length === 0 ? (
+        ) : validUsers.length === 0 ? (
           <p style={{ fontSize: 13, color: '#94a3b8', padding: '10px 0' }}>
-            No members with GitLab usernames found in the selected team(s).
+            No users with GitLab usernames found in the selected team(s).
           </p>
         ) : (
           <div
@@ -487,29 +489,29 @@ export function HierarchicalSelector({
               <input
                 type="checkbox"
                 checked={
-                  selectedMemberIds.size === validMembers.length &&
-                  validMembers.length > 0
+                  selectedUserIds.size === validUsers.length &&
+                  validUsers.length > 0
                 }
                 onChange={() =>
-                  setSelectedMemberIds(
-                    selectedMemberIds.size === validMembers.length
+                  setSelectedUserIds(
+                    selectedUserIds.size === validUsers.length
                       ? new Set()
-                      : new Set(validMembers.map((m) => m.id))
+                      : new Set(validUsers.map((appUser) => appUser.id))
                   )
                 }
                 style={{ accentColor: '#6366f1' }}
               />
               <span style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>
-                Select all ({validMembers.length})
+                Select all ({validUsers.length})
               </span>
             </label>
 
-            {validMembers.map((member) => {
+            {validUsers.map((appUser) => {
               const showTeam = selectedTeamIds.size > 1;
               return (
                 <label
-                  key={member.id}
-                  aria-label={member.name}
+                  key={appUser.id}
+                  aria-label={appUser.name}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -522,12 +524,12 @@ export function HierarchicalSelector({
                 >
                   <input
                     type="checkbox"
-                    checked={selectedMemberIds.has(member.id)}
+                    checked={selectedUserIds.has(appUser.id)}
                     onChange={() => {
-                      const next = new Set(selectedMemberIds);
-                      if (next.has(member.id)) next.delete(member.id);
-                      else next.add(member.id);
-                      setSelectedMemberIds(next);
+                      const next = new Set(selectedUserIds);
+                      if (next.has(appUser.id)) next.delete(appUser.id);
+                      else next.add(appUser.id);
+                      setSelectedUserIds(next);
                     }}
                     style={{ accentColor: '#6366f1' }}
                   />
@@ -543,12 +545,12 @@ export function HierarchicalSelector({
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {member.name}
+                      {appUser.name}
                     </p>
                     <p style={{ margin: 0, fontSize: 11, color: '#94a3b8' }}>
-                      @{member.gitlab_username}
-                      {showTeam && member.team_name
-                        ? ` · ${member.team_name}`
+                      @{appUser.gitlab_username}
+                      {showTeam && appUser.team_name
+                        ? ` · ${appUser.team_name}`
                         : ''}
                     </p>
                   </div>
@@ -558,10 +560,10 @@ export function HierarchicalSelector({
           </div>
         )}
 
-        {selectedMembers.length > 0 && (
+        {selectedUsers.length > 0 && (
           <p style={{ marginTop: 6, fontSize: 11, color: '#6366f1' }}>
-            {selectedMembers.length} member
-            {selectedMembers.length > 1 ? 's' : ''} selected
+            {selectedUsers.length} user
+            {selectedUsers.length > 1 ? 's' : ''} selected
           </p>
         )}
       </div>
@@ -655,7 +657,7 @@ export function HierarchicalSelector({
       >
         {isRunning && <Spinner size="sm" label="" />}
         {isRunning ? 'Running…' : `🚀 ${runLabel}`}
-        {!isRunning && selectedMembers.length > 0 && (
+        {!isRunning && selectedUsers.length > 0 && (
           <span
             style={{
               background: 'rgba(255,255,255,0.2)',
@@ -664,7 +666,7 @@ export function HierarchicalSelector({
               fontSize: 12,
             }}
           >
-            {selectedMembers.length}
+            {selectedUsers.length}
           </span>
         )}
       </button>

@@ -2,13 +2,13 @@ import { useConfigStore } from '../stores/configStore';
 import type {
   BatchRecord,
   HealthResponse,
-  MemberRecord,
   MyProfileResponse,
   MyTeamResponse,
   TeamRecord,
   Team,
   TeamDetailRecord,
   TeamResult,
+  UserRecord,
   UserCommitsResponse,
   UserProfileData,
   WeeklyActivity,
@@ -85,19 +85,6 @@ async function deleteJson(path: string): Promise<void> {
   await parseJson<unknown>(response);
 }
 
-async function putJson<T>(path: string, body: unknown): Promise<T> {
-  const response = await fetch(buildApiUrl(path), {
-    method: 'PUT',
-    headers: {
-      ...(buildHeaders() as Record<string, string>),
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify(body),
-  });
-  return parseJson<T>(response);
-}
-
 async function patchJson<T>(path: string, body: unknown): Promise<T> {
   const response = await fetch(buildApiUrl(path), {
     method: 'PATCH',
@@ -130,7 +117,7 @@ interface CorpusLoginResponse {
 export interface GitlabMeResponse {
   status: string;
   gitlab_url: string;
-  access_token: string;
+  connected: boolean;
   user: {
     id: number;
     username: string;
@@ -222,22 +209,12 @@ export async function setMyBatch(batchId: number): Promise<MyProfileResponse> {
   return patchJson<MyProfileResponse>('/me/batch', { batch_id: batchId });
 }
 
-export async function getGitlabMe(): Promise<GitlabMeResponse> {
-  return getJson<GitlabMeResponse>('/auth/gitlab/me');
+export async function getGitlabStatus(): Promise<GitlabMeResponse> {
+  return getJson<GitlabMeResponse>('/gitlab/status');
 }
 
-export function getGitlabAuthorizeUrl(): string {
-  return buildApiUrl('/auth/gitlab/authorize');
-}
-
-export async function storeGitlabToken(
-  token: string,
-  gitlabUrl: string
-): Promise<HealthResponse> {
-  return postJson<HealthResponse>('/auth/gitlab-token', {
-    token,
-    gitlab_url: gitlabUrl,
-  });
+export function getGitlabLoginUrl(): string {
+  return buildApiUrl('/gitlab/login');
 }
 
 export async function getMyTeam(): Promise<MyTeamResponse> {
@@ -248,7 +225,7 @@ export async function getUserProfile(
   username: string
 ): Promise<UserProfileData> {
   return getJson<UserProfileData>(
-    `/users/${encodeURIComponent(username)}/profile`
+    `/compliance/users/${encodeURIComponent(username)}/profile`
   );
 }
 
@@ -263,7 +240,7 @@ export async function getUserCommits(
     qs.set('project_ids', params.project_ids.join(','));
   const query = qs.toString();
   return getJson(
-    `/users/${encodeURIComponent(username)}/commits${query ? `?${query}` : ''}`
+    `/compliance/users/${encodeURIComponent(username)}/commits${query ? `?${query}` : ''}`
   );
 }
 
@@ -313,11 +290,11 @@ export async function updateBatch(
   batchId: number,
   updates: { name?: string; start_date?: string; end_date?: string }
 ): Promise<BatchRecord> {
-  return putJson(`/batches/${batchId}`, updates);
+  return patchJson(`/batches/${batchId}`, updates);
 }
 
-export async function getMembers(): Promise<MemberRecord[]> {
-  const payload = await getJson<{ users: MemberRecord[] }>('/members/');
+export async function getUsers(): Promise<UserRecord[]> {
+  const payload = await getJson<{ users: UserRecord[] }>('/users/');
   return payload.users;
 }
 
@@ -332,13 +309,13 @@ export async function getTeamsByBatchIds(
   return payload.teams;
 }
 
-export async function getMembersByTeamIds(
+export async function getUsersByTeamIds(
   teamIds: number[]
-): Promise<MemberRecord[]> {
+): Promise<UserRecord[]> {
   const params = new URLSearchParams();
   params.set('team_ids', teamIds.join(','));
-  const payload = await getJson<{ users: MemberRecord[] }>(
-    `/members/?${params.toString()}`
+  const payload = await getJson<{ users: UserRecord[] }>(
+    `/users/?${params.toString()}`
   );
   return payload.users;
 }
@@ -357,24 +334,24 @@ export async function getRosterTeams(
   return payload.teams;
 }
 
-export async function deleteMember(memberId: number): Promise<void> {
-  return deleteJson(`/members/${memberId}`);
+export async function deleteUser(userId: number): Promise<void> {
+  return deleteJson(`/users/${userId}`);
 }
 
-export async function searchMembers(query: string): Promise<MemberRecord[]> {
-  const payload = await getJson<{ users: MemberRecord[] }>(
-    `/members/search?q=${encodeURIComponent(query)}`
+export async function searchUsers(query: string): Promise<UserRecord[]> {
+  const payload = await getJson<{ users: UserRecord[] }>(
+    `/users/?q=${encodeURIComponent(query)}`
   );
   return payload.users;
 }
 
-export async function bulkImportMembers(
+export async function bulkImportUsers(
   batchId: number,
   file: File
 ): Promise<{ imported: number; errors: string[] }> {
   const form = new FormData();
   form.append('file', file);
-  const response = await fetch(buildApiUrl(`/members/import/${batchId}`), {
+  const response = await fetch(buildApiUrl(`/users/import/${batchId}`), {
     method: 'POST',
     headers: buildHeaders(),
     credentials: 'include',
@@ -383,7 +360,7 @@ export async function bulkImportMembers(
   return parseJson(response);
 }
 
-export async function createMember(payload: {
+export async function createUser(payload: {
   name: string;
   corpus_username: string;
   batch_id: number;
@@ -396,12 +373,12 @@ export async function createMember(payload: {
   global_username?: string;
   global_email?: string;
   date_of_joining?: string;
-}): Promise<MemberRecord> {
-  return postJson('/members/', payload);
+}): Promise<UserRecord> {
+  return postJson('/users/', payload);
 }
 
-export async function updateMember(
-  memberId: number,
+export async function updateUser(
+  userId: number,
   payload: {
     name: string;
     batch_id: number;
@@ -415,24 +392,15 @@ export async function updateMember(
     global_email?: string;
     date_of_joining?: string;
   }
-): Promise<MemberRecord> {
-  return putJson(`/members/${memberId}`, payload);
+): Promise<UserRecord> {
+  return patchJson(`/users/${userId}`, payload);
 }
 
-export async function assignMemberRole(
-  memberId: number,
+export async function assignUserRole(
+  userId: number,
   role: string
-): Promise<MemberRecord> {
-  return patchJson(`/members/${memberId}/role`, { role });
-}
-
-export async function updateMemberPermissions(
-  memberId: number,
-  canEditStandup: boolean
-): Promise<MemberRecord> {
-  return patchJson(`/members/${memberId}/permissions`, {
-    can_edit_standup: canEditStandup,
-  });
+): Promise<UserRecord> {
+  return patchJson(`/users/${userId}`, { role });
 }
 
 export async function createTeam(payload: {
@@ -446,7 +414,7 @@ export async function updateTeam(
   teamId: number,
   name: string
 ): Promise<TeamRecord> {
-  return putJson(`/teams/${teamId}`, { name });
+  return patchJson(`/teams/${teamId}`, { name });
 }
 
 export async function deleteTeam(teamId: number): Promise<void> {
@@ -454,35 +422,23 @@ export async function deleteTeam(teamId: number): Promise<void> {
 }
 
 export async function getTeamDetail(teamId: number): Promise<TeamDetailRecord> {
-  return getJson<TeamDetailRecord>(`/teams/${teamId}/breakdown`);
+  return getJson<TeamDetailRecord>(`/teams/${teamId}`);
 }
 
-export async function joinTeam(
-  teamId: number,
-  force = false
-): Promise<{ status: string; team?: Record<string, unknown> | null }> {
-  const suffix = force ? '?force=true' : '';
-  return postJson(`/teams/${teamId}/join${suffix}`, {});
-}
-
-export async function leaveTeam(teamId: number): Promise<void> {
-  await postJson(`/teams/${teamId}/leave`, {});
-}
-
-export async function addMemberToTeam(
+export async function addUserToTeam(
   teamId: number,
   corpusUsername: string
-): Promise<MemberRecord> {
-  return postJson(`/teams/${teamId}/members`, {
+): Promise<UserRecord> {
+  return postJson(`/teams/${teamId}/users`, {
     corpus_username: corpusUsername,
   });
 }
 
-export async function removeMemberFromTeam(
+export async function removeUserFromTeam(
   teamId: number,
-  memberId: number
+  userId: number
 ): Promise<void> {
-  return deleteJson(`/teams/${teamId}/members/${memberId}`);
+  return deleteJson(`/teams/${teamId}/users/${userId}`);
 }
 
 export async function getWeeklyPerformance(params: {
@@ -540,13 +496,15 @@ function buildStreamParams(
   usernames: string[],
   projectIds?: number[],
   since?: string,
-  until?: string
+  until?: string,
+  mode?: 'combined' | 'profile' | 'commits'
 ): string {
   const params = new URLSearchParams();
   params.set('usernames', usernames.join(','));
   if (projectIds?.length) params.set('project_ids', projectIds.join(','));
   if (since) params.set('since', since);
   if (until) params.set('until', until);
+  if (mode) params.set('mode', mode);
   return params.toString();
 }
 
@@ -554,18 +512,10 @@ export function buildBatchStreamUrl(
   usernames: string[],
   projectIds?: number[],
   since?: string,
-  until?: string
+  until?: string,
+  mode?: 'combined' | 'profile' | 'commits'
 ): string {
-  return `${getApiBaseUrl()}/batch/stream?${buildStreamParams(usernames, projectIds, since, until)}`;
-}
-
-export function buildBatchCommitsStreamUrl(
-  usernames: string[],
-  projectIds?: number[],
-  since?: string,
-  until?: string
-): string {
-  return `${getApiBaseUrl()}/batch/commits/stream?${buildStreamParams(usernames, projectIds, since, until)}`;
+  return `${getApiBaseUrl()}/batch/stream?${buildStreamParams(usernames, projectIds, since, until, mode)}`;
 }
 
 export function getCorpusRuntimeBaseUrl(): string {

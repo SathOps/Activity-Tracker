@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useConfigStore } from '../stores/configStore';
-import { corpusLogout, getGitlabMe, getMyProfile } from '../api';
+import { corpusLogout, getGitlabStatus, getMyProfile } from '../api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UserRole } from '../types';
 
@@ -17,7 +17,6 @@ interface AuthUser {
   corpusUsername: string;
   name: string;
   role: UserRole;
-  canEditStandup: boolean;
   gitlabUsername?: string | null;
   teamId?: number | null;
   teamName?: string;
@@ -84,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const gitlabMeQuery = useQuery({
     queryKey: ['gitlab-me'],
-    queryFn: getGitlabMe,
+    queryFn: getGitlabStatus,
     enabled: !!corpusToken.trim() && !!meQuery.data?.gitlab_username,
     retry: false,
     staleTime: 60 * 1000, // 1 min — re-verify GitLab session frequently
@@ -123,7 +122,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           corpusUsername: meQuery.data.corpus_username,
           name: meQuery.data.name,
           role: meQuery.data.role,
-          canEditStandup: meQuery.data.can_edit_standup,
           gitlabUsername: meQuery.data.gitlab_username,
           teamId: meQuery.data.team_id,
           teamName: meQuery.data.team_name,
@@ -162,8 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     corpusToken,
     gitlabMeQuery.data,
     gitlabMeQuery.isError,
-    meQuery.data,
-    meQuery.isLoading,
+    meQuery,
     queryClient,
     resetCredentials,
     sessionRestoreDone,

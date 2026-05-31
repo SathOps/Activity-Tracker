@@ -1,5 +1,5 @@
 import { useAuth } from '../../contexts/AuthContext';
-import { getGitlabAuthorizeUrl } from '../../api';
+import { getGitlabLoginUrl } from '../../api';
 
 interface Props {
   children: React.ReactNode;
@@ -40,7 +40,7 @@ export function GitComplianceWorkspace({ children }: Props) {
           <button
             type="button"
             onClick={() => {
-              window.location.href = getGitlabAuthorizeUrl();
+              window.location.href = getGitlabLoginUrl();
             }}
             style={{
               display: 'inline-flex',

@@ -148,21 +148,6 @@ export function MyProfilePage() {
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <RoleBadge role={data.role} />
-            {data.can_edit_standup && (
-              <span
-                style={{
-                  padding: '3px 10px',
-                  borderRadius: 99,
-                  fontSize: 11,
-                  fontWeight: 600,
-                  background: '#f0fdf4',
-                  color: '#15803d',
-                  border: '1px solid #bbf7d0',
-                }}
-              >
-                Can Edit Standup
-              </span>
-            )}
           </div>
         </div>
         <button

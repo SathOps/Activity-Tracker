@@ -24,13 +24,13 @@ export function Leaderboard() {
 
   const analyseMutation = useMutation({
     mutationFn: (output: SelectorOutput) => {
-      // Group selected members back into their teams
+      // Group selected users back into their teams
       const teamMap = new Map<string, string[]>();
-      for (const member of output.members) {
-        if (!member.gitlab_username) continue;
-        const key = member.team_name || 'Unknown Team';
+      for (const appUser of output.users) {
+        if (!appUser.gitlab_username) continue;
+        const key = appUser.team_name || 'Unknown Team';
         if (!teamMap.has(key)) teamMap.set(key, []);
-        teamMap.get(key)!.push(member.gitlab_username);
+        teamMap.get(key)!.push(appUser.gitlab_username);
       }
 
       const teams: Team[] = Array.from(teamMap.entries()).map(
@@ -65,7 +65,7 @@ export function Leaderboard() {
           🏆 Team Leaderboard
         </h2>
         <p className="mt-1 text-sm text-slate-500">
-          Select batches, teams, and members to compare GitLab activity scores.{' '}
+          Select batches, teams, and users to compare GitLab activity scores.{' '}
           <span className="font-medium text-slate-600">
             Score = Commits×1 + Merged MRs×5 + Total MRs×2 + Issues Closed×3
           </span>
@@ -113,8 +113,7 @@ export function Leaderboard() {
           {analyseMutation.isPending && (
             <div className="flex items-center gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700">
               <Spinner size="sm" label="" />
-              Analysing {analyseMutation.variables?.members.length ?? 0}{' '}
-              member(s)…
+              Analysing {analyseMutation.variables?.users.length ?? 0} user(s)…
             </div>
           )}
 

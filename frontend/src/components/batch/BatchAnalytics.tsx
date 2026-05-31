@@ -16,8 +16,8 @@ export function BatchAnalytics() {
   const [lastRun, setLastRun] = useState<SelectorOutput | null>(null);
 
   function handleRun(output: SelectorOutput) {
-    const usernames = output.members
-      .map((m) => m.gitlab_username)
+    const usernames = output.users
+      .map((appUser) => appUser.gitlab_username)
       .filter(Boolean);
 
     if (!usernames.length) return;
@@ -41,7 +41,7 @@ export function BatchAnalytics() {
       <div className="mb-6">
         <h2 className="text-xl font-bold text-slate-800">📊 Batch Analytics</h2>
         <p className="mt-1 text-sm text-slate-500">
-          Select members from a batch and team, then run a comprehensive GitLab
+          Select users from a batch and team, then run a comprehensive GitLab
           activity report. Results stream in live as each user completes.
         </p>
       </div>
@@ -70,8 +70,8 @@ export function BatchAnalytics() {
           </button>
           {lastRun && (
             <p className="text-xs text-slate-400">
-              Analysed {lastRun.members.length} member(s) · {lastRun.startDate}{' '}
-              → {lastRun.endDate}
+              Analysed {lastRun.users.length} user(s) · {lastRun.startDate} →{' '}
+              {lastRun.endDate}
             </p>
           )}
         </div>

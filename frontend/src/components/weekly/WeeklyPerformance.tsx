@@ -14,7 +14,7 @@ import {
 import {
   getWeeklyPerformance,
   getWeeklyPerformanceBatch,
-  buildBatchCommitsStreamUrl,
+  buildBatchStreamUrl,
   downloadJson,
 } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -559,7 +559,7 @@ export function WeeklyPerformance() {
   );
 
   async function handleRun(output: SelectorOutput) {
-    if (!output.members.length) return;
+    if (!output.users.length) return;
     abortRef.current?.abort();
 
     setIsLoading(true);
@@ -570,7 +570,7 @@ export function WeeklyPerformance() {
     setCommitsLoading(false);
 
     try {
-      if (output.members.length === 1) {
+      if (output.users.length === 1) {
         const result = await getWeeklyPerformance({
           start_date: output.startDate,
           end_date: output.endDate,
@@ -578,8 +578,8 @@ export function WeeklyPerformance() {
         setResults([result]);
       } else {
         const batchResults = await getWeeklyPerformanceBatch({
-          interns: output.members.map((m) => ({
-            gitlab_username: m.gitlab_username,
+          interns: output.users.map((appUser) => ({
+            gitlab_username: appUser.gitlab_username,
           })),
           start_date: output.startDate,
           end_date: output.endDate,
@@ -603,11 +603,12 @@ export function WeeklyPerformance() {
     const until = output.endDate
       ? new Date(output.endDate + 'T23:59:59').toISOString()
       : undefined;
-    const url = buildBatchCommitsStreamUrl(
-      output.members.map((m) => m.gitlab_username),
+    const url = buildBatchStreamUrl(
+      output.users.map((appUser) => appUser.gitlab_username),
       undefined,
       since,
-      until
+      until,
+      'commits'
     );
 
     fetch(url, { signal: ctrl.signal, credentials: 'include' })

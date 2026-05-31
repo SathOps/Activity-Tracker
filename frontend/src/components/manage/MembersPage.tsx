@@ -2,18 +2,18 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, Upload } from 'lucide-react';
 import {
-  bulkImportMembers,
-  createMember,
-  deleteMember,
+  bulkImportUsers,
+  createUser,
+  deleteUser,
   getBatches,
-  getMembers,
-  searchMembers,
+  getUsers,
+  searchUsers,
 } from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
 import { Alert } from '../ui/Alert';
 import { Spinner } from '../ui/Spinner';
 
-interface MemberDraft {
+interface UserDraft {
   name: string;
   corpus_username: string;
   batch_id: number | '';
@@ -22,7 +22,7 @@ interface MemberDraft {
   institution_name: string;
 }
 
-const EMPTY_DRAFT: MemberDraft = {
+const EMPTY_DRAFT: UserDraft = {
   name: '',
   corpus_username: '',
   batch_id: '',
@@ -36,7 +36,7 @@ export function MembersPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const [query, setQuery] = useState('');
-  const [draft, setDraft] = useState<MemberDraft>(EMPTY_DRAFT);
+  const [draft, setDraft] = useState<UserDraft>(EMPTY_DRAFT);
   const [importBatchId, setImportBatchId] = useState<number | ''>('');
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importResult, setImportResult] = useState<{
@@ -49,14 +49,14 @@ export function MembersPage() {
     queryFn: getBatches,
   });
 
-  const membersQuery = useQuery({
-    queryKey: ['members', query],
-    queryFn: () => (query.trim() ? searchMembers(query.trim()) : getMembers()),
+  const usersQuery = useQuery({
+    queryKey: ['users', query],
+    queryFn: () => (query.trim() ? searchUsers(query.trim()) : getUsers()),
   });
 
   const createMutation = useMutation({
     mutationFn: () =>
-      createMember({
+      createUser({
         name: draft.name.trim(),
         corpus_username: draft.corpus_username.trim(),
         batch_id: Number(draft.batch_id),
@@ -65,40 +65,40 @@ export function MembersPage() {
         institution_name: draft.institution_name.trim() || undefined,
       }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['members'] });
+      qc.invalidateQueries({ queryKey: ['users'] });
       qc.invalidateQueries({ queryKey: ['batches'] });
       setDraft(EMPTY_DRAFT);
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (memberId: number) => deleteMember(memberId),
+    mutationFn: (userId: number) => deleteUser(userId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['members'] });
+      qc.invalidateQueries({ queryKey: ['users'] });
       qc.invalidateQueries({ queryKey: ['batches'] });
     },
   });
 
   const importMutation = useMutation({
     mutationFn: () =>
-      bulkImportMembers(Number(importBatchId), importFile as File),
+      bulkImportUsers(Number(importBatchId), importFile as File),
     onSuccess: (result) => {
-      qc.invalidateQueries({ queryKey: ['members'] });
+      qc.invalidateQueries({ queryKey: ['users'] });
       qc.invalidateQueries({ queryKey: ['batches'] });
       setImportResult(result);
     },
   });
 
-  const members = useMemo(() => membersQuery.data ?? [], [membersQuery.data]);
+  const users = useMemo(() => usersQuery.data ?? [], [usersQuery.data]);
 
-  if (batchesQuery.isLoading || membersQuery.isLoading) {
-    return <Spinner label="Loading members…" />;
+  if (batchesQuery.isLoading || usersQuery.isLoading) {
+    return <Spinner label="Loading users…" />;
   }
 
-  if (batchesQuery.isError || membersQuery.isError) {
+  if (batchesQuery.isError || usersQuery.isError) {
     return (
-      <Alert variant="error" title="Failed to load members">
-        {((batchesQuery.error || membersQuery.error) as Error).message}
+      <Alert variant="error" title="Failed to load users">
+        {((batchesQuery.error || usersQuery.error) as Error).message}
       </Alert>
     );
   }
@@ -117,10 +117,10 @@ export function MembersPage() {
                 color: 'var(--slate-900)',
               }}
             >
-              Add member
+              Add user
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              Create members directly in the backend roster.
+              Create users directly in the backend roster.
             </p>
 
             <div className="mt-5 grid gap-3 md:grid-cols-2">
@@ -271,7 +271,7 @@ export function MembersPage() {
               }}
             >
               <Plus size={14} />
-              Add member
+              Add user
             </button>
           </div>
 
@@ -342,7 +342,7 @@ export function MembersPage() {
             {importResult ? (
               <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm">
                 <p className="font-medium text-slate-900">
-                  Imported {importResult.imported} member(s)
+                  Imported {importResult.imported} user(s)
                 </p>
                 {importResult.errors.map((error) => (
                   <p key={error} className="mt-2 text-red-600">
@@ -367,18 +367,18 @@ export function MembersPage() {
                 color: 'var(--slate-900)',
               }}
             >
-              Members
+              Users
             </h2>
             <p className="mt-1 text-sm text-slate-500">
               Search by name or Corpus username. Mentors only see batch-scoped
-              members.
+              users.
             </p>
           </div>
           <input
             type="text"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search members"
+            placeholder="Search users"
             className="w-full max-w-sm rounded-lg border border-slate-200 px-3 py-2 text-sm"
           />
         </div>
@@ -399,25 +399,25 @@ export function MembersPage() {
               </tr>
             </thead>
             <tbody>
-              {members.map((member) => (
-                <tr key={member.id} className="border-b border-slate-100">
+              {users.map((appUser) => (
+                <tr key={appUser.id} className="border-b border-slate-100">
                   <td className="px-3 py-3 font-medium text-slate-900">
-                    {member.name}
+                    {appUser.name}
                   </td>
                   <td className="px-3 py-3 text-slate-600">
-                    {member.corpus_username}
+                    {appUser.corpus_username}
                   </td>
                   <td className="px-3 py-3 text-slate-600">
-                    {member.role || 'intern'}
+                    {appUser.role || 'intern'}
                   </td>
                   <td className="px-3 py-3 text-slate-600">
-                    {member.batch_name || 'Unassigned'}
+                    {appUser.batch_name || 'Unassigned'}
                   </td>
                   <td className="px-3 py-3 text-slate-600">
-                    {member.team_name}
+                    {appUser.team_name}
                   </td>
                   <td className="px-3 py-3 text-slate-600">
-                    {member.gitlab_username || 'Not linked'}
+                    {appUser.gitlab_username || 'Not linked'}
                   </td>
                   {isAdmin ? (
                     <td className="px-3 py-3">
@@ -426,10 +426,10 @@ export function MembersPage() {
                         onClick={() => {
                           if (
                             window.confirm(
-                              `Delete member "${member.name}" (${member.corpus_username})?`
+                              `Delete user "${appUser.name}" (${appUser.corpus_username})?`
                             )
                           ) {
-                            void deleteMutation.mutate(member.id);
+                            void deleteMutation.mutate(appUser.id);
                           }
                         }}
                         className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600"

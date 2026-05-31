@@ -5,7 +5,7 @@ import type { Team } from '../../components/dashboard/TeamList';
 import type { Intern } from '../../components/intern/InternSearch';
 import {
   getCorpusRuntimeBaseUrl,
-  getMembers,
+  getUsers,
   getMyTeam,
   getRosterTeams,
 } from '../../api';
@@ -43,25 +43,25 @@ export default function StandupWorkspace() {
       if (user?.role === 'intern') {
         const team = await getMyTeam();
         if (isCancelled) return;
-        const interns = team.members.map(
-          (member): Intern => ({
-            id: member.corpus_username,
-            name: member.name,
-            username: member.corpus_username,
-            email: member.global_email || undefined,
+        const interns = team.users.map(
+          (appUser): Intern => ({
+            id: appUser.corpus_username,
+            name: appUser.name,
+            username: appUser.corpus_username,
+            email: appUser.global_email || undefined,
           })
         );
         setAddedInterns(interns);
         setPreloadedTeams(
-          team.team_id
+          team.team?.id
             ? [
                 {
-                  teamId: String(team.team_id),
-                  teamName: team.team_name,
-                  interns: team.members.map((member) => ({
-                    internId: member.corpus_username,
-                    corpusUserId: member.corpus_username,
-                    internName: member.name,
+                  teamId: String(team.team.id),
+                  teamName: team.team.name,
+                  interns: team.users.map((appUser) => ({
+                    internId: appUser.corpus_username,
+                    corpusUserId: appUser.corpus_username,
+                    internName: appUser.name,
                     status: 'PENDING',
                   })),
                 },
@@ -71,44 +71,46 @@ export default function StandupWorkspace() {
         return;
       }
 
-      // Admin and mentor: load all members and active teams
-      const [members, teams] = await Promise.all([
-        getMembers(),
+      // Admin and mentor: load all users and active teams
+      const [users, teams] = await Promise.all([
+        getUsers(),
         getRosterTeams(true),
       ]);
 
       if (isCancelled) return;
 
-      const interns = members.map((member): Intern => {
+      const interns = users.map((appUser): Intern => {
         const identifier =
-          member.corpus_username || member.gitlab_username || String(member.id);
+          appUser.corpus_username ||
+          appUser.gitlab_username ||
+          String(appUser.id);
         return {
           id: identifier,
-          name: member.name || identifier,
+          name: appUser.name || identifier,
           username: identifier,
-          email: member.email || member.gitlab_email || undefined,
+          email: appUser.email || appUser.global_email || undefined,
         };
       });
 
       setAddedInterns(interns);
       setPreloadedTeams(
         teams.map((team): Team => {
-          const teamMembers = members.filter(
-            (member) =>
-              member.team_id === team.id || member.team_name === team.name
+          const teamUsers = users.filter(
+            (appUser) =>
+              appUser.team_id === team.id || appUser.team_name === team.name
           );
           return {
             teamId: String(team.id),
             teamName: team.name,
-            interns: teamMembers.map((member) => {
+            interns: teamUsers.map((appUser) => {
               const identifier =
-                member.corpus_username ||
-                member.gitlab_username ||
-                String(member.id);
+                appUser.corpus_username ||
+                appUser.gitlab_username ||
+                String(appUser.id);
               return {
                 internId: identifier,
                 corpusUserId: identifier,
-                internName: member.name || identifier,
+                internName: appUser.name || identifier,
                 status: 'PENDING',
               };
             }),
@@ -166,7 +168,7 @@ export default function StandupWorkspace() {
         onInternsChange={setAddedInterns}
         onRemoveIntern={handleRemoveIntern}
         preloadedTeams={preloadedTeams}
-        canManageInterns={user?.role === 'admin' || !!user?.canEditStandup}
+        canManageInterns={user?.role === 'admin'}
       />
     </section>
   );

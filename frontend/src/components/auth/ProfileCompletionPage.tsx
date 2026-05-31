@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  getGitlabAuthorizeUrl,
-  getMyProfile,
-  updateMyProfile,
-} from '../../api';
+import { getGitlabLoginUrl, getMyProfile, updateMyProfile } from '../../api';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../contexts/AuthContext';
 import { useConfigStore } from '../../stores/configStore';
@@ -64,7 +60,7 @@ export function ProfileCompletionPage() {
 
       if (needsProfileSetup) {
         // First-time setup: redirect to GitLab OIDC
-        window.location.href = getGitlabAuthorizeUrl();
+        window.location.href = getGitlabLoginUrl();
       } else {
         // Edit mode: stay on page, confirm success, then go back to profile
         setSuccessMsg('Profile updated successfully.');
