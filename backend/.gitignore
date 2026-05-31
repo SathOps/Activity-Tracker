@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+.Python
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# uv
+.uv/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+coverage_report.txt
+*_coverage*.txt
+total_coverage.txt
+.hypothesis/
+
+# Linting & type checking
+.mypy_cache/
+.ruff_cache/
+
+# Database
+*.db
+*.sqlite3
+
+# Secrets & config (never commit)
+.env
+.streamlit/secrets.toml
+
+# Logs
+*.log
+
+# Build artifacts
+interrogate_badge.svg
+reports/*
+!reports/.gitkeep
+
+# Scripts debug
+scripts/debug/*
+messages.pot

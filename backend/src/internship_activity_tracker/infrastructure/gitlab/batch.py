@@ -1,0 +1,572 @@
+import asyncio
+import atexit
+import concurrent.futures
+
+from internship_activity_tracker.infrastructure.gitlab import commits, groups, issues, merge_requests, projects, users
+from internship_activity_tracker.infrastructure.gitlab.bridge import run_on_loop
+
+# Global Thread Pool to limit total concurrent network operations across the app
+# This prevents "Connection Reset" errors when scanning multiple teams
+_GLOBAL_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=8)
+atexit.register(lambda: _GLOBAL_EXECUTOR.shutdown(wait=False))
+
+
+def resolve_project_paths(client, repo_paths: list[str]) -> tuple[list[int], list[str]]:
+    """
+    Resolve a list of GitLab project paths (e.g. 'group/repo') to project IDs in parallel.
+    Returns (resolved_ids, failed_paths).
+    """
+    resolved_ids: list[int] = []
+    failed: list[str] = []
+    clean_paths = [p.strip() for p in repo_paths if p.strip()]
+
+    if not clean_paths:
+        return [], []
+
+    def _resolve_one(path):
+        try:
+            # URL-encode the path for the API
+            encoded = path.replace("/", "%2F")
+            proj = client._get(f"/projects/{encoded}")
+            if proj and isinstance(proj, dict) and "id" in proj:
+                return proj["id"], None
+            else:
+                return None, path
+        except Exception:
+            return None, path
+
+    results = list(_GLOBAL_EXECUTOR.map(_resolve_one, clean_paths))
+
+    for rid, fpath in results:
+        if rid:
+            resolved_ids.append(rid)
+        if fpath:
+            failed.append(fpath)
+
+    return resolved_ids, failed
+
+
+def process_single_user(
+    client,
+    username,
+    since=None,
+    until=None,
+    project_ids: list[int] | None = None,
+    override_email: str | None = None,
+    override_username: str | None = None,
+    time_since: str | None = None,
+    time_until: str | None = None,
+):
+    """
+    Sync entry point — delegates to the async implementation so GraphQL fast paths are used.
+    """
+    return run_on_loop(
+        process_single_user_async(
+            client,
+            username,
+            since=since,
+            until=until,
+            project_ids=project_ids,
+            override_email=override_email,
+            override_username=override_username,
+            time_since=time_since,
+            time_until=time_until,
+        ),
+        timeout=120,
+    )
+
+
+def process_single_user_no_commits(
+    client,
+    username,
+    since=None,
+    until=None,
+    project_ids: list[int] | None = None,
+    override_email: str | None = None,
+    override_username: str | None = None,
+    time_since: str | None = None,
+    time_until: str | None = None,
+):
+    """
+    Phase 1: fetch everything except commits (fast, ~3-5s via GraphQL).
+    Stores project list and user object in result for use by fetch_commits_for_result().
+    """
+    return run_on_loop(
+        process_single_user_async(
+            client,
+            username,
+            since=since,
+            until=until,
+            project_ids=project_ids,
+            override_email=override_email,
+            override_username=override_username,
+            time_since=time_since,
+            time_until=time_until,
+            skip_commits=True,
+        ),
+        timeout=120,
+    )
+
+
+def fetch_commits_for_result(client, result):
+    """
+    Phase 2: fetch commits using the project list stored by process_single_user_no_commits().
+    Returns (all_commits, commit_stats).
+    """
+    data = result.get("data", {})
+    projs = data.get("_projs_for_commits", [])
+    user_obj = data.get("_user_obj_for_commits", {})
+    since = data.get("_since_for_commits")
+    until = data.get("_until_for_commits")
+    all_commits, _counts, commit_stats = run_on_loop(
+        commits.get_user_commits_async(client, user_obj, projs, since=since, until=until),
+        timeout=120,
+    )
+    return all_commits, commit_stats
+
+
+def process_batch_users_no_commits(
+    client, usernames, since=None, until=None, project_ids: list[int] | None = None, overrides: dict | None = None
+):
+    """
+    Phase 1 batch: fetch all users concurrently without commits (fast, GraphQL).
+    Each result contains _projs_for_commits so phase 2 can fetch commits later.
+    """
+    results = []
+    clean_usernames = [u.strip() for u in usernames if u.strip()]
+
+    future_to_user = {}
+    for u in clean_usernames:
+        ov = overrides.get(u, {}) if overrides else {}
+        future = _GLOBAL_EXECUTOR.submit(process_single_user_no_commits, client, u, since, until, project_ids, **ov)
+        future_to_user[future] = u
+    for future in concurrent.futures.as_completed(future_to_user):
+        try:
+            res = future.result()
+            if res:
+                results.append(res)
+        except Exception as exc:
+            u = future_to_user[future]
+            results.append({"username": u, "status": "Crash", "error": str(exc)})
+
+    return results
+
+
+def fetch_batch_commits(client, phase1_results):
+    """
+    Phase 2 batch: fetch commits for all users concurrently.
+    Returns {username: (all_commits, commit_stats)}.
+    """
+    commits.clear_commit_cache()
+    empty_stats = {"total": 0, "morning_commits": 0, "afternoon_commits": 0}
+    commits_map: dict = {}
+
+    future_to_username: dict = {}
+    for result in phase1_results:
+        if result and result.get("status") == "Success":
+            username = result.get("username", "")
+            if username:
+                future = _GLOBAL_EXECUTOR.submit(fetch_commits_for_result, client, result)
+                future_to_username[future] = username
+
+    for future in concurrent.futures.as_completed(future_to_username):
+        username = future_to_username[future]
+        try:
+            all_commits, commit_stats = future.result()
+            commits_map[username] = (all_commits, commit_stats)
+        except Exception:
+            commits_map[username] = ([], dict(empty_stats))
+
+    return commits_map
+
+
+def process_batch_users(
+    client, usernames, since=None, until=None, project_ids: list[int] | None = None, overrides: dict | None = None
+):
+    """
+    Concurrent processing of multiple users using ThreadPoolExecutor.
+    Safe to call from Streamlit.
+    """
+    results = []
+    clean_usernames = [u.strip() for u in usernames if u.strip()]
+
+    future_to_user = {}
+    for u in clean_usernames:
+        ov = overrides.get(u, {}) if overrides else {}
+        future = _GLOBAL_EXECUTOR.submit(process_single_user, client, u, since, until, project_ids, **ov)
+        future_to_user[future] = u
+    for future in concurrent.futures.as_completed(future_to_user):
+        try:
+            res = future.result()
+            if res:
+                results.append(res)
+        except Exception as exc:
+            u = future_to_user[future]
+            results.append({"username": u, "status": "Crash", "error": str(exc)})
+
+    return results
+
+
+async def resolve_project_paths_async(client, repo_paths: list[str]) -> tuple[list[int], list[str]]:
+    """
+    Async resolve a list of GitLab project paths to project IDs.
+    """
+    clean_paths = [p.strip() for p in repo_paths if p.strip()]
+    if not clean_paths:
+        return [], []
+
+    async def _resolve_one(path):
+        try:
+            encoded = path.replace("/", "%2F")
+            proj = await client._async_get(f"/projects/{encoded}")
+            if proj and isinstance(proj, dict) and "id" in proj:
+                return proj["id"], None
+            return None, path
+        except Exception:
+            return None, path
+
+    results = await asyncio.gather(*[_resolve_one(p) for p in clean_paths])
+
+    resolved_ids = [rid for rid, fpath in results if rid]
+    failed = [fpath for rid, fpath in results if fpath]
+    return resolved_ids, failed
+
+
+async def process_single_user_async(
+    client,
+    username,
+    since=None,
+    until=None,
+    project_ids: list[int] | None = None,
+    override_email: str | None = None,
+    override_username: str | None = None,
+    time_since: str | None = None,
+    time_until: str | None = None,
+    skip_commits: bool = False,
+):
+    """
+    Async worker to process a single user with maximum concurrency.
+    """
+    from datetime import date
+
+    from internship_activity_tracker.infrastructure.gitlab.timelogs import (
+        aggregate_daily_time_categorized,
+        build_daily_time_from_time_stats,
+        fetch_user_timelogs_from_projects_async,
+    )
+
+    username = username.strip()
+    result = {"username": username, "status": "Success", "error": None, "data": {}}
+
+    if not username:
+        return None
+
+    try:
+        # 1. Get User (Foundation)
+        user_obj = await users.get_user_by_username_async(client, username)
+        if not user_obj:
+            result["status"] = "Not Found"
+            result["error"] = "User not found"
+            return result
+
+        user_id = user_obj.get("id")
+        if not user_id:
+            result["status"] = "Error"
+            result["error"] = f"Could not resolve GitLab user ID for '{username}'. Check that the OIDC token has sufficient scopes."
+            return result
+        if override_email:
+            user_obj["override_email"] = override_email
+        if override_username:
+            user_obj["override_username"] = override_username
+        result["data"]["user"] = user_obj
+
+        # 2. Concurrent Fetching (Components that only need user_id)
+        f_projs = projects.get_user_projects_async(client, user_id, username)
+        f_groups = groups.get_user_groups_async(client, user_id, username=username)
+        f_mrs = merge_requests.get_user_mrs_async(
+            client, user_id, username=username, since=since, until=until, project_ids=project_ids
+        )
+        f_issues = issues.get_user_issues_async(
+            client, user_id, username=username, since=since, until=until, project_ids=project_ids
+        )
+
+        # Gather these foundation components
+        projs, user_groups, (user_mrs, mr_stats), (user_issues, issue_stats) = await asyncio.gather(
+            f_projs, f_groups, f_mrs, f_issues
+        )
+
+        # 3. Resolve projects for commits
+        all_projs_dict = {p.get("id"): p for p in projs["all"]}
+        if project_ids is not None:
+            pid_set = set(project_ids)
+            all_projs_list = [p for p in all_projs_dict.values() if p.get("id") in pid_set]
+            existing_ids = {p.get("id") for p in all_projs_list}
+
+            missing_pids = [pid for pid in project_ids if pid not in existing_ids]
+            if missing_pids:
+                extra_f = [client._async_get(f"/projects/{pid}", params={"simple": "true"}) for pid in missing_pids]
+                extra_projects = await asyncio.gather(*extra_f, return_exceptions=True)
+                for p_extra in extra_projects:
+                    if isinstance(p_extra, Exception):
+                        continue
+                    if p_extra and isinstance(p_extra, dict) and "id" in p_extra:
+                        all_projs_list.append(p_extra)
+        else:
+            all_projs_list = list(all_projs_dict.values())
+
+        # 4. Fetch Commits (skipped in phase-1 / no-commits mode)
+        if skip_commits:
+            all_commits, commit_stats = [], {"total": 0, "morning_commits": 0, "afternoon_commits": 0}
+        else:
+            all_commits, _commit_counts, commit_stats = await commits.get_user_commits_async(
+                client, user_obj, all_projs_list, since=since, until=until
+            )
+
+        # 5. Timelogs (Special handling for Batch Analytics all-time spent)
+        def _to_date(val, default):
+            if not val:
+                return default
+            if isinstance(val, date):
+                return val
+            try:
+                return date.fromisoformat(str(val)[:10])
+            except Exception:
+                return default
+
+        t_since = _to_date(time_since, _to_date(since, date(2000, 1, 1)))
+        t_until = _to_date(time_until, _to_date(until, date.today()))
+
+        total_time_spent = 0
+        try:
+            timelog_projs = list(all_projs_list)
+            seen_t_pids = {p.get("id") for p in timelog_projs if p.get("id")}
+            for item in user_mrs + user_issues:
+                pid = item.get("project_id")
+                if pid and pid not in seen_t_pids:
+                    timelog_projs.append({"id": pid})
+                    seen_t_pids.add(pid)
+
+            timelogs_raw = await fetch_user_timelogs_from_projects_async(
+                client, user_id, timelog_projs, t_since, t_until, username=username
+            )
+            daily_times, daily_categorized, i_formal, m_formal, _ = aggregate_daily_time_categorized(
+                timelogs_raw, user_issues, user_mrs
+            )
+
+            # Supplement with time_stats fallback
+            daily_times, daily_categorized = build_daily_time_from_time_stats(
+                user_issues,
+                user_mrs,
+                client,
+                t_since.isoformat(),
+                t_until.isoformat(),
+                existing_daily_times=daily_times,
+                existing_categorized=daily_categorized,
+                issue_formal_totals=i_formal,
+                mr_formal_totals=m_formal,
+            )
+            total_time_spent = sum(daily_times.values())
+
+            # Sum up categorized times across all days
+            cat_totals = {"mrs_open": 0, "mrs_merged": 0, "issues_open": 0, "issues_closed": 0}
+            for day_cats in daily_categorized.values():
+                for k, v in day_cats.items():
+                    if k in cat_totals:
+                        cat_totals[k] += v
+            result["data"]["time_breakdown"] = cat_totals
+            result["data"]["daily_time_spent"] = dict(daily_times)
+            result["data"]["daily_time_categorized"] = dict(daily_categorized)
+
+            # NEW: Item-level breakdown for transparency
+            item_time_list = []
+            for mr in user_mrs:
+                gid = mr.get("id")
+                f_time = m_formal.get(gid, 0)
+                ts_time = mr.get("time_stats", {}).get("total_time_spent", 0)
+                total = max(f_time, ts_time)
+                if total > 0:
+                    item_time_list.append(
+                        {
+                            "id": f"!{mr.get('iid')}",
+                            "title": mr.get("title"),
+                            "seconds": int(total),
+                            "type": "mr",
+                            "state": mr.get("state"),
+                            "url": mr.get("web_url"),
+                        }
+                    )
+            for iss in user_issues:
+                gid = iss.get("id")
+                f_time = i_formal.get(gid, 0)
+                ts_time = iss.get("time_stats", {}).get("total_time_spent", 0)
+                total = max(f_time, ts_time)
+                if total > 0:
+                    item_time_list.append(
+                        {
+                            "id": f"#{iss.get('iid')}",
+                            "title": iss.get("title"),
+                            "seconds": int(total),
+                            "type": "issue",
+                            "state": iss.get("state"),
+                            "url": iss.get("web_url"),
+                        }
+                    )
+            result["data"]["item_time_breakdown"] = item_time_list
+        except Exception as te:
+            import logging
+
+            logging.getLogger(__name__).error(f"Async timelog fetch failed for {username}: {te}")
+
+        # 6. Quality Evaluation (Efficient logic, already async-friendly)
+        authored_issues = [i for i in user_issues if i.get("role") == "Author"]
+        authored_mrs = [m for m in user_mrs if m.get("role") == "Authored"]
+
+        issue_quality = client.batch_evaluate_issues_efficiently(authored_issues)
+        mr_quality = client.batch_evaluate_mrs_efficiently(authored_mrs)
+
+        # Populate result data
+        result["data"].update(
+            {
+                "projects": projs,
+                "commits": all_commits,
+                "commit_stats": commit_stats,
+                "groups": user_groups,
+                "mrs": user_mrs,
+                "mr_stats": mr_stats,
+                "issues": user_issues,
+                "issue_stats": issue_stats,
+                "issue_quality": issue_quality,
+                "mr_quality": mr_quality,
+                "total_time_spent_seconds": total_time_spent,
+            }
+        )
+
+        # Store phase-2 inputs so fetch_commits_for_result() can run without re-fetching
+        if skip_commits:
+            result["data"]["_projs_for_commits"] = all_projs_list
+            result["data"]["_user_obj_for_commits"] = user_obj
+            result["data"]["_since_for_commits"] = since
+            result["data"]["_until_for_commits"] = until
+
+    except Exception as e:
+        result["status"] = "Error"
+        result["error"] = str(e)
+
+    return result
+
+
+async def fetch_user_commits_only_async(
+    client,
+    username,
+    since=None,
+    until=None,
+    project_ids: list[int] | None = None,
+    override_email: str | None = None,
+    override_username: str | None = None,
+):
+    """
+    Fetch only commits for a user — independently callable from a separate HTTP request.
+    Flow: user lookup (GraphQL) → projects (GraphQL) → commits (REST).
+    """
+    username = username.strip()
+    if not username:
+        return None
+
+    user_obj = await users.get_user_by_username_async(client, username)
+    if not user_obj:
+        return {"username": username, "status": "Not Found", "error": "User not found", "commits": [], "commit_stats": {}}
+
+    user_id = user_obj.get("id")
+    if not user_id:
+        return {
+            "username": username,
+            "status": "Error",
+            "error": f"Could not resolve GitLab user ID for '{username}'.",
+            "commits": [],
+            "commit_stats": {},
+        }
+
+    if override_email:
+        user_obj["override_email"] = override_email
+    if override_username:
+        user_obj["override_username"] = override_username
+
+    projs = await projects.get_user_projects_async(client, user_id, username)
+    all_projs_dict = {p.get("id"): p for p in projs["all"]}
+
+    if project_ids is not None:
+        pid_set = set(project_ids)
+        all_projs_list = [p for p in all_projs_dict.values() if p.get("id") in pid_set]
+        existing_ids = {p.get("id") for p in all_projs_list}
+        missing_pids = [pid for pid in project_ids if pid not in existing_ids]
+        if missing_pids:
+            extra_f = [client._async_get(f"/projects/{pid}", params={"simple": "true"}) for pid in missing_pids]
+            extra_projects = await asyncio.gather(*extra_f, return_exceptions=True)
+            for p_extra in extra_projects:
+                if isinstance(p_extra, Exception):
+                    continue
+                if p_extra and isinstance(p_extra, dict) and "id" in p_extra:
+                    all_projs_list.append(p_extra)
+    else:
+        all_projs_list = list(all_projs_dict.values())
+
+    all_commits, _counts, commit_stats = await commits.get_user_commits_async(
+        client, user_obj, all_projs_list, since=since, until=until
+    )
+
+    return {
+        "username": username,
+        "status": "Success",
+        "error": None,
+        "commits": all_commits,
+        "commit_stats": commit_stats,
+    }
+
+
+def fetch_user_commits_only(
+    client,
+    username,
+    since=None,
+    until=None,
+    project_ids: list[int] | None = None,
+    override_email: str | None = None,
+    override_username: str | None = None,
+):
+    """Sync entry point for fetch_user_commits_only_async."""
+    return run_on_loop(
+        fetch_user_commits_only_async(
+            client,
+            username,
+            since=since,
+            until=until,
+            project_ids=project_ids,
+            override_email=override_email,
+            override_username=override_username,
+        ),
+        timeout=180,
+    )
+
+
+async def process_batch_users_async(
+    client, usernames, since=None, until=None, project_ids: list[int] | None = None, overrides: dict | None = None
+):
+    """
+    Core async batch processing with maximum concurrency.
+    Handles exceptions by returning a "Crash" status for the specific user.
+    """
+    clean_usernames = [u.strip() for u in usernames if u.strip()]
+    if not clean_usernames:
+        return []
+
+    commits.clear_commit_cache()
+
+    async def _safe_process(u):
+        try:
+            ov = overrides.get(u, {}) if overrides else {}
+            res = await process_single_user_async(client, u, since, until, project_ids, **ov)
+            return res
+        except Exception as exc:
+            return {"username": u, "status": "Crash", "error": str(exc)}
+
+    results = await asyncio.gather(*[_safe_process(u) for u in clean_usernames])
+    return [r for r in results if r is not None]
