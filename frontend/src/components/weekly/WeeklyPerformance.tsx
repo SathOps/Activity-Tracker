@@ -11,12 +11,11 @@ import {
   ExternalLink,
   Video,
 } from 'lucide-react';
+import { downloadJson } from '../../services/api/upload';
 import {
   getWeeklyPerformance,
   getWeeklyPerformanceBatch,
-  buildBatchStreamUrl,
-  downloadJson,
-} from '../../api';
+} from '../../services/api/weekly';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   HierarchicalSelector,
@@ -31,7 +30,6 @@ import type {
   DailyData,
   EventDetail,
   CommitEntry,
-  SSEProgressEvent,
 } from '../../types';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -548,34 +546,27 @@ export function WeeklyPerformance() {
   const [commitsMap, setCommitsMap] = useState<Map<string, CommitEntry[]>>(
     new Map()
   );
-  const [commitsLoading, setCommitsLoading] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
-
-  useEffect(
-    () => () => {
-      abortRef.current?.abort();
-    },
-    []
-  );
 
   async function handleRun(output: SelectorOutput) {
     if (!output.users.length) return;
-    abortRef.current?.abort();
 
     setIsLoading(true);
     setFetchError(null);
     setResults([]);
     setCommitsMap(new Map());
     setActiveTab(0);
-    setCommitsLoading(false);
 
     try {
       if (output.users.length === 1) {
         const result = await getWeeklyPerformance({
           start_date: output.startDate,
           end_date: output.endDate,
+          include_commits: true,
         });
         setResults([result]);
+        setCommitsMap(
+          new Map([[result.gitlab_username, result.commits ?? []]])
+        );
       } else {
         const batchResults = await getWeeklyPerformanceBatch({
           interns: output.users.map((appUser) => ({
@@ -583,74 +574,23 @@ export function WeeklyPerformance() {
           })),
           start_date: output.startDate,
           end_date: output.endDate,
+          include_commits: true,
         });
         setResults(batchResults);
+        setCommitsMap(
+          new Map(
+            batchResults.map((result) => [
+              result.gitlab_username,
+              result.commits ?? [],
+            ])
+          )
+        );
       }
     } catch (e) {
       setFetchError((e as Error).message ?? 'Failed to fetch activity');
     } finally {
       setIsLoading(false);
     }
-
-    // Stream commits for all selected members
-    const ctrl = new AbortController();
-    abortRef.current = ctrl;
-    setCommitsLoading(true);
-
-    const since = output.startDate
-      ? new Date(output.startDate).toISOString()
-      : undefined;
-    const until = output.endDate
-      ? new Date(output.endDate + 'T23:59:59').toISOString()
-      : undefined;
-    const url = buildBatchStreamUrl(
-      output.users.map((appUser) => appUser.gitlab_username),
-      undefined,
-      since,
-      until,
-      'commits'
-    );
-
-    fetch(url, { signal: ctrl.signal, credentials: 'include' })
-      .then(async (res) => {
-        if (!res.ok || !res.body) {
-          setCommitsLoading(false);
-          return;
-        }
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buf = '';
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buf += decoder.decode(value, { stream: true });
-          const lines = buf.split('\n');
-          buf = lines.pop() ?? '';
-          for (const line of lines) {
-            if (!line.startsWith('data:')) continue;
-            const raw = line.slice('data:'.length).trim();
-            if (!raw) continue;
-            try {
-              const ev = JSON.parse(raw) as SSEProgressEvent;
-              if (ev.type === 'done') {
-                setCommitsLoading(false);
-                return;
-              }
-              if (ev.type === 'progress' && ev.username && ev.result) {
-                const r = ev.result as { commits?: CommitEntry[] };
-                const list = r.commits ?? [];
-                setCommitsMap((prev) => new Map(prev).set(ev.username!, list));
-              }
-            } catch {
-              // skip malformed SSE line
-            }
-          }
-        }
-        setCommitsLoading(false);
-      })
-      .catch((err: unknown) => {
-        if ((err as Error)?.name !== 'AbortError') setCommitsLoading(false);
-      });
   }
 
   const activeResult = results[activeTab] ?? null;
@@ -756,11 +696,6 @@ export function WeeklyPerformance() {
                     {activeResult.audio_fetched && (
                       <span className="ml-2 text-indigo-500">
                         · recordings fetched
-                      </span>
-                    )}
-                    {commitsLoading && (
-                      <span className="ml-2 text-blue-400">
-                        · commits loading…
                       </span>
                     )}
                   </p>

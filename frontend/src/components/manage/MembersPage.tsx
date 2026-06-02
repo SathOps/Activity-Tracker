@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, Upload } from 'lucide-react';
+import { getBatches } from '../../services/api/batches';
 import {
   bulkImportUsers,
   createUser,
   deleteUser,
-  getBatches,
   getUsers,
   searchUsers,
-} from '../../api';
+} from '../../services/api/users';
 import { useAuth } from '../../contexts/AuthContext';
 import { Alert } from '../ui/Alert';
 import { Spinner } from '../ui/Spinner';

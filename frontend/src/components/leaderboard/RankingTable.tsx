@@ -1,4 +1,4 @@
-import { downloadCsv } from '../../api';
+import { downloadCsv } from '../../services/api/upload';
 import { Download } from 'lucide-react';
 import { rankMedal, scoreBg } from '../../lib/utils';
 import type { TeamResult, MemberRow } from '../../types';

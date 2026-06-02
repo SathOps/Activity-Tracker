@@ -12,10 +12,12 @@ import {
   getBatches,
   createBatch,
   deleteBatch,
+} from '../../services/api/batches';
+import {
   getUsers,
   deleteUser,
   bulkImportUsers,
-} from '../../api';
+} from '../../services/api/users';
 import { Spinner } from '../ui/Spinner';
 import { Alert } from '../ui/Alert';
 import { Badge } from '../ui/Badge';

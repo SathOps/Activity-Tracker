@@ -1,7 +1,7 @@
 import { Download } from 'lucide-react';
 import { DataTable } from '../ui/DataTable';
 import { Badge } from '../ui/Badge';
-import { downloadCsv } from '../../api';
+import { downloadCsv } from '../../services/api/upload';
 import { toDisplayText } from '../../lib/utils';
 import type { BatchUserRow } from '../../types';
 

@@ -1,5 +1,5 @@
 import { useAuth } from '../../contexts/AuthContext';
-import { getGitlabLoginUrl } from '../../api';
+import { getGitlabLoginUrl } from '../../services/api/auth';
 
 interface Props {
   children: React.ReactNode;

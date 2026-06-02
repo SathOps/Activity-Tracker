@@ -1,23 +1,25 @@
 /**
  * useHealth — validates the server-side GitLab session by calling GET /api/health.
- * Re-runs automatically whenever the token or URL changes.
+ * Re-runs automatically whenever the canonical session state changes.
  *
  * Also syncs the user's role (admin | intern | mentor) from the health
  * response into the config store so the sidebar can filter pages.
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { checkHealth } from '../api';
-import { useConfigStore } from '../stores/configStore';
+import { checkHealth } from '../services/api/auth';
 import { useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useConfigStore } from '../stores/configStore';
 
 export function useHealth() {
-  const { gitlabToken, setIsAuthenticated, setUserRole } = useConfigStore();
+  const { isAuthenticated, gitlabConnected } = useAuth();
+  const { setIsAuthenticated, setUserRole } = useConfigStore();
 
   const query = useQuery({
-    queryKey: ['health', gitlabToken],
+    queryKey: ['health', gitlabConnected],
     queryFn: checkHealth,
-    enabled: !!gitlabToken.trim(),
+    enabled: isAuthenticated && gitlabConnected,
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 min
   });

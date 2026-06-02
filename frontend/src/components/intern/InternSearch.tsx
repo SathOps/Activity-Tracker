@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getCorpusRuntimeBaseUrl } from '../../api';
+import { getCorpusRuntimeBaseUrl } from '../../services/api/batches';
 
 const DEBOUNCE_MS = 300;
 

@@ -1,16 +1,16 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Save, Trash2, Users, X } from 'lucide-react';
+import { getBatches } from '../../services/api/batches';
 import {
   addUserToTeam,
   createTeam,
   deleteTeam,
-  getBatches,
   getRosterTeams,
   getTeamDetail,
   removeUserFromTeam,
   updateTeam,
-} from '../../api';
+} from '../../services/api/teams';
 import { useAuth } from '../../contexts/AuthContext';
 import type { TeamDetailRecord, TeamRecord } from '../../types';
 import { Alert } from '../ui/Alert';

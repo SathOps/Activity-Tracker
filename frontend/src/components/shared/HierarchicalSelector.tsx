@@ -8,8 +8,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getBatches, getTeamsByBatchIds, getUsersByTeamIds } from '../../api';
-import type { BatchRecord, TeamRecord, UserRecord } from '../../types';
+import { getSelectorTree } from '../../services/api/selector';
+import type { BatchRecord, TeamRecord } from '../../types';
 import { Spinner } from '../ui/Spinner';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -271,58 +271,38 @@ export function HierarchicalSelector({
     () => new Date().toISOString().split('T')[0]
   );
 
-  // Step 1 — Batches (load on mount)
-  const batchesQuery = useQuery<BatchRecord[]>({
-    queryKey: ['batches'],
-    queryFn: getBatches,
+  const selectorQuery = useQuery({
+    queryKey: ['selector-tree'],
+    queryFn: getSelectorTree,
     staleTime: 5 * 60 * 1000,
   });
+  const batches = selectorQuery.data?.batches ?? [];
 
-  // Step 2 — Teams (load when batches are selected)
   const batchIdList = useMemo(
     () => Array.from(selectedBatchIds).sort((a, b) => a - b),
     [selectedBatchIds]
   );
-  const teamsQuery = useQuery<TeamRecord[]>({
-    queryKey: ['teams-by-batch', batchIdList],
-    queryFn: () => getTeamsByBatchIds(batchIdList),
-    enabled: batchIdList.length > 0,
-    staleTime: 2 * 60 * 1000,
-  });
+  const teams = useMemo(
+    () =>
+      (selectorQuery.data?.teams ?? []).filter(
+        (team) =>
+          batchIdList.length === 0 || batchIdList.includes(team.batch_id ?? -1)
+      ),
+    [batchIdList, selectorQuery.data?.teams]
+  );
 
-  // Step 3 — Users: one fetch per selected team, merged together.
-  // Using plain useEffect instead of useQuery because the custom query shim
-  // does not re-trigger when only the query key changes.
   const teamIdList = useMemo(
     () => Array.from(selectedTeamIds).sort((a, b) => a - b),
     [selectedTeamIds]
   );
-  const [users, setUsers] = useState<UserRecord[]>([]);
-  const [usersLoading, setUsersLoading] = useState(false);
-
-  useEffect(() => {
-    if (teamIdList.length === 0) {
-      setUsers([]);
-      return;
-    }
-    let cancelled = false;
-    setUsersLoading(true);
-    Promise.all(teamIdList.map((id) => getUsersByTeamIds([id])))
-      .then((results) => {
-        if (!cancelled) {
-          setUsers(results.flat());
-          setUsersLoading(false);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setUsersLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [teamIdList]);
-
-  const teams = teamsQuery.data ?? [];
+  const users = useMemo(
+    () =>
+      (selectorQuery.data?.users ?? []).filter(
+        (appUser) =>
+          teamIdList.length === 0 || teamIdList.includes(appUser.team_id ?? -1)
+      ),
+    [selectorQuery.data?.users, teamIdList]
+  );
 
   // Clear downstream selections on upstream change
   function handleBatchChange(next: Set<number>) {
@@ -379,7 +359,7 @@ export function HierarchicalSelector({
       }}
     >
       {/* Empty state for no batches */}
-      {!batchesQuery.isLoading && (batchesQuery.data ?? []).length === 0 && (
+      {!selectorQuery.isLoading && batches.length === 0 && (
         <p
           style={{
             fontSize: 13,
@@ -396,10 +376,10 @@ export function HierarchicalSelector({
       <MultiSelectDropdown<BatchRecord>
         label="1. Select Batch(es)"
         placeholder="Choose one or more batches…"
-        items={batchesQuery.data ?? []}
+        items={batches}
         selected={selectedBatchIds}
         onChange={handleBatchChange}
-        isLoading={batchesQuery.isLoading}
+        isLoading={selectorQuery.isLoading}
         renderItem={(b) =>
           b.start_date
             ? `${b.name} (${b.start_date?.slice(0, 7)} → ${b.end_date?.slice(0, 7) ?? '…'})`
@@ -419,7 +399,7 @@ export function HierarchicalSelector({
         selected={selectedTeamIds}
         onChange={handleTeamChange}
         disabled={selectedBatchIds.size === 0}
-        isLoading={teamsQuery.isLoading}
+        isLoading={selectorQuery.isLoading}
         renderItem={(t) =>
           showMultipleBatches && t.batch_name
             ? `${t.name} — ${t.batch_name}`
@@ -446,7 +426,7 @@ export function HierarchicalSelector({
           <p style={{ fontSize: 13, color: '#94a3b8', padding: '10px 0' }}>
             Select a team to load users.
           </p>
-        ) : usersLoading ? (
+        ) : selectorQuery.isLoading ? (
           <div
             style={{
               display: 'flex',

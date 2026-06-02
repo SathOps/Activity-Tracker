@@ -1,7 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Save, Trash2, X } from 'lucide-react';
-import { createBatch, deleteBatch, getBatches, updateBatch } from '../../api';
+import {
+  createBatch,
+  deleteBatch,
+  getBatches,
+  updateBatch,
+} from '../../services/api/batches';
 import { useAuth } from '../../contexts/AuthContext';
 import type { BatchRecord } from '../../types';
 import { Alert } from '../ui/Alert';

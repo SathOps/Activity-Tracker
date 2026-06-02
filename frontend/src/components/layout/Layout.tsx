@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../LanguageSwitcher';
 import { Sidebar } from './Sidebar';
-import { MobileHeader } from './MobileHeader';
 import { MobileBottomNav } from './MobileBottomNav';
 import { RecordStandupModal } from '../RecordStandupModal';
 import { useConfigStore } from '../../stores/configStore';
@@ -22,14 +21,7 @@ type ThemeMode = 'light' | 'dark';
 export function Layout({ children }: Props) {
   const { t } = useTranslation();
   const { pathname } = useRouter();
-  const {
-    gitlabToken,
-    activeMode,
-    corpusUser,
-    corpusToken,
-    activeStandupPanel,
-    clearCorpusToken,
-  } = useConfigStore();
+  const { corpusUser, corpusToken, clearCorpusToken } = useConfigStore();
   const { gitlabConnected } = useAuth();
   const [themeMode, setThemeMode] = useState<ThemeMode>(() =>
     readStoredThemeMode()

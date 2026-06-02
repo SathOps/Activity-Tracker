@@ -3,12 +3,10 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
-  useState,
   type ReactNode,
 } from 'react';
 import { useConfigStore } from '../stores/configStore';
-import { corpusLogout, getGitlabStatus, getMyProfile } from '../api';
+import { corpusLogout, getSession } from '../services/api/auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UserRole } from '../types';
 
@@ -17,7 +15,13 @@ interface AuthUser {
   corpusUsername: string;
   name: string;
   role: UserRole;
+  email?: string | null;
+  institutionId?: string | null;
+  institutionName?: string | null;
   gitlabUsername?: string | null;
+  globalUsername?: string | null;
+  globalEmail?: string | null;
+  dateOfJoining?: string | null;
   teamId?: number | null;
   teamName?: string;
   batchId?: number | null;
@@ -38,7 +42,6 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const corpusToken = useConfigStore((state) => state.corpusToken);
   const setUserRole = useConfigStore((state) => state.setUserRole);
   const setCorpusToken = useConfigStore((state) => state.setCorpusToken);
   const clearCorpusToken = useConfigStore((state) => state.clearCorpusToken);
@@ -46,98 +49,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const resetCredentials = useConfigStore((state) => state.resetCredentials);
   const queryClient = useQueryClient();
 
-  // On mount, if no token in sessionStorage, try to restore session from the
-  // iat_session cookie. This handles page refreshes and new tabs.
-  const sessionRestoreRan = useRef(false);
-  const [sessionRestoreDone, setSessionRestoreDone] = useState(
-    () => !!corpusToken.trim()
-  );
-
-  useEffect(() => {
-    if (sessionRestoreRan.current) return;
-    sessionRestoreRan.current = true;
-
-    if (corpusToken.trim()) {
-      setSessionRestoreDone(true);
-      return;
-    }
-
-    getMyProfile()
-      .then((profile) => {
-        setCorpusToken('session', profile.corpus_username);
-      })
-      .catch(() => undefined)
-      .finally(() => {
-        setSessionRestoreDone(true);
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const meQuery = useQuery({
-    queryKey: ['me', corpusToken],
-    queryFn: getMyProfile,
-    enabled: !!corpusToken.trim(),
+  const sessionQuery = useQuery({
+    queryKey: ['session'],
+    queryFn: getSession,
     retry: false,
     staleTime: 5 * 60 * 1000,
   });
 
-  const gitlabMeQuery = useQuery({
-    queryKey: ['gitlab-me'],
-    queryFn: getGitlabStatus,
-    enabled: !!corpusToken.trim() && !!meQuery.data?.gitlab_username,
-    retry: false,
-    staleTime: 60 * 1000, // 1 min — re-verify GitLab session frequently
-  });
-
   useEffect(() => {
-    if (!corpusToken.trim()) {
-      setUserRole('intern');
+    if (sessionQuery.data?.authenticated && sessionQuery.data.user) {
+      setCorpusToken('session', sessionQuery.data.user.corpus_username);
+      setUserRole(sessionQuery.data.user.role);
       return;
     }
 
-    if (meQuery.data) {
-      setUserRole(meQuery.data.role);
-      return;
-    }
-
-    if (meQuery.isError) {
+    if (sessionQuery.isError) {
       clearCorpusToken();
       clearAccessToken();
       resetCredentials();
+      setUserRole('intern');
     }
   }, [
     clearAccessToken,
     clearCorpusToken,
-    corpusToken,
-    meQuery.data,
-    meQuery.isError,
     resetCredentials,
+    sessionQuery.data,
+    sessionQuery.isError,
+    setCorpusToken,
     setUserRole,
   ]);
 
   const value = useMemo<AuthContextValue>(() => {
-    const user = meQuery.data
+    const profile = sessionQuery.data?.user;
+    const user = profile
       ? {
-          id: meQuery.data.id,
-          corpusUsername: meQuery.data.corpus_username,
-          name: meQuery.data.name,
-          role: meQuery.data.role,
-          gitlabUsername: meQuery.data.gitlab_username,
-          teamId: meQuery.data.team_id,
-          teamName: meQuery.data.team_name,
-          batchId: meQuery.data.batch_id,
-          batchName: meQuery.data.batch_name,
+          id: profile.id,
+          corpusUsername: profile.corpus_username,
+          name: profile.name,
+          role: profile.role,
+          email: profile.email,
+          institutionId: profile.institution_id,
+          institutionName: profile.institution_name,
+          gitlabUsername: profile.gitlab_username,
+          globalUsername: profile.global_username,
+          globalEmail: profile.global_email,
+          dateOfJoining: profile.date_of_joining,
+          teamId: profile.team_id,
+          teamName: profile.team_name,
+          batchId: profile.batch_id,
+          batchName: profile.batch_name,
         }
       : null;
 
-    const isAuthenticated = !!corpusToken.trim() && !!user;
-    const needsProfileSetup = isAuthenticated && !meQuery.data?.gitlab_username;
-    const gitlabConnected = !!gitlabMeQuery.data && !gitlabMeQuery.isError;
+    const isAuthenticated = !!sessionQuery.data?.authenticated && !!user;
+    const needsProfileSetup = !!sessionQuery.data?.needs_profile_setup;
+    const gitlabConnected = !!sessionQuery.data?.gitlab_connected;
 
     return {
       isAuthenticated,
-      isLoading:
-        !sessionRestoreDone || (!!corpusToken.trim() && meQuery.isLoading),
+      isLoading: sessionQuery.isLoading,
       user,
       gitlabConnected,
       needsProfileSetup,
@@ -146,24 +116,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearCorpusToken();
         clearAccessToken();
         resetCredentials();
-        queryClient.invalidateQueries({ queryKey: ['me'] });
-        queryClient.invalidateQueries({ queryKey: ['gitlab-me'] });
+        queryClient.invalidateQueries({ queryKey: ['session'] });
       },
       recheckGitlab: () => {
-        queryClient.invalidateQueries({ queryKey: ['gitlab-me'] });
+        queryClient.invalidateQueries({ queryKey: ['session'] });
       },
-      refetchMe: () => meQuery.refetch(),
+      refetchMe: () => {
+        void sessionQuery.refetch();
+      },
     };
   }, [
     clearAccessToken,
     clearCorpusToken,
-    corpusToken,
-    gitlabMeQuery.data,
-    gitlabMeQuery.isError,
-    meQuery,
     queryClient,
     resetCredentials,
-    sessionRestoreDone,
+    sessionQuery,
   ]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

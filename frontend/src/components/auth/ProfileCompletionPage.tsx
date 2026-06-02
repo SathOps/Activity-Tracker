@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getGitlabLoginUrl, getMyProfile, updateMyProfile } from '../../api';
+import { getGitlabLoginUrl } from '../../services/api/auth';
+import { updateMyProfile } from '../../services/api/profile';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../contexts/AuthContext';
 import { useConfigStore } from '../../stores/configStore';
@@ -22,21 +23,22 @@ export function ProfileCompletionPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Fetch existing profile to pre-fill the form
   useEffect(() => {
-    if (!corpusToken.trim()) return;
-
-    getMyProfile()
-      .then((profile) => {
-        setGitlabUsername(profile.gitlab_username ?? '');
-        setGlobalUsername(profile.global_username ?? '');
-        setGlobalEmail(profile.global_email ?? '');
-        setDateOfJoining(profile.date_of_joining ?? '');
-      })
-      .catch(() => undefined)
-      .finally(() => setLoadingProfile(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!corpusToken.trim()) {
+      return;
+    }
+    setGitlabUsername(user?.gitlabUsername ?? '');
+    setGlobalUsername(user?.globalUsername ?? '');
+    setGlobalEmail(user?.globalEmail ?? '');
+    setDateOfJoining(user?.dateOfJoining ?? '');
+    setLoadingProfile(false);
+  }, [
+    corpusToken,
+    user?.dateOfJoining,
+    user?.gitlabUsername,
+    user?.globalEmail,
+    user?.globalUsername,
+  ]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -56,7 +58,7 @@ export function ProfileCompletionPage() {
         ...(dateOfJoining && { date_of_joining: dateOfJoining }),
       });
 
-      queryClient.invalidateQueries({ queryKey: ['me'] });
+      queryClient.invalidateQueries({ queryKey: ['session'] });
 
       if (needsProfileSetup) {
         // First-time setup: redirect to GitLab OIDC

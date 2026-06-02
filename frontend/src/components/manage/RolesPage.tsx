@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { assignUserRole, getUsers, searchUsers } from '../../api';
+import {
+  assignUserRole,
+  getUsers,
+  searchUsers,
+} from '../../services/api/users';
 import { Alert } from '../ui/Alert';
 import { Spinner } from '../ui/Spinner';
 import type { UserRole } from '../../types';

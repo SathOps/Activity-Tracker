@@ -1,9 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { getMyProfile } from '../../api';
-import { useConfigStore } from '../../stores/configStore';
+import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from '../../lib/router';
 import { Spinner } from '../ui/Spinner';
-import { Alert } from '../ui/Alert';
 import type { UserRole } from '../../types';
 
 function Field({
@@ -78,16 +75,8 @@ function Avatar({ name }: { name: string }) {
 }
 
 export function MyProfilePage() {
-  const corpusToken = useConfigStore((state) => state.corpusToken);
+  const { user, isLoading } = useAuth();
   const { navigate } = useRouter();
-
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['me', corpusToken],
-    queryFn: getMyProfile,
-    enabled: !!corpusToken.trim(),
-    retry: false,
-    staleTime: 5 * 60 * 1000,
-  });
 
   if (isLoading) {
     return (
@@ -97,15 +86,7 @@ export function MyProfilePage() {
     );
   }
 
-  if (isError) {
-    return (
-      <Alert variant="error" title="Could not load profile">
-        {(error as Error).message}
-      </Alert>
-    );
-  }
-
-  if (!data) return null;
+  if (!user) return null;
 
   return (
     <div style={{ maxWidth: 680, margin: '0 auto' }}>
@@ -130,7 +111,7 @@ export function MyProfilePage() {
           boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
         }}
       >
-        <Avatar name={data.name} />
+        <Avatar name={user.name} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <h3
             style={{
@@ -141,13 +122,13 @@ export function MyProfilePage() {
               fontFamily: 'var(--font-display)',
             }}
           >
-            {data.name}
+            {user.name}
           </h3>
           <p style={{ margin: '0 0 8px', fontSize: 14, color: '#64748b' }}>
-            @{data.corpus_username}
+            @{user.corpusUsername}
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <RoleBadge role={data.role} />
+            <RoleBadge role={user.role} />
           </div>
         </div>
         <button
@@ -175,12 +156,12 @@ export function MyProfilePage() {
         <section className="profile-section">
           <h4 className="profile-section-title">Account</h4>
           <div className="profile-fields">
-            <Field label="ID" value={data.id} />
-            <Field label="Corpus Username" value={data.corpus_username} />
-            <Field label="Email" value={data.email} />
-            <Field label="Institution" value={data.institution_name} />
-            <Field label="Institution ID" value={data.institution_id} />
-            <Field label="Date of Joining" value={data.date_of_joining} />
+            <Field label="ID" value={user.id} />
+            <Field label="Corpus Username" value={user.corpusUsername} />
+            <Field label="Email" value={user.email} />
+            <Field label="Institution" value={user.institutionName} />
+            <Field label="Institution ID" value={user.institutionId} />
+            <Field label="Date of Joining" value={user.dateOfJoining} />
           </div>
         </section>
 
@@ -188,10 +169,10 @@ export function MyProfilePage() {
         <section className="profile-section">
           <h4 className="profile-section-title">Team &amp; Batch</h4>
           <div className="profile-fields">
-            <Field label="Team" value={data.team_name} />
-            <Field label="Team ID" value={data.team_id} />
-            <Field label="Batch" value={data.batch_name} />
-            <Field label="Batch ID" value={data.batch_id} />
+            <Field label="Team" value={user.teamName} />
+            <Field label="Team ID" value={user.teamId} />
+            <Field label="Batch" value={user.batchName} />
+            <Field label="Batch ID" value={user.batchId} />
           </div>
         </section>
 
@@ -199,9 +180,9 @@ export function MyProfilePage() {
         <section className="profile-section">
           <h4 className="profile-section-title">GitLab &amp; Global</h4>
           <div className="profile-fields">
-            <Field label="GitLab Username" value={data.gitlab_username} />
-            <Field label="Global Username" value={data.global_username} />
-            <Field label="Global Email" value={data.global_email} />
+            <Field label="GitLab Username" value={user.gitlabUsername} />
+            <Field label="Global Username" value={user.globalUsername} />
+            <Field label="Global Email" value={user.globalEmail} />
           </div>
         </section>
       </div>

@@ -1,26 +1,20 @@
-import { useEffect, useState } from 'react';
-import { getBatches, setMyBatch } from '../../api';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getBatches } from '../../services/api/batches';
+import { setMyBatch } from '../../services/api/profile';
 import { useAuth } from '../../contexts/AuthContext';
-import type { BatchRecord } from '../../types';
 
 export function BatchSelectionPage() {
   const { refetchMe } = useAuth();
-  const [batches, setBatches] = useState<BatchRecord[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    getBatches()
-      .then(setBatches)
-      .catch((caught: unknown) =>
-        setError(
-          caught instanceof Error ? caught.message : 'Failed to load batches'
-        )
-      )
-      .finally(() => setFetching(false));
-  }, []);
+  const batchesQuery = useQuery({
+    queryKey: ['batches'],
+    queryFn: getBatches,
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
 
   async function handleSubmit() {
     if (selectedId === null) return;
@@ -29,7 +23,8 @@ export function BatchSelectionPage() {
 
     try {
       await setMyBatch(selectedId);
-      await refetchMe();
+      refetchMe();
+      setLoading(false);
     } catch (caught) {
       setError(
         caught instanceof Error ? caught.message : 'Failed to set batch'
@@ -38,7 +33,7 @@ export function BatchSelectionPage() {
     }
   }
 
-  if (fetching) {
+  if (batchesQuery.isLoading) {
     return (
       <main className="portal-login-page">
         <div className="portal-login-backdrop" aria-hidden="true" />
@@ -50,6 +45,15 @@ export function BatchSelectionPage() {
       </main>
     );
   }
+
+  const batches = batchesQuery.data ?? [];
+  const loadError =
+    error ??
+    (batchesQuery.isError
+      ? batchesQuery.error instanceof Error
+        ? batchesQuery.error.message
+        : 'Failed to load batches'
+      : null);
 
   return (
     <main className="portal-login-page">
@@ -65,14 +69,14 @@ export function BatchSelectionPage() {
             activities you can access. If you&rsquo;re unsure, ask your mentor.
           </p>
 
-          {error && (
+          {loadError && (
             <div
               style={{
                 color: 'var(--color-error, #e53e3e)',
                 marginBottom: '1rem',
               }}
             >
-              {error}
+              {loadError}
             </div>
           )}
 
@@ -87,7 +91,7 @@ export function BatchSelectionPage() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                handleSubmit();
+                void handleSubmit();
               }}
             >
               <div

@@ -8,7 +8,7 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
-import { buildBatchStreamUrl } from '../api';
+import { buildBatchStreamUrl } from '../services/api/batches';
 import type { SSEProgressEvent } from '../types';
 
 interface StreamState {

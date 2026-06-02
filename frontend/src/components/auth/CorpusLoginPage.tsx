@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { corpusLogin } from '../../api';
+import { corpusLogin } from '../../services/api/auth';
 import { useRouter } from '../../lib/router';
 import { useConfigStore } from '../../stores/configStore';
 import { useQueryClient } from '@tanstack/react-query';
@@ -38,7 +38,7 @@ export function CorpusLoginPage() {
       setAccessToken(response.access_token);
       setCorpusToken('session', response.username || phone.trim());
       setPassword('');
-      queryClient.invalidateQueries({ queryKey: ['me'] });
+      queryClient.invalidateQueries({ queryKey: ['session'] });
       navigate('/standup');
     } catch (caught) {
       setError(

@@ -4,7 +4,7 @@ import type {
   CorpusUploadProgress,
   Category,
 } from '../types/corpusUpload';
-import { getCorpusRuntimeBaseUrl } from '../api';
+import { getCorpusRuntimeBaseUrl } from './api/batches';
 
 export const DEFAULT_CHUNK_SIZE_BYTES = 5 * 1024 * 1024;
 export const MAX_AUDIO_FILE_SIZE_BYTES = 1024 * 1024 * 1024;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Trophy, Briefcase } from 'lucide-react';
-import { analyzeTeams } from '../../api';
+import { analyzeTeams } from '../../services/api/leaderboard';
 import { Spinner } from '../ui/Spinner';
 import { Alert } from '../ui/Alert';
 import { MemberTable } from './MemberTable';

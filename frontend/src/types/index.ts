@@ -44,6 +44,14 @@ export interface MyProfileResponse {
   batch_name?: string | null;
 }
 
+export interface SessionResponse {
+  authenticated: boolean;
+  gitlab_connected: boolean;
+  needs_profile_setup: boolean;
+  needs_batch_selection: boolean;
+  user: MyProfileResponse | null;
+}
+
 export interface MyTeamResponse {
   team: TeamRecord | null;
   users: UserRecord[];
@@ -349,6 +357,7 @@ export interface WeeklyActivity {
   daily_data: Record<string, DailyData>;
   total_weekly_time: number;
   audio_fetched: boolean;
+  commits: CommitEntry[];
 }
 
 // ── Commits endpoint ──────────────────────────────────────
@@ -359,6 +368,28 @@ export interface UserCommitsResponse {
   error: string | null;
   commits: CommitEntry[];
   commit_stats: CommitStats;
+}
+
+export interface UserComplianceDetailResponse {
+  profile: UserProfileData;
+  commits: UserCommitsResponse;
+}
+
+export interface SelectorTreeResponse {
+  batches: BatchRecord[];
+  teams: TeamRecord[];
+  users: UserRecord[];
+}
+
+export interface StandupWorkspaceResponse {
+  data: {
+    scope: UserRole;
+    dashboard: Record<string, unknown>;
+    analytics: Record<string, unknown>;
+    team: TeamRecord | null;
+    teams: TeamRecord[];
+    users: UserRecord[];
+  };
 }
 
 // ── App routing ───────────────────────────────────────────────────────────

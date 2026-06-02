@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Download } from 'lucide-react';
-import {
-  getUserProfile,
-  getUserCommits,
-  searchUsers,
-  downloadCsv,
-  getGitlabLoginUrl,
-} from '../../api';
+import { getGitlabLoginUrl } from '../../services/api/auth';
+import { getUserComplianceDetail } from '../../services/api/compliance';
+import { searchUsers } from '../../services/api/users';
+import { downloadCsv } from '../../services/api/upload';
 import { Spinner } from '../ui/Spinner';
 import { Alert } from '../ui/Alert';
 import { ProfileHeader } from './ProfileHeader';
@@ -16,11 +13,7 @@ import { CommitsPanel } from './CommitsPanel';
 import { MRsPanel } from './MRsPanel';
 import { IssuesPanel } from './IssuesPanel';
 import { ProfileReadme } from './ProfileReadme';
-import type {
-  UserRecord,
-  UserProfileData,
-  UserCommitsResponse,
-} from '../../types';
+import type { UserRecord, UserComplianceDetailResponse } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 
 function isGitlabSessionError(err: unknown): boolean {
@@ -279,34 +272,22 @@ export function UserProfile() {
     }
   }, [isIntern, internUsername]);
 
-  // ── Profile fetch ─────────────────────────────────────────────────────────
   const {
-    data: profileData,
-    isLoading: profileLoading,
-    isError: profileIsError,
-    error: profileError,
-    refetch: refetchProfile,
-  } = useQuery<UserProfileData>({
-    queryKey: ['gitlab-profile', queriedUsername],
-    queryFn: () => getUserProfile(queriedUsername),
+    data: detailData,
+    isLoading: detailLoading,
+    isError: detailIsError,
+    error: detailError,
+    refetch: refetchDetail,
+  } = useQuery<UserComplianceDetailResponse>({
+    queryKey: ['gitlab-user-detail', queriedUsername],
+    queryFn: () => getUserComplianceDetail(queriedUsername),
     enabled: !!queriedUsername,
     retry: false,
     staleTime: 2 * 60 * 1000,
   });
 
-  // ── Commits fetch — parallel, arrives later ───────────────────────────────
-  const {
-    data: commitsData,
-    isLoading: commitsLoading,
-    isError: commitsIsError,
-  } = useQuery<UserCommitsResponse>({
-    queryKey: ['gitlab-commits', queriedUsername],
-    queryFn: () => getUserCommits(queriedUsername),
-    enabled: !!queriedUsername,
-    retry: false,
-    staleTime: 2 * 60 * 1000,
-  });
-
+  const profileData = detailData?.profile;
+  const commitsData = detailData?.commits;
   const d = profileData?.data;
   const profileOk = profileData?.status?.toLowerCase() === 'success' && !!d;
 
@@ -339,7 +320,7 @@ export function UserProfile() {
       )}
 
       {/* Empty state */}
-      {!isIntern && !queriedUsername && !profileLoading && (
+      {!isIntern && !queriedUsername && !detailLoading && (
         <div className="flex flex-col items-center justify-center py-24 gap-2 text-slate-400">
           <Search size={36} />
           <p className="text-sm">
@@ -349,7 +330,7 @@ export function UserProfile() {
       )}
 
       {/* Intern with no gitlab_username */}
-      {isIntern && !internUsername && !profileLoading && (
+      {isIntern && !internUsername && !detailLoading && (
         <Alert variant="warning" title="GitLab account not linked">
           Your GitLab username is not set. Go to{' '}
           <strong>My Profile → Edit Profile</strong> to add it.
@@ -357,7 +338,7 @@ export function UserProfile() {
       )}
 
       {/* Profile loading */}
-      {profileLoading && (
+      {detailLoading && (
         <div className="flex flex-col items-center justify-center py-24 gap-3">
           <Spinner size="lg" label="" />
           <p className="text-sm text-slate-500">Fetching profile data…</p>
@@ -368,8 +349,8 @@ export function UserProfile() {
       )}
 
       {/* GitLab session error */}
-      {profileIsError &&
-        (isGitlabSessionError(profileError) ? (
+      {detailIsError &&
+        (isGitlabSessionError(detailError) ? (
           <div
             style={{
               padding: '20px 24px',
@@ -417,10 +398,10 @@ export function UserProfile() {
           </div>
         ) : (
           <Alert variant="error" title="Error fetching profile">
-            {(profileError as Error).message}
+            {(detailError as Error).message}
             <button
               type="button"
-              onClick={() => void refetchProfile()}
+              onClick={() => void refetchDetail()}
               className="ml-3 underline text-sm"
             >
               Retry
@@ -429,7 +410,7 @@ export function UserProfile() {
         ))}
 
       {/* Backend non-success */}
-      {!profileLoading &&
+      {!detailLoading &&
         profileData &&
         profileData.status?.toLowerCase() !== 'success' && (
           <Alert
@@ -443,7 +424,7 @@ export function UserProfile() {
         )}
 
       {/* ── Profile data ─────────────────────────────────────────────────── */}
-      {!profileLoading && profileOk && (
+      {!detailLoading && profileOk && (
         <div className="space-y-6">
           <ProfileHeader user={d.user} />
 
@@ -494,19 +475,7 @@ export function UserProfile() {
 
           {/* Commits */}
           <div className="rounded-xl border border-slate-200 bg-white p-5">
-            {commitsLoading ? (
-              <div className="flex items-center gap-3 py-6">
-                <Spinner size="sm" label="" />
-                <div>
-                  <p className="text-sm font-medium text-slate-700">
-                    Loading commits…
-                  </p>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    This can take 10–30 seconds for active users
-                  </p>
-                </div>
-              </div>
-            ) : commitsIsError ? (
+            {!commitsData ? (
               <p className="text-sm text-red-500 py-4">
                 Could not load commits. Profile data is still available above.
               </p>

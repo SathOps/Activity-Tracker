@@ -1,14 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import DashboardHome from '../../components/dashboard/DashboardHome';
 import type { Team } from '../../components/dashboard/TeamList';
 import type { Intern } from '../../components/intern/InternSearch';
-import {
-  getCorpusRuntimeBaseUrl,
-  getUsers,
-  getMyTeam,
-  getRosterTeams,
-} from '../../api';
+import { getCorpusRuntimeBaseUrl } from '../../services/api/batches';
+import { getStandupWorkspace } from '../../services/api/standup';
 import { useAuth } from '../../contexts/AuthContext';
 import { configureCorpusService } from '../../services/corpus';
 import { useConfigStore } from '../../stores/configStore';
@@ -19,8 +16,6 @@ export default function StandupWorkspace() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const authToken = useConfigStore((state) => state.corpusToken);
-  const [addedInterns, setAddedInterns] = useState<Intern[]>([]);
-  const [preloadedTeams, setPreloadedTeams] = useState<Team[]>([]);
 
   useEffect(() => {
     configureCorpusService({
@@ -30,107 +25,68 @@ export default function StandupWorkspace() {
     });
   }, [authToken]);
 
+  const standupQuery = useQuery({
+    queryKey: ['standup-workspace'],
+    queryFn: getStandupWorkspace,
+    enabled: !!authToken,
+    retry: false,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const [addedInterns, setAddedInterns] = useState<Intern[]>([]);
+
+  const preloadedTeams = useMemo<Team[]>(() => {
+    const payload = standupQuery.data?.data;
+    if (!payload) {
+      return [];
+    }
+    return payload.teams.map((team): Team => {
+      const teamUsers = payload.users.filter(
+        (appUser) =>
+          appUser.team_id === team.id || appUser.team_name === team.name
+      );
+      return {
+        teamId: String(team.id),
+        teamName: team.name,
+        interns: teamUsers.map((appUser) => {
+          const identifier =
+            appUser.corpus_username ||
+            appUser.gitlab_username ||
+            String(appUser.id);
+          return {
+            internId: identifier,
+            corpusUserId: identifier,
+            internName: appUser.name || identifier,
+            status: 'PENDING',
+          };
+        }),
+      };
+    });
+  }, [standupQuery.data]);
+
   useEffect(() => {
-    if (!authToken) {
+    const payload = standupQuery.data?.data;
+    if (!payload) {
       setAddedInterns([]);
-      setPreloadedTeams([]);
       return;
     }
-
-    let isCancelled = false;
-
-    const loadRoster = async () => {
-      if (user?.role === 'intern') {
-        const team = await getMyTeam();
-        if (isCancelled) return;
-        const interns = team.users.map(
-          (appUser): Intern => ({
-            id: appUser.corpus_username,
-            name: appUser.name,
-            username: appUser.corpus_username,
-            email: appUser.global_email || undefined,
-          })
-        );
-        setAddedInterns(interns);
-        setPreloadedTeams(
-          team.team?.id
-            ? [
-                {
-                  teamId: String(team.team.id),
-                  teamName: team.team.name,
-                  interns: team.users.map((appUser) => ({
-                    internId: appUser.corpus_username,
-                    corpusUserId: appUser.corpus_username,
-                    internName: appUser.name,
-                    status: 'PENDING',
-                  })),
-                },
-              ]
-            : []
-        );
-        return;
-      }
-
-      // Admin and mentor: load all users and active teams
-      const [users, teams] = await Promise.all([
-        getUsers(),
-        getRosterTeams(true),
-      ]);
-
-      if (isCancelled) return;
-
-      const interns = users.map((appUser): Intern => {
-        const identifier =
-          appUser.corpus_username ||
-          appUser.gitlab_username ||
-          String(appUser.id);
-        return {
-          id: identifier,
-          name: appUser.name || identifier,
-          username: identifier,
+    setAddedInterns(
+      payload.users.map(
+        (appUser): Intern => ({
+          id:
+            appUser.corpus_username ||
+            appUser.gitlab_username ||
+            String(appUser.id),
+          name: appUser.name,
+          username:
+            appUser.corpus_username ||
+            appUser.gitlab_username ||
+            String(appUser.id),
           email: appUser.email || appUser.global_email || undefined,
-        };
-      });
-
-      setAddedInterns(interns);
-      setPreloadedTeams(
-        teams.map((team): Team => {
-          const teamUsers = users.filter(
-            (appUser) =>
-              appUser.team_id === team.id || appUser.team_name === team.name
-          );
-          return {
-            teamId: String(team.id),
-            teamName: team.name,
-            interns: teamUsers.map((appUser) => {
-              const identifier =
-                appUser.corpus_username ||
-                appUser.gitlab_username ||
-                String(appUser.id);
-              return {
-                internId: identifier,
-                corpusUserId: identifier,
-                internName: appUser.name || identifier,
-                status: 'PENDING',
-              };
-            }),
-          };
         })
-      );
-    };
-
-    void loadRoster().catch((error) => {
-      if (!isCancelled) {
-        console.error('Could not load roster from backend:', error);
-        setAddedInterns([]);
-        setPreloadedTeams([]);
-      }
-    });
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [authToken, user?.role]);
+      )
+    );
+  }, [standupQuery.data, user?.role]);
 
   const handleRemoveIntern = (internId: string) => {
     setAddedInterns((prev) => prev.filter((i) => i.id !== internId));

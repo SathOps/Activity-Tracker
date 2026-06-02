@@ -8,7 +8,7 @@ import {
   User,
 } from 'lucide-react';
 import { useMemo } from 'react';
-import { getGitlabLoginUrl } from '../../api';
+import { getGitlabLoginUrl } from '../../services/api/auth';
 import { useAuth } from '../../contexts/AuthContext';
 import { ROUTES, type AppRoute, type WorkspaceId } from '../../lib/appRoutes';
 import { cn } from '../../lib/utils';
