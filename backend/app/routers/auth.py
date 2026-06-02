@@ -7,7 +7,8 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_current_user, get_db
-from app.schemas.auth import CorpusLoginRequest, CorpusLoginResponse
+from app.schemas.auth import CorpusLoginRequest, CorpusLoginResponse, SessionResponse
+from app.schemas.roster import UserRecord
 from app.schemas.compliance import GitlabStatusResponse
 from app.session_store import clear_session, ensure_session, get_session
 from internship_activity_tracker.application.auth_service import (
@@ -19,6 +20,7 @@ from internship_activity_tracker.application.auth_service import (
     update_gitlab_username_from_session,
     validate_gitlab_access_token,
 )
+from internship_activity_tracker.application import session_service, user_service
 from internship_activity_tracker.infrastructure.models import User
 
 router = APIRouter(tags=["Auth"])
@@ -51,6 +53,33 @@ def corpus_login(body: CorpusLoginRequest, request: Request, response: Response,
 def corpus_logout(request: Request, response: Response):
     clear_session(request, response)
     return {"status": "ok"}
+
+
+@router.get("/session", response_model=SessionResponse)
+def get_session_state(request: Request, db: Session = Depends(get_db)):
+    browser_session = get_session(request)
+    if browser_session is None or not browser_session.corpus_username:
+        return SessionResponse()
+    current_user = user_service.get_user_by_corpus_username(db, browser_session.corpus_username)
+    if current_user is None:
+        return SessionResponse()
+    gitlab_connected = False
+    if browser_session and browser_session.gitlab_token:
+        try:
+            gitlab_user = validate_gitlab_access_token(
+                browser_session.gitlab_url or DEFAULT_GITLAB_URL,
+                browser_session.gitlab_token,
+                is_oauth=browser_session.gitlab_auth_type == "oauth",
+            )
+            browser_session.gitlab_user = gitlab_user
+            update_gitlab_username_from_session(db, current_user, gitlab_user)
+            gitlab_connected = True
+        except HTTPException:
+            gitlab_connected = False
+    payload = session_service.get_session_state(current_user, gitlab_connected=gitlab_connected)
+    if payload["user"] is not None:
+        payload["user"] = UserRecord(**payload["user"])
+    return SessionResponse(**payload)
 
 
 @router.get("/gitlab/login")
@@ -112,14 +141,4 @@ def gitlab_status(request: Request, db: Session = Depends(get_db), current_user:
     )
 
 
-@router.post("/gitlab/logout")
-def gitlab_logout(request: Request):
-    browser_session = get_session(request)
-    if browser_session is not None:
-        browser_session.gitlab_token = ""
-        browser_session.gitlab_url = ""
-        browser_session.gitlab_user = {}
-        browser_session.gitlab_auth_type = ""
-        browser_session.gitlab_oauth_state = ""
-        browser_session.gitlab_error = ""
-    return {"status": "ok"}
+

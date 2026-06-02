@@ -1,4 +1,8 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
+
+from app.schemas.roster import UserRecord
 
 
 class CorpusLoginRequest(BaseModel):
@@ -22,3 +26,11 @@ class CorpusLoginResponse(BaseModel):
     phone: str = ""
     roles: list[str] = Field(default_factory=list)
     profile: CorpusProfile
+
+
+class SessionResponse(BaseModel):
+    authenticated: bool = False
+    gitlab_connected: bool = False
+    needs_profile_setup: bool = False
+    needs_batch_selection: bool = False
+    user: Optional[UserRecord] = None

@@ -18,7 +18,6 @@ class BatchUpdatePayload(BaseModel):
 class BatchRecord(BaseModel):
     id: int
     name: str
-    date: str = ""
     start_date: str = ""
     end_date: str = ""
 
@@ -68,6 +67,7 @@ class UserRecord(BaseModel):
     team_name: str = ""
     batch_id: Optional[int] = None
     batch_name: str = ""
+    mentor_batch_ids: list[int] = Field(default_factory=list)
 
 
 class UserListResponse(BaseModel):
@@ -109,15 +109,6 @@ class SetBatchPayload(BaseModel):
     batch_id: int
 
 
-class CreateMyTeamPayload(BaseModel):
-    name: str
-    batch_id: int
-
-
-class TeamSelectionPayload(BaseModel):
-    team_id: int
-
-
 class AddTeamMemberPayload(BaseModel):
     corpus_username: str
 
@@ -152,3 +143,9 @@ class MembershipRecord(BaseModel):
 class TeamDetailRecord(TeamRecord):
     users: list[UserRecord] = Field(default_factory=list)
     history: list[MembershipRecord] = Field(default_factory=list)
+
+
+class SelectorTreeResponse(BaseModel):
+    batches: list[BatchRecord] = Field(default_factory=list)
+    teams: list[TeamRecord] = Field(default_factory=list)
+    users: list[UserRecord] = Field(default_factory=list)

@@ -7,7 +7,6 @@ def batch_to_dict(batch: Batch) -> dict:
     return {
         "id": batch.id,
         "name": batch.name,
-        "date": batch.date or "",
         "start_date": batch.start_date or "",
         "end_date": batch.end_date or "",
     }

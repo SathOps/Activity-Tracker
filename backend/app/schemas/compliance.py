@@ -28,3 +28,8 @@ class UserProfileEnvelope(BaseModel):
     issues_details: dict[str, Any] = Field(default_factory=dict)
     issues_list: list[dict[str, Any]] = Field(default_factory=list)
     profile_readme: dict[str, Any] = Field(default_factory=dict)
+
+
+class UserComplianceDetailResponse(BaseModel):
+    profile: dict[str, Any] = Field(default_factory=dict)
+    commits: dict[str, Any] = Field(default_factory=dict)

@@ -29,3 +29,16 @@ def get_user_commits(client, username: str, since: str | None = None, until: str
         until=until,
         project_ids=project_ids,
     )
+
+
+def get_user_detail(client, username: str, since: str | None = None, until: str | None = None, project_ids: list[int] | None = None) -> dict:
+    return {
+        "profile": get_gitlab_profile(client, username),
+        "commits": get_user_commits(
+            client,
+            username,
+            since=since,
+            until=until,
+            project_ids=project_ids,
+        ),
+    }

@@ -22,7 +22,7 @@ for _path in (_BACKEND_DIR, _SRC_DIR):
 load_dotenv(os.path.join(_BACKEND_DIR, ".env"))
 
 from app.dependencies import get_current_user, get_gitlab_identity
-from app.routers import auth, batch, batches, compliance, leaderboard, me, mentor_access, standup, teams, users, weekly_performance
+from app.routers import auth, batches, compliance, leaderboard, me, mentor_access, selector, standup, teams, users, weekly_performance
 from internship_activity_tracker.infrastructure import database as db
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s - %(message)s")
@@ -62,9 +62,9 @@ app.include_router(batches.router, prefix="/api/batches")
 app.include_router(teams.router, prefix="/api/teams")
 app.include_router(users.router, prefix="/api/users")
 app.include_router(mentor_access.router, prefix="/api/mentor-access")
+app.include_router(selector.router, prefix="/api/selector")
 app.include_router(standup.router, prefix="/api/standup")
 app.include_router(compliance.router, prefix="/api/compliance")
-app.include_router(batch.router, prefix="/api/batch")
 app.include_router(leaderboard.router, prefix="/api/leaderboard")
 app.include_router(weekly_performance.router, prefix="/api/weekly-performance")
 

@@ -49,6 +49,7 @@ class WeeklyActivityResponse(BaseModel):
     daily_data: Dict[str, DailyData] = {}
     total_weekly_time: int = 0
     audio_fetched: bool = False
+    commits: List[Dict[str, Any]] = []
 
 
 # ── Request ───────────────────────────────────────────────────────────────────
@@ -68,6 +69,7 @@ class WeeklyPerformanceRequest(BaseModel):
         default=None,
         description="ISO date string e.g. '2025-05-31'. Defaults to today.",
     )
+    include_commits: bool = False
 
 
 class InternWeeklyRequest(BaseModel):
@@ -82,3 +84,4 @@ class BatchWeeklyRequest(BaseModel):
     interns: List[InternWeeklyRequest]
     start_date: str
     end_date: str
+    include_commits: bool = False

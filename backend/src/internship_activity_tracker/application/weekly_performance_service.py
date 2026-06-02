@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from fastapi import HTTPException, status
 
 from app.schemas.weekly_performance import CorpusDailyData, DailyData, GitLabDailyData, WeeklyActivityResponse
-from internship_activity_tracker.application import user_service
+from internship_activity_tracker.application import compliance_service, user_service
 from internship_activity_tracker.infrastructure.corpus.client import CorpusClient
 from internship_activity_tracker.services.weekly_performance.aggregator import aggregate_batch_interns, aggregate_intern_data
 
@@ -53,10 +53,24 @@ def activity_to_response(activity) -> WeeklyActivityResponse:
         daily_data=daily,  # type: ignore[arg-type]
         total_weekly_time=activity.total_weekly_time,
         audio_fetched=activity.audio_fetched,
+        commits=[],
     )
 
 
-def get_single_weekly_activity(current_user, client, corpus_token: str | None, *, start_date: str | None, end_date: str | None) -> WeeklyActivityResponse:
+def _attach_commits(response: WeeklyActivityResponse, client, *, start: date, end: date) -> WeeklyActivityResponse:
+    if not response.gitlab_username:
+        return response
+    commits_payload = compliance_service.get_user_commits(
+        client,
+        response.gitlab_username,
+        since=start.isoformat(),
+        until=end.isoformat(),
+    )
+    response.commits = list(commits_payload.get("commits") or [])
+    return response
+
+
+def get_single_weekly_activity(current_user, client, corpus_token: str | None, *, start_date: str | None, end_date: str | None, include_commits: bool = False) -> WeeklyActivityResponse:
     today = date.today()
     start = parse_date(start_date, "start_date") if start_date else today - timedelta(days=7)
     end = parse_date(end_date, "end_date") if end_date else today
@@ -105,10 +119,13 @@ def get_single_weekly_activity(current_user, client, corpus_token: str | None, *
         except Exception:
             pass
 
+    if include_commits:
+        response = _attach_commits(response, client, start=start, end=end)
+
     return response
 
 
-def get_batch_weekly_activity(session, actor, client, interns: list, *, start_date: str, end_date: str, allowed_usernames: list[str] | None) -> list[WeeklyActivityResponse]:
+def get_batch_weekly_activity(session, actor, client, interns: list, *, start_date: str, end_date: str, allowed_usernames: list[str] | None, include_commits: bool = False) -> list[WeeklyActivityResponse]:
     start = parse_date(start_date, "start_date")
     end = parse_date(end_date, "end_date")
     if start > end:
@@ -144,4 +161,7 @@ def get_batch_weekly_activity(session, actor, client, interns: list, *, start_da
         start_date=start,
         end_date=end,
     )
-    return [activity_to_response(activity) for activity in results]
+    responses = [activity_to_response(activity) for activity in results]
+    if include_commits:
+        responses = [_attach_commits(response, client, start=start, end=end) for response in responses]
+    return responses

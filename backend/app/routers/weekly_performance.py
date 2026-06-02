@@ -22,6 +22,7 @@ def get_single_intern_weekly(
         corpus_token,
         start_date=body.start_date,
         end_date=body.end_date,
+        include_commits=body.include_commits,
     )
 
 
@@ -41,4 +42,5 @@ def get_batch_weekly(
         start_date=body.start_date,
         end_date=body.end_date,
         allowed_usernames=allowed_usernames,
+        include_commits=body.include_commits,
     )

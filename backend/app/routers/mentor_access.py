@@ -1,3 +1,12 @@
+"""
+Deprecated — Mentor Access router.
+
+These endpoints are not consumed by the frontend and are kept only for
+backward compatibility. They may be removed in a future release.
+"""
+
+import logging
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -6,7 +15,10 @@ from app.schemas.roster import MentorAccessListResponse, MentorAccessPayload, Me
 from internship_activity_tracker.application import mentor_access_service
 from internship_activity_tracker.infrastructure.models import User
 
-router = APIRouter(tags=["Mentor Access"])
+logger = logging.getLogger(__name__)
+logger.warning("mentor_access router is deprecated and may be removed in a future release.")
+
+router = APIRouter(tags=["Mentor Access (Deprecated)"])
 
 
 @router.get("", response_model=MentorAccessListResponse)

@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from internship_activity_tracker.infrastructure.models import Team, User
+from internship_activity_tracker.application.serializers import team_to_dict, user_to_dict
 
 
 def _scoped_teams(session: Session, actor: User) -> list[Team]:
@@ -21,7 +22,7 @@ def _scoped_teams(session: Session, actor: User) -> list[Team]:
     return [team for team in teams if actor.batch_id and team.batch_id == actor.batch_id]
 
 
-def standup_dashboard(session: Session, actor: User) -> dict:
+def _standup_dashboard(session: Session, actor: User) -> dict:
     teams = _scoped_teams(session, actor)
     members = [member for team in teams for member in team.members]
     return {
@@ -51,7 +52,7 @@ def standup_dashboard(session: Session, actor: User) -> dict:
     }
 
 
-def standup_analytics(session: Session, actor: User) -> dict:
+def _standup_analytics(session: Session, actor: User) -> dict:
     teams = _scoped_teams(session, actor)
     batch_counts = Counter(team.batch.name if team.batch else "Unassigned" for team in teams)
     return {
@@ -62,8 +63,27 @@ def standup_analytics(session: Session, actor: User) -> dict:
 
 
 def standup_overview(session: Session, actor: User) -> dict:
+    teams = _scoped_teams(session, actor)
+    users = []
+    if actor.role == "intern":
+        users = [user_to_dict(member) for team in teams for member in sorted(team.members, key=lambda item: item.name.lower())]
+    else:
+        users = [
+            user_to_dict(member)
+            for team in teams
+            for member in sorted(team.members, key=lambda item: item.name.lower())
+        ]
+    current_team = None
+    if actor.team_id:
+        for team in teams:
+            if team.id == actor.team_id:
+                current_team = team_to_dict(team)
+                break
     return {
         "scope": actor.role,
-        "dashboard": standup_dashboard(session, actor),
-        "analytics": standup_analytics(session, actor),
+        "dashboard": _standup_dashboard(session, actor),
+        "analytics": _standup_analytics(session, actor),
+        "team": current_team,
+        "teams": [team_to_dict(team) for team in teams],
+        "users": users,
     }

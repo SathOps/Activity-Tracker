@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_current_user, get_db
-from app.schemas.roster import CreateMyTeamPayload, SelfProfileUpdatePayload, SetBatchPayload, TeamRecord, TeamSelectionPayload, UserRecord
+from app.schemas.roster import SelfProfileUpdatePayload, SetBatchPayload, TeamRecord, UserRecord
 from internship_activity_tracker.application import team_service, user_service
 from internship_activity_tracker.application.serializers import user_to_dict
 from internship_activity_tracker.infrastructure.models import User
@@ -36,19 +36,4 @@ def get_my_team(db: Session = Depends(get_db), current_user: User = Depends(get_
     return {"team": TeamRecord(**team), "users": [UserRecord(**app_user) for app_user in users]}
 
 
-@router.post("/team/create", response_model=TeamRecord)
-def create_my_team(payload: CreateMyTeamPayload, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    result = team_service.create_my_team(db, current_user, name=payload.name, batch_id=payload.batch_id)
-    return TeamRecord(**result)
 
-
-@router.post("/team/join", response_model=UserRecord)
-def join_my_team(payload: TeamSelectionPayload, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    result = team_service.join_team(db, current_user, payload.team_id)
-    return UserRecord(**result)
-
-
-@router.post("/team/leave", response_model=UserRecord)
-def leave_my_team(payload: TeamSelectionPayload, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    result = team_service.leave_team(db, current_user, payload.team_id)
-    return UserRecord(**result)
