@@ -11,9 +11,11 @@ function Field({
   value: string | number | null | undefined;
 }) {
   return (
-    <div className="profile-field">
-      <span className="profile-field-label">{label}</span>
-      <span className="profile-field-value">
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.06em]">
+        {label}
+      </span>
+      <span className="text-sm text-slate-800 font-medium break-all">
         {value != null && value !== '' ? String(value) : '—'}
       </span>
     </div>
@@ -29,14 +31,8 @@ function RoleBadge({ role }: { role: UserRole }) {
   const c = colours[role] ?? colours.intern;
   return (
     <span
+      className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-[0.06em]"
       style={{
-        display: 'inline-block',
-        padding: '3px 12px',
-        borderRadius: 99,
-        fontSize: 12,
-        fontWeight: 700,
-        textTransform: 'uppercase',
-        letterSpacing: '0.06em',
         background: c.bg,
         color: c.text,
       }}
@@ -54,21 +50,7 @@ function Avatar({ name }: { name: string }) {
     .toUpperCase()
     .slice(0, 2);
   return (
-    <div
-      style={{
-        width: 72,
-        height: 72,
-        borderRadius: '50%',
-        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: 28,
-        fontWeight: 700,
-        color: '#fff',
-        flexShrink: 0,
-      }}
-    >
+    <div className="w-[72px] h-[72px] rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-3xl font-bold text-white shrink-0">
       {initials}
     </div>
   );
@@ -89,7 +71,7 @@ export function MyProfilePage() {
   if (!user) return null;
 
   return (
-    <div style={{ maxWidth: 680, margin: '0 auto' }}>
+    <div className="max-w-[680px] mx-auto">
       <div className="mb-6">
         <h2 className="text-xl font-bold text-slate-800">My Profile</h2>
         <p className="mt-1 text-sm text-slate-500">
@@ -98,64 +80,36 @@ export function MyProfilePage() {
       </div>
 
       {/* Header card */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 20,
-          padding: '24px',
-          borderRadius: 16,
-          background: '#fff',
-          border: '1px solid #e2e8f0',
-          marginBottom: 20,
-          boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-        }}
-      >
+      <div className="flex items-center gap-5 p-6 rounded-2xl bg-white border border-slate-200 mb-5 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
         <Avatar name={user.name} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3
-            style={{
-              margin: '0 0 4px',
-              fontSize: 22,
-              fontWeight: 700,
-              color: '#0f172a',
-              fontFamily: 'var(--font-display)',
-            }}
-          >
+        <div className="flex-1 min-w-0">
+          <h3 className="m-0 mb-1 text-[22px] font-bold text-slate-900 font-display">
             {user.name}
           </h3>
-          <p style={{ margin: '0 0 8px', fontSize: 14, color: '#64748b' }}>
+          <p className="m-0 mb-2 text-sm text-slate-500">
             @{user.corpusUsername}
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="flex items-center gap-2.5">
             <RoleBadge role={user.role} />
           </div>
         </div>
         <button
           type="button"
           onClick={() => navigate('/profile-setup')}
-          style={{
-            padding: '8px 18px',
-            borderRadius: 10,
-            border: '1px solid #e2e8f0',
-            background: '#f8fafc',
-            color: '#475569',
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-          }}
+          className="px-[18px] py-2 rounded-xl border border-slate-200 bg-slate-50 text-[#475569] text-[13px] font-medium cursor-pointer whitespace-nowrap hover:bg-slate-100 transition-colors"
         >
           Edit Profile
         </button>
       </div>
 
       {/* Info sections */}
-      <div style={{ display: 'grid', gap: 16 }}>
+      <div className="grid gap-4">
         {/* Account */}
-        <section className="profile-section">
-          <h4 className="profile-section-title">Account</h4>
-          <div className="profile-fields">
+        <section className="bg-white border border-slate-200 rounded-[14px] p-5 sm:p-6 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+          <h4 className="m-0 mb-3.5 text-[13px] font-bold uppercase tracking-[0.08em] text-slate-400">
+            Account
+          </h4>
+          <div className="grid grid-cols-1 min-[540px]:grid-cols-2 gap-x-6 gap-y-3">
             <Field label="ID" value={user.id} />
             <Field label="Corpus Username" value={user.corpusUsername} />
             <Field label="Email" value={user.email} />
@@ -166,9 +120,11 @@ export function MyProfilePage() {
         </section>
 
         {/* Team & Batch */}
-        <section className="profile-section">
-          <h4 className="profile-section-title">Team &amp; Batch</h4>
-          <div className="profile-fields">
+        <section className="bg-white border border-slate-200 rounded-[14px] p-5 sm:p-6 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+          <h4 className="m-0 mb-3.5 text-[13px] font-bold uppercase tracking-[0.08em] text-slate-400">
+            Team &amp; Batch
+          </h4>
+          <div className="grid grid-cols-1 min-[540px]:grid-cols-2 gap-x-6 gap-y-3">
             <Field label="Team" value={user.teamName} />
             <Field label="Team ID" value={user.teamId} />
             <Field label="Batch" value={user.batchName} />
@@ -177,9 +133,11 @@ export function MyProfilePage() {
         </section>
 
         {/* GitLab / Global */}
-        <section className="profile-section">
-          <h4 className="profile-section-title">GitLab &amp; Global</h4>
-          <div className="profile-fields">
+        <section className="bg-white border border-slate-200 rounded-[14px] p-5 sm:p-6 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+          <h4 className="m-0 mb-3.5 text-[13px] font-bold uppercase tracking-[0.08em] text-slate-400">
+            GitLab &amp; Global
+          </h4>
+          <div className="grid grid-cols-1 min-[540px]:grid-cols-2 gap-x-6 gap-y-3">
             <Field label="GitLab Username" value={user.gitlabUsername} />
             <Field label="Global Username" value={user.globalUsername} />
             <Field label="Global Email" value={user.globalEmail} />
