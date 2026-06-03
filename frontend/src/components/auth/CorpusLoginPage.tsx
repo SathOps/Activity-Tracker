@@ -117,22 +117,28 @@ export function CorpusLoginPage() {
             </div>
           </section>
 
-          <section className="portal-login-panel">
-            <div className="portal-login-panel-header">
-              <p className="portal-login-panel-kicker">Corpus Access</p>
-              <h2 className="portal-login-panel-title">Login to continue</h2>
-              <p className="portal-login-panel-copy">
+          <section className="mx-auto lg:mx-0 w-full max-w-[480px] self-center bg-white/75 backdrop-blur-[20px] border border-white/70 rounded-[24px] sm:rounded-[30px] p-6 sm:p-9 shadow-[0_26px_70px_rgba(37,99,235,0.12),inset_0_1px_0_rgba(255,255,255,0.6)]">
+            <div className="border-b border-[rgba(215,226,242,0.9)] mb-6 pb-5">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#6c85a9] mb-2.5 font-display">
+                Corpus Access
+              </p>
+              <h2 className="text-[28px] sm:text-[34px] font-bold tracking-[-0.03em] text-[#13233f] mb-2.5 font-display">
+                Login to continue
+              </h2>
+              <p className="text-[15px] leading-[1.75] text-[#5a6b87] m-0">
                 Use your Corpus phone number and password to open the internship
                 activity workspace.
               </p>
             </div>
 
-            <form className="portal-login-form" onSubmit={handleSubmit}>
+            <form className="grid gap-[18px]" onSubmit={handleSubmit}>
               <label
-                className="portal-login-field"
+                className="grid gap-2 text-[#243752]"
                 htmlFor="corpus-login-phone"
               >
-                <span className="portal-login-label">Phone Number</span>
+                <span className="text-xs font-semibold tracking-[0.03em]">
+                  Phone Number
+                </span>
                 <input
                   id="corpus-login-phone"
                   type="tel"
@@ -143,7 +149,7 @@ export function CorpusLoginPage() {
                       .slice(0, 10);
                     setPhone(cleaned);
                   }}
-                  className="portal-login-input"
+                  className="w-full min-h-[56px] px-4 rounded-2xl bg-[#f7faff]/95 border border-[#bed0e9]/95 text-[#13233f] text-[15px] placeholder-[#8b9bb4] focus:bg-white focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/16 focus:outline-none transition-all duration-200"
                   placeholder="Enter 10-digit number"
                   pattern="[0-9]{10}"
                   title="Please enter a 10-digit phone number"
@@ -152,24 +158,26 @@ export function CorpusLoginPage() {
               </label>
 
               <label
-                className="portal-login-field"
+                className="grid gap-2 text-[#243752]"
                 htmlFor="corpus-login-password"
               >
-                <span className="portal-login-label">Password</span>
-                <div className="portal-password-input-wrapper">
+                <span className="text-xs font-semibold tracking-[0.03em]">
+                  Password
+                </span>
+                <div className="relative w-full">
                   <input
                     id="corpus-login-password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="portal-login-input portal-password-input"
+                    className="w-full min-h-[56px] pl-4 pr-12 rounded-2xl bg-[#f7faff]/95 border border-[#bed0e9]/95 text-[#13233f] text-[15px] placeholder-[#8b9bb4] focus:bg-white focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/16 focus:outline-none transition-all duration-200"
                     placeholder="Enter password"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="portal-password-toggle-btn"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-none border-none text-[#8b9bb4] hover:text-[#3b82f6] flex items-center justify-center p-1 cursor-pointer"
                     aria-label={
                       showPassword ? 'Hide password' : 'Show password'
                     }
@@ -180,20 +188,20 @@ export function CorpusLoginPage() {
               </label>
 
               {statusMessage && (
-                <div className="portal-login-status-bar">
-                  <span className="portal-login-status-spinner animate-spin">
+                <div className="flex items-center gap-2.5 bg-blue-500/8 border border-blue-500/20 rounded-[14px] p-[12px_14px] text-[#1d4ed8] text-[13px] font-semibold shadow-[0_0_10px_rgba(59,130,246,0.08)] animate-pulse-border">
+                  <span className="text-[#3b82f6] text-base inline-block leading-none animate-spin">
                     ◌
                   </span>
-                  <span className="portal-login-status-text">
-                    {statusMessage}
-                  </span>
+                  <span className="font-body">{statusMessage}</span>
                 </div>
               )}
 
               {error ? (
-                <p className="portal-login-error">{error}</p>
+                <p className="bg-[#fff1f3] border border-[#f4c1c8] rounded-[14px] text-[#8f2532] text-xs leading-[1.6] m-0 p-[12px_14px]">
+                  {error}
+                </p>
               ) : (
-                <p className="portal-login-hint">
+                <p className="text-[#6b7f9d] text-[13px] leading-[1.6] m-0">
                   Corpus is the only required login to enter the product.
                 </p>
               )}
@@ -201,7 +209,7 @@ export function CorpusLoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="portal-login-submit"
+                className="w-full min-h-[58px] rounded-2xl bg-gradient-to-br from-[#1d4ed8] via-[#2563eb] to-[#0ea5e9] border-none text-white text-[15px] font-bold font-display tracking-[0.01em] px-[18px] shadow-[0_16px_34px_rgba(37,99,235,0.24)] hover:enabled:shadow-[0_20px_38px_rgba(37,99,235,0.3)] hover:enabled:-translate-y-[1px] disabled:opacity-[0.68] disabled:cursor-wait transition-all duration-[180ms]"
               >
                 {loading ? 'Signing in…' : 'Login with Corpus'}
               </button>

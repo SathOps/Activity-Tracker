@@ -22,6 +22,7 @@ The format is based on Keep a Changelog, and this project follows a simple relea
 
 ### Changed
 
+- Fully migrated CorpusLoginPage to Tailwind CSS utility classes and removed corresponding custom styles
 - Migrate login and batch selection layouts to Tailwind CSS and clean up styles
 - Updated GitLab CI/CD pipeline and package.json scripts with Knip validation
 - `README.md` now links directly to the user manual for easier discoverability
