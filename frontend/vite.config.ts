@@ -44,6 +44,8 @@ export default defineConfig({
       'node_modules',
       'vite.config.js',
       'vite.config.d.ts',
+      'src/index.css',
+      'src/styles.css',
     ],
     overrides: [
       {
