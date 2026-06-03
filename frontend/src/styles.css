@@ -2864,6 +2864,7 @@ select {
   100% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
@@ -3254,4 +3255,75 @@ select {
   color: #1e293b;
   font-weight: 500;
   word-break: break-all;
+}
+
+/* ── Login Improvements (Password Toggle & Status Bar) ──── */
+
+.portal-password-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.portal-password-input {
+  padding-right: 48px !important;
+  /* Leave space for toggle button */
+}
+
+.portal-password-toggle-btn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #8b9bb4;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.portal-password-toggle-btn:hover {
+  color: #3b82f6;
+}
+
+/* Connection Status Bar */
+.portal-login-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 14px;
+  padding: 12px 14px;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.08);
+  animation: pulse-border 2s infinite ease-in-out;
+}
+
+@keyframes pulse-border {
+  0%,
+  100% {
+    border-color: rgba(59, 130, 246, 0.2);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.08);
+  }
+
+  50% {
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+  }
+}
+
+.portal-login-status-spinner {
+  color: #3b82f6;
+  font-size: 16px;
+  display: inline-block;
+  line-height: 1;
+}
+
+.portal-login-status-text {
+  font-family: var(--font-body);
 }

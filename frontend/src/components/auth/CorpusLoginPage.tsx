@@ -3,6 +3,7 @@ import { corpusLogin } from '../../services/api/auth';
 import { useRouter } from '../../lib/router';
 import { useConfigStore } from '../../stores/configStore';
 import { useQueryClient } from '@tanstack/react-query';
+import { Eye, EyeOff } from 'lucide-react';
 
 export function CorpusLoginPage() {
   const setCorpusToken = useConfigStore((state) => state.setCorpusToken);
@@ -11,8 +12,10 @@ export function CorpusLoginPage() {
   const queryClient = useQueryClient();
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   // Show any error from GitLab OIDC redirect (/login?error=...)
   useEffect(() => {
@@ -32,9 +35,19 @@ export function CorpusLoginPage() {
 
     setLoading(true);
     setError(null);
+    setStatusMessage('Connecting to server...');
 
     try {
+      // Simulate multi-stage connection for visual clarity
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setStatusMessage('Authenticating with Corpus...');
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       const response = await corpusLogin(phone.trim(), password.trim());
+
+      setStatusMessage('Finalizing session...');
+      await new Promise((resolve) => setTimeout(resolve, 400));
+
       setAccessToken(response.access_token);
       setCorpusToken('session', response.username || phone.trim());
       setPassword('');
@@ -46,6 +59,7 @@ export function CorpusLoginPage() {
       );
     } finally {
       setLoading(false);
+      setStatusMessage(null);
     }
   }
 
@@ -102,9 +116,16 @@ export function CorpusLoginPage() {
                 id="corpus-login-phone"
                 type="tel"
                 value={phone}
-                onChange={(event) => setPhone(event.target.value)}
+                onChange={(event) => {
+                  const cleaned = event.target.value
+                    .replace(/\D/g, '')
+                    .slice(0, 10);
+                  setPhone(cleaned);
+                }}
                 className="portal-login-input"
-                placeholder="+91xxxxxxxxxx"
+                placeholder="Enter 10-digit number"
+                pattern="[0-9]{10}"
+                title="Please enter a 10-digit phone number"
                 required
               />
             </label>
@@ -114,16 +135,37 @@ export function CorpusLoginPage() {
               htmlFor="corpus-login-password"
             >
               <span className="portal-login-label">Password</span>
-              <input
-                id="corpus-login-password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="portal-login-input"
-                placeholder="Enter password"
-                required
-              />
+              <div className="portal-password-input-wrapper">
+                <input
+                  id="corpus-login-password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="portal-login-input portal-password-input"
+                  placeholder="Enter password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="portal-password-toggle-btn"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </label>
+
+            {statusMessage && (
+              <div className="portal-login-status-bar">
+                <span className="portal-login-status-spinner animate-spin">
+                  ◌
+                </span>
+                <span className="portal-login-status-text">
+                  {statusMessage}
+                </span>
+              </div>
+            )}
 
             {error ? (
               <p className="portal-login-error">{error}</p>

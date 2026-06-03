@@ -29,20 +29,6 @@ export interface GitlabMeResponse {
   };
 }
 
-function normalizePhone(phone: string): string {
-  const digits = phone.replace(/\D/g, '');
-  if (!digits) {
-    return '';
-  }
-  if (digits.startsWith('91') && digits.length === 12) {
-    return `+${digits}`;
-  }
-  if (digits.length === 10) {
-    return `+91${digits}`;
-  }
-  return phone.trim();
-}
-
 export async function checkHealth(): Promise<HealthResponse> {
   return getJson<HealthResponse>('/health');
 }
@@ -59,7 +45,7 @@ export async function corpusLogin(
     },
     credentials: 'include',
     body: JSON.stringify({
-      phone: normalizePhone(phone),
+      phone: phone.trim(),
       password,
     }),
   });
