@@ -31,7 +31,7 @@ export function BatchSelectionPage() {
 
     try {
       await setMyBatch(selectedId);
-      await refetchMe();
+      refetchMe();
     } catch (caught) {
       setError(
         caught instanceof Error ? caught.message : 'Failed to set batch'
@@ -43,17 +43,31 @@ export function BatchSelectionPage() {
 
   if (batchesQuery.isLoading) {
     return (
-      <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8 font-[var(--font-body)] bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.15),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(139,92,246,0.12),transparent_40%),radial-gradient(circle_at_60%_10%,rgba(14,165,233,0.1),transparent_30%),linear-gradient(135deg,#eef0fa_0%,#e8ecf5_40%,#eff0fa_100%)] bg-[length:200%_200%] animate-[login-gradient-shift_15s_ease_infinite]">
-        <div
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(15,23,42,0.05),transparent_40%),linear-gradient(315deg,rgba(37,99,235,0.08),transparent_38%)]"
-          aria-hidden="true"
-        />
-        <div className="relative z-10 w-full max-w-5xl">
-          <section className="relative overflow-hidden rounded-[32px] border border-slate-200/60 bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-10 shadow-[0_28px_70px_rgba(15,23,42,0.22)] text-white md:p-11">
-            <p className="relative z-10 font-[var(--font-display)] text-xs font-bold uppercase tracking-[0.18em] text-blue-200">
-              Loading batches…
-            </p>
-          </section>
+      <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.14),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(59,130,246,0.14),transparent_30%),linear-gradient(135deg,#eef2ff_0%,#e0e7ff_45%,#dbeafe_100%)] px-4 py-6 sm:px-6 lg:px-10">
+        <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-7xl items-center justify-center">
+          <div className="grid w-full gap-6 lg:grid-cols-2">
+            <section className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(145deg,#0b1020_0%,#12264c_55%,#13203a_100%)] p-8 text-white shadow-[0_30px_80px_rgba(15,23,42,0.25)] sm:p-10">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-300/80">
+                Internship Activity Tracker
+              </p>
+              <h1 className="mt-6 max-w-[11ch] text-4xl font-semibold leading-[1.05] tracking-[-0.05em] text-white sm:text-5xl lg:text-[4.6rem]">
+                One portal for batch selection.
+              </h1>
+              <p className="mt-6 max-w-xl text-base leading-8 text-slate-300">
+                Select your batch to unlock the teams, activities, and access
+                assigned to you.
+              </p>
+            </section>
+
+            <section className="rounded-[28px] bg-white/90 p-8 shadow-[0_30px_80px_rgba(15,23,42,0.12)] backdrop-blur-sm sm:p-10">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Corpus Access
+              </p>
+              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-slate-900">
+                Loading batches...
+              </h2>
+            </section>
+          </div>
         </div>
       </main>
     );
@@ -69,38 +83,81 @@ export function BatchSelectionPage() {
       : null);
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8 font-[var(--font-body)] bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.15),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(139,92,246,0.12),transparent_40%),radial-gradient(circle_at_60%_10%,rgba(14,165,233,0.1),transparent_30%),linear-gradient(135deg,#eef0fa_0%,#e8ecf5_40%,#eff0fa_100%)] bg-[length:200%_200%] animate-[login-gradient-shift_15s_ease_infinite]">
-      <div
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(15,23,42,0.05),transparent_40%),linear-gradient(315deg,rgba(37,99,235,0.08),transparent_38%)]"
-        aria-hidden="true"
-      />
+    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.14),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(59,130,246,0.14),transparent_30%),linear-gradient(135deg,#eef2ff_0%,#e0e7ff_45%,#dbeafe_100%)] px-4 py-6 sm:px-6 lg:px-10">
+      <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-7xl items-center justify-center">
+        <div className="grid w-full gap-6 lg:grid-cols-2">
+          <section className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(145deg,#0b1020_0%,#12264c_55%,#13203a_100%)] p-8 text-white shadow-[0_30px_80px_rgba(15,23,42,0.25)] sm:p-10 lg:p-12">
+            <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
+            <div className="pointer-events-none absolute bottom-0 left-0 h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl" />
 
-      <div className="relative z-10 grid w-full max-w-[1240px] gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(360px,0.9fr)]">
-        <section className="relative overflow-hidden rounded-[32px] border border-slate-200/20 bg-[linear-gradient(145deg,rgba(11,18,32,0.97),rgba(17,45,92,0.94)),linear-gradient(180deg,rgba(255,255,255,0.06),transparent)] p-8 text-slate-50 shadow-[0_28px_70px_rgba(15,23,42,0.22)] md:p-11">
-          <div className="pointer-events-none absolute -right-20 -top-14 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(96,165,250,0.22),transparent_60%)]" />
-          <div className="relative z-10">
-            <p className="mb-4 font-[var(--font-display)] text-xs font-bold uppercase tracking-[0.18em] text-blue-200">
-              Welcome — Choose Your Batch
+            <div className="relative z-10">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-300/80">
+                Internship Activity Tracker
+              </p>
+
+              <h1 className="mt-6 max-w-[11ch] text-4xl font-semibold leading-[1.02] tracking-[-0.05em] text-white sm:text-5xl lg:text-[4.8rem]">
+                One portal for batch access and activity control.
+              </h1>
+
+              <p className="mt-6 max-w-xl text-base leading-8 text-slate-300">
+                Pick the batch you belong to and continue into your workspace.
+                Your batch decides which teams and activities you can access.
+              </p>
+
+              <div className="mt-12 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-[24px] border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-sm font-semibold text-slate-200">
+                    01
+                  </span>
+                  <h3 className="mt-6 text-2xl font-semibold tracking-[-0.03em] text-white">
+                    Batch Selection
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-300">
+                    Choose the correct batch to unlock the right access and keep
+                    your profile aligned.
+                  </p>
+                </div>
+
+                <div className="rounded-[24px] border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-sm font-semibold text-slate-200">
+                    02
+                  </span>
+                  <h3 className="mt-6 text-2xl font-semibold tracking-[-0.03em] text-white">
+                    Team Access
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-300">
+                    Once confirmed, your dashboard will reflect the teams,
+                    activities, and records tied to that batch.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-[28px] bg-white/90 p-7 shadow-[0_30px_80px_rgba(15,23,42,0.12)] backdrop-blur-sm sm:p-10">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+              Batch Access
             </p>
 
-            <h1 className="mb-5 max-w-[11ch] font-[var(--font-display)] text-4xl font-bold leading-[0.98] tracking-[-0.04em] text-white sm:text-5xl lg:text-[4.6rem]">
-              Select the batch you belong to.
-            </h1>
+            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-slate-900">
+              Select your batch to continue
+            </h2>
 
-            <p className="mb-8 max-w-[58ch] text-[17px] leading-8 text-slate-200/90">
-              This is a one-time selection. Your batch determines which teams
-              and activities you can access. If you&apos;re unsure, ask your
-              mentor.
+            <p className="mt-4 max-w-xl text-base leading-7 text-slate-600">
+              This is a one-time selection. If you are unsure, confirm with your
+              mentor before proceeding.
             </p>
+
+            <div className="my-6 h-px w-full bg-slate-200" />
 
             {loadError && (
-              <div className="mb-4 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
                 {loadError}
               </div>
             )}
 
             {batches.length === 0 ? (
-              <p className="text-sm text-slate-300">
+              <p className="text-sm text-slate-500">
                 No batches are available yet. Ask an admin to create one.
               </p>
             ) : (
@@ -109,52 +166,56 @@ export function BatchSelectionPage() {
                   e.preventDefault();
                   void handleSubmit();
                 }}
-                className="space-y-6"
+                className="space-y-5"
               >
                 <div className="space-y-3">
-                  {batches.map((b) => (
-                    <label
-                      key={b.id}
-                      className={`group flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-4 transition-all duration-200 ${
-                        selectedId === b.id
-                          ? 'border-blue-400 bg-blue-50/10 shadow-[0_0_0_1px_rgba(96,165,250,0.18)]'
-                          : 'border-slate-200/15 bg-white/0 hover:border-slate-200/30 hover:bg-white/5'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="batch"
-                        value={b.id}
-                        checked={selectedId === b.id}
-                        onChange={() => setSelectedId(b.id)}
-                        className="peer h-4 w-4 accent-blue-500"
-                      />
+                  {batches.map((b) => {
+                    const active = selectedId === b.id;
 
-                      <span className="flex-1 text-sm text-slate-100">
-                        <strong className="block text-base font-semibold text-white">
-                          {b.name}
-                        </strong>
-                        {b.date && (
-                          <span className="mt-1 block text-sm text-slate-300">
-                            {b.date}
-                          </span>
-                        )}
-                      </span>
-                    </label>
-                  ))}
+                    return (
+                      <label
+                        key={b.id}
+                        className={`flex cursor-pointer items-center gap-4 rounded-2xl border px-4 py-4 transition-all duration-200 ${
+                          active
+                            ? 'border-blue-500 bg-blue-50 shadow-[0_0_0_1px_rgba(59,130,246,0.12)]'
+                            : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="batch"
+                          value={b.id}
+                          checked={active}
+                          onChange={() => setSelectedId(b.id)}
+                          className="h-4 w-4 accent-blue-600"
+                        />
+
+                        <span className="min-w-0 flex-1">
+                          <strong className="block truncate text-base font-semibold text-slate-900">
+                            {b.name}
+                          </strong>
+                          {b.date && (
+                            <span className="mt-1 block text-sm text-slate-500">
+                              {b.date}
+                            </span>
+                          )}
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
 
                 <button
                   type="submit"
                   disabled={selectedId === null || loading}
-                  className="w-full rounded-2xl bg-blue-600 px-4 py-3 text-base font-semibold text-white shadow-lg shadow-blue-950/25 transition-all duration-200 hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-2xl bg-[linear-gradient(90deg,#2563eb_0%,#0ea5e9_100%)] px-4 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-500/20 transition-transform duration-200 hover:scale-[1.01] hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loading ? 'Setting batch…' : 'Confirm Selection'}
                 </button>
               </form>
             )}
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
     </main>
   );

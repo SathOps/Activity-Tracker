@@ -64,126 +64,150 @@ export function CorpusLoginPage() {
   }
 
   return (
-    <main className="portal-login-page">
-      <div className="portal-login-backdrop" aria-hidden="true" />
-      <div className="portal-login-shell">
-        <section className="portal-login-hero">
-          <p className="portal-login-eyebrow">Internship Activity Tracker</p>
-          <h1 className="portal-login-title">
-            One portal for standup operations and Git compliance review.
-          </h1>
-          <p className="portal-login-copy">
-            Sign in with Corpus to enter a unified workspace. Standup Tracker
-            handles daily submissions and verification, while Git Compliance
-            Checker opens the GitLab-backed analytics and audit tools.
-          </p>
+    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.14),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(59,130,246,0.14),transparent_30%),linear-gradient(135deg,#eef2ff_0%,#e0e7ff_45%,#dbeafe_100%)] px-4 py-6 sm:px-6 lg:px-10">
+      <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-7xl items-center justify-center">
+        <div className="grid w-full gap-6 lg:grid-cols-2">
+          <section className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(145deg,#0b1020_0%,#12264c_55%,#13203a_100%)] p-8 text-white shadow-[0_30px_80px_rgba(15,23,42,0.25)] sm:p-10 lg:p-12">
+            <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
+            <div className="pointer-events-none absolute bottom-0 left-0 h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl" />
 
-          <div className="portal-feature-grid">
-            <article className="portal-feature-card">
-              <span className="portal-feature-badge">01</span>
-              <h2 className="portal-feature-title">Standup Tracker</h2>
-              <p className="portal-feature-copy">
-                Track standup uploads, verify team completion, review audio
-                evidence, and manage daily status from one operational surface.
+            <div className="relative z-10">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-300/80">
+                Internship Activity Tracker
               </p>
-            </article>
-
-            <article className="portal-feature-card">
-              <span className="portal-feature-badge">02</span>
-              <h2 className="portal-feature-title">Git Compliance Checker</h2>
-              <p className="portal-feature-copy">
-                Add GitLab access after login to inspect developer activity,
-                weekly trends, team rankings, batch analytics, and roster data.
+              <h1 className="mt-6 max-w-[11ch] text-4xl font-semibold leading-[1.02] tracking-[-0.05em] text-white sm:text-5xl lg:text-[4.8rem]">
+                One portal for standup operations and Git compliance review.
+              </h1>
+              <p className="mt-6 max-w-xl text-base leading-8 text-slate-300">
+                Sign in with Corpus to enter a unified workspace. Standup
+                Tracker handles daily submissions and verification, while Git
+                Compliance Checker opens the GitLab-backed analytics and audit
+                tools.
               </p>
-            </article>
-          </div>
-        </section>
 
-        <section className="portal-login-panel">
-          <div className="portal-login-panel-header">
-            <p className="portal-login-panel-kicker">Corpus Access</p>
-            <h2 className="portal-login-panel-title">Login to continue</h2>
-            <p className="portal-login-panel-copy">
-              Use your Corpus phone number and password to open the internship
-              activity workspace.
-            </p>
-          </div>
+              <div className="mt-12 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-[24px] border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-sm font-semibold text-slate-200">
+                    01
+                  </span>
+                  <h3 className="mt-6 text-2xl font-semibold tracking-[-0.03em] text-white">
+                    Standup Tracker
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-300">
+                    Track standup uploads, verify team completion, review audio
+                    evidence, and manage daily status from one operational
+                    surface.
+                  </p>
+                </div>
 
-          <form className="portal-login-form" onSubmit={handleSubmit}>
-            <label className="portal-login-field" htmlFor="corpus-login-phone">
-              <span className="portal-login-label">Phone Number</span>
-              <input
-                id="corpus-login-phone"
-                type="tel"
-                value={phone}
-                onChange={(event) => {
-                  const cleaned = event.target.value
-                    .replace(/\D/g, '')
-                    .slice(0, 10);
-                  setPhone(cleaned);
-                }}
-                className="portal-login-input"
-                placeholder="Enter 10-digit number"
-                pattern="[0-9]{10}"
-                title="Please enter a 10-digit phone number"
-                required
-              />
-            </label>
+                <div className="rounded-[24px] border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-sm font-semibold text-slate-200">
+                    02
+                  </span>
+                  <h3 className="mt-6 text-2xl font-semibold tracking-[-0.03em] text-white">
+                    Git Compliance Checker
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-300">
+                    Add GitLab access after login to inspect developer activity,
+                    weekly trends, team rankings, batch analytics, and roster
+                    data.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
 
-            <label
-              className="portal-login-field"
-              htmlFor="corpus-login-password"
-            >
-              <span className="portal-login-label">Password</span>
-              <div className="portal-password-input-wrapper">
+          <section className="portal-login-panel">
+            <div className="portal-login-panel-header">
+              <p className="portal-login-panel-kicker">Corpus Access</p>
+              <h2 className="portal-login-panel-title">Login to continue</h2>
+              <p className="portal-login-panel-copy">
+                Use your Corpus phone number and password to open the internship
+                activity workspace.
+              </p>
+            </div>
+
+            <form className="portal-login-form" onSubmit={handleSubmit}>
+              <label
+                className="portal-login-field"
+                htmlFor="corpus-login-phone"
+              >
+                <span className="portal-login-label">Phone Number</span>
                 <input
-                  id="corpus-login-password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  className="portal-login-input portal-password-input"
-                  placeholder="Enter password"
+                  id="corpus-login-phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(event) => {
+                    const cleaned = event.target.value
+                      .replace(/\D/g, '')
+                      .slice(0, 10);
+                    setPhone(cleaned);
+                  }}
+                  className="portal-login-input"
+                  placeholder="Enter 10-digit number"
+                  pattern="[0-9]{10}"
+                  title="Please enter a 10-digit phone number"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="portal-password-toggle-btn"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </label>
+              </label>
 
-            {statusMessage && (
-              <div className="portal-login-status-bar">
-                <span className="portal-login-status-spinner animate-spin">
-                  ◌
-                </span>
-                <span className="portal-login-status-text">
-                  {statusMessage}
-                </span>
-              </div>
-            )}
+              <label
+                className="portal-login-field"
+                htmlFor="corpus-login-password"
+              >
+                <span className="portal-login-label">Password</span>
+                <div className="portal-password-input-wrapper">
+                  <input
+                    id="corpus-login-password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    className="portal-login-input portal-password-input"
+                    placeholder="Enter password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="portal-password-toggle-btn"
+                    aria-label={
+                      showPassword ? 'Hide password' : 'Show password'
+                    }
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              </label>
 
-            {error ? (
-              <p className="portal-login-error">{error}</p>
-            ) : (
-              <p className="portal-login-hint">
-                Corpus is the only required login to enter the product.
-              </p>
-            )}
+              {statusMessage && (
+                <div className="portal-login-status-bar">
+                  <span className="portal-login-status-spinner animate-spin">
+                    ◌
+                  </span>
+                  <span className="portal-login-status-text">
+                    {statusMessage}
+                  </span>
+                </div>
+              )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="portal-login-submit"
-            >
-              {loading ? 'Signing in…' : 'Login with Corpus'}
-            </button>
-          </form>
-        </section>
+              {error ? (
+                <p className="portal-login-error">{error}</p>
+              ) : (
+                <p className="portal-login-hint">
+                  Corpus is the only required login to enter the product.
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="portal-login-submit"
+              >
+                {loading ? 'Signing in…' : 'Login with Corpus'}
+              </button>
+            </form>
+          </section>
+        </div>
       </div>
     </main>
   );

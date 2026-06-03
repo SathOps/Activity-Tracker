@@ -22,6 +22,7 @@ The format is based on Keep a Changelog, and this project follows a simple relea
 
 ### Changed
 
+- Migrate login and batch selection layouts to Tailwind CSS and clean up styles
 - Updated GitLab CI/CD pipeline and package.json scripts with Knip validation
 - `README.md` now links directly to the user manual for easier discoverability
 - `CONTRIBUTING.md` was restructured and updated with current commands, type-check guidance (`npx tsc -b`), changelog process, and current environment variable usage
