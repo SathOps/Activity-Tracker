@@ -68,6 +68,53 @@ def sync_user_from_corpus(session: Session, me: dict[str, Any]) -> User:
 
 
 def authenticate_corpus(session: Session, phone: str, password: str) -> tuple[dict[str, Any], User]:
+    if os.getenv("MOCK_CORPUS", "false").lower() == "true":
+        phone_str = str(phone).strip()
+        if phone_str.endswith("000"):
+            role = "admin"
+            username = "mock_admin"
+            full_name = "Mock Admin"
+        elif phone_str.endswith("999"):
+            role = "mentor"
+            username = "mock_mentor"
+            full_name = "Mock Mentor"
+        elif len(phone_str) == 10 and phone_str[-3:].isdigit() and 1 <= int(phone_str[-3:]) <= 252:
+            idx = int(phone_str[-3:])
+            db_user = session.scalar(select(User).order_by(User.id).offset(idx - 1).limit(1))
+            if db_user:
+                role = db_user.role
+                username = db_user.corpus_username
+                full_name = db_user.name
+            else:
+                role = "intern"
+                username = f"mock_intern_{idx}"
+                full_name = f"Mock Intern {idx}"
+        else:
+            role = "intern"
+            username = "mock_intern"
+            full_name = "Mock Intern"
+
+        db_user = session.scalar(select(User).where(User.corpus_username == username))
+        if db_user is None:
+            db_user = User(
+                name=full_name,
+                corpus_username=username,
+                role=role,
+            )
+            session.add(db_user)
+            session.flush()
+        else:
+            db_user.role = role
+            db_user.name = full_name
+            session.flush()
+
+        payload = {
+            "access_token": f"mock_token_{username}",
+            "token_type": "bearer",
+            "user_id": str(db_user.id),
+        }
+        return payload, db_user
+
     payload = corpus_service.authenticate(phone, password)
     token = str(payload["access_token"])
     profile = corpus_service.fetch_profile(token)
