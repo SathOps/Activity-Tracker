@@ -3,11 +3,12 @@ import {
   Calendar,
   Database,
   LogOut,
+  Menu,
   Mic,
   Trophy,
   User,
 } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { getGitlabLoginUrl } from '../../services/api/auth';
 import { useAuth } from '../../contexts/AuthContext';
 import { ROUTES, type AppRoute, type WorkspaceId } from '../../lib/appRoutes';
@@ -126,8 +127,26 @@ function UserAvatar({ name }: { name: string }) {
 
 export function Sidebar() {
   const { pathname, navigate } = useRouter();
-  const { user, gitlabConnected } = useAuth();
-  const { corpusUser, clearCorpusToken, resetCredentials } = useConfigStore();
+  const { user, gitlabConnected, logout } = useAuth();
+  const { corpusUser } = useConfigStore();
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen]);
 
   const currentRoute =
     ROUTES.find((route) => route.path === pathname) ??
@@ -155,8 +174,7 @@ export function Sidebar() {
   }, [activeWorkspace, user?.role]);
 
   async function handleCorpusLogout() {
-    clearCorpusToken();
-    resetCredentials();
+    await logout();
     navigate('/');
   }
 
@@ -260,96 +278,6 @@ export function Sidebar() {
 
       {/* Scrollable content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 12px' }}>
-        {/* User card */}
-        <div
-          style={{
-            padding: '14px 16px',
-            borderRadius: 16,
-            background: 'rgba(99, 102, 241, 0.08)',
-            border: '1px solid rgba(99, 102, 241, 0.15)',
-            marginBottom: 20,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button
-              type="button"
-              onClick={() => navigate('/my-profile')}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer',
-                flexShrink: 0,
-              }}
-              title="View my profile"
-            >
-              <UserAvatar name={displayName} />
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/my-profile')}
-              style={{
-                flex: 1,
-                minWidth: 0,
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: 'var(--sidebar-text-bright)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {displayName}
-              </p>
-              <span
-                style={{
-                  display: 'inline-block',
-                  marginTop: 4,
-                  padding: '2px 8px',
-                  borderRadius: 99,
-                  fontSize: 10,
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  background:
-                    'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15))',
-                  color: '#a5b4fc',
-                  border: '1px solid rgba(99,102,241,0.2)',
-                }}
-              >
-                {user?.role || 'intern'}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => void handleCorpusLogout()}
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 10,
-                padding: 8,
-                cursor: 'pointer',
-                color: 'var(--sidebar-text)',
-                display: 'flex',
-                transition: 'all 0.2s',
-              }}
-              title="Logout"
-            >
-              <LogOut size={14} />
-            </button>
-          </div>
-        </div>
-
         {/* Workspace nav */}
         <p
           style={{
@@ -638,20 +566,333 @@ export function Sidebar() {
         ) : null}
       </div>
 
-      {/* Footer */}
+      {/* Footer / Profile Section */}
       <div
+        ref={menuRef}
         style={{
-          padding: '14px 20px',
+          padding: '12px 16px',
           borderTop: '1px solid var(--sidebar-border)',
-          textAlign: 'center',
+          position: 'relative',
+          background: 'rgba(255, 255, 255, 0.02)',
         }}
       >
+        {/* Hamburger Dropdown Menu */}
+        {menuOpen && (
+          <div
+            className="profile-dropdown-menu"
+            style={{
+              position: 'absolute',
+              bottom: 'calc(100% + 8px)',
+              left: 12,
+              right: 12,
+              background: '#0f172a',
+              border: '1px solid rgba(99, 102, 241, 0.3)',
+              borderRadius: 12,
+              boxShadow:
+                '0 -10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)',
+              padding: '16px',
+              zIndex: 50,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+            }}
+          >
+            {/* Header / Title */}
+            <div
+              style={{
+                borderBottom: '1px solid rgba(255,255,255,0.08)',
+                paddingBottom: 8,
+                marginBottom: 4,
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: 'rgba(148, 163, 184, 0.5)',
+                }}
+              >
+                User Details
+              </p>
+            </div>
+
+            {/* Details List */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+                fontSize: 12,
+              }}
+            >
+              <div>
+                <span
+                  style={{
+                    color: 'rgba(148, 163, 184, 0.6)',
+                    display: 'block',
+                    fontSize: 10,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Name
+                </span>
+                <span
+                  style={{
+                    color: 'var(--sidebar-text-bright)',
+                    fontWeight: 500,
+                  }}
+                >
+                  {user?.name || displayName}
+                </span>
+              </div>
+
+              <div>
+                <span
+                  style={{
+                    color: 'rgba(148, 163, 184, 0.6)',
+                    display: 'block',
+                    fontSize: 10,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Role
+                </span>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    marginTop: 2,
+                    padding: '2px 8px',
+                    borderRadius: 99,
+                    fontSize: 10,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    background:
+                      'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15))',
+                    color: '#a5b4fc',
+                    border: '1px solid rgba(99,102,241,0.2)',
+                  }}
+                >
+                  {user?.role || 'intern'}
+                </span>
+              </div>
+
+              {user?.email && (
+                <div>
+                  <span
+                    style={{
+                      color: 'rgba(148, 163, 184, 0.6)',
+                      display: 'block',
+                      fontSize: 10,
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Email
+                  </span>
+                  <span
+                    style={{
+                      color: 'var(--sidebar-text-bright)',
+                      wordBreak: 'break-all',
+                    }}
+                  >
+                    {user.email}
+                  </span>
+                </div>
+              )}
+
+              {user?.batchName && (
+                <div>
+                  <span
+                    style={{
+                      color: 'rgba(148, 163, 184, 0.6)',
+                      display: 'block',
+                      fontSize: 10,
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Batch
+                  </span>
+                  <span style={{ color: 'var(--sidebar-text-bright)' }}>
+                    {user.batchName}
+                  </span>
+                </div>
+              )}
+
+              {user?.teamName && (
+                <div>
+                  <span
+                    style={{
+                      color: 'rgba(148, 163, 184, 0.6)',
+                      display: 'block',
+                      fontSize: 10,
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Team
+                  </span>
+                  <span style={{ color: 'var(--sidebar-text-bright)' }}>
+                    {user.teamName}
+                  </span>
+                </div>
+              )}
+
+              {user?.institutionName && (
+                <div>
+                  <span
+                    style={{
+                      color: 'rgba(148, 163, 184, 0.6)',
+                      display: 'block',
+                      fontSize: 10,
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Institution
+                  </span>
+                  <span
+                    style={{
+                      color: 'var(--sidebar-text-bright)',
+                      fontSize: 11,
+                    }}
+                  >
+                    {user.institutionName}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div
+              style={{
+                borderTop: '1px solid rgba(255,255,255,0.08)',
+                paddingTop: 8,
+                marginTop: 4,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => void handleCorpusLogout()}
+                style={{
+                  width: '100%',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.25)',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  color: '#f87171',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
+                }}
+              >
+                <LogOut size={14} />
+                Logout
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Profile Info & Trigger Row */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              minWidth: 0,
+              flex: 1,
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => navigate('/my-profile')}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+              title="View my profile"
+            >
+              <UserAvatar name={displayName} />
+            </button>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: 'var(--sidebar-text-bright)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {displayName}
+              </p>
+              <span
+                style={{
+                  display: 'inline-block',
+                  marginTop: 2,
+                  fontSize: 10,
+                  color: 'rgba(148, 163, 184, 0.6)',
+                  textTransform: 'uppercase',
+                  fontWeight: 500,
+                  letterSpacing: '0.04em',
+                }}
+              >
+                {user?.role || 'intern'}
+              </span>
+            </div>
+          </div>
+
+          {/* Hamburger Menu Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setMenuOpen(!menuOpen)}
+            style={{
+              background: menuOpen
+                ? 'rgba(99,102,241,0.15)'
+                : 'rgba(255,255,255,0.04)',
+              border: menuOpen
+                ? '1px solid rgba(99,102,241,0.3)'
+                : '1px solid rgba(255,255,255,0.06)',
+              borderRadius: 8,
+              padding: 8,
+              cursor: 'pointer',
+              color: menuOpen ? '#a5b4fc' : 'var(--sidebar-text)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s',
+            }}
+            title="User Menu"
+          >
+            <Menu size={16} />
+          </button>
+        </div>
+
+        {/* Small version text at the very bottom */}
         <p
           style={{
-            margin: 0,
-            fontSize: 10,
-            color: 'rgba(148, 163, 184, 0.35)',
-            letterSpacing: '0.04em',
+            margin: '8px 0 0 0',
+            fontSize: 9,
+            color: 'rgba(148, 163, 184, 0.25)',
+            letterSpacing: '0.02em',
+            textAlign: 'center',
           }}
         >
           Activity Tracker v2.0

@@ -59,6 +59,7 @@ export const Layers = icon('☰');
 export const LayoutGrid = icon('▦');
 export const Loader2 = icon('◌');
 export const LogOut = icon('↩');
+export const Menu = icon('☰');
 export const Mic = icon('🎙');
 export const Moon = icon('☾');
 export const Pause = icon('⏸');
