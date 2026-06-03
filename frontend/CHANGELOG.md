@@ -22,6 +22,7 @@ The format is based on Keep a Changelog, and this project follows a simple relea
 
 ### Changed
 
+- Migrated DashboardLayout to use Tailwind CSS utility classes
 - Fully migrated ProfileCompletionPage and MyProfilePage to Tailwind CSS utility classes
 - Fully migrated CorpusLoginPage to Tailwind CSS utility classes and removed corresponding custom styles
 - Migrate login and batch selection layouts to Tailwind CSS and clean up styles

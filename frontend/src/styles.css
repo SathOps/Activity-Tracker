@@ -1259,80 +1259,6 @@ select {
   margin: 0;
 }
 
-.dashboard-container {
-  background: linear-gradient(
-    160deg,
-    var(--surface-0) 0%,
-    var(--surface-1) 100%
-  );
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: var(--shadow-soft);
-  padding: clamp(14px, 1.8vw, 22px);
-}
-
-.dashboard-header {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.dashboard-header-actions {
-  align-items: center;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.dashboard-title {
-  color: var(--text-main);
-  font-size: 22px;
-  margin: 0;
-}
-
-.dashboard-view-switch {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-bottom: 16px;
-  padding: 8px;
-}
-
-.dashboard-view-button {
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  color: var(--text-subtle);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  min-height: 40px;
-  padding: 8px 12px;
-  transition: all 0.2s ease;
-}
-
-.dashboard-view-button:hover {
-  background: var(--surface-0);
-  border-color: var(--border);
-  color: var(--text-main);
-}
-
-.dashboard-view-button.is-active {
-  background: linear-gradient(
-    135deg,
-    var(--accent) 0%,
-    var(--accent-strong) 100%
-  );
-  border-color: transparent;
-  box-shadow: 0 8px 16px rgba(22, 58, 136, 0.24);
-  color: #ffffff;
-}
-
 .team-create-row,
 .date-filter-section,
 .search-section {
@@ -1747,9 +1673,7 @@ select {
 }
 
 [data-theme='dark'] .app-toolbar,
-[data-theme='dark'] .dashboard-container,
 [data-theme='dark'] .view-tabs,
-[data-theme='dark'] .dashboard-view-switch,
 [data-theme='dark'] .interns-list-panel,
 [data-theme='dark'] .interns-add-panel,
 [data-theme='dark'] .team-card,
@@ -1771,8 +1695,7 @@ select {
 }
 
 [data-theme='dark'] .primary-button,
-[data-theme='dark'] .view-tab--active,
-[data-theme='dark'] .dashboard-view-button.is-active {
+[data-theme='dark'] .view-tab--active {
   box-shadow: 0 10px 18px rgba(65, 143, 239, 0.36);
 }
 
@@ -2304,7 +2227,6 @@ select {
     right: 0;
   }
 
-  .dashboard-header,
   .team-header {
     align-items: flex-start;
     flex-direction: column;
@@ -2318,14 +2240,6 @@ select {
     flex: 1;
     justify-content: center;
     min-width: 120px;
-  }
-
-  .dashboard-view-switch {
-    grid-template-columns: 1fr;
-  }
-
-  .dashboard-container {
-    padding: 14px;
   }
 
   .status-glance-grid {

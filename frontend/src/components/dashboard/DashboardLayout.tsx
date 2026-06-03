@@ -1232,15 +1232,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   };
 
   return (
-    <main className="dashboard-container">
-      <header className="dashboard-header">
-        <h1 className="dashboard-title">
+    <main className="bg-gradient-to-br from-[var(--surface-0)] to-[var(--surface-1)] border border-[var(--border)] dark:border-[var(--border-strong)] rounded-[14px] shadow-[var(--shadow-soft)] p-3.5 sm:p-6">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <h1 className="m-0 text-2xl font-bold text-[var(--text-main)]">
           {isInlineStatusView
             ? t('dashboard.teamStatusDashboard')
             : resolvedTitle}
         </h1>
         {!isInlineStatusView ? (
-          <div className="dashboard-header-actions">
+          <div className="flex gap-3">
             <button
               className="secondary-button"
               onClick={() => setIsRecordModalOpen(true)}
@@ -1266,7 +1266,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       ) : !isInlineStatusView ? (
         <>
           <section
-            className="dashboard-view-switch"
+            className="flex bg-[var(--surface-1)] border border-[var(--border)] dark:border-[var(--border-strong)] rounded-lg p-1 mb-5 max-w-fit w-full sm:w-auto"
             aria-label={t('dashboard.viewSelector')}
           >
             {[
@@ -1280,7 +1280,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
               return (
                 <button
-                  className={`dashboard-view-button${isActive ? ' is-active' : ''}`}
+                  className={`px-4 py-2 border border-transparent rounded-md text-[13px] font-semibold cursor-pointer transition-all duration-200 ${
+                    isActive
+                      ? 'bg-gradient-to-br from-[var(--accent)] to-[var(--accent-strong)] text-white shadow-[0_8px_16px_rgba(22,58,136,0.24)] dark:shadow-[0_10px_18px_rgba(65,143,239,0.36)]'
+                      : 'bg-transparent text-[var(--text-subtle)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'
+                  }`}
                   key={item.key}
                   onClick={() => setActiveView(item.key)}
                   type="button"
