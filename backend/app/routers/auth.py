@@ -28,7 +28,14 @@ router = APIRouter(tags=["Auth"])
 
 @router.post("/corpus/login", response_model=CorpusLoginResponse)
 def corpus_login(body: CorpusLoginRequest, request: Request, response: Response, db: Session = Depends(get_db)):
-    payload, user = authenticate_corpus(db, body.phone, body.password)
+    phone = body.phone.strip()
+    digits = "".join(c for c in phone if c.isdigit())
+    if len(digits) == 10:
+        phone = f"+91{digits}"
+    elif len(digits) == 12 and digits.startswith("91"):
+        phone = f"+{digits}"
+
+    payload, user = authenticate_corpus(db, phone, body.password)
     browser_session = ensure_session(request, response)
     browser_session.corpus_token = payload["access_token"]
     browser_session.corpus_username = user.corpus_username
@@ -37,7 +44,7 @@ def corpus_login(body: CorpusLoginRequest, request: Request, response: Response,
         token_type=payload.get("token_type") or "bearer",
         user_id=str(payload.get("user_id") or user.id),
         username=user.corpus_username,
-        phone=body.phone,
+        phone=phone,
         roles=[user.role],
         profile={
             "corpus_username": user.corpus_username,
