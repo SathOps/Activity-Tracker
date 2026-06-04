@@ -755,7 +755,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           <input
             aria-label={t('dashboard.standupVerificationDate')}
             onChange={handleSelectedDateChange}
-            className="bg-[var(--surface-0)] border border-[var(--border)] rounded-lg text-[var(--text-main)] text-sm px-3 py-2.5"
+            className="bg-[var(--surface-0)] border-none rounded-lg text-[var(--text-main)] text-sm px-3 py-2.5"
             type="date"
             value={selectedDateKey}
           />
@@ -767,7 +767,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           className="flex flex-wrap gap-2 p-1 glass rounded-full"
           style={{
             background: 'var(--glass-bg)',
-            border: '1px solid var(--glass-border)',
+            border: 'none',
             boxShadow: 'var(--shadow-sm)',
           }}
         >
@@ -778,7 +778,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <button
                 key={viewKey}
                 onClick={() => setStatusView(viewKey)}
-                className={`px-4 py-2 border border-transparent rounded-full text-[13px] font-semibold cursor-pointer transition-all duration-200 ${
+                className={`px-4 py-2 border-none rounded-full text-[13px] font-semibold cursor-pointer transition-all duration-200 ${
                   isActive
                     ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm'
                     : 'bg-transparent text-[var(--text-subtle)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'

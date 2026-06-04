@@ -119,7 +119,7 @@ export function Layout({ children }: Props) {
                       themeMode === 'dark'
                         ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.35), rgba(79, 70, 229, 0.25))'
                         : 'rgba(0, 0, 0, 0.05)',
-                    border: '1px solid var(--glass-border)',
+                    border: 'none',
                     padding: 4,
                     display: 'flex',
                     alignItems: 'center',

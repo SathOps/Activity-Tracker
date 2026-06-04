@@ -173,39 +173,73 @@ export function Sidebar() {
     shrink-0
     relative
     overflow-hidden
-    backdrop-blur-2xl
-    border-r
-    border-white/10
-    shadow-[0_0_60px_rgba(59,130,246,0.12)]
-    bg-[#0e1629]/75
   "
+      style={{
+        background:
+          'linear-gradient(180deg, rgba(15, 23, 50, 0.88) 0%, rgba(10, 16, 38, 0.92) 50%, rgba(8, 12, 30, 0.88) 100%)',
+        backdropFilter: 'blur(40px) saturate(1.6)',
+        WebkitBackdropFilter: 'blur(40px) saturate(1.6)',
+        borderRight: '1px solid rgba(100, 140, 255, 0.18)',
+        boxShadow:
+          '8px 0 32px rgba(0, 0, 0, 0.4), 16px 0 64px rgba(0, 0, 0, 0.2), inset -1px 0 0 rgba(100, 140, 255, 0.08)',
+      }}
     >
-      {/* Ambient glow */}
+      {/* Top edge glow line */}
       <div
         aria-hidden="true"
         style={{
           position: 'absolute',
-          top: -60,
-          right: -60,
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 1,
+          background:
+            'linear-gradient(90deg, transparent, rgba(99, 140, 255, 0.3), rgba(139, 92, 246, 0.2), transparent)',
+          zIndex: 2,
+        }}
+      />
+      {/* Right edge inner glow */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: 80,
+          background:
+            'linear-gradient(270deg, rgba(59, 130, 246, 0.04), transparent)',
+          pointerEvents: 'none',
+          zIndex: 1,
+        }}
+      />
+      {/* Ambient glow - top right */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          top: -80,
+          right: -80,
+          width: 240,
+          height: 240,
+          borderRadius: '50%',
+          background:
+            'radial-gradient(circle, rgba(59,130,246,0.2), transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+      {/* Ambient glow - bottom left */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          bottom: -60,
+          left: -60,
           width: 200,
           height: 200,
           borderRadius: '50%',
           background:
-            'radial-gradient(circle, rgba(59,130,246,0.18), transparent 70%)',
-          pointerEvents: 'none',
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          bottom: -40,
-          left: -40,
-          width: 160,
-          height: 160,
-          borderRadius: '50%',
-          background:
-            'radial-gradient(circle, rgba(139,92,246,0.08), transparent 70%)',
+            'radial-gradient(circle, rgba(139,92,246,0.12), transparent 70%)',
           pointerEvents: 'none',
         }}
       />
@@ -213,66 +247,48 @@ export function Sidebar() {
       {/* Logo */}
       <div
         style={{
-          padding: '24px 20px 20px',
-          borderBottom: '1px solid var(--sidebar-border)',
+          padding: '28px 24px 22px',
           position: 'relative',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div
+        <div>
+          <h1
             style={{
-              width: 52,
-              height: 52,
-              borderRadius: 18,
-
-              background: 'linear-gradient(135deg, #2563eb, #60a5fa)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 30px rgba(59, 130, 246, 0.35)',
+              margin: 0,
+              fontSize: 17,
+              fontWeight: 800,
+              fontFamily: 'var(--font-display)',
+              color: '#f1f5f9',
+              letterSpacing: '-0.02em',
+              lineHeight: 1.3,
             }}
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ color: '#ffffff', width: 24, height: 24 }}
-            >
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-            </svg>
-          </div>
-          <div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: 15,
-                fontWeight: 800,
-                fontFamily: 'var(--font-display)',
-                color: 'var(--sidebar-text-bright)',
-                letterSpacing: '-0.01em',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-              }}
-            >
-              <Mic size={18} className="text-blue-400" />
-              Activity Tracker
-            </h1>
-            <p
-              style={{
-                margin: '2px 0 0',
-                fontSize: 11,
-                color: 'rgba(148, 163, 184, 0.6)',
-                letterSpacing: '0.02em',
-              }}
-            >
-              Internship workspace
-            </p>
-          </div>
+            Activity Tracker
+          </h1>
+          <p
+            style={{
+              margin: '4px 0 0',
+              fontSize: 12,
+              color: 'rgba(148, 163, 184, 0.5)',
+              letterSpacing: '0.01em',
+              fontWeight: 400,
+            }}
+          >
+            Internship workspace
+          </p>
         </div>
+        {/* Subtle separator */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 24,
+            right: 24,
+            height: 1,
+            background:
+              'linear-gradient(90deg, transparent, rgba(148,163,184,0.12), transparent)',
+          }}
+        />
       </div>
 
       {/* Scrollable content */}
@@ -312,20 +328,17 @@ export function Sidebar() {
                   width: '100%',
                   padding: '10px 14px',
                   borderRadius: 12,
-                  border: isActive
-                    ? '1px solid rgba(59, 130, 246, 0.25)'
-                    : '1px solid transparent',
+                  border: 'none',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'all 0.2s ease',
                   background: isActive
-                    ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(79, 70, 229, 0.15))'
+                    ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(79, 70, 229, 0.12))'
                     : 'transparent',
                   boxShadow: isActive
-                    ? '0 0 25px rgba(37, 99, 235, 0.2), inset 0 1px 0 rgba(255,255,255,0.05)'
+                    ? '0 4px 16px rgba(37, 99, 235, 0.15)'
                     : 'none',
                   color: isActive ? '#e0e7ff' : 'var(--sidebar-text)',
-
                   position: 'relative',
                 }}
               >
@@ -571,14 +584,23 @@ export function Sidebar() {
         ) : null}
       </div>
 
+      {/* Subtle separator before footer */}
+      <div
+        style={{
+          height: 1,
+          margin: '0 20px',
+          background:
+            'linear-gradient(90deg, transparent, rgba(148,163,184,0.1), transparent)',
+        }}
+      />
+
       {/* Footer / Profile Section */}
       <div
         style={{
-          padding: '12px 16px',
-          borderTop: '1px solid var(--sidebar-border)',
+          padding: '16px 20px',
           position: 'relative',
           background:
-            'linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02))',
+            'linear-gradient(180deg, rgba(255,255,255,.03), transparent)',
         }}
       >
         {/* Profile Info & Trigger Row */}
