@@ -876,9 +876,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {t('dashboard.noTeamsForStatusTracking')}
             </p>
           ) : (
-            <section className="team-list">
+            <section className="grid gap-4">
               {teamDailyStatusRows.map((row) => (
-                <article className="team-card" key={row.teamId}>
+                <article
+                  className="glass-card p-6 relative overflow-hidden"
+                  key={row.teamId}
+                  style={{
+                    padding: '24px',
+                    borderRadius: '24px',
+                  }}
+                >
                   <header className="flex items-start justify-between gap-2">
                     <div className="grid gap-0.5">
                       <h3
@@ -929,9 +936,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {t('dashboard.noTeamsForWeeklyStatusTracking')}
             </p>
           ) : (
-            <section className="team-list">
+            <section className="team-list grid gap-4">
               {teamWeeklyStatusRows.map((row) => (
-                <article className="team-card" key={row.teamId}>
+                <article
+                  className="glass-card p-6 relative overflow-hidden"
+                  key={row.teamId}
+                  style={{
+                    padding: '24px',
+                    borderRadius: '24px',
+                  }}
+                >
                   <header className="mb-2.5">
                     <h3 className="team-name">{row.teamName}</h3>
                     <div className="team-id">
@@ -944,11 +958,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     {row.dayStatuses.map((dayStatus) => (
                       <article
                         key={dayStatus.dateKey}
-                        className={`grid gap-1 p-[8px_9px] rounded-lg border ${
-                          dayStatus.isCompleted
-                            ? 'bg-[var(--success-bg)] border-[var(--success-border)]'
-                            : 'bg-[var(--surface-1)] border-[var(--border)]'
-                        }`}
+                        className={getWeeklyDayClasses(dayStatus.standupCount)}
                       >
                         <strong
                           className="text-[var(--text-main)] cursor-help text-xs"
@@ -1350,7 +1360,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           ) : null}
 
           {activeView !== 'TEAMS' ? (
-            <section className="team-list">
+            <section className="team-list grid gap-4">
               {filteredInternRows.length === 0 ? (
                 <p className="team-empty">
                   {activeView === 'COMPLETED'
@@ -1359,7 +1369,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 </p>
               ) : (
                 filteredInternRows.map((intern) => (
-                  <article className="team-card" key={intern.internId}>
+                  <article
+                    className="glass-card p-6 relative overflow-hidden"
+                    key={intern.internId}
+                    style={{
+                      padding: '24px',
+                      borderRadius: '24px',
+                    }}
+                  >
                     <header className="team-header">
                       <div>
                         <h3 className="team-name">{intern.teamName}</h3>
@@ -2308,6 +2325,46 @@ function resolveUploadedDateKey(
   }
 
   return getDateKeyInTimeZone(parsedDate, STANDUP_TIME_ZONE);
+}
+
+function getWeeklyDayClasses(count: number): string {
+  const base =
+    'relative overflow-hidden grid gap-1 px-3 py-2.5 rounded-[14px] ' +
+    'backdrop-blur-[20px] transition-all duration-[450ms] ' +
+    'border text-[#ffedd5] [animation:border-glow-breathing_4s_infinite_ease-in-out] ' +
+    'hover:-translate-y-1 ' +
+    'hover:[box-shadow:0_15px_35px_rgba(59,130,246,0.08),inset_0_1px_0_rgba(255,255,255,0.04)] ' +
+    '[background:linear-gradient(135deg,transparent,transparent)]';
+
+  if (count >= 4) {
+    return (
+      base +
+      ' border-[rgba(34,197,94,.80)] ' +
+      '[box-shadow:inset_0_6px_30px_rgba(34,197,94,0.06)]'
+    );
+  }
+
+  if (count === 3) {
+    return (
+      base +
+      ' border-[rgba(250,204,21,0.34)] ' +
+      '[box-shadow:inset_0_6px_30px_rgba(250,204,21,0.05)]'
+    );
+  }
+
+  if (count === 2) {
+    return (
+      base +
+      ' border-[rgba(249,115,22,0.30)] ' +
+      '[box-shadow:inset_0_6px_30px_rgba(249,115,22,0.05)]'
+    );
+  }
+
+  return (
+    base +
+    ' border-[rgba(186, 0, 0, 1)] ' +
+    '[box-shadow:inset_0_6px_30px_rgba(248,113,113,0.06)]'
+  );
 }
 
 export default DashboardLayout;
