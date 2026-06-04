@@ -183,7 +183,7 @@ export function Sidebar() {
   return (
     <aside
       className="
-    w-[280px]
+    w-[300px]
     h-screen
     flex
     flex-col
@@ -191,12 +191,6 @@ export function Sidebar() {
     relative
     overflow-hidden
 
-   background:
-linear-gradient(
-180deg,
-rgba(3,7,18,.96),
-rgba(7,20,40,.98)
-);
     backdrop-blur-2xl
 
     border-r
@@ -216,7 +210,7 @@ rgba(7,20,40,.98)
           height: 200,
           borderRadius: '50%',
           background:
-            'radial-gradient(circle, rgba(99,102,241,0.12), transparent 70%)',
+            'radial-gradient(circle, rgba(59,130,246,0.18), transparent 70%)',
           pointerEvents: 'none',
         }}
       />
@@ -246,15 +240,16 @@ rgba(7,20,40,.98)
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 14,
+              width: 52,
+              height: 52,
+              borderRadius: 18,
+
               background: 'linear-gradient(135deg,#2563eb , #60a5fa)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: 18,
-              boxShadow: '0 4px 14px rgba(79, 70, 229, 0.35)',
+              boxShadow: '0 0 30px rgba(59,130,246,.35)',
             }}
           >
             📊
@@ -271,7 +266,7 @@ rgba(7,20,40,.98)
               }}
             >
               <Mic size={20} />
-              Activity Tracker Standup Intelligence
+              Activity Tracker
             </h1>
             <p
               style={{
@@ -329,9 +324,13 @@ rgba(7,20,40,.98)
                   textAlign: 'left',
                   transition: 'all 0.2s ease',
                   background: isActive
-                    ? 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(139,92,246,0.12))'
+                    ? 'linear-gradient(135deg, rgba(59,130,246,.28), rgba(59,130,246,.08))'
                     : 'transparent',
+                  boxShadow: isActive
+                    ? '0 0 25px rgba(59,130,246,.18)'
+                    : 'none',
                   color: isActive ? '#e0e7ff' : 'var(--sidebar-text)',
+
                   position: 'relative',
                 }}
               >
@@ -351,9 +350,9 @@ rgba(7,20,40,.98)
                 )}
                 <span
                   style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 10,
+                    width: 44,
+                    height: 44,
+                    borderRadius: 14,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -480,7 +479,7 @@ rgba(7,20,40,.98)
                       padding: '9px 14px',
                       borderRadius: 10,
                       border: 'none',
-                      background: 'linear-gradient(135deg, #4f46e5, #3b82f6)',
+                      background: 'linear-gradient(135deg, #2563eb, #60a5fa)',
                       color: '#fff',
                       fontSize: 12,
                       fontWeight: 600,
@@ -584,7 +583,8 @@ rgba(7,20,40,.98)
           padding: '12px 16px',
           borderTop: '1px solid var(--sidebar-border)',
           position: 'relative',
-          background: 'rgba(255, 255, 255, 0.02)',
+          background:
+            'linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02))',
         }}
       >
         {/* Hamburger Dropdown Menu */}
@@ -876,15 +876,15 @@ rgba(7,20,40,.98)
             onClick={() => setMenuOpen(!menuOpen)}
             style={{
               background: menuOpen
-                ? 'rgba(99,102,241,0.15)'
-                : 'rgba(255,255,255,0.04)',
+                ? 'rgba(59,130,246,.15)'
+                : 'rgba(255,255,255,.04)',
               border: menuOpen
                 ? '1px solid rgba(99,102,241,0.3)'
                 : '1px solid rgba(255,255,255,0.06)',
               borderRadius: 8,
               padding: 8,
               cursor: 'pointer',
-              color: menuOpen ? '#a5b4fc' : 'var(--sidebar-text)',
+              color: menuOpen ? '#60a5fa' : 'var(--sidebar-text)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

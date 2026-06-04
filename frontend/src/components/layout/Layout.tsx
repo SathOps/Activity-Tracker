@@ -45,27 +45,7 @@ export function Layout({ children }: Props) {
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
-      <main
-        className="flex-1 overflow-y-auto"
-        style={{
-          background: `
-      radial-gradient(circle at top right,
-      rgba(59,130,246,.12),
-      transparent 35%),
-
-      radial-gradient(circle at bottom left,
-      rgba(96,165,250,.08),
-      transparent 35%),
-
-      linear-gradient(
-      135deg,
-      #020817,
-      #071428,
-      #0f1d3b
-      )
-      `,
-        }}
-      >
+      <main className="flex-1 overflow-y-auto premium-background">
         <div style={{ padding: '24px 32px', maxWidth: 1200, margin: '0 auto' }}>
           {/* Glass header */}
           <header
@@ -100,7 +80,8 @@ export function Layout({ children }: Props) {
                     fontSize: 26,
                     fontWeight: 800,
                     fontFamily: 'var(--font-display)',
-                    color: 'var(--slate-900)',
+                    color:
+                      themeMode === 'dark' ? '#F8FAFC' : 'var(--slate-900)',
                     letterSpacing: '-0.02em',
                     lineHeight: 1.2,
                   }}
@@ -111,7 +92,8 @@ export function Layout({ children }: Props) {
                   style={{
                     margin: '6px 0 0',
                     fontSize: 14,
-                    color: 'var(--slate-500)',
+                    color:
+                      themeMode === 'dark' ? '#CBD5E1' : 'var(--slate-500)',
                     maxWidth: '60ch',
                   }}
                 >
