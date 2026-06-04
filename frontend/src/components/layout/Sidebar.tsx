@@ -3,12 +3,11 @@ import {
   Calendar,
   Database,
   LogOut,
-  Menu,
   Mic,
   Trophy,
   User,
 } from 'lucide-react';
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo } from 'react';
 import { getGitlabLoginUrl } from '../../services/api/auth';
 import { useAuth } from '../../contexts/AuthContext';
 import { ROUTES, type AppRoute, type WorkspaceId } from '../../lib/appRoutes';
@@ -131,24 +130,6 @@ export function Sidebar() {
   const { user, gitlabConnected, logout } = useAuth();
   const { corpusUser } = useConfigStore();
 
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuOpen(false);
-      }
-    }
-
-    if (menuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [menuOpen]);
-
   const currentRoute =
     ROUTES.find((route) => route.path === pathname) ??
     ROUTES.find((route) => pathname.startsWith(`/${route.workspace}`)) ??
@@ -179,7 +160,8 @@ export function Sidebar() {
     navigate('/');
   }
 
-  const displayName = corpusUser || user?.corpusUsername || 'User';
+  const displayName =
+    user?.name || corpusUser || user?.corpusUsername || 'User';
 
   return (
     <aside
@@ -591,7 +573,6 @@ export function Sidebar() {
 
       {/* Footer / Profile Section */}
       <div
-        ref={menuRef}
         style={{
           padding: '12px 16px',
           borderTop: '1px solid var(--sidebar-border)',
@@ -600,228 +581,6 @@ export function Sidebar() {
             'linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02))',
         }}
       >
-        {/* Hamburger Dropdown Menu */}
-        {menuOpen && (
-          <div
-            className="profile-dropdown-menu glass"
-            style={{
-              position: 'absolute',
-              bottom: 'calc(100% + 8px)',
-              left: 12,
-              right: 12,
-              background: 'rgba(15, 23, 42, 0.85)',
-              border: '1px solid rgba(99, 102, 241, 0.25)',
-              borderRadius: 16,
-              boxShadow:
-                '0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-              padding: '16px',
-              zIndex: 50,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 12,
-              backdropFilter: 'blur(20px)',
-            }}
-          >
-            {/* Header / Title */}
-            <div
-              style={{
-                borderBottom: '1px solid rgba(255,255,255,0.08)',
-                paddingBottom: 8,
-                marginBottom: 4,
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: 11,
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  color: 'rgba(148, 163, 184, 0.5)',
-                }}
-              >
-                User Details
-              </p>
-            </div>
-
-            {/* Details List */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8,
-                fontSize: 12,
-              }}
-            >
-              <div>
-                <span
-                  style={{
-                    color: 'rgba(148, 163, 184, 0.6)',
-                    display: 'block',
-                    fontSize: 10,
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Name
-                </span>
-                <span
-                  style={{
-                    color: 'var(--sidebar-text-bright)',
-                    fontWeight: 500,
-                  }}
-                >
-                  {user?.name || displayName}
-                </span>
-              </div>
-
-              <div>
-                <span
-                  style={{
-                    color: 'rgba(148, 163, 184, 0.6)',
-                    display: 'block',
-                    fontSize: 10,
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Role
-                </span>
-                <span
-                  style={{
-                    display: 'inline-block',
-                    marginTop: 2,
-                    padding: '2px 8px',
-                    borderRadius: 99,
-                    fontSize: 10,
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    background:
-                      'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15))',
-                    color: '#a5b4fc',
-                    border: '1px solid rgba(99,102,241,0.2)',
-                  }}
-                >
-                  {user?.role || 'intern'}
-                </span>
-              </div>
-
-              {user?.email && (
-                <div>
-                  <span
-                    style={{
-                      color: 'rgba(148, 163, 184, 0.6)',
-                      display: 'block',
-                      fontSize: 10,
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    Email
-                  </span>
-                  <span
-                    style={{
-                      color: 'var(--sidebar-text-bright)',
-                      wordBreak: 'break-all',
-                    }}
-                  >
-                    {user.email}
-                  </span>
-                </div>
-              )}
-
-              {user?.batchName && (
-                <div>
-                  <span
-                    style={{
-                      color: 'rgba(148, 163, 184, 0.6)',
-                      display: 'block',
-                      fontSize: 10,
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    Batch
-                  </span>
-                  <span style={{ color: 'var(--sidebar-text-bright)' }}>
-                    {user.batchName}
-                  </span>
-                </div>
-              )}
-
-              {user?.teamName && (
-                <div>
-                  <span
-                    style={{
-                      color: 'rgba(148, 163, 184, 0.6)',
-                      display: 'block',
-                      fontSize: 10,
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    Team
-                  </span>
-                  <span style={{ color: 'var(--sidebar-text-bright)' }}>
-                    {user.teamName}
-                  </span>
-                </div>
-              )}
-
-              {user?.institutionName && (
-                <div>
-                  <span
-                    style={{
-                      color: 'rgba(148, 163, 184, 0.6)',
-                      display: 'block',
-                      fontSize: 10,
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    Institution
-                  </span>
-                  <span
-                    style={{
-                      color: 'var(--sidebar-text-bright)',
-                      fontSize: 11,
-                    }}
-                  >
-                    {user.institutionName}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div
-              style={{
-                borderTop: '1px solid rgba(255,255,255,0.08)',
-                paddingTop: 8,
-                marginTop: 4,
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => void handleCorpusLogout()}
-                style={{
-                  width: '100%',
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.25)',
-                  borderRadius: 8,
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  color: '#f87171',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  transition: 'all 0.2s',
-                }}
-              >
-                <LogOut size={14} />
-                Logout
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Profile Info & Trigger Row */}
         <div
           style={{
@@ -871,12 +630,31 @@ export function Sidebar() {
               <span
                 style={{
                   display: 'inline-block',
-                  marginTop: 2,
-                  fontSize: 10,
-                  color: 'rgba(148, 163, 184, 0.6)',
+                  marginTop: 4,
+                  padding: '2px 8px',
+                  borderRadius: 99,
+                  fontSize: 9,
+                  fontWeight: 700,
                   textTransform: 'uppercase',
-                  fontWeight: 500,
-                  letterSpacing: '0.04em',
+                  letterSpacing: '0.05em',
+                  background:
+                    user?.role === 'admin'
+                      ? 'rgba(244, 63, 94, 0.15)'
+                      : user?.role === 'mentor'
+                        ? 'rgba(59, 130, 246, 0.15)'
+                        : 'rgba(16, 185, 129, 0.15)',
+                  color:
+                    user?.role === 'admin'
+                      ? '#fb7185'
+                      : user?.role === 'mentor'
+                        ? '#60a5fa'
+                        : '#34d399',
+                  border:
+                    user?.role === 'admin'
+                      ? '1px solid rgba(244, 63, 94, 0.25)'
+                      : user?.role === 'mentor'
+                        ? '1px solid rgba(59, 130, 246, 0.25)'
+                        : '1px solid rgba(16, 185, 129, 0.25)',
                 }}
               >
                 {user?.role || 'intern'}
@@ -884,29 +662,25 @@ export function Sidebar() {
             </div>
           </div>
 
-          {/* Hamburger Menu Toggle Button */}
+          {/* Logout Button */}
           <button
             type="button"
-            onClick={() => setMenuOpen(!menuOpen)}
+            onClick={handleCorpusLogout}
             style={{
-              background: menuOpen
-                ? 'rgba(59,130,246,.15)'
-                : 'rgba(255,255,255,.04)',
-              border: menuOpen
-                ? '1px solid rgba(99,102,241,0.3)'
-                : '1px solid rgba(255,255,255,0.06)',
+              background: 'rgba(239, 68, 68, 0.08)',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
               borderRadius: 8,
               padding: 8,
               cursor: 'pointer',
-              color: menuOpen ? '#60a5fa' : 'var(--sidebar-text)',
+              color: '#f87171',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'all 0.2s',
             }}
-            title="User Menu"
+            title="Logout"
           >
-            <Menu size={16} />
+            <LogOut size={16} />
           </button>
         </div>
 
