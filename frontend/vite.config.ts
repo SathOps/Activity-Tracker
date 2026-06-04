@@ -20,7 +20,6 @@ export default defineConfig({
         rootDir,
         'src/shims/react-query.ts'
       ),
-      'lucide-react': path.resolve(rootDir, 'src/shims/lucide-react.tsx'),
       'react-hot-toast': path.resolve(rootDir, 'src/shims/react-hot-toast.tsx'),
     },
   },

@@ -13,7 +13,6 @@
     "strict": true,
     "paths": {
       "@tanstack/react-query": ["./src/shims/react-query"],
-      "lucide-react": ["./src/shims/lucide-react"],
       "react-hot-toast": ["./src/shims/react-hot-toast"]
     }
   },

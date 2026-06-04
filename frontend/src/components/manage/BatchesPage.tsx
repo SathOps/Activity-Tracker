@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Save, Trash2, X } from 'lucide-react';
+import { Calendar, Plus, Save, Trash2, X } from 'lucide-react';
 import {
   createBatch,
   deleteBatch,
@@ -17,6 +17,14 @@ interface BatchDraft {
   start_date: string;
   end_date: string;
 }
+
+/* ── Shared glass input style ────────────────────────────── */
+const glassInput =
+  'w-full rounded-xl px-3 py-2.5 text-sm outline-none ' +
+  'bg-white/5 border border-blue-500/20 text-white placeholder:text-white/35 ' +
+  'focus:border-blue-500/50 focus:bg-white/8 focus:ring-0 ' +
+  'transition-all duration-200 backdrop-blur-sm ' +
+  '[color-scheme:dark]'; // makes date picker calendar dark
 
 export function BatchesPage() {
   const qc = useQueryClient();
@@ -88,86 +96,137 @@ export function BatchesPage() {
   }
 
   return (
-    <section style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <div className="glass-card" style={{ padding: '24px 28px' }}>
-        <div style={{ marginBottom: isAdmin ? 20 : 0 }}>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
-            Batch management
-          </h2>
+    <section className="flex flex-col gap-6">
+      {/* ── Create form (admin only) ───────────────────── */}
+      {isAdmin ? (
+        <div
+          className="glass-card"
+          style={{
+            padding: '22px 26px',
+            borderColor: 'rgba(65, 120, 255, 0.35)',
+          }}
+        >
           <p
             style={{
-              margin: '4px 0 0',
-              fontSize: 14,
-              color: 'var(--slate-500)',
+              margin: '0 0 16px',
+              fontSize: 13,
+              color: 'rgba(203,213,232,0.6)',
+              letterSpacing: '0.01em',
             }}
           >
-            {isAdmin
-              ? 'Create internship cohorts and define their actual date range.'
-              : 'Review the batches currently assigned to your mentor scope.'}
+            Create internship cohorts and define their actual date range
           </p>
-        </div>
 
-        {isAdmin ? (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1.4fr 1fr 1fr auto',
-              gap: 12,
-              alignItems: 'end',
-            }}
-          >
-            <input
-              type="text"
-              value={draft.name}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  name: event.target.value,
-                }))
-              }
-              placeholder="Batch name"
-              className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            />
-            <input
-              type="date"
-              value={draft.start_date}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  start_date: event.target.value,
-                }))
-              }
-              className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            />
-            <input
-              type="date"
-              value={draft.end_date}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  end_date: event.target.value,
-                }))
-              }
-              className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            />
+          {/* 3 fields + button in one row */}
+          <div className="grid gap-3 grid-cols-[1.4fr_1fr_1fr_auto] items-end">
+            {/* Batch name */}
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="batch-name"
+                className="text-[11px] font-semibold uppercase tracking-widest"
+                style={{ color: 'rgba(148,163,184,0.8)' }}
+              >
+                Batch name
+              </label>
+              <input
+                id="batch-name"
+                type="text"
+                value={draft.name}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    name: event.target.value,
+                  }))
+                }
+                placeholder="e.g. Batch 2026"
+                className={glassInput}
+                style={{ borderColor: 'rgba(65, 120, 255, 0.35)' }}
+              />
+            </div>
+
+            {/* Start date */}
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="batch-start-date"
+                className="text-[11px] font-semibold uppercase tracking-widest"
+                style={{ color: 'rgba(148,163,184,0.8)' }}
+              >
+                Start date
+              </label>
+              <input
+                id="batch-start-date"
+                type="date"
+                value={draft.start_date}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    start_date: event.target.value,
+                  }))
+                }
+                className={glassInput}
+                style={{ borderColor: 'rgba(65, 120, 255, 0.35)' }}
+              />
+            </div>
+
+            {/* End date */}
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="batch-end-date"
+                className="text-[11px] font-semibold uppercase tracking-widest"
+                style={{ color: 'rgba(148,163,184,0.8)' }}
+              >
+                End date
+              </label>
+              <input
+                id="batch-end-date"
+                type="date"
+                value={draft.end_date}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    end_date: event.target.value,
+                  }))
+                }
+                className={glassInput}
+                style={{ borderColor: 'rgba(65, 120, 255, 0.35)' }}
+              />
+            </div>
+
+            {/* Add batch button */}
             <button
               type="button"
               onClick={() => void createMutation.mutate()}
               disabled={!draft.name.trim() || createMutation.isPending}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+              className="
+                h-[42px] px-[18px] rounded-xl
+                text-sm font-semibold whitespace-nowrap
+                flex inline-flex items-center gap-1.5
+                cursor-pointer transition-all duration-200
+                backdrop-blur-md
+                bg-blue-600/20 text-blue-300 border border-blue-500/35
+                shadow-[0_0_12px_rgba(59,130,246,0.15)]
+                hover:bg-blue-500/30 hover:border-blue-500/65 hover:text-blue-100
+                disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-white/5 disabled:border-blue-500/10 disabled:text-white/30 disabled:shadow-none
+              "
+              style={
+                !draft.name.trim() || createMutation.isPending
+                  ? { borderColor: 'rgba(65, 120, 255, 0.15)' }
+                  : undefined
+              }
             >
               <Plus size={14} />
               Add batch
             </button>
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
+      {/* ── Batch cards grid ──────────────────────────── */}
       <div
         style={{
           display: 'grid',
-          gap: 16,
-          gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+          gap: 14,
+          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
         }}
       >
         {batchCards.map((batch) => {
@@ -177,10 +236,11 @@ export function BatchesPage() {
             <article
               key={batch.id}
               className="glass-card"
-              style={{ padding: '24px 28px' }}
+              style={{ padding: '20px 24px' }}
             >
               {isEditing ? (
-                <div style={{ display: 'grid', gap: 12 }}>
+                /* ── Edit form ── */
+                <div className="flex flex-col gap-3">
                   <input
                     type="text"
                     value={editingDraft.name}
@@ -190,7 +250,9 @@ export function BatchesPage() {
                         name: event.target.value,
                       }))
                     }
-                    className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    placeholder="Batch name"
+                    className={glassInput}
+                    style={{ borderColor: 'rgba(65, 120, 255, 0.35)' }}
                   />
                   <input
                     type="date"
@@ -201,7 +263,8 @@ export function BatchesPage() {
                         start_date: event.target.value,
                       }))
                     }
-                    className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    className={glassInput}
+                    style={{ borderColor: 'rgba(65, 120, 255, 0.35)' }}
                   />
                   <input
                     type="date"
@@ -212,107 +275,135 @@ export function BatchesPage() {
                         end_date: event.target.value,
                       }))
                     }
-                    className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    className={glassInput}
+                    style={{ borderColor: 'rgba(65, 120, 255, 0.35)' }}
                   />
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div className="flex gap-2 mt-1">
                     <button
                       type="button"
                       onClick={() => void updateMutation.mutate(batch)}
-                      className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '8px 14px',
+                        borderRadius: 10,
+                        border: 'none',
+                        background: 'linear-gradient(135deg,#2563eb,#3b82f6)',
+                        color: '#fff',
+                        fontSize: 13,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
                     >
-                      <Save size={14} />
+                      <Save size={13} />
                       Save
                     </button>
                     <button
                       type="button"
                       onClick={() => setEditingId(null)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '8px 14px',
+                        borderRadius: 10,
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        background: 'rgba(255,255,255,0.06)',
+                        color: 'rgba(203,213,232,0.8)',
+                        fontSize: 13,
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                      }}
                     >
-                      <X size={14} />
+                      <X size={13} />
                       Cancel
                     </button>
                   </div>
                 </div>
               ) : (
-                <>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      gap: 16,
-                    }}
-                  >
-                    <div>
-                      <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
-                        {batch.name}
-                      </h3>
-                      <p
-                        style={{
-                          margin: '4px 0 0',
-                          fontSize: 14,
-                          color: 'var(--slate-500)',
-                        }}
-                      >
-                        {batch.start_date && batch.end_date
-                          ? `${batch.start_date} to ${batch.end_date}`
-                          : batch.date || 'Date range not set'}
-                      </p>
-                    </div>
-                    {isAdmin ? (
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingId(batch.id);
-                            setEditingDraft({
-                              name: batch.name,
-                              start_date: batch.start_date || '',
-                              end_date: batch.end_date || '',
-                            });
-                          }}
-                          className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (
-                              window.confirm(`Delete batch "${batch.name}"?`)
-                            ) {
-                              void deleteMutation.mutate(batch.id);
-                            }
-                          }}
-                          className="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-600"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    ) : null}
+                /* ── View mode ── */
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: 15,
+                        fontWeight: 700,
+                        color: 'var(--text-main)',
+                        letterSpacing: '-0.01em',
+                      }}
+                    >
+                      {batch.name}
+                    </h3>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 12,
+                        color: 'rgba(148,163,184,0.75)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 5,
+                      }}
+                    >
+                      <Calendar size={11} style={{ flexShrink: 0 }} />
+                      {batch.start_date && batch.end_date
+                        ? `${batch.start_date} → ${batch.end_date}`
+                        : batch.date || 'Date range not set'}
+                    </p>
                   </div>
 
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '1fr 1fr',
-                      gap: 12,
-                      marginTop: 18,
-                    }}
-                  >
-                    <div className="rounded-lg bg-slate-50 px-4 py-3">
-                      <div className="text-xs text-slate-500">Teams</div>
-                      <div className="mt-1 text-lg font-semibold text-slate-900">
-                        {batch.team_count}
-                      </div>
+                  {isAdmin ? (
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingId(batch.id);
+                          setEditingDraft({
+                            name: batch.name,
+                            start_date: batch.start_date || '',
+                            end_date: batch.end_date || '',
+                          });
+                        }}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: 8,
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          background: 'rgba(255,255,255,0.06)',
+                          color: 'rgba(203,213,232,0.85)',
+                          fontSize: 12,
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm(`Delete batch "${batch.name}"?`)) {
+                            void deleteMutation.mutate(batch.id);
+                          }
+                        }}
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: 8,
+                          border: '1px solid rgba(239,68,68,0.25)',
+                          background: 'rgba(239,68,68,0.08)',
+                          color: '#f87171',
+                          fontSize: 12,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
-                    <div className="rounded-lg bg-slate-50 px-4 py-3">
-                      <div className="text-xs text-slate-500">Members</div>
-                      <div className="mt-1 text-lg font-semibold text-slate-900">
-                        {batch.member_count}
-                      </div>
-                    </div>
-                  </div>
-                </>
+                  ) : null}
+                </div>
               )}
             </article>
           );
