@@ -712,29 +712,21 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   const renderStatusPanelContent = (isModalPanel: boolean) => (
     <>
-      <header
-        style={{
-          alignItems: 'center',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 12,
-          justifyContent: 'space-between',
-        }}
-      >
-        <div style={{ display: 'grid', gap: 4 }}>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="grid gap-1">
           {!isInlineStatusView ? (
-            <h2 style={{ color: 'var(--text-main)', fontSize: 20, margin: 0 }}>
+            <h2 className="text-[var(--text-main)] text-xl m-0">
               {t('dashboard.teamStatusDashboard')}
             </h2>
           ) : null}
-          <p style={{ color: 'var(--text-subtle)', fontSize: 13, margin: 0 }}>
+          <p className="text-[var(--text-subtle)] text-[13px] m-0">
             {t('dashboard.dailyDateWeeklyRange', {
               daily: selectedDateLabel,
               weekly: selectedWeekLabel,
             })}
           </p>
         </div>
-        <div style={{ display: 'grid', gap: 8, justifyItems: 'end' }}>
+        <div className="grid gap-2 justify-items-end">
           <button
             className="ghost-button"
             disabled={statusLoading}
@@ -757,44 +749,21 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </div>
       </header>
 
-      <section style={{ marginBottom: 4 }}>
-        <label
-          style={{
-            color: 'var(--text-main)',
-            display: 'grid',
-            fontSize: 13,
-            gap: 6,
-            maxWidth: 280,
-          }}
-        >
+      <section className="mb-1">
+        <label className="grid gap-1.5 text-[var(--text-main)] text-[13px] max-w-[280px]">
           <span>{t('dashboard.standupVerificationDate')}</span>
           <input
             aria-label={t('dashboard.standupVerificationDate')}
             onChange={handleSelectedDateChange}
-            style={{
-              backgroundColor: 'var(--surface-0)',
-              border: '1px solid var(--border)',
-              borderRadius: 8,
-              color: 'var(--text-main)',
-              fontSize: 14,
-              padding: '10px 12px',
-            }}
+            className="bg-[var(--surface-0)] border border-[var(--border)] rounded-lg text-[var(--text-main)] text-sm px-3 py-2.5"
             type="date"
             value={selectedDateKey}
           />
         </label>
       </section>
 
-      <section
-        style={{
-          alignItems: 'center',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 8,
-          justifyContent: 'space-between',
-        }}
-      >
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <section className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap gap-2">
           {(['DAILY', 'WEEKLY'] as const).map((viewKey) => {
             const isActive = statusView === viewKey;
 
@@ -802,18 +771,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <button
                 key={viewKey}
                 onClick={() => setStatusView(viewKey)}
-                style={{
-                  backgroundColor: isActive
-                    ? 'var(--accent)'
-                    : 'var(--surface-1)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 8,
-                  color: isActive ? '#ffffff' : 'var(--text-main)',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  padding: '8px 12px',
-                }}
+                className={`border border-[var(--border)] rounded-lg cursor-pointer text-[13px] font-semibold px-3 py-2 ${
+                  isActive
+                    ? 'bg-[var(--accent)] text-white'
+                    : 'bg-[var(--surface-1)] text-[var(--text-main)]'
+                }`}
                 type="button"
               >
                 {viewKey === 'DAILY'
@@ -880,7 +842,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       !statusError &&
       statusView === 'DAILY' &&
       (!isInlineStatusView || !showDailyChart) ? (
-        <section style={{ display: 'grid', gap: 14 }}>
+        <section className="grid gap-3.5">
           {teamDailyStatusRows.length === 0 ? (
             <p className="team-empty">
               {t('dashboard.noTeamsForStatusTracking')}
@@ -889,18 +851,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <section className="team-list">
               {teamDailyStatusRows.map((row) => (
                 <article className="team-card" key={row.teamId}>
-                  <header
-                    style={{
-                      alignItems: 'start',
-                      display: 'flex',
-                      gap: 8,
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <div style={{ display: 'grid', gap: 3 }}>
+                  <header className="flex items-start justify-between gap-2">
+                    <div className="grid gap-0.5">
                       <h3
-                        className="team-name"
-                        style={{ cursor: 'help' }}
+                        className="team-name cursor-help"
                         title={formatContributorTooltip(
                           row.contributorDetails,
                           t('dashboard.noUploadsForSelection')
@@ -913,32 +867,17 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                         {row.requiredStandupCount}
                       </div>
                     </div>
-                    <div
-                      style={{
-                        alignItems: 'center',
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: 6,
-                        justifyContent: 'flex-end',
-                        maxWidth: 220,
-                      }}
-                    >
+                    <div className="flex flex-wrap items-center justify-end gap-1.5 max-w-[220px]">
                       {row.slotStatuses.map((slot) => (
                         <span
                           key={slot.slotId}
+                          className="inline-flex justify-center items-center text-[11px] font-bold min-w-[36px] px-2 py-1 rounded-full border"
                           style={{
                             backgroundColor: getStatusSlotBackground(
                               slot.status
                             ),
-                            border: `1px solid ${getStatusSlotBorder(slot.status)}`,
-                            borderRadius: 9999,
+                            borderColor: getStatusSlotBorder(slot.status),
                             color: getStatusSlotColor(slot.status),
-                            display: 'inline-flex',
-                            fontSize: 11,
-                            fontWeight: 700,
-                            justifyContent: 'center',
-                            minWidth: 36,
-                            padding: '4px 8px',
                           }}
                           title={`${slot.label} (${slot.windowLabel})`}
                         >
@@ -955,7 +894,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       ) : null}
 
       {!statusLoading && !statusError && statusView === 'WEEKLY' ? (
-        <section style={{ display: 'grid', gap: 14 }}>
+        <section className="grid gap-3.5">
           {teamWeeklyStatusRows.length === 0 ? (
             <p className="team-empty">
               {t('dashboard.noTeamsForWeeklyStatusTracking')}
@@ -964,7 +903,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <section className="team-list">
               {teamWeeklyStatusRows.map((row) => (
                 <article className="team-card" key={row.teamId}>
-                  <header style={{ marginBottom: 10 }}>
+                  <header className="mb-2.5">
                     <h3 className="team-name">{row.teamName}</h3>
                     <div className="team-id">
                       {t('dashboard.completedDays')}: {row.completedDaysCount}/
@@ -972,34 +911,18 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     </div>
                   </header>
 
-                  <section
-                    style={{
-                      display: 'grid',
-                      gap: 8,
-                      gridTemplateColumns:
-                        'repeat(auto-fit, minmax(110px, 1fr))',
-                    }}
-                  >
+                  <section className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(110px,1fr))]">
                     {row.dayStatuses.map((dayStatus) => (
                       <article
                         key={dayStatus.dateKey}
-                        style={{
-                          backgroundColor: dayStatus.isCompleted
-                            ? 'var(--success-bg)'
-                            : 'var(--surface-1)',
-                          border: `1px solid ${dayStatus.isCompleted ? 'var(--success-border)' : 'var(--border)'}`,
-                          borderRadius: 8,
-                          display: 'grid',
-                          gap: 4,
-                          padding: '8px 9px',
-                        }}
+                        className={`grid gap-1 p-[8px_9px] rounded-lg border ${
+                          dayStatus.isCompleted
+                            ? 'bg-[var(--success-bg)] border-[var(--success-border)]'
+                            : 'bg-[var(--surface-1)] border-[var(--border)]'
+                        }`}
                       >
                         <strong
-                          style={{
-                            color: 'var(--text-main)',
-                            cursor: 'help',
-                            fontSize: 12,
-                          }}
+                          className="text-[var(--text-main)] cursor-help text-xs"
                           title={formatContributorTooltip(
                             dayStatus.contributorDetails,
                             t('dashboard.noUploadsForSelection')
@@ -1007,14 +930,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                         >
                           {dayStatus.dayLabel}
                         </strong>
-                        <span
-                          style={{ color: 'var(--text-subtle)', fontSize: 11 }}
-                        >
+                        <span className="text-[var(--text-subtle)] text-[11px]">
                           {dayStatus.fullDateLabel}
                         </span>
-                        <span
-                          style={{ color: 'var(--text-main)', fontSize: 12 }}
-                        >
+                        <span className="text-[var(--text-main)] text-xs">
                           {dayStatus.standupCount}/
                           {dayStatus.requiredStandupCount}
                         </span>
@@ -1022,7 +941,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     ))}
                   </section>
 
-                  <section style={{ marginTop: 10 }}>
+                  <section className="mt-2.5">
                     {row.pendingDayDetails.length === 0 ? (
                       <p className="team-id">
                         {t('dashboard.noPendingDaysForWeek')}
@@ -1039,11 +958,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </section>
           )}
 
-          <section
-            className="team-card"
-            style={{ backgroundColor: 'var(--surface-1)' }}
-          >
-            <h3 className="team-name" style={{ marginBottom: 8 }}>
+          <section className="team-card bg-[var(--surface-1)]">
+            <h3 className="team-name mb-2">
               {t('dashboard.weeklyPendingSummary')}
             </h3>
             {pendingWeeklyRows.length === 0 ? (
@@ -1051,13 +967,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 {t('dashboard.allTeamsCompletedWeeklyStandups')}
               </p>
             ) : (
-              <ul
-                style={{ display: 'grid', gap: 6, margin: 0, paddingLeft: 18 }}
-              >
+              <ul className="grid gap-1.5 m-0 pl-4.5">
                 {pendingWeeklyRows.map((row) => (
                   <li
                     key={row.teamId}
-                    style={{ color: 'var(--text-subtle)', fontSize: 13 }}
+                    className="text-[var(--text-subtle)] text-[13px]"
                   >
                     {row.teamName}: {row.pendingDayDetails.join(', ')} |
                     {t('dashboard.remaining')}: {row.totalRemainingStandups}
@@ -1073,21 +987,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   const renderAnalyticsContent = () => {
     return (
-      <section style={{ display: 'grid', gap: 16 }}>
-        <header
-          style={{
-            alignItems: 'center',
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 12,
-            justifyContent: 'space-between',
-          }}
-        >
-          <div style={{ display: 'grid', gap: 4 }}>
-            <h2 style={{ color: 'var(--text-main)', fontSize: 20, margin: 0 }}>
+      <section className="grid gap-4">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <div className="grid gap-1">
+            <h2 className="text-[var(--text-main)] text-xl m-0">
               {t('dashboard.teamAnalytics')}
             </h2>
-            <p style={{ color: '#475569', fontSize: 13, margin: 0 }}>
+            <p className="text-[#475569] text-[13px] m-0">
               {t('dashboard.dailyUploadsAcrossAllTeamsRange', {
                 start: formatDateForDisplay(analyticsDateKeys[0]),
                 end: formatDateForDisplay(
@@ -1096,23 +1002,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               })}
             </p>
           </div>
-          <div
-            style={{
-              alignItems: 'end',
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 8,
-            }}
-          >
-            <label
-              style={{
-                color: '#475569',
-                display: 'grid',
-                fontSize: 12,
-                gap: 4,
-                minWidth: 170,
-              }}
-            >
+          <div className="flex flex-wrap items-end gap-2">
+            <label className="grid gap-1 text-[#475569] text-xs min-w-[170px]">
               <span>{t('dashboard.customDate')}</span>
               <input
                 aria-label={t('dashboard.customDate')}
@@ -1159,30 +1050,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         ) : null}
 
         {!analyticsLoading && !analyticsError ? (
-          <section
-            className="team-card"
-            style={{ backgroundColor: '#f8fafc', overflowX: 'hidden' }}
-          >
-            <div
-              style={{
-                alignItems: 'center',
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 8,
-                justifyContent: 'space-between',
-                marginBottom: 12,
-              }}
-            >
-              <div style={{ display: 'grid', gap: 4 }}>
-                <div
-                  style={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: 8,
-                  }}
-                >
-                  <h3 className="team-name" style={{ margin: 0 }}>
+          <section className="team-card bg-[#f8fafc] overflow-x-hidden">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div className="grid gap-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="team-name m-0">
                     {t('dashboard.memberActivityHeatmap')}
                   </h3>
                   {(
@@ -1199,7 +1071,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       <button
                         key={filterKey}
                         onClick={() => setAnalyticsQualityFilter(filterKey)}
-                        style={getFilterButtonStyle(isActive)}
+                        className={getFilterButtonClass(isActive)}
                         type="button"
                       >
                         {label}
@@ -1207,7 +1079,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     );
                   })}
                 </div>
-                <p className="team-id" style={{ margin: 0 }}>
+                <p className="team-id m-0">
                   {t('dashboard.dailyUploadsPerTeamMax')}
                 </p>
               </div>
@@ -1285,23 +1157,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           </section>
 
           {isCreatingTeam && canManageStandup ? (
-            <section
-              style={{
-                alignItems: 'center',
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 8,
-                marginBottom: 14,
-              }}
-            >
+            <section className="flex flex-wrap items-center gap-2 mb-3.5">
               <input
                 aria-label={t('teams.newTeamName')}
-                className="team-search-input"
+                className="team-search-input min-w-[260px]"
                 onChange={(event) => setNewTeamName(event.target.value)}
                 placeholder={t('teams.enterTeamName')}
-                style={{
-                  minWidth: 260,
-                }}
                 type="text"
                 value={newTeamName}
               />
@@ -1315,16 +1176,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </section>
           ) : null}
 
-          <section style={{ marginBottom: 16 }}>
-            <label
-              style={{
-                color: 'var(--text-main)',
-                display: 'grid',
-                fontSize: 13,
-                gap: 6,
-                maxWidth: 280,
-              }}
-            >
+          <section className="mb-4">
+            <label className="grid gap-1.5 text-[var(--text-main)] text-[13px] max-w-[280px]">
               <span>{t('dashboard.standupVerificationDate')}</span>
               <input
                 aria-label={t('dashboard.standupVerificationDate')}
@@ -1336,7 +1189,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </label>
           </section>
 
-          <section style={{ marginBottom: 16 }}>
+          <section className="mb-4">
             <input
               aria-label={t('common.search')}
               className="team-search-input"
@@ -1411,7 +1264,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           ) : null}
         </>
       ) : (
-        <section style={{ display: 'grid', gap: 14 }}>
+        <section className="grid gap-3.5">
           {renderStatusPanelContent(false)}
         </section>
       )}
@@ -1420,30 +1273,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <div
           aria-modal="true"
           role="dialog"
-          style={{
-            backgroundColor: 'rgba(15, 23, 42, 0.45)',
-            display: 'flex',
-            inset: 0,
-            justifyContent: 'center',
-            padding: '24px 14px',
-            position: 'fixed',
-            zIndex: 80,
-          }}
+          className="fixed inset-0 z-[80] flex justify-center bg-slate-900/45 p-[24px_14px]"
         >
-          <section
-            style={{
-              backgroundColor: 'var(--surface-0)',
-              border: '1px solid var(--border)',
-              borderRadius: 12,
-              display: 'grid',
-              gap: 14,
-              maxHeight: '100%',
-              maxWidth: 980,
-              overflowY: 'auto',
-              padding: 16,
-              width: '100%',
-            }}
-          >
+          <section className="grid gap-3.5 max-h-full max-w-[980px] w-full bg-[var(--surface-0)] border border-[var(--border)] rounded-xl overflow-y-auto p-4">
             {renderStatusPanelContent(true)}
           </section>
         </div>
@@ -2121,17 +1953,12 @@ function formatContributorTooltip(
     .join(' | ');
 }
 
-function getFilterButtonStyle(isActive: boolean): React.CSSProperties {
-  return {
-    backgroundColor: isActive ? 'var(--accent)' : 'var(--surface-1)',
-    border: '1px solid var(--border)',
-    borderRadius: 8,
-    color: isActive ? '#ffffff' : 'var(--text-main)',
-    cursor: 'pointer',
-    fontSize: 13,
-    fontWeight: 600,
-    padding: '8px 12px',
-  };
+function getFilterButtonClass(isActive: boolean): string {
+  return `border border-[var(--border)] rounded-lg cursor-pointer text-[13px] font-semibold px-3 py-2 ${
+    isActive
+      ? 'bg-[var(--accent)] text-white'
+      : 'bg-[var(--surface-1)] text-[var(--text-main)]'
+  }`;
 }
 
 function getStatusSlotBackground(status: StandupSlotResult['status']): string {

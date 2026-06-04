@@ -219,11 +219,15 @@ export const TeamList: React.FC<TeamListProps> = ({
   };
 
   if (teams.length === 0) {
-    return <p className="team-empty">{t('teams.noTeamsAvailable')}</p>;
+    return (
+      <p className="border border-dashed border-[var(--border-strong)] rounded-xl text-[var(--text-subtle)] text-sm m-0 p-[22px_16px] text-center bg-gradient-to-b from-[var(--surface-1)] to-[var(--surface-2)]">
+        {t('teams.noTeamsAvailable')}
+      </p>
+    );
   }
 
   return (
-    <section className="team-list">
+    <section className="grid gap-4">
       {teams.map((team) => {
         const state = getState(team.teamId);
         const filtered = getFilteredInterns(team.teamId);
@@ -235,11 +239,14 @@ export const TeamList: React.FC<TeamListProps> = ({
           : t('teams.selectedDateQualifiedStandups');
 
         return (
-          <article className="team-card" key={team.teamId}>
-            <header className="team-header">
-              <div style={{ display: 'grid', gap: 4 }}>
+          <article
+            className="relative overflow-hidden border border-white/[0.08] bg-white/[0.05] backdrop-blur-[24px] rounded-[28px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.25),_0_0_30px_rgba(59,130,246,0.1)] transition-all duration-[350ms] hover:-translate-y-1 hover:border-blue-500/30 hover:shadow-[0_12px_40px_rgba(0,0,0,0.35),_0_0_50px_rgba(59,130,246,0.25)] dark:border-[var(--border-strong)] dark:bg-gradient-to-b dark:from-[var(--surface-0)] dark:to-[var(--surface-1)]"
+            key={team.teamId}
+          >
+            <header className="flex items-center justify-between gap-2 mb-3">
+              <div className="grid gap-1">
                 {editingTeamId === team.teamId ? (
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <div className="flex flex-wrap gap-2">
                     <input
                       aria-label={t('teams.editTeamNameFor', {
                         name: team.teamName,
@@ -250,15 +257,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                           [team.teamId]: event.target.value,
                         }))
                       }
-                      style={{
-                        backgroundColor: 'var(--surface-0)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 6,
-                        color: 'var(--text-main)',
-                        fontSize: 13,
-                        minWidth: 220,
-                        padding: '6px 8px',
-                      }}
+                      className="bg-[var(--surface-0)] border border-[var(--border)] rounded text-[13px] text-[var(--text-main)] min-w-[220px] px-2 py-1.5"
                       type="text"
                       value={teamNameDraftById[team.teamId] ?? team.teamName}
                     />
@@ -278,32 +277,25 @@ export const TeamList: React.FC<TeamListProps> = ({
                     </button>
                   </div>
                 ) : (
-                  <h3 className="team-name">{team.teamName}</h3>
+                  <h3 className="m-0 text-[1.4rem] font-bold text-white tracking-[-0.02em]">
+                    {team.teamName}
+                  </h3>
                 )}
 
-                <div className="team-id">
+                <div className="text-[#94a3b8] text-[0.85rem] font-medium">
                   {qualifiedStandupLabel}: {standupCount}/{requiredCount} |{' '}
                   {teamStatus}
                 </div>
                 {team.teamSlotStatuses?.length ? (
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: 6,
-                    }}
-                  >
+                  <div className="flex flex-wrap gap-1.5">
                     {team.teamSlotStatuses.map((slot) => (
                       <span
                         key={slot.slotId}
+                        className="inline-flex justify-center items-center text-[11px] font-bold rounded-full border px-2 py-0.5"
                         style={{
                           backgroundColor: getSlotStatusBackground(slot.status),
-                          border: `1px solid ${getSlotStatusBorder(slot.status)}`,
-                          borderRadius: 9999,
+                          borderColor: getSlotStatusBorder(slot.status),
                           color: getSlotStatusColor(slot.status),
-                          fontSize: 11,
-                          fontWeight: 700,
-                          padding: '2px 8px',
                         }}
                         title={`${slot.label} (${slot.windowLabel})`}
                       >
@@ -313,13 +305,13 @@ export const TeamList: React.FC<TeamListProps> = ({
                   </div>
                 ) : null}
                 {team.verifiedDate ? (
-                  <div className="team-id">
+                  <div className="text-[#94a3b8] text-[0.85rem] font-medium">
                     {t('teams.verifiedDate')}: {team.verifiedDate}
                   </div>
                 ) : null}
               </div>
 
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <div className="flex flex-wrap gap-2">
                 {onVerifyTeam ? (
                   <button
                     className="secondary-button"
@@ -355,41 +347,42 @@ export const TeamList: React.FC<TeamListProps> = ({
             </header>
 
             {onAddInternToTeam ? (
-              <div className="intern-dropdown-wrapper">
-                <div style={{ position: 'relative', flex: 1, minWidth: 220 }}>
+              <div className="flex flex-wrap items-start gap-2 mb-3">
+                <div className="relative flex-1 min-w-[220px]">
                   <input
                     aria-label={t('teams.addInternToTeam', {
                       name: team.teamName,
                     })}
-                    className="team-add-intern-input"
+                    className="team-add-intern-input w-full"
                     onChange={(event) =>
                       handleInputChange(team.teamId, event.target.value)
                     }
                     onFocus={() => handleFocus(team.teamId)}
                     onBlur={() => handleBlur(team.teamId)}
                     placeholder={t('teams.selectInternFromAddedList')}
-                    style={{
-                      width: '100%',
-                    }}
                     type="text"
                     value={state.inputValue}
                   />
 
                   {state.showDropdown ? (
-                    <ul className="intern-dropdown">
+                    <ul className="absolute left-0 right-0 z-10 bg-[var(--surface-0)] border border-[var(--border)] rounded-lg shadow-[var(--shadow-soft)] list-none m-1 max-h-[220px] overflow-y-auto p-1">
                       {addedInterns.length === 0 ? (
-                        <li className="intern-dropdown-empty">
+                        <li className="text-[var(--text-subtle)] text-[13px] list-none p-[10px_12px] text-center">
                           {t('interns.noInternsAvailable')}
                         </li>
                       ) : filtered.length === 0 ? (
-                        <li className="intern-dropdown-empty">
+                        <li className="text-[var(--text-subtle)] text-[13px] list-none p-[10px_12px] text-center">
                           {t('interns.noMatchingInterns')}
                         </li>
                       ) : (
                         filtered.map((intern) => (
                           <li
                             key={intern.id}
-                            className={`intern-dropdown-item${intern.alreadyInTeam ? ' disabled' : ''}`}
+                            className={`flex items-center gap-2 text-[13px] px-2.5 py-2 transition-colors duration-120 ${
+                              intern.alreadyInTeam
+                                ? 'text-[var(--text-soft)] cursor-default bg-[var(--surface-1)]'
+                                : 'cursor-pointer hover:bg-[var(--surface-2)]'
+                            }`}
                             tabIndex={intern.alreadyInTeam ? -1 : 0}
                             onMouseDown={(event) => {
                               event.preventDefault();
@@ -408,14 +401,14 @@ export const TeamList: React.FC<TeamListProps> = ({
                               }
                             }}
                           >
-                            <span className="intern-dropdown-name">
+                            <span className="text-[var(--text-main)] font-semibold">
                               {intern.name}
                             </span>
-                            <span className="intern-dropdown-id">
+                            <span className="text-[var(--text-subtle)] text-xs">
                               {intern.id}
                             </span>
                             {intern.alreadyInTeam ? (
-                              <span className="intern-dropdown-badge">
+                              <span className="ml-auto bg-[var(--danger-bg)] border border-[var(--danger-border)] rounded-full text-[var(--danger-text)] text-[11px] font-semibold px-2 py-0.5">
                                 {t('interns.alreadyInTeam')}
                               </span>
                             ) : null}
@@ -436,7 +429,7 @@ export const TeamList: React.FC<TeamListProps> = ({
               </div>
             ) : null}
 
-            <div className="team-interns">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4.5 mt-5">
               {team.interns.map((intern) => (
                 <InternCard
                   key={intern.internId}
