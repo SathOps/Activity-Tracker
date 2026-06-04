@@ -1793,10 +1793,10 @@ select {
 }
 
 .interns-dashboard {
-  align-items: start;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: clamp(14px, 1.4vw, 22px);
-  grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr);
+  width: 100%;
 }
 
 .interns-add-panel {
