@@ -23,6 +23,7 @@ export function ProfileCompletionPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [showAbout, setShowAbout] = useState(false);
+  const [step, setStep] = useState(1);
 
   useEffect(() => {
     if (!corpusToken.trim()) {
@@ -43,7 +44,13 @@ export function ProfileCompletionPage() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!gitlabUsername.trim()) return;
+    if (isSetupMode && step === 1) {
+      if (gitlabUsername.trim() && dateOfJoining) {
+        setStep(2);
+      }
+      return;
+    }
+    if (!gitlabUsername.trim() || (isSetupMode && !dateOfJoining)) return;
 
     setSaving(true);
     setError(null);
@@ -256,8 +263,8 @@ export function ProfileCompletionPage() {
           </section>
 
           {/* Right Section (Form) */}
-          <section className="portal-login-panel max-[800px]:relative max-[800px]:w-full max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:flex max-[800px]:items-center max-[800px]:justify-center max-[800px]:p-6 max-[800px]:bg-[linear-gradient(to_bottom,#eff2f9_0%,#f8fafc_15%,#f8fafc_100%)] max-[800px]:overflow-y-auto">
-            <div className="portal-login-card max-[800px]:py-8 max-[800px]:mx-auto">
+          <section className="portal-login-panel max-[800px]:relative max-[800px]:w-full max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:flex max-[800px]:items-center max-[800px]:justify-start max-[800px]:pt-12 max-[800px]:pb-16 max-[800px]:px-6 max-[800px]:bg-[linear-gradient(to_bottom,#eff2f9_0%,#f8fafc_15%,#f8fafc_100%)] max-[800px]:overflow-y-auto">
+            <div className="portal-login-card max-[800px]:max-w-[440px] max-[800px]:py-8 max-[800px]:my-auto max-[800px]:mx-auto">
               {/* Mobile Brand Header */}
               <div className="hidden max-[800px]:flex flex-col items-center text-center mb-6">
                 <div className="w-12 h-12 rounded-2xl bg-[linear-gradient(135deg,#4f46e5_0%,#3b82f6_100%)] flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-3 animate-[pulse-border_2s_infinite_ease-in-out]">
@@ -287,168 +294,162 @@ export function ProfileCompletionPage() {
 
               <div className="portal-login-card-accent max-[800px]:mx-auto max-[800px]:mb-6" />
 
-              <div className="portal-login-card-header max-[800px]:mb-5 max-[800px]:text-center">
-                <span className="text-indigo-600 font-display text-xs font-bold tracking-wide uppercase block mb-1">
-                  Welcome, {user?.name ?? 'intern'}
+              <div className="portal-login-card-header max-[800px]:mb-5 max-[800px]:text-center relative">
+                {step === 2 && (
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="absolute left-0 top-1 p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 active:scale-95 transition-all duration-150 rounded-xl focus:outline-none max-[800px]:left-1"
+                    title="Back to step 1"
+                    aria-label="Back to step 1"
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="19" y1="12" x2="5" y2="12" />
+                      <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                  </button>
+                )}
+                {step === 1 ? (
+                  <>
+                    <span className="text-indigo-600 font-display text-xs font-bold tracking-wide uppercase block mb-1">
+                      Welcome, {user?.name ?? 'intern'}
+                    </span>
+                    <h2 className="portal-login-panel-title">
+                      Complete Profile
+                    </h2>
+                    <p className="portal-login-panel-copy">
+                      Set your GitLab username to complete
+                      <br />
+                      registration and connect your profile.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-indigo-600 font-display text-xs font-bold tracking-wide uppercase block mb-1">
+                      Additional Info
+                    </span>
+                    <h2 className="portal-login-panel-title">
+                      Optional Details
+                    </h2>
+                    <p className="portal-login-panel-copy">
+                      Provide optional details below or
+                      <br />
+                      save to finish the setup process.
+                    </p>
+                  </>
+                )}
+              </div>
+
+              {/* Progress Indicator for Wizard */}
+              <div className="flex flex-col items-center gap-1.5 mb-6 text-center">
+                <span className="text-xs font-bold text-slate-400 tracking-wide uppercase">
+                  Step {step} of 2
                 </span>
-                <h2 className="portal-login-panel-title">Complete Profile</h2>
-                <p className="portal-login-panel-copy">
-                  Set your GitLab username and details to complete registration.
-                </p>
+                <div className="flex gap-2">
+                  <div
+                    className={`w-8 h-1.5 rounded-full transition-all duration-300 ${step === 1 ? 'bg-indigo-600' : 'bg-indigo-600/30'}`}
+                  />
+                  <div
+                    className={`w-8 h-1.5 rounded-full transition-all duration-300 ${step === 2 ? 'bg-indigo-600' : 'bg-slate-200'}`}
+                  />
+                </div>
               </div>
 
               <form className="portal-login-form" onSubmit={handleSubmit}>
-                <div className="grid gap-1.5 w-full">
-                  <label
-                    className="text-xs font-bold text-slate-700 tracking-wide"
-                    htmlFor="profile-gitlab-username"
-                  >
-                    GitLab Username <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="profile-gitlab-username"
-                      type="text"
-                      value={gitlabUsername}
-                      onChange={(e) => setGitlabUsername(e.target.value)}
-                      className="w-full min-h-[52px] bg-white border-[1.5px] border-[#e2e8f0] rounded-xl text-[#0f172a] text-sm pl-11 pr-4 transition-all duration-200 focus:bg-white focus:border-[#2563eb] focus:shadow-[0_0_0_4px_rgba(37,99,235,0.12)] focus:outline-none"
-                      placeholder="your_gitlab_username"
-                      required
-                      autoComplete="username"
-                    />
-                    <svg
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none transition-all duration-200"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                {step === 1 && (
+                  <>
+                    <div className="grid gap-1.5 w-full">
+                      <label
+                        className="text-xs font-bold text-slate-700 tracking-wide"
+                        htmlFor="profile-gitlab-username"
+                      >
+                        GitLab Username <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          id="profile-gitlab-username"
+                          type="text"
+                          value={gitlabUsername}
+                          onChange={(e) => setGitlabUsername(e.target.value)}
+                          className="w-full min-h-[52px] bg-white border-[1.5px] border-[#e2e8f0] rounded-xl text-[#0f172a] text-sm pl-11 pr-4 transition-all duration-200 focus:bg-white focus:border-[#2563eb] focus:shadow-[0_0_0_4px_rgba(37,99,235,0.12)] focus:outline-none"
+                          placeholder="your_gitlab_username"
+                          required
+                          autoComplete="username"
+                        />
+                        <svg
+                          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none transition-all duration-200"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                          <circle cx="12" cy="7" r="4" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-1.5 w-full">
+                      <label
+                        className="text-xs font-bold text-slate-700 tracking-wide"
+                        htmlFor="profile-date-of-joining"
+                      >
+                        Date of Joining <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          id="profile-date-of-joining"
+                          type="date"
+                          value={dateOfJoining}
+                          onChange={(e) => setDateOfJoining(e.target.value)}
+                          className="w-full min-h-[52px] bg-white border-[1.5px] border-[#e2e8f0] rounded-xl text-[#0f172a] text-sm pl-11 pr-4 transition-all duration-200 focus:bg-white focus:border-[#2563eb] focus:shadow-[0_0_0_4px_rgba(37,99,235,0.12)] focus:outline-none"
+                          required
+                        />
+                        <svg
+                          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none transition-all duration-200"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect
+                            x="3"
+                            y="4"
+                            width="18"
+                            height="18"
+                            rx="2"
+                            ry="2"
+                          />
+                          <line x1="16" y1="2" x2="16" y2="6" />
+                          <line x1="8" y1="2" x2="8" y2="6" />
+                          <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={!gitlabUsername.trim() || !dateOfJoining}
+                      className="portal-login-submit mt-2"
                     >
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                  </div>
-                </div>
-
-                <div className="grid gap-1.5 w-full">
-                  <label
-                    className="text-xs font-bold text-slate-700 tracking-wide"
-                    htmlFor="profile-global-username"
-                  >
-                    Global Username (optional)
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="profile-global-username"
-                      type="text"
-                      value={globalUsername}
-                      onChange={(e) => setGlobalUsername(e.target.value)}
-                      className="w-full min-h-[52px] bg-white border-[1.5px] border-[#e2e8f0] rounded-xl text-[#0f172a] text-sm pl-11 pr-4 transition-all duration-200 focus:bg-white focus:border-[#2563eb] focus:shadow-[0_0_0_4px_rgba(37,99,235,0.12)] focus:outline-none"
-                      placeholder="e.g. GitHub handle"
-                    />
-                    <svg
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none transition-all duration-200"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="2" y1="12" x2="22" y2="12" />
-                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    </svg>
-                  </div>
-                </div>
-
-                <div className="grid gap-1.5 w-full">
-                  <label
-                    className="text-xs font-bold text-slate-700 tracking-wide"
-                    htmlFor="profile-global-email"
-                  >
-                    Personal Email (optional)
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="profile-global-email"
-                      type="email"
-                      value={globalEmail}
-                      onChange={(e) => setGlobalEmail(e.target.value)}
-                      className="w-full min-h-[52px] bg-white border-[1.5px] border-[#e2e8f0] rounded-xl text-[#0f172a] text-sm pl-11 pr-4 transition-all duration-200 focus:bg-white focus:border-[#2563eb] focus:shadow-[0_0_0_4px_rgba(37,99,235,0.12)] focus:outline-none"
-                      placeholder="you@personal.com"
-                    />
-                    <svg
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none transition-all duration-200"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                      <polyline points="22,6 12,13 2,6" />
-                    </svg>
-                  </div>
-                </div>
-
-                <div className="grid gap-1.5 w-full">
-                  <label
-                    className="text-xs font-bold text-slate-700 tracking-wide"
-                    htmlFor="profile-date-of-joining"
-                  >
-                    Date of Joining (optional)
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="profile-date-of-joining"
-                      type="date"
-                      value={dateOfJoining}
-                      onChange={(e) => setDateOfJoining(e.target.value)}
-                      className="w-full min-h-[52px] bg-white border-[1.5px] border-[#e2e8f0] rounded-xl text-[#0f172a] text-sm pl-11 pr-4 transition-all duration-200 focus:bg-white focus:border-[#2563eb] focus:shadow-[0_0_0_4px_rgba(37,99,235,0.12)] focus:outline-none"
-                    />
-                    <svg
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none transition-all duration-200"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                      <line x1="16" y1="2" x2="16" y2="6" />
-                      <line x1="8" y1="2" x2="8" y2="6" />
-                      <line x1="3" y1="10" x2="21" y2="10" />
-                    </svg>
-                  </div>
-                </div>
-
-                {error && <p className="portal-login-error">{error}</p>}
-
-                <button
-                  type="submit"
-                  disabled={saving || !gitlabUsername.trim()}
-                  className="portal-login-submit"
-                >
-                  {saving ? (
-                    <span className="portal-login-submit-content">
-                      <span className="portal-login-spinner" />
-                      {'Saving…'}
-                    </span>
-                  ) : (
-                    <>
-                      <span>Save & Connect GitLab</span>
+                      <span>Next Step</span>
                       <svg
                         width="16"
                         height="16"
@@ -462,14 +463,119 @@ export function ProfileCompletionPage() {
                         <line x1="5" y1="12" x2="19" y2="12" />
                         <polyline points="12 5 19 12 12 19" />
                       </svg>
-                    </>
-                  )}
-                </button>
+                    </button>
+                  </>
+                )}
+
+                {step === 2 && (
+                  <>
+                    <div className="grid gap-1.5 w-full">
+                      <label
+                        className="text-xs font-bold text-slate-700 tracking-wide"
+                        htmlFor="profile-global-username"
+                      >
+                        Global Username (optional)
+                      </label>
+                      <div className="relative">
+                        <input
+                          id="profile-global-username"
+                          type="text"
+                          value={globalUsername}
+                          onChange={(e) => setGlobalUsername(e.target.value)}
+                          className="w-full min-h-[52px] bg-white border-[1.5px] border-[#e2e8f0] rounded-xl text-[#0f172a] text-sm pl-11 pr-4 transition-all duration-200 focus:bg-white focus:border-[#2563eb] focus:shadow-[0_0_0_4px_rgba(37,99,235,0.12)] focus:outline-none"
+                          placeholder="e.g. GitHub handle"
+                        />
+                        <svg
+                          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none transition-all duration-200"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="2" y1="12" x2="22" y2="12" />
+                          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-1.5 w-full">
+                      <label
+                        className="text-xs font-bold text-slate-700 tracking-wide"
+                        htmlFor="profile-global-email"
+                      >
+                        Personal Email (optional)
+                      </label>
+                      <div className="relative">
+                        <input
+                          id="profile-global-email"
+                          type="email"
+                          value={globalEmail}
+                          onChange={(e) => setGlobalEmail(e.target.value)}
+                          className="w-full min-h-[52px] bg-white border-[1.5px] border-[#e2e8f0] rounded-xl text-[#0f172a] text-sm pl-11 pr-4 transition-all duration-200 focus:bg-white focus:border-[#2563eb] focus:shadow-[0_0_0_4px_rgba(37,99,235,0.12)] focus:outline-none"
+                          placeholder="you@personal.com"
+                        />
+                        <svg
+                          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none transition-all duration-200"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                          <polyline points="22,6 12,13 2,6" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {error && <p className="portal-login-error">{error}</p>}
+
+                    <button
+                      type="submit"
+                      disabled={
+                        saving || !gitlabUsername.trim() || !dateOfJoining
+                      }
+                      className="portal-login-submit mt-2"
+                    >
+                      {saving ? (
+                        <span className="portal-login-submit-content">
+                          <span className="portal-login-spinner" />
+                          {'Saving…'}
+                        </span>
+                      ) : (
+                        <>
+                          <span>Save & Connect GitLab</span>
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                            <polyline points="12 5 19 12 12 19" />
+                          </svg>
+                        </>
+                      )}
+                    </button>
+                  </>
+                )}
 
                 <button
                   type="button"
                   onClick={logout}
-                  className="bg-transparent border-none cursor-pointer text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors self-center text-center w-full"
+                  className="bg-transparent border-none cursor-pointer text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors self-center text-center w-full mt-2"
                 >
                   Sign out
                 </button>

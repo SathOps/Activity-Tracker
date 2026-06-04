@@ -3538,9 +3538,13 @@ select {
     position: relative;
     width: 100%;
     height: auto;
-    min-height: auto;
-    padding: 48px 24px;
+    min-height: 100vh;
+    padding: 48px 24px 64px;
     border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
   }
 
   .portal-login-card {
