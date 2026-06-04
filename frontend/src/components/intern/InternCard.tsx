@@ -121,11 +121,12 @@ export const InternCard: React.FC<InternCardProps> = ({
                 })}
                 onChange={(event) => setEditedName(event.target.value)}
                 style={{
-                  border: '1px solid var(--border)',
-                  borderRadius: 6,
+                  border: '1px solid var(--glass-border)',
+                  borderRadius: 8,
                   color: 'var(--text-main)',
                   fontSize: 12,
-                  backgroundColor: 'var(--surface-0)',
+                  backgroundColor: 'var(--glass-bg)',
+                  backdropFilter: 'blur(var(--glass-blur))',
                   minWidth: 180,
                   padding: '6px 8px',
                 }}
@@ -219,14 +220,17 @@ export const InternCard: React.FC<InternCardProps> = ({
               className="ghost-button"
               onClick={toggleExpanded}
               style={{
-                padding: '4px 8px',
-                fontSize: 12,
+                padding: '5px 12px',
+                fontSize: 11,
+                fontWeight: 600,
                 color: 'var(--accent)',
-                border: '1px solid var(--border)',
-                borderRadius: 6,
+                border: '1px solid var(--glass-border)',
+                borderRadius: 99,
                 backgroundColor: isExpanded
                   ? 'var(--accent-soft)'
-                  : 'var(--surface-0)',
+                  : 'var(--glass-bg)',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
               }}
               type="button"
             >
@@ -240,10 +244,34 @@ export const InternCard: React.FC<InternCardProps> = ({
               aria-label={t('interns.editAria', { name: displayName })}
               className="ghost-button"
               onClick={() => setIsEditing(true)}
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 0,
+                border: '1px solid var(--glass-border)',
+                background: 'var(--glass-bg)',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
               title={t('button.edit')}
               type="button"
             >
-              ✎
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: '#2563eb', width: 12, height: 12 }}
+              >
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+              </svg>
             </button>
           ) : null}
           {onDeleteIntern ? (
@@ -251,10 +279,37 @@ export const InternCard: React.FC<InternCardProps> = ({
               aria-label={t('interns.deleteAria', { name: displayName })}
               className="ghost-button"
               onClick={() => onDeleteIntern(internId)}
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 0,
+                border: '1px solid var(--glass-border)',
+                background: 'var(--glass-bg)',
+                color: 'var(--danger-text)',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
               title={t('button.delete')}
               type="button"
             >
-              🗑
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: '#ef4444', width: 12, height: 12 }}
+              >
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <line x1="10" y1="11" x2="10" y2="17" />
+                <line x1="14" y1="11" x2="14" y2="17" />
+              </svg>
             </button>
           ) : null}
         </div>
@@ -262,12 +317,13 @@ export const InternCard: React.FC<InternCardProps> = ({
 
       {isExpanded && (
         <section
+          className="glass"
           style={{
-            marginTop: 4,
-            padding: 8,
-            backgroundColor: 'var(--surface-1)',
-            borderRadius: 6,
-            border: '1px solid var(--border)',
+            marginTop: 8,
+            padding: 12,
+            borderRadius: 14,
+            border: '1px solid var(--glass-border)',
+            background: 'var(--glass-bg)',
           }}
         >
           {audios.length === 0 ? (
@@ -304,17 +360,19 @@ export const InternCard: React.FC<InternCardProps> = ({
                 return (
                   <li
                     key={audio.id}
+                    className="glass"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       gap: 8,
                       fontSize: 12,
-                      padding: '4px 6px',
-                      backgroundColor: isPlaying
+                      padding: '8px 12px',
+                      background: isPlaying
                         ? 'var(--accent-soft)'
-                        : 'transparent',
-                      borderRadius: 4,
+                        : 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                      borderRadius: 10,
                     }}
                   >
                     <div style={{ display: 'grid' }}>
@@ -364,11 +422,27 @@ export const InternCard: React.FC<InternCardProps> = ({
                               borderRadius: 8,
                               border: '1px solid var(--danger-border)',
                               background: 'var(--danger-bg)',
+                              cursor: 'pointer',
                             }}
                             title={t('audio.closePlayer')}
                             type="button"
                           >
-                            ✕
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              style={{
+                                color: '#ef4444',
+                                width: 12,
+                                height: 12,
+                              }}
+                            >
+                              <line x1="18" y1="6" x2="6" y2="18" />
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
                           </button>
                         </div>
                       ) : resolvingId === audio.id ? (
@@ -381,12 +455,17 @@ export const InternCard: React.FC<InternCardProps> = ({
                           disabled={!audio.audioUrl && !audio.id}
                           onClick={() => handlePlay(audio.id, audio.audioUrl)}
                           style={{
-                            padding: '4px 10px',
-                            backgroundColor: 'var(--accent)',
+                            padding: '6px 14px',
+                            background:
+                              'linear-gradient(135deg, #2563eb, #3b82f6)',
                             color: '#ffffff',
-                            borderRadius: 4,
+                            border: 'none',
+                            borderRadius: 99,
                             fontSize: 11,
+                            fontWeight: 600,
+                            cursor: 'pointer',
                             opacity: !audio.audioUrl && !audio.id ? 0.5 : 1,
+                            transition: 'all 0.2s',
                           }}
                           type="button"
                         >
@@ -406,51 +485,15 @@ export const InternCard: React.FC<InternCardProps> = ({
 };
 
 function getSlotStatusBackground(status: StandupSlotResult['status']): string {
-  if (status === 'GOOD') {
-    return 'var(--slot-good-bg)';
-  }
-
-  if (status === 'DELAYED') {
-    return 'var(--slot-delayed-bg)';
-  }
-
-  if (status === 'UPCOMING') {
-    return 'var(--slot-upcoming-bg)';
-  }
-
-  return 'var(--slot-missing-bg)';
+  return `var(--slot-${status.toLowerCase()}-bg)`;
 }
 
 function getSlotStatusBorder(status: StandupSlotResult['status']): string {
-  if (status === 'GOOD') {
-    return 'var(--slot-good-border)';
-  }
-
-  if (status === 'DELAYED') {
-    return 'var(--slot-delayed-border)';
-  }
-
-  if (status === 'UPCOMING') {
-    return 'var(--slot-upcoming-border)';
-  }
-
-  return 'var(--slot-missing-border)';
+  return `var(--slot-${status.toLowerCase()}-border)`;
 }
 
 function getSlotStatusColor(status: StandupSlotResult['status']): string {
-  if (status === 'GOOD') {
-    return 'var(--slot-good-text)';
-  }
-
-  if (status === 'DELAYED') {
-    return 'var(--slot-delayed-text)';
-  }
-
-  if (status === 'UPCOMING') {
-    return 'var(--slot-upcoming-text)';
-  }
-
-  return 'var(--slot-missing-text)';
+  return `var(--slot-${status.toLowerCase()}-text)`;
 }
 
 export default InternCard;
