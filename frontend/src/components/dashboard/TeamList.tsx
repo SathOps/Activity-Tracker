@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Check, Clock, X } from 'lucide-react';
 import InternCard, { SubmissionStatus } from '../intern/InternCard';
 import type { Intern } from '../intern/InternSearch';
 
@@ -322,15 +323,16 @@ export const TeamList: React.FC<TeamListProps> = ({
                     {team.teamSlotStatuses.map((slot) => (
                       <span
                         key={slot.slotId}
-                        className="inline-flex justify-center items-center text-[10px] font-bold rounded-full border px-2.5 py-0.5 backdrop-blur-md"
+                        className="inline-flex justify-center items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full border backdrop-blur-md transition-all duration-200"
                         style={{
                           backgroundColor: getSlotStatusBackground(slot.status),
                           borderColor: getSlotStatusBorder(slot.status),
                           color: getSlotStatusColor(slot.status),
                         }}
-                        title={`${slot.label} (${slot.windowLabel})`}
+                        title={`${slot.label} (${slot.windowLabel}): ${slot.status}`}
                       >
-                        {slot.slotId}: {slot.status}
+                        {renderSlotIcon(slot.status)}
+                        <span>{getSlotTimeLabel(slot.slotId)}</span>
                       </span>
                     ))}
                   </div>
@@ -489,6 +491,46 @@ export const TeamList: React.FC<TeamListProps> = ({
       })}
     </section>
   );
+};
+
+const getSlotTimeLabel = (slotId: string) => {
+  switch (slotId) {
+    case 'S1':
+      return '09:00';
+    case 'S2':
+      return '12:00';
+    case 'S3':
+      return '14:00';
+    case 'S4':
+      return '16:30';
+    default:
+      return slotId;
+  }
+};
+
+const renderSlotIcon = (status: string) => {
+  const iconStyle = { width: 10, height: 10, strokeWidth: 3.5, flexShrink: 0 };
+  switch (status) {
+    case 'GOOD':
+      return <Check style={iconStyle} />;
+    case 'DELAYED':
+      return <Clock style={{ ...iconStyle, strokeWidth: 2.5 }} />;
+    case 'MISSING':
+      return <X style={iconStyle} />;
+    case 'UPCOMING':
+    default:
+      return (
+        <div
+          style={{
+            width: 4,
+            height: 4,
+            borderRadius: '50%',
+            backgroundColor: 'currentColor',
+            flexShrink: 0,
+          }}
+        />
+      );
+  }
 };
 
 function getSlotStatusBackground(status: StandupSlotResult['status']): string {

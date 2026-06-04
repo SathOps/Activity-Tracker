@@ -197,7 +197,7 @@ body {
 }
 
 [data-theme='dark'] body {
-  background: var(--slate-900);
+  background: #020617;
 }
 
 .toast-stack {
@@ -1441,7 +1441,7 @@ body {
       rgba(96, 165, 250, 0.08),
       transparent 35%
     ),
-    linear-gradient(135deg, #020817, #071428, #0f1d3b);
+    linear-gradient(135deg, #020617, #040d21, #081530);
 }
 
 [data-theme='light'] .premium-background,

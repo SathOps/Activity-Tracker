@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Clock, X } from 'lucide-react';
+import { Check, Clock, X, Calendar, BarChart3, RefreshCw } from 'lucide-react';
 import TeamList, { Team } from './TeamList';
 import TeamStatusRing from './TeamStatusRing';
 import InternCard from '../intern/InternCard';
@@ -713,34 +713,42 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   const renderStatusPanelContent = (isModalPanel: boolean) => (
     <>
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div className="grid gap-1">
+      <header className="flex flex-wrap items-center justify-between gap-3 mb-2">
+        <div className="grid gap-1.5">
           {!isInlineStatusView ? (
-            <h2 className="text-[var(--text-main)] text-xl m-0">
+            <h2 className="text-[var(--text-main)] text-xl m-0 font-extrabold tracking-tight">
               {t('dashboard.teamStatusDashboard')}
             </h2>
           ) : null}
-          <p className="text-[var(--text-subtle)] text-[13px] m-0">
-            {t('dashboard.dailyDateWeeklyRange', {
-              daily: selectedDateLabel,
-              weekly: selectedWeekLabel,
-            })}
-          </p>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-500/5 dark:bg-white/5 border border-slate-500/10 dark:border-white/5 text-[var(--text-subtle)] text-[12px] font-semibold tracking-wide backdrop-blur-md">
+            <Calendar className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+            <span>
+              {t('dashboard.dailyDateWeeklyRange', {
+                daily: selectedDateLabel,
+                weekly: selectedWeekLabel,
+              })}
+            </span>
+          </div>
         </div>
-        <div className="grid gap-2 justify-items-end">
+        <div className="flex items-center gap-2">
           <button
-            className="ghost-button"
+            className="ghost-button flex items-center gap-1.5 py-2 px-4 text-xs font-semibold rounded-xl border border-slate-500/10 dark:border-white/5"
             disabled={statusLoading}
             onClick={() => {
               void loadStatusSummaries();
             }}
             type="button"
           >
-            {statusLoading ? t('dashboard.refreshing') : t('button.refresh')}
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${statusLoading ? 'animate-spin' : ''}`}
+            />
+            <span>
+              {statusLoading ? t('dashboard.refreshing') : t('button.refresh')}
+            </span>
           </button>
           {isModalPanel ? (
             <button
-              className="ghost-button"
+              className="ghost-button py-2 px-4 text-xs font-semibold rounded-xl border border-slate-500/10 dark:border-white/5"
               onClick={handleCloseStatusModal}
               type="button"
             >
@@ -750,28 +758,32 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </div>
       </header>
 
-      <section className="mb-1">
-        <label className="grid gap-1.5 text-[var(--text-main)] text-[13px] max-w-[280px]">
-          <span>{t('dashboard.standupVerificationDate')}</span>
-          <input
-            aria-label={t('dashboard.standupVerificationDate')}
-            onChange={handleSelectedDateChange}
-            className="bg-[var(--surface-0)] border-none rounded-lg text-[var(--text-main)] text-sm px-3 py-2.5"
-            type="date"
-            value={selectedDateKey}
-          />
+      <section className="mb-4 mt-2">
+        <label className="grid gap-2 max-w-[320px]">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-soft)]">
+            {t('dashboard.standupVerificationDate')}
+          </span>
+          <div className="relative flex items-center">
+            <input
+              aria-label={t('dashboard.standupVerificationDate')}
+              onChange={handleSelectedDateChange}
+              className="w-full bg-slate-500/5 dark:bg-white/5 border border-slate-500/15 dark:border-white/10 rounded-xl text-[var(--text-main)] text-sm px-4 py-3 transition-all duration-200 outline-none hover:border-blue-500/35 focus:border-blue-500/50 focus:shadow-[0_0_15px_rgba(59,130,246,0.12)] cursor-pointer"
+              type="date"
+              value={selectedDateKey}
+              style={{
+                colorScheme:
+                  typeof document !== 'undefined' &&
+                  document.documentElement.getAttribute('data-theme') === 'dark'
+                    ? 'dark'
+                    : 'light',
+              }}
+            />
+          </div>
         </label>
       </section>
 
-      <section className="flex flex-wrap items-center justify-between gap-2">
-        <div
-          className="flex flex-wrap gap-2 p-1 glass rounded-full"
-          style={{
-            background: 'var(--glass-bg)',
-            border: 'none',
-            boxShadow: 'var(--shadow-sm)',
-          }}
-        >
+      <section className="flex flex-wrap items-center justify-between gap-4 py-3 border-t border-slate-500/5 dark:border-white/5 mt-2">
+        <div className="flex p-1 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-500/15 dark:border-white/10 rounded-full backdrop-blur-md">
           {(['DAILY', 'WEEKLY'] as const).map((viewKey) => {
             const isActive = statusView === viewKey;
 
@@ -779,16 +791,24 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <button
                 key={viewKey}
                 onClick={() => setStatusView(viewKey)}
-                className={`px-4 py-2 border-none rounded-full text-[13px] font-semibold cursor-pointer transition-all duration-200 ${
+                className={`flex items-center gap-1.5 px-5 py-2.5 border-none rounded-full text-xs font-semibold cursor-pointer transition-all duration-300 ${
                   isActive
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_4px_15px_rgba(59,130,246,0.25)]'
                     : 'bg-transparent text-[var(--text-subtle)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'
                 }`}
                 type="button"
               >
-                {viewKey === 'DAILY'
-                  ? 'Daily Standup Status'
-                  : 'Weekly Standup Status'}
+                {viewKey === 'DAILY' ? (
+                  <>
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Daily Standup Status</span>
+                  </>
+                ) : (
+                  <>
+                    <BarChart3 className="w-3.5 h-3.5" />
+                    <span>Weekly Standup Status</span>
+                  </>
+                )}
               </button>
             );
           })}
@@ -796,11 +816,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
         {isInlineStatusView && statusView === 'DAILY' ? (
           <button
-            className="ghost-button"
+            className="ghost-button flex items-center gap-1.5 py-2.5 px-5 text-xs font-semibold rounded-full border border-slate-500/15 dark:border-white/10"
             onClick={() => setShowDailyChart((prev) => !prev)}
             type="button"
           >
-            {showDailyChart ? 'Hide Chart' : 'Show Chart'}
+            <span>{showDailyChart ? 'Hide Chart' : 'Show Chart'}</span>
           </button>
         ) : null}
       </section>

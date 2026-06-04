@@ -44,20 +44,20 @@
   --danger-border: #f4c1c8;
   --danger-text: #8f2532;
 
-  --slot-good-bg: #6acb96;
-  --slot-good-border: #35ae6f;
-  --slot-good-text: #0f4a2f;
+  --slot-good-bg: rgba(16, 185, 129, 0.08);
+  --slot-good-border: rgba(16, 185, 129, 0.2);
+  --slot-good-text: #047857;
 
-  --slot-delayed-bg: #f2cf4a;
-  --slot-delayed-border: #d8b22b;
-  --slot-delayed-text: #4f3d00;
+  --slot-delayed-bg: rgba(245, 158, 11, 0.08);
+  --slot-delayed-border: rgba(245, 158, 11, 0.25);
+  --slot-delayed-text: #b45309;
 
-  --slot-missing-bg: #dc2626;
-  --slot-missing-border: #b91c1c;
-  --slot-missing-text: #ffffff;
+  --slot-missing-bg: rgba(239, 68, 68, 0.08);
+  --slot-missing-border: rgba(239, 68, 68, 0.25);
+  --slot-missing-text: #b91c1c;
 
-  --slot-upcoming-bg: #edf2f7;
-  --slot-upcoming-border: #cbd5e1;
+  --slot-upcoming-bg: rgba(148, 163, 184, 0.06);
+  --slot-upcoming-border: rgba(148, 163, 184, 0.18);
   --slot-upcoming-text: #475569;
 
   --glass-bg: rgba(255, 255, 255, 0.45);
@@ -104,21 +104,21 @@
   --danger-border: #cb6776;
   --danger-text: #ffd7df;
 
-  --slot-good-bg: #0b4402;
-  --slot-good-border: #0b4402;
-  --slot-good-text: #ffffff;
+  --slot-good-bg: rgba(52, 211, 153, 0.1);
+  --slot-good-border: rgba(52, 211, 153, 0.25);
+  --slot-good-text: #34d399;
 
-  --slot-delayed-bg: #dcc21e;
-  --slot-delayed-border: #dcc21e;
-  --slot-delayed-text: #1f1b00;
+  --slot-delayed-bg: rgba(251, 191, 36, 0.1);
+  --slot-delayed-border: rgba(251, 191, 36, 0.25);
+  --slot-delayed-text: #fbbf24;
 
-  --slot-missing-bg: #7a0000;
-  --slot-missing-border: #7a0000;
-  --slot-missing-text: #ffffff;
+  --slot-missing-bg: rgba(248, 113, 113, 0.1);
+  --slot-missing-border: rgba(248, 113, 113, 0.25);
+  --slot-missing-text: #f87171;
 
-  --slot-upcoming-bg: #334155;
-  --slot-upcoming-border: #64748b;
-  --slot-upcoming-text: #e2e8f0;
+  --slot-upcoming-bg: rgba(148, 163, 184, 0.08);
+  --slot-upcoming-border: rgba(148, 163, 184, 0.18);
+  --slot-upcoming-text: #94a3b8;
 
   --glass-bg: rgba(15, 23, 42, 0.45);
   --glass-border: rgba(255, 255, 255, 0.04);
@@ -1405,46 +1405,46 @@ select {
   );
 }
 
-/* Grid list for team status cards with proper gap matching intern-card grid */
-.team-list {
-  display: grid;
-  gap: 12px;
-}
-
 .team-card {
   position: relative;
   overflow: hidden;
 
   background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 
   border: 1px solid var(--glass-border);
-  border-left: 3px solid #3b82f6;
+  border-radius: 24px;
+  padding: 24px;
 
-  border-radius: var(--radius-md);
+  box-shadow:
+    0 10px 30px -10px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
-  padding: 18px 20px;
-
-  box-shadow: var(--shadow-sm);
-
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.35s ease;
 }
 
-[data-theme='dark'] .team-card {
-  background: rgba(15, 23, 42, 0.35);
+[data-theme='light'] .team-card {
+  box-shadow:
+    0 10px 30px -10px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .team-card:hover {
-  transform: translateY(-2px) scale(1.01);
+  transform: translateY(-2px);
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(255, 255, 255, 0.15);
   box-shadow:
-    var(--shadow-md),
-    0 0 20px rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.4);
+    0 20px 40px -15px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-[data-theme='dark'] .team-card:hover {
-  background: rgba(15, 23, 42, 0.5);
+[data-theme='light'] .team-card:hover {
+  background: rgba(255, 255, 255, 0.65);
+  border-color: rgba(15, 23, 42, 0.15);
+  box-shadow:
+    0 20px 40px -15px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 .team-heatmap-box {
@@ -1793,22 +1793,34 @@ select {
 }
 
 .interns-dashboard {
-  display: flex;
-  flex-direction: column;
+  align-items: start;
+  display: grid;
   gap: clamp(14px, 1.4vw, 22px);
-  width: 100%;
+  grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr);
+}
+
+.interns-add-panel {
+  order: 2;
 }
 
 .interns-list-panel {
+  order: 1;
+}
+
+.interns-list-panel,
+.interns-add-panel {
   background: var(--surface-0);
   border: 1px solid var(--border);
   border-radius: 14px;
   box-shadow: var(--shadow-soft);
+}
+
+.interns-list-panel {
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 250px);
   min-height: 320px;
-  position: relative;
+  overflow: hidden;
 }
 
 .interns-list-header {
@@ -3718,15 +3730,4 @@ select {
     0 15px 35px rgba(59, 130, 246, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
   border-color: rgba(59, 130, 246, 0.3) !important;
-}
-
-/* ── Inline Intern Dropdown for Modal ──────────────────────────── */
-.intern-dropdown--inline {
-  position: static !important;
-  box-shadow: none !important;
-  max-height: 280px;
-  overflow-y: auto;
-  border-radius: 10px;
-  margin-top: 8px;
-  border: 1px solid var(--border);
 }
