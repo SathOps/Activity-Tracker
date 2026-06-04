@@ -109,7 +109,7 @@ function UserAvatar({ name }: { name: string }) {
         width: 36,
         height: 36,
         borderRadius: '50%',
-        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+        background: 'linear-gradient(135deg, #3b82f6, )#93c5fd',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -182,18 +182,28 @@ export function Sidebar() {
 
   return (
     <aside
-      className="sidebar-shell"
-      style={{
-        width: 280,
-        flexShrink: 0,
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        background: 'var(--sidebar-bg)',
-        borderRight: '1px solid var(--sidebar-border)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
+      className="
+    w-[280px]
+    h-screen
+    flex
+    flex-col
+    shrink-0
+    relative
+    overflow-hidden
+
+   background:
+linear-gradient(
+180deg,
+rgba(3,7,18,.96),
+rgba(7,20,40,.98)
+);
+    backdrop-blur-2xl
+
+    border-r
+    border-white/10
+
+    shadow-[0_0_60px_rgba(59,130,246,0.12)]
+  "
     >
       {/* Ambient glow */}
       <div
@@ -239,7 +249,7 @@ export function Sidebar() {
               width: 40,
               height: 40,
               borderRadius: 14,
-              background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+              background: 'linear-gradient(135deg,#2563eb , #60a5fa)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -260,7 +270,8 @@ export function Sidebar() {
                 letterSpacing: '-0.01em',
               }}
             >
-              Activity Tracker
+              <Mic size={20} />
+              Activity Tracker Standup Intelligence
             </h1>
             <p
               style={{
@@ -334,7 +345,7 @@ export function Sidebar() {
                       width: 3,
                       height: 20,
                       borderRadius: 99,
-                      background: 'linear-gradient(180deg, #818cf8, #6366f1)',
+                      background: 'linear-gradient(180deg, #818cf8, #3b82f6)',
                     }}
                   />
                 )}
@@ -347,7 +358,7 @@ export function Sidebar() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     background: isActive
-                      ? 'linear-gradient(135deg, #4f46e5, #6366f1)'
+                      ? 'linear-gradient(135deg, #2563eb, #3b82f6)'
                       : 'rgba(255,255,255,0.04)',
                     color: isActive ? '#fff' : 'var(--sidebar-text)',
                     flexShrink: 0,
@@ -469,7 +480,7 @@ export function Sidebar() {
                       padding: '9px 14px',
                       borderRadius: 10,
                       border: 'none',
-                      background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
+                      background: 'linear-gradient(135deg, #4f46e5, #3b82f6)',
                       color: '#fff',
                       fontSize: 12,
                       fontWeight: 600,

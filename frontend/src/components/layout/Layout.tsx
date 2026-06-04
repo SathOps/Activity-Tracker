@@ -49,8 +49,22 @@ export function Layout({ children }: Props) {
       <main
         className="flex-1 overflow-y-auto"
         style={{
-          background:
-            'linear-gradient(135deg, #f0f2f8 0%, #e8ecf5 50%, #f0f0fa 100%)',
+          background: `
+      radial-gradient(circle at top right,
+      rgba(59,130,246,.12),
+      transparent 35%),
+
+      radial-gradient(circle at bottom left,
+      rgba(96,165,250,.08),
+      transparent 35%),
+
+      linear-gradient(
+      135deg,
+      #020817,
+      #071428,
+      #0f1d3b
+      )
+      `,
         }}
       >
         <div style={{ padding: '24px 32px', maxWidth: 1200, margin: '0 auto' }}>
@@ -60,12 +74,10 @@ export function Layout({ children }: Props) {
               marginBottom: 28,
               borderRadius: 20,
               padding: '20px 28px',
-              background: 'rgba(255, 255, 255, 0.65)',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-              border: '1px solid rgba(255, 255, 255, 0.6)',
-              boxShadow:
-                '0 4px 24px rgba(15, 20, 40, 0.05), inset 0 1px 0 rgba(255,255,255,0.6)',
+              background: 'rgba(255,255,255,0.05)',
+              backdropFilter: 'blur(24px)',
+              border: '1px solid rgba(255,255,255,.08)',
+              boxShadow: '0 0 30px rgba(59,130,246,.12)',
             }}
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
