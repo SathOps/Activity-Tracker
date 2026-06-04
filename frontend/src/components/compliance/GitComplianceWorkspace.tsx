@@ -25,15 +25,28 @@ export function GitComplianceWorkspace({ children }: Props) {
 
   if (!gitlabConnected) {
     return (
-      <section className="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+      <section
+        className="fade-in-up-container gitlab-access-card-interactive"
+        style={{
+          padding: '32px',
+          borderRadius: 14,
+          background:
+            'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.03))',
+          border: '1px solid rgba(59, 130, 246, 0.15)',
+          boxShadow:
+            '0 0 25px rgba(59, 130, 246, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+        }}
+      >
         <div className="max-w-3xl space-y-5">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-indigo-400">
             Git Compliance Checker
           </p>
-          <h2 className="text-3xl font-bold text-slate-900">
+          <h2 className="text-3xl font-bold text-slate-100">
             Connect GitLab to open compliance tools
           </h2>
-          <p className="text-base leading-7 text-slate-600">
+          <p className="text-base leading-7 text-slate-300">
             Authorise your GitLab account via OAuth to unlock profile, weekly
             performance, mentor groups, batch analytics, and leaderboard views.
           </p>
@@ -42,18 +55,11 @@ export function GitComplianceWorkspace({ children }: Props) {
             onClick={() => {
               window.location.href = getGitlabLoginUrl();
             }}
+            className="premium-gitlab-btn pulse-animation"
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
               padding: '11px 22px',
               borderRadius: 10,
-              border: 'none',
-              background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
-              color: '#fff',
               fontSize: 14,
-              fontWeight: 600,
-              cursor: 'pointer',
             }}
           >
             <svg

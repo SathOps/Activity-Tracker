@@ -763,14 +763,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       </section>
 
       <section className="flex flex-wrap items-center justify-between gap-2">
-        <div
-          className="flex flex-wrap gap-2 p-1 glass rounded-full"
-          style={{
-            background: 'var(--glass-bg)',
-            border: '1px solid var(--glass-border)',
-            boxShadow: 'var(--shadow-sm)',
-          }}
-        >
+        <div className="flex flex-wrap gap-2">
           {(['DAILY', 'WEEKLY'] as const).map((viewKey) => {
             const isActive = statusView === viewKey;
 
@@ -778,10 +771,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <button
                 key={viewKey}
                 onClick={() => setStatusView(viewKey)}
-                className={`px-4 py-2 border border-transparent rounded-full text-[13px] font-semibold cursor-pointer transition-all duration-200 ${
+                className={`border border-[var(--border)] rounded-lg cursor-pointer text-[13px] font-semibold px-3 py-2 ${
                   isActive
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm'
-                    : 'bg-transparent text-[var(--text-subtle)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'
+                    ? 'bg-[var(--accent)] text-white'
+                    : 'bg-[var(--surface-1)] text-[var(--text-main)]'
                 }`}
                 type="button"
               >
@@ -1108,100 +1101,33 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   return (
     <div className="w-full">
-      {/* KPI Summary Cards */}
-      {!isInlineStatusView && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div
-            className="glass-card p-5 flex flex-col justify-between"
-            style={{ padding: '20px' }}
-          >
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
-              {t('dashboard.totalTeams', 'Total Teams')}
-            </span>
-            <div className="flex items-baseline justify-between mt-2">
-              <strong className="text-2xl font-extrabold text-[var(--text-main)]">
-                {displayTeams.length}
-              </strong>
-              <span className="text-xs text-blue-500 font-semibold bg-blue-500/10 px-2 py-0.5 rounded-full">
-                Active
-              </span>
-            </div>
-          </div>
-          <div
-            className="glass-card p-5 flex flex-col justify-between"
-            style={{ padding: '20px' }}
-          >
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
-              {t('dashboard.totalInterns', 'Total Interns')}
-            </span>
-            <div className="flex items-baseline justify-between mt-2">
-              <strong className="text-2xl font-extrabold text-[var(--text-main)]">
-                {allInternRows.length}
-              </strong>
-              <span className="text-xs text-indigo-500 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded-full">
-                Enrolled
-              </span>
-            </div>
-          </div>
-          <div
-            className="glass-card p-5 flex flex-col justify-between"
-            style={{ padding: '20px' }}
-          >
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
-              {t('dashboard.standupCompletionRate', 'Completion Rate')}
-            </span>
-            <div className="flex items-baseline justify-between mt-2">
-              <strong className="text-2xl font-extrabold text-[var(--text-main)]">
-                {displayTeams.length > 0
-                  ? Math.round(
-                      (displayTeams.filter((t) => t.teamStatus === 'COMPLETED')
-                        .length /
-                        displayTeams.length) *
-                        105 /* Math.min to cap at 100 below */
-                    ) > 100
-                    ? 100
-                    : Math.round(
-                        (displayTeams.filter(
-                          (t) => t.teamStatus === 'COMPLETED'
-                        ).length /
-                          displayTeams.length) *
-                          100
-                      )
-                  : 0}
-                %
-              </strong>
-              <div className="w-16 bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full"
-                  style={{
-                    width: `${
-                      displayTeams.length > 0
-                        ? Math.round(
-                            (displayTeams.filter(
-                              (t) => t.teamStatus === 'COMPLETED'
-                            ).length /
-                              displayTeams.length) *
-                              100
-                          )
-                        : 0
-                    }%`,
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {!isInlineStatusView ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div className="flex justify-end gap-3 mb-6">
+          <button
+            className="secondary-button"
+            onClick={() => setIsRecordModalOpen(true)}
+            type="button"
+          >
+            Record Standup
+          </button>
+          {canManageStandup ? (
+            <button
+              className="primary-button"
+              onClick={() => setIsCreatingTeam((prev) => !prev)}
+              type="button"
+            >
+              {isCreatingTeam ? t('button.cancel') : t('teams.createTeam')}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {isAnalyticsView ? (
+        renderAnalyticsContent()
+      ) : !isInlineStatusView ? (
+        <>
           <section
-            className="flex glass p-1 max-w-fit w-full sm:w-auto rounded-full"
-            style={{
-              background: 'var(--glass-bg)',
-              border: '1px solid var(--glass-border)',
-              boxShadow: 'var(--shadow-sm)',
-            }}
+            className="flex bg-[var(--surface-1)] border border-[var(--border)] dark:border-[var(--border-strong)] rounded-lg p-1 mb-5 max-w-fit w-full sm:w-auto"
             aria-label={t('dashboard.viewSelector')}
           >
             {[
@@ -1215,9 +1141,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
               return (
                 <button
-                  className={`px-5 py-2 border border-transparent rounded-full text-[13px] font-semibold cursor-pointer transition-all duration-200 ${
+                  className={`px-4 py-2 border border-transparent rounded-md text-[13px] font-semibold cursor-pointer transition-all duration-200 ${
                     isActive
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm'
+                      ? 'bg-gradient-to-br from-[var(--accent)] to-[var(--accent-strong)] text-white shadow-[0_8px_16px_rgba(22,58,136,0.24)] dark:shadow-[0_10px_18px_rgba(65,143,239,0.36)]'
                       : 'bg-transparent text-[var(--text-subtle)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'
                   }`}
                   key={item.key}
@@ -1230,31 +1156,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             })}
           </section>
 
-          <div className="flex gap-3">
-            <button
-              className="secondary-button"
-              onClick={() => setIsRecordModalOpen(true)}
-              type="button"
-            >
-              Record Standup
-            </button>
-            {canManageStandup ? (
-              <button
-                className="primary-button"
-                onClick={() => setIsCreatingTeam((prev) => !prev)}
-                type="button"
-              >
-                {isCreatingTeam ? t('button.cancel') : t('teams.createTeam')}
-              </button>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-
-      {isAnalyticsView ? (
-        renderAnalyticsContent()
-      ) : !isInlineStatusView ? (
-        <>
           {isCreatingTeam && canManageStandup ? (
             <section className="flex flex-wrap items-center gap-2 mb-3.5">
               <input
@@ -2053,10 +1954,10 @@ function formatContributorTooltip(
 }
 
 function getFilterButtonClass(isActive: boolean): string {
-  return `glass border text-[13px] font-semibold px-4 py-2 rounded-full transition-all duration-200 cursor-pointer ${
+  return `border border-[var(--border)] rounded-lg cursor-pointer text-[13px] font-semibold px-3 py-2 ${
     isActive
-      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-transparent shadow-sm'
-      : 'bg-white/10 dark:bg-black/10 border-white/10 dark:border-white/5 text-[var(--text-subtle)] hover:text-[var(--text-main)]'
+      ? 'bg-[var(--accent)] text-white'
+      : 'bg-[var(--surface-1)] text-[var(--text-main)]'
   }`;
 }
 

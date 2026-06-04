@@ -238,22 +238,13 @@ export const TeamList: React.FC<TeamListProps> = ({
           ? t('teams.qualifiedStandupsOnDate', { date: selectedDateLabel })
           : t('teams.selectedDateQualifiedStandups');
 
-        const progressPercentage = Math.min(
-          Math.round((standupCount / requiredCount) * 100),
-          100
-        );
-
         return (
           <article
-            className="glass-card p-6 relative overflow-hidden"
+            className="relative overflow-hidden border border-white/[0.08] bg-white/[0.05] backdrop-blur-[24px] rounded-[28px] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.25),_0_0_30px_rgba(59,130,246,0.1)] transition-all duration-[350ms] hover:-translate-y-1 hover:border-blue-500/30 hover:shadow-[0_12px_40px_rgba(0,0,0,0.35),_0_0_50px_rgba(59,130,246,0.25)] dark:border-[var(--border-strong)] dark:bg-gradient-to-b dark:from-[var(--surface-0)] dark:to-[var(--surface-1)]"
             key={team.teamId}
-            style={{
-              padding: '24px',
-              borderRadius: '24px',
-            }}
           >
-            <header className="flex flex-wrap items-start justify-between gap-4 mb-4">
-              <div className="grid gap-1.5 flex-1 min-w-0">
+            <header className="flex items-center justify-between gap-2 mb-3">
+              <div className="grid gap-1">
                 {editingTeamId === team.teamId ? (
                   <div className="flex flex-wrap gap-2">
                     <input
@@ -286,43 +277,21 @@ export const TeamList: React.FC<TeamListProps> = ({
                     </button>
                   </div>
                 ) : (
-                  <h3 className="m-0 text-xl font-extrabold text-[var(--text-main)] tracking-tight truncate">
+                  <h3 className="m-0 text-[1.4rem] font-bold text-white tracking-[-0.02em]">
                     {team.teamName}
                   </h3>
                 )}
 
-                <div className="flex flex-wrap items-center gap-2 mt-1">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
-                    {qualifiedStandupLabel}:
-                  </span>
-                  <span className="text-xs font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2.5 py-0.5 rounded-full border border-blue-500/20">
-                    {standupCount}/{requiredCount}
-                  </span>
-                  <span
-                    className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
-                      teamStatus === 'COMPLETED'
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                        : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
-                    }`}
-                  >
-                    {teamStatus === 'COMPLETED' ? 'Completed' : 'Pending'}
-                  </span>
+                <div className="text-[#94a3b8] text-[0.85rem] font-medium">
+                  {qualifiedStandupLabel}: {standupCount}/{requiredCount} |{' '}
+                  {teamStatus}
                 </div>
-
-                {/* Progress Indicator */}
-                <div className="w-full bg-slate-200/50 dark:bg-slate-800/55 h-2 rounded-full overflow-hidden mt-3 mb-2">
-                  <div
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${progressPercentage}%` }}
-                  />
-                </div>
-
                 {team.teamSlotStatuses?.length ? (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {team.teamSlotStatuses.map((slot) => (
                       <span
                         key={slot.slotId}
-                        className="inline-flex justify-center items-center text-[10px] font-bold rounded-full border px-2.5 py-0.5 backdrop-blur-md"
+                        className="inline-flex justify-center items-center text-[11px] font-bold rounded-full border px-2 py-0.5"
                         style={{
                           backgroundColor: getSlotStatusBackground(slot.status),
                           borderColor: getSlotStatusBorder(slot.status),
@@ -336,13 +305,13 @@ export const TeamList: React.FC<TeamListProps> = ({
                   </div>
                 ) : null}
                 {team.verifiedDate ? (
-                  <div className="text-[var(--text-soft)] text-xs font-medium mt-1.5">
+                  <div className="text-[#94a3b8] text-[0.85rem] font-medium">
                     {t('teams.verifiedDate')}: {team.verifiedDate}
                   </div>
                 ) : null}
               </div>
 
-              <div className="flex flex-wrap gap-2 shrink-0">
+              <div className="flex flex-wrap gap-2">
                 {onVerifyTeam ? (
                   <button
                     className="secondary-button"
@@ -378,7 +347,7 @@ export const TeamList: React.FC<TeamListProps> = ({
             </header>
 
             {onAddInternToTeam ? (
-              <div className="flex flex-wrap items-start gap-2 mb-4">
+              <div className="flex flex-wrap items-start gap-2 mb-3">
                 <div className="relative flex-1 min-w-[220px]">
                   <input
                     aria-label={t('teams.addInternToTeam', {
@@ -396,13 +365,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                   />
 
                   {state.showDropdown ? (
-                    <ul
-                      className="absolute left-0 right-0 z-20 glass rounded-xl shadow-lg list-none m-1 max-h-[220px] overflow-y-auto p-1 backdrop-blur-xl"
-                      style={{
-                        background: 'var(--glass-bg)',
-                        border: '1px solid var(--glass-border)',
-                      }}
-                    >
+                    <ul className="absolute left-0 right-0 z-10 bg-[var(--surface-0)] border border-[var(--border)] rounded-lg shadow-[var(--shadow-soft)] list-none m-1 max-h-[220px] overflow-y-auto p-1">
                       {addedInterns.length === 0 ? (
                         <li className="text-[var(--text-subtle)] text-[13px] list-none p-[10px_12px] text-center">
                           {t('interns.noInternsAvailable')}
@@ -415,10 +378,10 @@ export const TeamList: React.FC<TeamListProps> = ({
                         filtered.map((intern) => (
                           <li
                             key={intern.id}
-                            className={`flex items-center gap-2 text-[13px] px-2.5 py-2 transition-colors duration-120 rounded-lg ${
+                            className={`flex items-center gap-2 text-[13px] px-2.5 py-2 transition-colors duration-120 ${
                               intern.alreadyInTeam
-                                ? 'text-[var(--text-soft)] cursor-default bg-black/5 dark:bg-white/5'
-                                : 'cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-main)]'
+                                ? 'text-[var(--text-soft)] cursor-default bg-[var(--surface-1)]'
+                                : 'cursor-pointer hover:bg-[var(--surface-2)]'
                             }`}
                             tabIndex={intern.alreadyInTeam ? -1 : 0}
                             onMouseDown={(event) => {
@@ -441,11 +404,11 @@ export const TeamList: React.FC<TeamListProps> = ({
                             <span className="text-[var(--text-main)] font-semibold">
                               {intern.name}
                             </span>
-                            <span className="text-[var(--text-soft)] text-xs">
+                            <span className="text-[var(--text-subtle)] text-xs">
                               {intern.id}
                             </span>
                             {intern.alreadyInTeam ? (
-                              <span className="ml-auto bg-red-500/10 border border-red-500/20 rounded-full text-red-600 dark:text-red-400 text-[10px] font-semibold px-2 py-0.5">
+                              <span className="ml-auto bg-[var(--danger-bg)] border border-[var(--danger-border)] rounded-full text-[var(--danger-text)] text-[11px] font-semibold px-2 py-0.5">
                                 {t('interns.alreadyInTeam')}
                               </span>
                             ) : null}
@@ -466,7 +429,7 @@ export const TeamList: React.FC<TeamListProps> = ({
               </div>
             ) : null}
 
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4 mt-4">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4.5 mt-5">
               {team.interns.map((intern) => (
                 <InternCard
                   key={intern.internId}
@@ -492,15 +455,51 @@ export const TeamList: React.FC<TeamListProps> = ({
 };
 
 function getSlotStatusBackground(status: StandupSlotResult['status']): string {
-  return `var(--slot-${status.toLowerCase()}-bg)`;
+  if (status === 'GOOD') {
+    return '#dcfce7';
+  }
+
+  if (status === 'DELAYED') {
+    return '#fef3c7';
+  }
+
+  if (status === 'UPCOMING') {
+    return '#f1f5f9';
+  }
+
+  return '#fee2e2';
 }
 
 function getSlotStatusBorder(status: StandupSlotResult['status']): string {
-  return `var(--slot-${status.toLowerCase()}-border)`;
+  if (status === 'GOOD') {
+    return '#86efac';
+  }
+
+  if (status === 'DELAYED') {
+    return '#fcd34d';
+  }
+
+  if (status === 'UPCOMING') {
+    return '#cbd5e1';
+  }
+
+  return '#fca5a5';
 }
 
 function getSlotStatusColor(status: StandupSlotResult['status']): string {
-  return `var(--slot-${status.toLowerCase()}-text)`;
+  if (status === 'GOOD') {
+    return '#166534';
+  }
+
+  if (status === 'DELAYED') {
+    return '#92400e';
+  }
+
+  if (status === 'UPCOMING') {
+    return '#475569';
+  }
+
+  return '#991b1b';
 }
 
 export default TeamList;

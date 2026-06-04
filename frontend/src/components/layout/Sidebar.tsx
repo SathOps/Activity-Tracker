@@ -109,7 +109,7 @@ function UserAvatar({ name }: { name: string }) {
         width: 36,
         height: 36,
         borderRadius: '50%',
-        background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+        background: 'linear-gradient(135deg, #3b82f6, )#93c5fd',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -118,7 +118,6 @@ function UserAvatar({ name }: { name: string }) {
         color: '#fff',
         letterSpacing: '0.02em',
         flexShrink: 0,
-        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)',
       }}
     >
       {initials}
@@ -191,11 +190,13 @@ export function Sidebar() {
     shrink-0
     relative
     overflow-hidden
+
     backdrop-blur-2xl
+
     border-r
     border-white/10
+
     shadow-[0_0_60px_rgba(59,130,246,0.12)]
-    bg-[#0e1629]/75
   "
     >
       {/* Ambient glow */}
@@ -243,24 +244,15 @@ export function Sidebar() {
               height: 52,
               borderRadius: 18,
 
-              background: 'linear-gradient(135deg, #2563eb, #60a5fa)',
+              background: 'linear-gradient(135deg,#2563eb , #60a5fa)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 30px rgba(59, 130, 246, 0.35)',
+              fontSize: 18,
+              boxShadow: '0 0 30px rgba(59,130,246,.35)',
             }}
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ color: '#ffffff', width: 24, height: 24 }}
-            >
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-            </svg>
+            📊
           </div>
           <div>
             <h1
@@ -271,12 +263,9 @@ export function Sidebar() {
                 fontFamily: 'var(--font-display)',
                 color: 'var(--sidebar-text-bright)',
                 letterSpacing: '-0.01em',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
               }}
             >
-              <Mic size={18} className="text-blue-400" />
+              <Mic size={20} />
               Activity Tracker
             </h1>
             <p
@@ -330,17 +319,15 @@ export function Sidebar() {
                   width: '100%',
                   padding: '10px 14px',
                   borderRadius: 12,
-                  border: isActive
-                    ? '1px solid rgba(59, 130, 246, 0.25)'
-                    : '1px solid transparent',
+                  border: 'none',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'all 0.2s ease',
                   background: isActive
-                    ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(79, 70, 229, 0.15))'
+                    ? 'linear-gradient(135deg, rgba(59,130,246,.28), rgba(59,130,246,.08))'
                     : 'transparent',
                   boxShadow: isActive
-                    ? '0 0 25px rgba(37, 99, 235, 0.2), inset 0 1px 0 rgba(255,255,255,0.05)'
+                    ? '0 0 25px rgba(59,130,246,.18)'
                     : 'none',
                   color: isActive ? '#e0e7ff' : 'var(--sidebar-text)',
 
@@ -357,7 +344,7 @@ export function Sidebar() {
                       width: 3,
                       height: 20,
                       borderRadius: 99,
-                      background: 'linear-gradient(180deg, #3b82f6, #4f46e5)',
+                      background: 'linear-gradient(180deg, #818cf8, #3b82f6)',
                     }}
                   />
                 )}
@@ -370,12 +357,12 @@ export function Sidebar() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     background: isActive
-                      ? 'linear-gradient(135deg, #2563eb, #4f46e5)'
+                      ? 'linear-gradient(135deg, #2563eb, #3b82f6)'
                       : 'rgba(255,255,255,0.04)',
                     color: isActive ? '#fff' : 'var(--sidebar-text)',
                     flexShrink: 0,
                     boxShadow: isActive
-                      ? '0 4px 12px rgba(37, 99, 235, 0.3)'
+                      ? '0 4px 12px rgba(79, 70, 229, 0.3)'
                       : 'none',
                     transition: 'all 0.2s',
                   }}
@@ -429,8 +416,13 @@ export function Sidebar() {
               style={{
                 padding: '14px 16px',
                 borderRadius: 14,
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.06)',
+                background:
+                  'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.03))',
+                border: '1px solid rgba(59, 130, 246, 0.15)',
+                boxShadow:
+                  '0 0 25px rgba(59, 130, 246, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 12,
@@ -488,16 +480,11 @@ export function Sidebar() {
                     onClick={() => {
                       window.location.href = getGitlabLoginUrl();
                     }}
+                    className="premium-gitlab-btn pulse-animation"
                     style={{
                       padding: '9px 14px',
                       borderRadius: 10,
-                      border: 'none',
-                      background: 'linear-gradient(135deg, #2563eb, #60a5fa)',
-                      color: '#fff',
                       fontSize: 12,
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      transition: 'opacity 0.2s',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -603,23 +590,22 @@ export function Sidebar() {
         {/* Hamburger Dropdown Menu */}
         {menuOpen && (
           <div
-            className="profile-dropdown-menu glass"
+            className="profile-dropdown-menu"
             style={{
               position: 'absolute',
               bottom: 'calc(100% + 8px)',
               left: 12,
               right: 12,
-              background: 'rgba(15, 23, 42, 0.85)',
-              border: '1px solid rgba(99, 102, 241, 0.25)',
-              borderRadius: 16,
+              background: '#0f172a',
+              border: '1px solid rgba(99, 102, 241, 0.3)',
+              borderRadius: 12,
               boxShadow:
-                '0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                '0 -10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)',
               padding: '16px',
               zIndex: 50,
               display: 'flex',
               flexDirection: 'column',
               gap: 12,
-              backdropFilter: 'blur(20px)',
             }}
           >
             {/* Header / Title */}
