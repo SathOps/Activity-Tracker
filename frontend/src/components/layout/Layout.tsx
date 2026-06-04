@@ -49,14 +49,15 @@ export function Layout({ children }: Props) {
         <div style={{ padding: '24px 32px', maxWidth: 1200, margin: '0 auto' }}>
           {/* Glass header */}
           <header
+            className="glass"
             style={{
               marginBottom: 28,
               borderRadius: 20,
               padding: '20px 28px',
-              background: 'rgba(255,255,255,0.05)',
-              backdropFilter: 'blur(24px)',
-              border: '1px solid rgba(255,255,255,.08)',
-              boxShadow: '0 0 30px rgba(59,130,246,.12)',
+              boxShadow:
+                themeMode === 'dark'
+                  ? '0 8px 32px 0 rgba(0, 0, 0, 0.25), 0 0 30px rgba(59, 130, 246, 0.15)'
+                  : '0 8px 32px 0 rgba(31, 38, 135, 0.05), 0 0 30px rgba(59, 130, 246, 0.08)',
             }}
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -68,7 +69,7 @@ export function Layout({ children }: Props) {
                     fontWeight: 700,
                     textTransform: 'uppercase',
                     letterSpacing: '0.16em',
-                    color: 'var(--indigo-400)',
+                    color: 'var(--indigo-500)',
                     fontFamily: 'var(--font-display)',
                   }}
                 >
@@ -80,8 +81,7 @@ export function Layout({ children }: Props) {
                     fontSize: 26,
                     fontWeight: 800,
                     fontFamily: 'var(--font-display)',
-                    color:
-                      themeMode === 'dark' ? '#F8FAFC' : 'var(--slate-900)',
+                    color: themeMode === 'dark' ? '#F8FAFC' : '#0F172A',
                     letterSpacing: '-0.02em',
                     lineHeight: 1.2,
                   }}
@@ -92,8 +92,7 @@ export function Layout({ children }: Props) {
                   style={{
                     margin: '6px 0 0',
                     fontSize: 14,
-                    color:
-                      themeMode === 'dark' ? '#CBD5E1' : 'var(--slate-500)',
+                    color: themeMode === 'dark' ? '#CBD5E1' : '#475569',
                     maxWidth: '60ch',
                   }}
                 >
@@ -108,17 +107,98 @@ export function Layout({ children }: Props) {
                     mode:
                       themeMode === 'dark' ? t('theme.light') : t('theme.dark'),
                   })}
-                  className="theme-toggle-btn"
                   onClick={() =>
                     setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'))
                   }
                   type="button"
+                  style={{
+                    width: 58,
+                    height: 32,
+                    borderRadius: 99,
+                    background:
+                      themeMode === 'dark'
+                        ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.35), rgba(79, 70, 229, 0.25))'
+                        : 'rgba(0, 0, 0, 0.05)',
+                    border: '1px solid var(--glass-border)',
+                    padding: 4,
+                    display: 'flex',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    boxShadow:
+                      themeMode === 'dark'
+                        ? 'inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 10px rgba(59, 130, 246, 0.15)'
+                        : 'inset 0 2px 4px rgba(0, 0, 0, 0.05)',
+                    outline: 'none',
+                  }}
                 >
-                  {themeMode === 'dark' ? (
-                    <Sun size={18} className="text-amber-400" />
-                  ) : (
-                    <Moon size={18} className="text-slate-700" />
-                  )}
+                  {/* Background Icons */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      paddingLeft: 8,
+                      paddingRight: 8,
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    <Sun
+                      size={11}
+                      style={{
+                        color: 'var(--amber-500)',
+                        opacity: themeMode === 'dark' ? 0.35 : 0,
+                        transition: 'opacity 0.3s ease',
+                      }}
+                    />
+                    <Moon
+                      size={11}
+                      style={{
+                        color: 'var(--indigo-400)',
+                        opacity: themeMode === 'dark' ? 0 : 0.35,
+                        transition: 'opacity 0.3s ease',
+                      }}
+                    />
+                  </div>
+
+                  {/* Sliding Handle */}
+                  <div
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: '50%',
+                      background:
+                        themeMode === 'dark'
+                          ? 'linear-gradient(135deg, #ffffff, #cbd5e1)'
+                          : 'linear-gradient(135deg, #ffffff, #f1f5f9)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
+                      transform:
+                        themeMode === 'dark'
+                          ? 'translateX(26px)'
+                          : 'translateX(0px)',
+                      transition:
+                        'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s',
+                      zIndex: 2,
+                    }}
+                  >
+                    {themeMode === 'dark' ? (
+                      <Moon
+                        size={11}
+                        className="text-indigo-600 fill-indigo-600"
+                      />
+                    ) : (
+                      <Sun
+                        size={11}
+                        className="text-amber-500 fill-amber-500"
+                      />
+                    )}
+                  </div>
                 </button>
               </div>
             </div>
@@ -131,12 +211,25 @@ export function Layout({ children }: Props) {
                 marginBottom: 24,
               }}
             >
-              <span
+              <svg
                 className="warning-icon-pulse"
-                style={{ fontSize: 18, color: '#f59e0b' }}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                  color: '#f59e0b',
+                  flexShrink: 0,
+                  width: 18,
+                  height: 18,
+                }}
               >
-                ⚠
-              </span>
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
               <span>
                 GitLab account not connected. Use the{' '}
                 <strong style={{ color: '#fbbf24' }}>

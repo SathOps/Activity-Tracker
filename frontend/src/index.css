@@ -82,9 +82,9 @@
   --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
 
   /* ── Glass ──────────────────────────────────────────────────────── */
-  --glass-bg: rgba(255, 255, 255, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --glass-blur: 12px;
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.35);
+  --glass-blur: 20px;
 
   /* ── Sidebar ────────────────────────────────────────────────────── */
   --sidebar-bg: linear-gradient(180deg, #0f1629 0%, #131a33 50%, #0e1528 100%);
@@ -97,6 +97,12 @@
     rgba(99, 102, 241, 0.18),
     rgba(139, 92, 246, 0.12)
   );
+}
+
+[data-theme='dark'] {
+  --glass-bg: rgba(15, 23, 42, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: 20px;
 }
 
 *,
@@ -148,24 +154,46 @@ body {
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   box-shadow:
     var(--shadow-md),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  border-radius: 20px;
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border-radius: 24px;
   transition:
-    transform 0.22s ease,
-    box-shadow 0.22s ease;
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.25s ease,
+    background-color 0.25s ease;
 }
 
 .glass-card:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(59, 130, 246, 0.3);
   box-shadow:
     var(--shadow-lg),
+    0 0 25px rgba(59, 130, 246, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+[data-theme='dark'] .glass-card {
+  background: rgba(15, 23, 42, 0.45);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    var(--shadow-md),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='dark'] .glass-card:hover {
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow:
+    var(--shadow-lg),
+    0 0 25px rgba(59, 130, 246, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 [data-theme='dark'] body {
@@ -1426,7 +1454,7 @@ body {
     linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
 
-  background-size: 60px 60px;
+  background-size: 15px 15px;
 
   pointer-events: none;
 }
