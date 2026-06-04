@@ -1237,7 +1237,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
               return (
                 <button
-                  className={`px-5 py-2 border border-transparent rounded-full text-[13px] font-semibold cursor-pointer transition-all duration-200 ${
+                  className={`px-5 py-2 border-none rounded-full text-[13px] font-semibold cursor-pointer transition-all duration-200 ${
                     isActive
                       ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm'
                       : 'bg-transparent text-[var(--text-subtle)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'
