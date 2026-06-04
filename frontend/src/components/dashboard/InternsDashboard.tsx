@@ -19,6 +19,19 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
 }) => {
   const { t } = useTranslation();
   const [listSearchQuery, setListSearchQuery] = useState('');
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setShowAddForm(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setShowAddForm(false);
+    }
+  };
 
   const normalizedQuery = listSearchQuery.trim().toLowerCase();
   const filteredInterns = normalizedQuery
@@ -34,10 +47,29 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
       {/* ── Left: Interns List ── */}
       <section className="interns-list-panel">
         <header className="interns-list-header">
-          <h2 className="interns-list-title">
-            {t('interns.title')}{' '}
-            <span className="interns-list-count">({addedInterns.length})</span>
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="interns-list-title m-0">
+              {t('interns.title')}{' '}
+              <span className="interns-list-count">
+                ({addedInterns.length})
+              </span>
+            </h2>
+            {canManageInterns ? (
+              <button
+                type="button"
+                className="btn-primary py-1.5 px-3.5 text-[13px]"
+                onClick={() => setShowAddForm(true)}
+              >
+                + Add Intern
+              </button>
+            ) : (
+              <span className="text-xs text-[var(--text-secondary)] italic max-w-[420px] text-right">
+                Intern list is visible here, but roster edits require
+                admin-granted standup edit permission.
+              </span>
+            )}
+          </div>
+
           <input
             type="text"
             className="interns-list-search"
@@ -84,22 +116,54 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
         </div>
       </section>
 
-      {/* ── Right: Add Intern ── */}
-      {canManageInterns ? (
-        <aside className="interns-add-panel">
-          <InternSearch
-            addedInterns={addedInterns}
-            authToken={authToken}
-            onInternsChange={onInternsChange}
-          />
-        </aside>
-      ) : (
-        <aside className="interns-add-panel">
-          <div className="rounded-lg border border-slate-200 bg-white px-4 py-6 text-sm text-slate-500">
-            Intern list is visible here, but roster edits require admin-granted
-            standup edit permission.
+      {/* ── Modal Pop-up: Add Intern ── */}
+      {showAddForm && canManageInterns && (
+        <div
+          className="modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('interns.addIntern')}
+          onClick={handleBackdropClick}
+          onKeyDown={handleKeyDown}
+          tabIndex={-1}
+        >
+          <div
+            className="modal-container animate-panel-fade-in"
+            style={{ width: '100%', maxWidth: '520px' }}
+          >
+            <header className="modal-header">
+              <h3 className="modal-title font-display font-bold text-lg text-[var(--text-primary)]">
+                {t('interns.addIntern')}
+              </h3>
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={() => setShowAddForm(false)}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </header>
+            <div className="modal-body" style={{ padding: '20px' }}>
+              <InternSearch
+                addedInterns={addedInterns}
+                authToken={authToken}
+                onInternsChange={onInternsChange}
+                hideHeader
+                inlineResults
+              />
+              <div className="mt-6 flex justify-end gap-2 border-t border-[var(--border)] pt-4">
+                <button
+                  type="button"
+                  className="btn-secondary py-2 px-4 text-xs font-semibold"
+                  onClick={() => setShowAddForm(false)}
+                >
+                  {t('button.cancel') || 'Cancel'}
+                </button>
+              </div>
+            </div>
           </div>
-        </aside>
+        </div>
       )}
     </div>
   );

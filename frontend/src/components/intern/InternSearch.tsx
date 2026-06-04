@@ -119,6 +119,8 @@ export interface InternSearchProps {
   addedInterns?: Intern[];
   /** Called when an intern is added; required when addedInterns is provided */
   onInternsChange?: (interns: Intern[]) => void;
+  hideHeader?: boolean;
+  inlineResults?: boolean;
 }
 
 /**
@@ -130,6 +132,8 @@ const InternSearch: React.FC<InternSearchProps> = ({
   authToken,
   addedInterns,
   onInternsChange,
+  hideHeader = false,
+  inlineResults = false,
 }) => {
   const { t } = useTranslation();
   const emailLabel = t('interns.email');
@@ -257,7 +261,9 @@ const InternSearch: React.FC<InternSearchProps> = ({
   return (
     <div className="intern-search">
       {/* ── Add Intern Input ── */}
-      <h3 className="intern-search-label">{t('interns.addIntern')}</h3>
+      {!hideHeader && (
+        <h3 className="intern-search-label">{t('interns.addIntern')}</h3>
+      )}
 
       <div className="intern-dropdown-wrapper">
         <div className="intern-search-input-wrapper">
@@ -275,7 +281,9 @@ const InternSearch: React.FC<InternSearchProps> = ({
 
           {/* ── Search Results Dropdown ── */}
           {showDropdown && hasQuery ? (
-            <ul className="intern-dropdown">
+            <ul
+              className={`intern-dropdown${inlineResults ? ' intern-dropdown--inline' : ''}`}
+            >
               {isLoading ? (
                 <li className="intern-dropdown-empty">
                   {t('interns.searching')}
