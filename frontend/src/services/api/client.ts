@@ -2,7 +2,29 @@ import { useConfigStore } from '../../stores/configStore';
 
 function getApiBaseUrl(): string {
   const configuredBase = (import.meta.env.VITE_API_URL || '').trim();
-  return configuredBase ? `${configuredBase.replace(/\/+$/, '')}/api` : '/api';
+  if (configuredBase) {
+    try {
+      const url = new URL(configuredBase);
+      const isLocalHost =
+        url.hostname === 'localhost' ||
+        url.hostname === '127.0.0.1' ||
+        url.hostname.startsWith('192.168.') ||
+        url.hostname.startsWith('10.') ||
+        url.hostname.startsWith('172.');
+
+      if (
+        isLocalHost &&
+        typeof window !== 'undefined' &&
+        window.location.hostname
+      ) {
+        url.hostname = window.location.hostname;
+      }
+      return `${url.origin.replace(/\/+$/, '')}/api`;
+    } catch {
+      return `${configuredBase.replace(/\/+$/, '')}/api`;
+    }
+  }
+  return '/api';
 }
 
 function buildApiUrl(path: string): string {
