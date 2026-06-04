@@ -69,6 +69,11 @@ function AppContent() {
     return <CorpusLoginPage />;
   }
 
+  // Dev-only bypass for batch selection UI testing
+  if (import.meta.env.DEV && pathname === '/batch-selection') {
+    return <BatchSelectionPage />;
+  }
+
   // Intern with no batch assigned yet — must pick a batch before continuing
   if (!isLoading && user && user.role === 'intern' && user.batchId == null) {
     return <BatchSelectionPage />;
@@ -80,7 +85,12 @@ function AppContent() {
   }
 
   // First-time setup: full-page shell (no Layout)
-  if (pathname === '/profile-setup' && needsProfileSetup) {
+  if (
+    pathname === '/profile-setup' &&
+    (needsProfileSetup ||
+      (import.meta.env.DEV &&
+        new URLSearchParams(window.location.search).get('setup') === 'true'))
+  ) {
     return <ProfileCompletionPage />;
   }
 

@@ -11,7 +11,7 @@ export function ProfileCompletionPage() {
   const { user, needsProfileSetup, logout } = useAuth();
   const corpusToken = useConfigStore((state) => state.corpusToken);
   const queryClient = useQueryClient();
-  const { navigate } = useRouter();
+  const { navigate, pathname } = useRouter();
 
   const [gitlabUsername, setGitlabUsername] = useState('');
   const [globalUsername, setGlobalUsername] = useState('');
@@ -77,7 +77,11 @@ export function ProfileCompletionPage() {
     }
   }
 
-  const isSetupMode = needsProfileSetup;
+  const isSetupMode =
+    needsProfileSetup ||
+    (import.meta.env.DEV &&
+      pathname === '/profile-setup' &&
+      new URLSearchParams(window.location.search).get('setup') === 'true');
 
   if (loadingProfile) {
     return (
