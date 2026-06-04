@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Check, Clock, X } from 'lucide-react';
 import TeamList, { Team } from './TeamList';
 import TeamStatusRing from './TeamStatusRing';
 import InternCard from '../intern/InternCard';
@@ -874,11 +875,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                         {row.requiredStandupCount}
                       </div>
                     </div>
-                    <div className="flex flex-wrap items-center justify-end gap-1.5 max-w-[220px]">
+                    <div className="flex flex-wrap items-center justify-end gap-1.5 max-w-[280px]">
                       {row.slotStatuses.map((slot) => (
                         <span
                           key={slot.slotId}
-                          className="inline-flex justify-center items-center text-[11px] font-bold min-w-[36px] px-2 py-1 rounded-full border"
+                          className="inline-flex justify-center items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full border backdrop-blur-md transition-all duration-200"
                           style={{
                             backgroundColor: getStatusSlotBackground(
                               slot.status
@@ -886,9 +887,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                             borderColor: getStatusSlotBorder(slot.status),
                             color: getStatusSlotColor(slot.status),
                           }}
-                          title={`${slot.label} (${slot.windowLabel})`}
+                          title={`${slot.label} (${slot.windowLabel}): ${slot.status}`}
                         >
-                          {slot.slotId}
+                          {renderSlotIcon(slot.status)}
+                          <span>{getSlotTimeLabel(slot.slotId)}</span>
                         </span>
                       ))}
                     </div>
@@ -2059,6 +2061,46 @@ function getFilterButtonClass(isActive: boolean): string {
       : 'bg-white/10 dark:bg-black/10 border-white/10 dark:border-white/5 text-[var(--text-subtle)] hover:text-[var(--text-main)]'
   }`;
 }
+
+const getSlotTimeLabel = (slotId: string) => {
+  switch (slotId) {
+    case 'S1':
+      return '09:00';
+    case 'S2':
+      return '12:00';
+    case 'S3':
+      return '14:00';
+    case 'S4':
+      return '16:30';
+    default:
+      return slotId;
+  }
+};
+
+const renderSlotIcon = (status: string) => {
+  const iconStyle = { width: 10, height: 10, strokeWidth: 3.5, flexShrink: 0 };
+  switch (status) {
+    case 'GOOD':
+      return <Check style={iconStyle} />;
+    case 'DELAYED':
+      return <Clock style={{ ...iconStyle, strokeWidth: 2.5 }} />;
+    case 'MISSING':
+      return <X style={iconStyle} />;
+    case 'UPCOMING':
+    default:
+      return (
+        <div
+          style={{
+            width: 4,
+            height: 4,
+            borderRadius: '50%',
+            backgroundColor: 'currentColor',
+            flexShrink: 0,
+          }}
+        />
+      );
+  }
+};
 
 function getStatusSlotBackground(status: StandupSlotResult['status']): string {
   if (status === 'GOOD') {
