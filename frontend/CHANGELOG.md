@@ -23,6 +23,9 @@ The format is based on Keep a Changelog, and this project follows a simple relea
 ### Changed
 
 - Repositioned Step 2 back button beside progress indicators to prevent header collisions
+- Removed duplicate headers and outer card styling containers from the dashboard layout to simplify and natively integrate the standup workspace dashboard
+- Moved the mobile/desktop bottom navigation element inside the main container to avoid flex conflicts and adjusted its positioning to center correctly next to the sidebar on desktop
+- Imported missing `styles.css` stylesheet in `main.tsx` to load custom sidebar and bottom navigation styles
 - Implemented two-step profile completion wizard and stabilized mobile onboarding screen heights
 - Bypassed batch selection and profile setup redirects during local development.
 - Updated `src/components/auth/CorpusLoginPage.tsx` CSS for mobile view.

@@ -200,11 +200,11 @@ export function Layout({ children }: Props) {
           )}
           <div className="tracker-main__content">{children}</div>
         </div>
-      </main>
 
-      {isStandupMode && (
-        <MobileBottomNav onRecordClick={() => setIsRecordModalOpen(true)} />
-      )}
+        {isStandupMode && (
+          <MobileBottomNav onRecordClick={() => setIsRecordModalOpen(true)} />
+        )}
+      </main>
 
       {isRecordModalOpen && (
         <RecordStandupModal

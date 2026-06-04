@@ -2453,9 +2453,9 @@ select {
   display: block;
   position: fixed;
   bottom: 24px;
-  left: 50%;
+  left: calc(50% + 140px);
   transform: translateX(-50%);
-  width: calc(100% - 48px);
+  width: calc(100% - 328px);
   max-width: 580px;
   background: var(--surface-0);
   border: 1px solid var(--border);
@@ -2575,6 +2575,7 @@ select {
     display: block;
     width: calc(100% - 32px);
     bottom: 16px;
+    left: 50%;
   }
 
   .tracker-main {

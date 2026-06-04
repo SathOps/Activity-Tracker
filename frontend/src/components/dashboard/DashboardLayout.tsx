@@ -77,7 +77,6 @@ interface ContributorUploadDetail {
 export interface DashboardLayoutProps {
   teams?: Team[];
   addedInterns?: Intern[];
-  title?: string;
   statusDisplay?: 'modal' | 'inline';
   mode?: 'teams' | 'status' | 'analytics';
   authToken?: string;
@@ -106,7 +105,6 @@ const MAX_INTERN_FETCH_ATTEMPTS = 3;
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   teams,
   addedInterns,
-  title,
   statusDisplay = 'modal',
   mode = 'teams',
   authToken,
@@ -289,8 +287,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     setNewTeamName('');
     setIsCreatingTeam(false);
   };
-
-  const resolvedTitle = title || t('dashboard.teamWiseSubmissionDashboard');
 
   const handleAddInternToTeam = (teamId: string, intern: Intern) => {
     const trimmedName = intern.name.trim();
@@ -1232,34 +1228,27 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   };
 
   return (
-    <main className="bg-gradient-to-br from-[var(--surface-0)] to-[var(--surface-1)] border border-[var(--border)] dark:border-[var(--border-strong)] rounded-[14px] shadow-[var(--shadow-soft)] p-3.5 sm:p-6">
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <h1 className="m-0 text-2xl font-bold text-[var(--text-main)]">
-          {isInlineStatusView
-            ? t('dashboard.teamStatusDashboard')
-            : resolvedTitle}
-        </h1>
-        {!isInlineStatusView ? (
-          <div className="flex gap-3">
+    <div className="w-full">
+      {!isInlineStatusView ? (
+        <div className="flex justify-end gap-3 mb-6">
+          <button
+            className="secondary-button"
+            onClick={() => setIsRecordModalOpen(true)}
+            type="button"
+          >
+            Record Standup
+          </button>
+          {canManageStandup ? (
             <button
-              className="secondary-button"
-              onClick={() => setIsRecordModalOpen(true)}
+              className="primary-button"
+              onClick={() => setIsCreatingTeam((prev) => !prev)}
               type="button"
             >
-              Record Standup
+              {isCreatingTeam ? t('button.cancel') : t('teams.createTeam')}
             </button>
-            {canManageStandup ? (
-              <button
-                className="primary-button"
-                onClick={() => setIsCreatingTeam((prev) => !prev)}
-                type="button"
-              >
-                {isCreatingTeam ? t('button.cancel') : t('teams.createTeam')}
-              </button>
-            ) : null}
-          </div>
-        ) : null}
-      </header>
+          ) : null}
+        </div>
+      ) : null}
 
       {isAnalyticsView ? (
         renderAnalyticsContent()
@@ -1467,7 +1456,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           onSuccess={handleUploadSuccess}
         />
       ) : null}
-    </main>
+    </div>
   );
 };
 
