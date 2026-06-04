@@ -7,6 +7,7 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_current_user, get_db
+from app.dependencies import _is_bypass_mode
 from app.schemas.auth import CorpusLoginRequest, CorpusLoginResponse, SessionResponse
 from app.schemas.roster import UserRecord
 from app.schemas.compliance import GitlabStatusResponse
@@ -65,17 +66,21 @@ def get_session_state(request: Request, db: Session = Depends(get_db)):
         return SessionResponse()
     gitlab_connected = False
     if browser_session and browser_session.gitlab_token:
-        try:
-            gitlab_user = validate_gitlab_access_token(
-                browser_session.gitlab_url or DEFAULT_GITLAB_URL,
-                browser_session.gitlab_token,
-                is_oauth=browser_session.gitlab_auth_type == "oauth",
-            )
-            browser_session.gitlab_user = gitlab_user
-            update_gitlab_username_from_session(db, current_user, gitlab_user)
+        if _is_bypass_mode():
+            # In bypass mode, treat the mock token as connected without hitting GitLab
             gitlab_connected = True
-        except HTTPException:
-            gitlab_connected = False
+        else:
+            try:
+                gitlab_user = validate_gitlab_access_token(
+                    browser_session.gitlab_url or DEFAULT_GITLAB_URL,
+                    browser_session.gitlab_token,
+                    is_oauth=browser_session.gitlab_auth_type == "oauth",
+                )
+                browser_session.gitlab_user = gitlab_user
+                update_gitlab_username_from_session(db, current_user, gitlab_user)
+                gitlab_connected = True
+            except HTTPException:
+                gitlab_connected = False
     payload = session_service.get_session_state(current_user, gitlab_connected=gitlab_connected)
     if payload["user"] is not None:
         payload["user"] = UserRecord(**payload["user"])
@@ -84,6 +89,21 @@ def get_session_state(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/gitlab/login")
 def gitlab_login(request: Request, response: Response, current_user: User = Depends(get_current_user)):
+    frontend_url = os.getenv("FRONTEND_APP_URL", "http://localhost:5173").rstrip("/")
+    if _is_bypass_mode():
+        # Bypass: stamp a mock GitLab session and redirect directly to the app
+        browser_session = ensure_session(request, response)
+        browser_session.gitlab_token = "mock_gitlab_token"
+        browser_session.gitlab_url = DEFAULT_GITLAB_URL
+        browser_session.gitlab_auth_type = "mock"
+        browser_session.gitlab_user = {
+            "id": 0,
+            "username": "mock_gitlab_user",
+            "name": "Mock GitLab User",
+            "avatar_url": "",
+        }
+        browser_session.gitlab_error = ""
+        return RedirectResponse(f"{frontend_url}/compliance/profile")
     browser_session = ensure_session(request, response)
     url, state = build_gitlab_authorize_url()
     browser_session.gitlab_oauth_state = state
@@ -123,6 +143,21 @@ def gitlab_status(request: Request, db: Session = Depends(get_db), current_user:
     if not browser_session or not browser_session.gitlab_token:
         return GitlabStatusResponse(
             **gitlab_status_payload(current_user, DEFAULT_GITLAB_URL, {}, False)
+        )
+    if _is_bypass_mode():
+        mock_gitlab_user = browser_session.gitlab_user or {
+            "id": 0,
+            "username": "mock_gitlab_user",
+            "name": "Mock GitLab User",
+            "avatar_url": "",
+        }
+        return GitlabStatusResponse(
+            **gitlab_status_payload(
+                current_user,
+                browser_session.gitlab_url or DEFAULT_GITLAB_URL,
+                mock_gitlab_user,
+                True,
+            )
         )
     gitlab_user = validate_gitlab_access_token(
         browser_session.gitlab_url or DEFAULT_GITLAB_URL,

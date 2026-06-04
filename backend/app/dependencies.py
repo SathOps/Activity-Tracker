@@ -72,6 +72,14 @@ def get_corpus_token(request: Request, authorization: str | None = Header(defaul
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Corpus token not found.")
 
 
+def _is_bypass_mode() -> bool:
+    """Return True when BYPASS_GITLAB_AUTH or MOCK_CORPUS is enabled."""
+    return (
+        os.getenv("BYPASS_GITLAB_AUTH", "false").lower() == "true"
+        or os.getenv("MOCK_CORPUS", "false").lower() == "true"
+    )
+
+
 def get_gitlab_client(request: Request) -> GitLabClient:
     browser_session = get_session(request)
     if browser_session and browser_session.gitlab_token:
@@ -85,10 +93,22 @@ def get_gitlab_client(request: Request) -> GitLabClient:
     if fallback_token:
         return GitLabClient(DEFAULT_GITLAB_URL, fallback_token)
 
+    if _is_bypass_mode():
+        return GitLabClient(DEFAULT_GITLAB_URL, "mock_gitlab_token")
+
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="GitLab login required.")
 
 
 def get_gitlab_identity(request: Request) -> dict:
+    if _is_bypass_mode():
+        return {
+            "id": 0,
+            "username": "mock_gitlab_user",
+            "name": "Mock GitLab User",
+            "avatar_url": "",
+            "web_url": "",
+            "email": "mock@localhost",
+        }
     browser_session = get_session(request)
     if not browser_session or not browser_session.gitlab_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="GitLab login required.")
