@@ -48,8 +48,37 @@ export const Copy = icon('⧉');
 export const Database = icon('◫');
 export const Download = icon('↓');
 export const ExternalLink = icon('↗');
-export const Eye = icon('◉');
-export const EyeOff = icon('○');
+export const Eye = icon(
+  <svg
+    width="100%"
+    height="100%"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+export const EyeOff = icon(
+  <svg
+    width="100%"
+    height="100%"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-7-10-7a19.16 19.16 0 0 1 5.44-5.44M21.8 14.1A19.39 19.39 0 0 0 22 12s-3-7-10-7a10 10 0 0 0-3 1" />
+    <line x1="1" y1="1" x2="23" y2="23" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
 export const FolderSearch = icon('⌕');
 export const GitCommit = icon('•');
 export const GitMerge = icon('⋈');

@@ -14,11 +14,9 @@ export function CorpusLoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [loadingStep, setLoadingStep] = useState<
-    'idle' | 'authenticating' | 'signing_in'
-  >('idle');
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [showAbout, setShowAbout] = useState(false);
 
   // Show any error from GitLab OIDC redirect (/login?error=...)
   useEffect(() => {
@@ -37,7 +35,6 @@ export function CorpusLoginPage() {
     }
 
     setLoading(true);
-    setLoadingStep('authenticating');
     setError(null);
     setStatusMessage('Connecting to server...');
 
@@ -48,7 +45,6 @@ export function CorpusLoginPage() {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       const response = await corpusLogin(phone.trim(), password.trim());
-      setLoadingStep('signing_in');
       setStatusMessage('Finalizing session...');
       await new Promise((resolve) => setTimeout(resolve, 800));
 
@@ -62,7 +58,6 @@ export function CorpusLoginPage() {
         caught instanceof Error ? caught.message : 'Corpus login failed'
       );
       setLoading(false);
-      setLoadingStep('idle');
       setStatusMessage(null);
     }
   }
@@ -74,7 +69,7 @@ export function CorpusLoginPage() {
         aria-hidden="true"
       />
       <div className="relative w-screen h-screen overflow-hidden z-10 max-[800px]:flex max-[800px]:flex-col max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:w-full max-[800px]:overflow-visible">
-        <section className="absolute left-0 top-0 w-[65vw] h-full z-20 flex flex-col justify-center gap-12 p-[60px_48px] text-[#f8fbff] [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)] bg-[linear-gradient(145deg,rgba(11,18,32,0.98),rgba(17,45,92,0.96)),linear-gradient(180deg,rgba(255,255,255,0.05),transparent)] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1024px]:min-[801px]:w-[65vw] max-[1024px]:min-[801px]:p-[50px_36px] max-[800px]:relative max-[800px]:w-full max-[800px]:h-auto max-[800px]:min-h-0 max-[800px]:p-12 max-[800px]:px-6 max-[800px]:[clip-path:none]">
+        <section className="absolute left-0 top-0 w-[65vw] h-full z-20 flex flex-col justify-center gap-12 p-[60px_48px] text-[#f8fbff] [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)] bg-[linear-gradient(145deg,rgba(11,18,32,0.98),rgba(17,45,92,0.96)),linear-gradient(180deg,rgba(255,255,255,0.05),transparent)] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1024px]:min-[801px]:w-[65vw] max-[1024px]:min-[801px]:p-[50px_36px] max-[800px]:hidden">
           <div
             className="absolute -right-20 -top-[60px] w-80 h-80 pointer-events-none bg-[radial-gradient(circle,rgba(96,165,250,0.22),transparent_60%)]"
             aria-hidden="true"
@@ -127,17 +122,44 @@ export function CorpusLoginPage() {
           </div>
         </section>
 
-        <section className="absolute right-0 top-0 w-screen h-full z-10 flex flex-col items-center justify-center pl-[68vw] pr-[4vw] py-0 bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_40%,#f1f5f9_100%)] overflow-hidden max-[1024px]:min-[801px]:pl-[68vw] max-[1024px]:min-[801px]:pr-[4vw] max-[800px]:relative max-[800px]:w-full max-[800px]:h-auto max-[800px]:min-h-0 max-[800px]:p-12 max-[800px]:px-6">
-          <div className="w-full max-w-[380px] flex flex-col gap-0 animate-[panel-fade-in_0.6s_cubic-bezier(0.16,1,0.3,1)_both] max-[800px]:max-w-full">
+        <section className="absolute right-0 top-0 w-screen h-full z-10 flex flex-col items-center justify-center pl-[68vw] pr-[4vw] py-0 bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_40%,#f1f5f9_100%)] overflow-hidden max-[1024px]:min-[801px]:pl-[68vw] max-[1024px]:min-[801px]:pr-[4vw] max-[800px]:relative max-[800px]:w-full max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:flex max-[800px]:items-center max-[800px]:justify-center max-[800px]:p-6 max-[800px]:bg-[linear-gradient(to_bottom,#eff2f9_0%,#f8fafc_15%,#f8fafc_100%)] max-[800px]:overflow-y-auto">
+          <div className="w-full max-w-[380px] flex flex-col gap-0 animate-[panel-fade-in_0.6s_cubic-bezier(0.16,1,0.3,1)_both] max-[800px]:max-w-[440px] max-[800px]:py-8 max-[800px]:mx-auto">
+            {/* Mobile Brand Header */}
+            <div className="hidden max-[800px]:flex flex-col items-center text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-[linear-gradient(135deg,#4f46e5_0%,#3b82f6_100%)] flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-3 animate-[pulse-border_2s_infinite_ease-in-out]">
+                <svg
+                  className="text-white"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5" />
+                  <path d="M2 12l10 5 10-5" />
+                </svg>
+              </div>
+              <span className="text-indigo-600 font-display text-[10px] font-bold tracking-[0.18em] uppercase">
+                Swecha Internship
+              </span>
+              <h1 className="text-[#0f172a] font-display text-base font-bold tracking-tight mt-0.5">
+                Activity Tracker
+              </h1>
+            </div>
+
             <div
-              className="w-12 h-1 rounded-sm mb-5 bg-[linear-gradient(90deg,#6366f1,#818cf8,#a5b4fc)] bg-[size:200%_100%] animate-[accent-shimmer_3s_ease-in-out_infinite]"
+              className="w-12 h-1 rounded-sm mb-5 bg-[linear-gradient(90deg,#6366f1,#818cf8,#a5b4fc)] bg-[size:200%_100%] animate-[accent-shimmer_3s_ease-in-out_infinite] max-[800px]:mx-auto max-[800px]:mb-6"
               aria-hidden="true"
             />
-            <div className="mb-7">
-              <h2 className="text-[#0f172a] font-display text-[clamp(26px,2.5vw,32px)] font-bold tracking-[-0.03em] leading-tight m-0 mb-2 max-[800px]:text-[26px]">
+            <div className="mb-7 max-[800px]:mb-5 max-[800px]:text-center">
+              <h2 className="text-[#0f172a] font-display text-[clamp(26px,2.5vw,32px)] font-bold tracking-[-0.03em] leading-tight m-0 mb-2 max-[800px]:text-2xl">
                 Login
               </h2>
-              <p className="text-[#64748b] text-[14.5px] leading-relaxed m-0">
+              <p className="text-[#64748b] text-[14.5px] leading-relaxed m-0 max-[800px]:text-sm">
                 Sign in with your Corpus credentials to access the internship
                 workspace.
               </p>
@@ -188,7 +210,7 @@ export function CorpusLoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="peer w-full min-h-[52px] bg-white border-[1.5px] border-[#e2e8f0] rounded-xl text-[#0f172a] text-sm p-[18px_14px_6px_42px] transition-all duration-200 focus:bg-white focus:border-[#2563eb] focus:shadow-[0_0_0_4px_rgba(37,99,235,0.12)] focus:outline-none"
+                  className="peer w-full min-h-[52px] bg-white border-[1.5px] border-[#e2e8f0] rounded-xl text-[#0f172a] text-sm p-[18px_40px_6px_42px] transition-all duration-200 focus:bg-white focus:border-[#2563eb] focus:shadow-[0_0_0_4px_rgba(37,99,235,0.12)] focus:outline-none"
                   placeholder=" "
                   required
                 />
@@ -212,22 +234,17 @@ export function CorpusLoginPage() {
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                   <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
-              </div>
-
-              <div className="group flex items-center gap-2 mt-[-8px] cursor-pointer w-fit select-none">
-                <input
-                  id="portal-login-show-password"
-                  type="checkbox"
-                  checked={showPassword}
-                  onChange={(event) => setShowPassword(event.target.checked)}
-                  className="appearance-none w-4 h-4 border-[1.5px] border-[#cbd5e1] rounded-[5px] outline-none bg-white cursor-pointer grid place-content-center relative transition-all duration-200 hover:border-[#2563eb] focus-visible:border-[#2563eb] focus-visible:shadow-[0_0_0_3px_rgba(37,99,235,0.2)] checked:bg-[#2563eb] checked:border-[#2563eb] after:content-[''] after:w-2.5 after:h-2.5 after:scale-0 checked:after:scale-100 after:transition-transform after:duration-120 after:shadow-[inset_1em_1em_#fff] after:[clip-path:polygon(14%_44%,0_58%,33%_90%,100%_20%,86%_6%,33%_62%)]"
-                />
-                <label
-                  htmlFor="portal-login-show-password"
-                  className="font-body text-xs font-medium text-[#64748b] cursor-pointer transition-colors duration-150 group-hover:text-[#0f172a]"
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#0f172a] transition-all duration-150 p-1 flex items-center justify-center rounded-lg hover:bg-slate-50 focus:outline-none focus:text-[#2563eb]"
                 >
-                  Show Password
-                </label>
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
               </div>
 
               {error ? (
@@ -244,9 +261,7 @@ export function CorpusLoginPage() {
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="w-4 h-4 border-2 border-white/30 rounded-full border-t-white animate-spin" />
-                    {loadingStep === 'authenticating'
-                      ? 'Authenticating…'
-                      : 'Signing in…'}
+                    {statusMessage || 'Loading…'}
                   </span>
                 ) : (
                   <>
@@ -289,6 +304,69 @@ export function CorpusLoginPage() {
                 </svg>
                 <span>Secured by Corpus Authentication</span>
               </div>
+            </div>
+
+            {/* Mobile About Section Button & Toggle */}
+            <div className="hidden max-[800px]:block mt-10 w-full text-center">
+              <button
+                type="button"
+                onClick={() => setShowAbout(!showAbout)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 rounded-xl text-xs font-semibold shadow-sm transition-all duration-150 active:scale-95 focus:outline-none"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="16" x2="12" y2="12" />
+                  <line x1="12" y1="8" x2="12.01" y2="8" />
+                </svg>
+                <span>
+                  {showAbout ? 'Hide About Platform' : 'About the Platform'}
+                </span>
+              </button>
+
+              {showAbout && (
+                <div className="flex flex-col gap-4 mt-6 text-left animate-[panel-fade-in_0.4s_cubic-bezier(0.16,1,0.3,1)_both]">
+                  <article className="p-5 rounded-2xl bg-white border border-slate-100 shadow-[0_2px_8px_rgba(15,23,42,0.02)]">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold text-indigo-600 bg-indigo-50/80">
+                        01
+                      </span>
+                      <h4 className="text-slate-900 font-display font-bold text-sm">
+                        Standup Tracker
+                      </h4>
+                    </div>
+                    <p className="text-slate-500 text-xs leading-relaxed">
+                      Track standup uploads, verify team completion, review
+                      audio evidence, and manage daily status from one
+                      operational surface.
+                    </p>
+                  </article>
+
+                  <article className="p-5 rounded-2xl bg-white border border-slate-100 shadow-[0_2px_8px_rgba(15,23,42,0.02)]">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold text-indigo-600 bg-indigo-50/80">
+                        02
+                      </span>
+                      <h4 className="text-slate-900 font-display font-bold text-sm">
+                        Git Compliance Checker
+                      </h4>
+                    </div>
+                    <p className="text-slate-500 text-xs leading-relaxed">
+                      Add GitLab access after login to inspect developer
+                      activity, weekly trends, team rankings, batch analytics,
+                      and roster data.
+                    </p>
+                  </article>
+                </div>
+              )}
             </div>
           </div>
         </section>
