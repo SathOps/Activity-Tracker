@@ -1,4 +1,4 @@
-import { LogOut } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../LanguageSwitcher';
@@ -21,7 +21,7 @@ type ThemeMode = 'light' | 'dark';
 export function Layout({ children }: Props) {
   const { t } = useTranslation();
   const { pathname } = useRouter();
-  const { corpusUser, corpusToken, clearCorpusToken } = useConfigStore();
+  const { corpusToken } = useConfigStore();
   const { gitlabConnected } = useAuth();
   const [themeMode, setThemeMode] = useState<ThemeMode>(() =>
     readStoredThemeMode()
@@ -29,7 +29,6 @@ export function Layout({ children }: Props) {
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
 
   const modeMeta = getRouteMeta(pathname);
-  const corpusUserLabel = corpusUser.trim();
   const isStandupMode = modeMeta.workspace === 'standup';
   const isComplianceMode = modeMeta.workspace === 'compliance';
 
@@ -127,50 +126,18 @@ export function Layout({ children }: Props) {
                     mode:
                       themeMode === 'dark' ? t('theme.light') : t('theme.dark'),
                   })}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: '50%',
-                    border: '1px solid rgba(0,0,0,0.06)',
-                    background: 'rgba(255,255,255,0.7)',
-                    fontSize: 16,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.2s',
-                  }}
+                  className="theme-toggle-btn"
                   onClick={() =>
                     setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'))
                   }
                   type="button"
                 >
-                  <span aria-hidden="true">
-                    {themeMode === 'dark' ? '☀' : '☾'}
-                  </span>
+                  {themeMode === 'dark' ? (
+                    <Sun size={18} className="text-amber-400" />
+                  ) : (
+                    <Moon size={18} className="text-slate-700" />
+                  )}
                 </button>
-                {corpusUserLabel ? (
-                  <div className="tracker-sidebar__session-card ml-2">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="text-left">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 leading-none mb-1">
-                          Corpus Session
-                        </p>
-                        <p className="truncate font-semibold text-indigo-700 leading-none">
-                          {corpusUserLabel}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={clearCorpusToken}
-                        className="rounded-lg bg-indigo-50 p-1.5 text-indigo-500 transition-colors hover:bg-indigo-100 hover:text-indigo-700"
-                        title="Logout"
-                      >
-                        <LogOut size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
               </div>
             </div>
           </header>

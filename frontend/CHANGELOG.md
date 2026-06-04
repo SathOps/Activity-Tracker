@@ -22,6 +22,7 @@ The format is based on Keep a Changelog, and this project follows a simple relea
 
 ### Changed
 
+- Removed the duplicate Corpus Session card from the main page header and replaced the theme switcher button with a modern glassmorphic toggle switch using Lucide Sun/Moon icons
 - Repositioned Step 2 back button beside progress indicators to prevent header collisions
 - Removed duplicate headers and outer card styling containers from the dashboard layout to simplify and natively integrate the standup workspace dashboard
 - Moved the mobile/desktop bottom navigation element inside the main container to avoid flex conflicts and adjusted its positioning to center correctly next to the sidebar on desktop
