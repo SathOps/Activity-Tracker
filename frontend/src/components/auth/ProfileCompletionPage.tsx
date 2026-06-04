@@ -294,30 +294,7 @@ export function ProfileCompletionPage() {
 
               <div className="portal-login-card-accent max-[800px]:mx-auto max-[800px]:mb-6" />
 
-              <div className="portal-login-card-header max-[800px]:mb-5 max-[800px]:text-center relative">
-                {step === 2 && (
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="absolute left-0 top-1 p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 active:scale-95 transition-all duration-150 rounded-xl focus:outline-none max-[800px]:left-1"
-                    title="Back to step 1"
-                    aria-label="Back to step 1"
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <line x1="19" y1="12" x2="5" y2="12" />
-                      <polyline points="12 19 5 12 12 5" />
-                    </svg>
-                  </button>
-                )}
+              <div className="portal-login-card-header max-[800px]:mb-5 max-[800px]:text-center">
                 {step === 1 ? (
                   <>
                     <span className="text-indigo-600 font-display text-xs font-bold tracking-wide uppercase block mb-1">
@@ -350,11 +327,36 @@ export function ProfileCompletionPage() {
               </div>
 
               {/* Progress Indicator for Wizard */}
-              <div className="flex flex-col items-center gap-1.5 mb-6 text-center">
-                <span className="text-xs font-bold text-slate-400 tracking-wide uppercase">
-                  Step {step} of 2
-                </span>
-                <div className="flex gap-2">
+              <div className="flex flex-col items-center justify-center mb-6 w-full">
+                <div className="relative w-full max-w-[140px] flex items-center justify-center">
+                  {step === 2 && (
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="absolute left-0 p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 active:scale-95 transition-all duration-150 rounded-lg focus:outline-none"
+                      title="Back to step 1"
+                      aria-label="Back to step 1"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                      </svg>
+                    </button>
+                  )}
+                  <span className="text-xs font-bold text-slate-400 tracking-wide uppercase">
+                    Step {step} of 2
+                  </span>
+                </div>
+                <div className="flex gap-2 mt-1.5">
                   <div
                     className={`w-8 h-1.5 rounded-full transition-all duration-300 ${step === 1 ? 'bg-indigo-600' : 'bg-indigo-600/30'}`}
                   />
