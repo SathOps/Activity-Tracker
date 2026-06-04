@@ -176,12 +176,12 @@ export function Sidebar() {
   "
       style={{
         background:
-          'linear-gradient(180deg, rgba(15, 23, 50, 0.88) 0%, rgba(10, 16, 38, 0.92) 50%, rgba(8, 12, 30, 0.88) 100%)',
-        backdropFilter: 'blur(40px) saturate(1.6)',
-        WebkitBackdropFilter: 'blur(40px) saturate(1.6)',
-        borderRight: '1px solid rgba(100, 140, 255, 0.18)',
+          'linear-gradient(180deg, #0f172a 0%, #0d1424 50%, #0b1120 100%)',
+        backdropFilter: 'blur(40px) saturate(1.4)',
+        WebkitBackdropFilter: 'blur(40px) saturate(1.4)',
+        borderRight: '1px solid rgba(30, 79, 178, 0.18)',
         boxShadow:
-          '8px 0 32px rgba(0, 0, 0, 0.4), 16px 0 64px rgba(0, 0, 0, 0.2), inset -1px 0 0 rgba(100, 140, 255, 0.08)',
+          '8px 0 32px rgba(0, 0, 0, 0.5), 16px 0 64px rgba(0, 0, 0, 0.3), inset -1px 0 0 rgba(30, 79, 178, 0.08)',
       }}
     >
       {/* Top edge glow line */}
@@ -194,7 +194,7 @@ export function Sidebar() {
           right: 0,
           height: 1,
           background:
-            'linear-gradient(90deg, transparent, rgba(99, 140, 255, 0.3), rgba(139, 92, 246, 0.2), transparent)',
+            'linear-gradient(90deg, transparent, rgba(30, 79, 178, 0.25), rgba(56, 189, 248, 0.12), transparent)',
           zIndex: 2,
         }}
       />
@@ -224,7 +224,7 @@ export function Sidebar() {
           height: 240,
           borderRadius: '50%',
           background:
-            'radial-gradient(circle, rgba(59,130,246,0.2), transparent 70%)',
+            'radial-gradient(circle, rgba(30, 79, 178, 0.14), transparent 70%)',
           pointerEvents: 'none',
         }}
       />
@@ -239,7 +239,7 @@ export function Sidebar() {
           height: 200,
           borderRadius: '50%',
           background:
-            'radial-gradient(circle, rgba(139,92,246,0.12), transparent 70%)',
+            'radial-gradient(circle, rgba(14, 165, 233, 0.07), transparent 70%)',
           pointerEvents: 'none',
         }}
       />

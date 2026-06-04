@@ -87,15 +87,15 @@
   --glass-blur: 20px;
 
   /* ── Sidebar ────────────────────────────────────────────────────── */
-  --sidebar-bg: linear-gradient(180deg, #0f1629 0%, #131a33 50%, #0e1528 100%);
-  --sidebar-border: rgba(99, 102, 241, 0.12);
+  --sidebar-bg: linear-gradient(180deg, #0f172a 0%, #0d1424 50%, #0b1120 100%);
+  --sidebar-border: rgba(30, 79, 178, 0.15);
   --sidebar-text: rgba(203, 213, 232, 0.85);
   --sidebar-text-bright: #e8ecf5;
-  --sidebar-hover: rgba(99, 102, 241, 0.08);
+  --sidebar-hover: rgba(30, 79, 178, 0.1);
   --sidebar-active: linear-gradient(
     135deg,
-    rgba(99, 102, 241, 0.18),
-    rgba(139, 92, 246, 0.12)
+    rgba(30, 79, 178, 0.2),
+    rgba(14, 165, 233, 0.1)
   );
 }
 
