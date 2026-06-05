@@ -55,11 +55,11 @@ export function StandupAudioRecorder({
   const isDisabled = disabled || !isSupported;
 
   return (
-    <div className="recorder-section">
-      <div className="recorder-controls">
+    <div className="grid gap-2.5">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-2">
         <button
           type="button"
-          className="primary-button recorder-btn"
+          className="primary-button w-full sm:w-auto px-3.5 py-1.5 text-center"
           onClick={() => void start()}
           disabled={isDisabled || isRecording}
         >
@@ -68,7 +68,7 @@ export function StandupAudioRecorder({
         {!isPaused ? (
           <button
             type="button"
-            className="secondary-button recorder-btn"
+            className="secondary-button w-full sm:w-auto px-3.5 py-1.5 text-center"
             onClick={pause}
             disabled={isDisabled || !isRecording}
           >
@@ -77,7 +77,7 @@ export function StandupAudioRecorder({
         ) : (
           <button
             type="button"
-            className="secondary-button recorder-btn"
+            className="secondary-button w-full sm:w-auto px-3.5 py-1.5 text-center"
             onClick={resume}
             disabled={isDisabled}
           >
@@ -86,7 +86,7 @@ export function StandupAudioRecorder({
         )}
         <button
           type="button"
-          className="secondary-button recorder-btn"
+          className="secondary-button w-full sm:w-auto px-3.5 py-1.5 text-center"
           onClick={stop}
           disabled={isDisabled || !isRecording}
         >
@@ -94,7 +94,7 @@ export function StandupAudioRecorder({
         </button>
         <button
           type="button"
-          className="secondary-button recorder-btn"
+          className="secondary-button w-full sm:w-auto px-3.5 py-1.5 text-center"
           onClick={cancel}
           disabled={isDisabled || !isRecording}
         >
@@ -102,7 +102,7 @@ export function StandupAudioRecorder({
         </button>
         <button
           type="button"
-          className="ghost-button recorder-btn"
+          className="w-full sm:w-auto cursor-pointer rounded-[14px] border border-white/[0.08] bg-white/5 px-4 py-2.5 text-center text-[13px] font-semibold text-white backdrop-blur-[12px] transition-all duration-300 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
           onClick={clear}
           disabled={isDisabled || !audioBlob || isRecording}
         >
@@ -110,36 +110,40 @@ export function StandupAudioRecorder({
         </button>
       </div>
 
-      <p className="recorder-hint">{t('recorder.minimumHint')}</p>
+      <p className="m-0 text-xs text-slate-500">{t('recorder.minimumHint')}</p>
 
       {!isSupported && (
-        <p className="recorder-error">{t('recorder.notSupported')}</p>
+        <p className="m-0 text-xs text-red-500">{t('recorder.notSupported')}</p>
       )}
 
       {disabled && (
-        <p className="recorder-hint">{t('recorder.loginRequired')}</p>
+        <p className="m-0 text-xs text-slate-500">
+          {t('recorder.loginRequired')}
+        </p>
       )}
 
       {isRecording && !isPaused && (
-        <p className="recorder-recording">
+        <p className="m-0 text-[13px] font-semibold text-amber-600">
           {t('recorder.recordingInProgress')}{' '}
-          <span className="recorder-timer">{formattedDuration}</span>
+          <span className="tabular-nums">{formattedDuration}</span>
         </p>
       )}
 
       {isRecording && isPaused && (
-        <p className="recorder-recording recorder-paused">
+        <p className="m-0 text-[13px] font-semibold text-indigo-500">
           {t('recorder.paused')}{' '}
-          <span className="recorder-timer">{formattedDuration}</span>
+          <span className="tabular-nums">{formattedDuration}</span>
         </p>
       )}
 
       {isPermissionDenied && (
-        <div className="recorder-permission-denied">
-          <p>{t('recorder.permissionDenied')}</p>
+        <div className="grid gap-2 rounded-lg border border-red-200 bg-red-50 p-2.5 dark:border-red-900/30 dark:bg-red-900/10">
+          <p className="m-0 text-xs text-red-600 dark:text-red-400">
+            {t('recorder.permissionDenied')}
+          </p>
           <button
             type="button"
-            className="secondary-button"
+            className="secondary-button w-full sm:w-auto text-center"
             onClick={() => void start()}
             disabled={disabled}
           >
@@ -148,12 +152,12 @@ export function StandupAudioRecorder({
         </div>
       )}
 
-      {error && <p className="recorder-error">{error}</p>}
+      {error && <p className="m-0 text-xs text-red-500">{error}</p>}
 
       {audioPreviewUrl && (
         // oxlint-disable-next-line jsx-a11y/media-has-caption
         <audio
-          className="recorder-preview"
+          className="w-full rounded-lg"
           controls
           src={audioPreviewUrl}
           aria-label={t('recorder.audioPreview')}

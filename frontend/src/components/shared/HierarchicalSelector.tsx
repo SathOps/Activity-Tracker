@@ -1,11 +1,3 @@
-/**
- * HierarchicalSelector — Batch → Team → User cascading multi-select.
- *
- * Used by Leaderboard, Batch Analytics, and Weekly Performance pages.
- * Backend filters results by the caller's role automatically (admin sees all,
- * mentor sees only their assigned batches/teams/users).
- */
-
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getSelectorTree } from '../../services/api/selector';
@@ -93,94 +85,47 @@ function MultiSelectDropdown<T extends { id: number; name: string }>({
 
   return (
     <div>
-      <p
-        style={{
-          fontSize: 11,
-          fontWeight: 700,
-          color: '#64748b',
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-          marginBottom: 6,
-        }}
-      >
+      <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500">
         {label}
       </p>
-      <div ref={ref} style={{ position: 'relative' }}>
+      <div ref={ref} className="relative">
         <button
           type="button"
           disabled={disabled || isLoading}
           onClick={() => !disabled && setOpen((o) => !o)}
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 8,
-            padding: '9px 14px',
-            borderRadius: 10,
-            border: '1px solid #e2e8f0',
-            background: disabled ? '#f8fafc' : '#fff',
-            color: selectedCount === 0 ? '#94a3b8' : '#1e293b',
-            fontSize: 13,
-            fontWeight: selectedCount > 0 ? 500 : 400,
-            cursor: disabled ? 'not-allowed' : 'pointer',
-            textAlign: 'left',
-          }}
+          className={`flex w-full items-center justify-between gap-2 rounded-[10px] border border-slate-200 px-3.5 py-[9px] text-left text-[13px] ${
+            disabled
+              ? 'cursor-not-allowed bg-slate-50'
+              : 'cursor-pointer bg-white'
+          } ${
+            selectedCount === 0
+              ? 'font-normal text-slate-400'
+              : 'font-medium text-slate-800'
+          }`}
         >
-          <span
-            style={{
-              flex: 1,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
+          <span className="flex-1 truncate">
             {isLoading ? 'Loading…' : triggerLabel}
           </span>
           {isLoading ? (
             <Spinner size="sm" label="" />
           ) : (
-            <span style={{ fontSize: 10, color: '#94a3b8' }}>
+            <span className="text-[10px] text-slate-400">
               {open ? '▲' : '▾'}
             </span>
           )}
         </button>
 
         {open && !disabled && items.length > 0 && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 'calc(100% + 4px)',
-              left: 0,
-              right: 0,
-              background: '#fff',
-              border: '1px solid #e2e8f0',
-              borderRadius: 10,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              zIndex: 50,
-              maxHeight: 240,
-              overflowY: 'auto',
-            }}
-          >
+          <div className="absolute inset-x-0 top-[calc(100%+4px)] z-50 max-h-[240px] overflow-y-auto rounded-[10px] border border-slate-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
             {/* Select all */}
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '9px 14px',
-                borderBottom: '1px solid #f1f5f9',
-                cursor: 'pointer',
-                background: '#f8fafc',
-              }}
-            >
+            <label className="flex cursor-pointer items-center gap-2.5 border-b border-slate-100 bg-slate-50 px-3.5 py-[9px]">
               <input
                 type="checkbox"
                 checked={selectedCount === items.length && items.length > 0}
                 onChange={toggleAll}
-                style={{ accentColor: '#6366f1' }}
+                className="accent-indigo-500"
               />
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>
+              <span className="text-xs font-semibold text-slate-600">
                 Select all ({items.length})
               </span>
             </label>
@@ -188,32 +133,15 @@ function MultiSelectDropdown<T extends { id: number; name: string }>({
             {items.map((item) => (
               <label
                 key={item.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '9px 14px',
-                  borderBottom: '1px solid #f8fafc',
-                  cursor: 'pointer',
-                }}
-                className="hover:bg-slate-50"
+                className="flex cursor-pointer items-center gap-2.5 border-b border-slate-50 px-3.5 py-[9px] hover:bg-slate-50"
               >
                 <input
                   type="checkbox"
                   checked={selected.has(item.id)}
                   onChange={() => toggle(item.id)}
-                  style={{ accentColor: '#6366f1' }}
+                  className="accent-indigo-500"
                 />
-                <span
-                  style={{
-                    fontSize: 13,
-                    color: '#1e293b',
-                    flex: 1,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
+                <span className="flex-1 truncate text-[13px] text-slate-800">
                   {renderItem ? renderItem(item) : item.name}
                 </span>
               </label>
@@ -222,22 +150,7 @@ function MultiSelectDropdown<T extends { id: number; name: string }>({
         )}
 
         {open && !disabled && !isLoading && items.length === 0 && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 'calc(100% + 4px)',
-              left: 0,
-              right: 0,
-              background: '#fff',
-              border: '1px solid #e2e8f0',
-              borderRadius: 10,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              zIndex: 50,
-              padding: '12px 14px',
-              fontSize: 13,
-              color: '#94a3b8',
-            }}
-          >
+          <div className="absolute inset-x-0 top-[calc(100%+4px)] z-50 rounded-[10px] border border-slate-200 bg-white px-3.5 py-3 text-[13px] text-slate-400 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
             None available
           </div>
         )}
@@ -347,27 +260,10 @@ export function HierarchicalSelector({
     selectedUsers.length > 0 && !!startDate && !!endDate && !isRunning;
 
   return (
-    <div
-      style={{
-        background: '#fff',
-        border: '1px solid #e2e8f0',
-        borderRadius: 16,
-        padding: '20px 24px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 18,
-      }}
-    >
+    <div className="flex flex-col gap-[18px] rounded-2xl border border-slate-200 bg-white px-6 py-5">
       {/* Empty state for no batches */}
       {!selectorQuery.isLoading && batches.length === 0 && (
-        <p
-          style={{
-            fontSize: 13,
-            color: '#94a3b8',
-            textAlign: 'center',
-            padding: '12px 0',
-          }}
-        >
+        <p className="py-3 text-center text-[13px] text-slate-400">
           No batches assigned. Contact your admin.
         </p>
       )}
@@ -409,63 +305,27 @@ export function HierarchicalSelector({
 
       {/* Step 3 — Users */}
       <div>
-        <p
-          style={{
-            fontSize: 11,
-            fontWeight: 700,
-            color: '#64748b',
-            textTransform: 'uppercase',
-            letterSpacing: '0.06em',
-            marginBottom: 6,
-          }}
-        >
+        <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500">
           3. Select Users
         </p>
 
         {selectedTeamIds.size === 0 ? (
-          <p style={{ fontSize: 13, color: '#94a3b8', padding: '10px 0' }}>
+          <p className="py-2.5 text-[13px] text-slate-400">
             Select a team to load users.
           </p>
         ) : selectorQuery.isLoading ? (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '10px 0',
-            }}
-          >
+          <div className="flex items-center gap-2 py-2.5">
             <Spinner size="sm" label="" />
-            <span style={{ fontSize: 13, color: '#94a3b8' }}>
-              Loading users…
-            </span>
+            <span className="text-[13px] text-slate-400">Loading users…</span>
           </div>
         ) : validUsers.length === 0 ? (
-          <p style={{ fontSize: 13, color: '#94a3b8', padding: '10px 0' }}>
+          <p className="py-2.5 text-[13px] text-slate-400">
             No users with GitLab usernames found in the selected team(s).
           </p>
         ) : (
-          <div
-            style={{
-              border: '1px solid #e2e8f0',
-              borderRadius: 10,
-              overflow: 'hidden',
-              maxHeight: 260,
-              overflowY: 'auto',
-            }}
-          >
+          <div className="max-h-[260px] overflow-hidden overflow-y-auto rounded-[10px] border border-slate-200">
             {/* Select all */}
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '9px 14px',
-                borderBottom: '1px solid #f1f5f9',
-                cursor: 'pointer',
-                background: '#f8fafc',
-              }}
-            >
+            <label className="flex cursor-pointer items-center gap-2.5 border-b border-slate-100 bg-slate-50 px-3.5 py-[9px]">
               <input
                 type="checkbox"
                 checked={
@@ -479,9 +339,9 @@ export function HierarchicalSelector({
                       : new Set(validUsers.map((appUser) => appUser.id))
                   )
                 }
-                style={{ accentColor: '#6366f1' }}
+                className="accent-indigo-500"
               />
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>
+              <span className="text-xs font-semibold text-slate-600">
                 Select all ({validUsers.length})
               </span>
             </label>
@@ -492,15 +352,7 @@ export function HierarchicalSelector({
                 <label
                   key={appUser.id}
                   aria-label={appUser.name}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '9px 14px',
-                    borderBottom: '1px solid #f8fafc',
-                    cursor: 'pointer',
-                  }}
-                  className="hover:bg-slate-50"
+                  className="flex cursor-pointer items-center gap-2.5 border-b border-slate-50 px-3.5 py-[9px] hover:bg-slate-50"
                 >
                   <input
                     type="checkbox"
@@ -511,23 +363,13 @@ export function HierarchicalSelector({
                       else next.add(appUser.id);
                       setSelectedUserIds(next);
                     }}
-                    style={{ accentColor: '#6366f1' }}
+                    className="accent-indigo-500"
                   />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: 13,
-                        fontWeight: 500,
-                        color: '#1e293b',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
+                  <div className="flex-1 min-w-0">
+                    <p className="m-0 truncate text-[13px] font-medium text-slate-800">
                       {appUser.name}
                     </p>
-                    <p style={{ margin: 0, fontSize: 11, color: '#94a3b8' }}>
+                    <p className="m-0 text-[11px] text-slate-400">
                       @{appUser.gitlab_username}
                       {showTeam && appUser.team_name
                         ? ` · ${appUser.team_name}`
@@ -541,7 +383,7 @@ export function HierarchicalSelector({
         )}
 
         {selectedUsers.length > 0 && (
-          <p style={{ marginTop: 6, fontSize: 11, color: '#6366f1' }}>
+          <p className="mt-1.5 text-[11px] text-indigo-500">
             {selectedUsers.length} user
             {selectedUsers.length > 1 ? 's' : ''} selected
           </p>
@@ -549,18 +391,10 @@ export function HierarchicalSelector({
       </div>
 
       {/* Date range */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div className="grid grid-cols-2 gap-3">
         <div>
           <label
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: '#64748b',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-              display: 'block',
-              marginBottom: 6,
-            }}
+            className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500"
             htmlFor="hs-start-date"
           >
             Start Date
@@ -570,27 +404,12 @@ export function HierarchicalSelector({
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            style={{
-              width: '100%',
-              borderRadius: 10,
-              border: '1px solid #e2e8f0',
-              padding: '9px 12px',
-              fontSize: 13,
-              outline: 'none',
-            }}
+            className="w-full rounded-[10px] border border-slate-200 px-3 py-[9px] text-[13px] focus:outline-none focus:ring-2 focus:ring-indigo-300"
           />
         </div>
         <div>
           <label
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: '#64748b',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-              display: 'block',
-              marginBottom: 6,
-            }}
+            className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500"
             htmlFor="hs-end-date"
           >
             End Date
@@ -600,14 +419,7 @@ export function HierarchicalSelector({
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            style={{
-              width: '100%',
-              borderRadius: 10,
-              border: '1px solid #e2e8f0',
-              padding: '9px 12px',
-              fontSize: 13,
-              outline: 'none',
-            }}
+            className="w-full rounded-[10px] border border-slate-200 px-3 py-[9px] text-[13px] focus:outline-none focus:ring-2 focus:ring-indigo-300"
           />
         </div>
       </div>
@@ -617,35 +429,16 @@ export function HierarchicalSelector({
         type="button"
         onClick={handleRun}
         disabled={!canRun}
-        style={{
-          padding: '11px 24px',
-          borderRadius: 10,
-          border: 'none',
-          background: canRun
-            ? 'linear-gradient(135deg, #4f46e5, #6366f1)'
-            : '#e2e8f0',
-          color: canRun ? '#fff' : '#94a3b8',
-          fontSize: 14,
-          fontWeight: 600,
-          cursor: canRun ? 'pointer' : 'not-allowed',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 8,
-          transition: 'opacity 0.2s',
-        }}
+        className={`flex items-center justify-center gap-2 rounded-[10px] px-6 py-[11px] text-sm font-semibold transition-opacity duration-200 ${
+          canRun
+            ? 'cursor-pointer bg-gradient-to-br from-indigo-600 to-indigo-500 text-white'
+            : 'cursor-not-allowed bg-slate-200 text-slate-400'
+        }`}
       >
         {isRunning && <Spinner size="sm" label="" />}
         {isRunning ? 'Running…' : `🚀 ${runLabel}`}
         {!isRunning && selectedUsers.length > 0 && (
-          <span
-            style={{
-              background: 'rgba(255,255,255,0.2)',
-              borderRadius: 99,
-              padding: '1px 8px',
-              fontSize: 12,
-            }}
-          >
+          <span className="rounded-full bg-white/20 px-2 py-[1px] text-xs">
             {selectedUsers.length}
           </span>
         )}

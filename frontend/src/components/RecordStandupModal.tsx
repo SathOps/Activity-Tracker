@@ -104,19 +104,21 @@ export function RecordStandupModal({
 
   return (
     <div
-      className="modal-backdrop"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/45"
       onClick={handleBackdropClick}
       onKeyDown={handleKeyDown}
       role="dialog"
       aria-modal="true"
       aria-label={t('record.standup')}
     >
-      <div className="record-modal">
-        <div className="record-modal-header">
-          <h2 className="record-modal-title">{t('record.standup')}</h2>
+      <div className="flex w-[92%] max-w-[640px] max-h-[85vh] flex-col rounded-[14px] border border-slate-200 bg-white shadow-xl">
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+          <h2 className="m-0 text-lg font-semibold text-slate-900">
+            {t('record.standup')}
+          </h2>
           <button
             type="button"
-            className="record-modal-close"
+            className="cursor-pointer border-none bg-transparent px-2 py-1 text-xl leading-none text-slate-400 hover:text-slate-600 disabled:opacity-50"
             onClick={onClose}
             disabled={isUploading}
             aria-label={t('button.close')}
@@ -125,9 +127,9 @@ export function RecordStandupModal({
           </button>
         </div>
 
-        <div className="record-modal-body">
-          <div className="record-modal-section">
-            <h3 className="record-modal-section-title">
+        <div className="flex-1 overflow-y-auto px-5 pt-4 pb-5">
+          <div className="grid gap-3 mb-4">
+            <h3 className="m-0 text-[15px] font-semibold text-slate-900">
               {t('recorder.stepRecord')}
             </h3>
             <StandupAudioRecorder
@@ -138,8 +140,8 @@ export function RecordStandupModal({
           </div>
 
           {audioBlob && (
-            <div className="record-modal-section">
-              <h3 className="record-modal-section-title">
+            <div className="grid gap-3 mb-4">
+              <h3 className="m-0 text-[15px] font-semibold text-slate-900">
                 {t('upload.stepDetails')}
               </h3>
               <StandupUploadForm
