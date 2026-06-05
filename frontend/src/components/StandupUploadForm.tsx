@@ -358,9 +358,9 @@ export function StandupUploadForm({
   };
 
   return (
-    <div className="upload-form">
-      <div className="upload-form-section">
-        <label className="upload-form-label">
+    <div className="grid gap-[14px]">
+      <div className="grid gap-[6px]">
+        <label className="text-[13px] text-[var(--text-main)] grid gap-[6px]">
           {t('upload.title')}
           <input
             type="text"
@@ -373,15 +373,17 @@ export function StandupUploadForm({
           />
         </label>
         {titleValidationError && title.trim() && (
-          <p className="upload-form-error">{titleValidationError}</p>
+          <p className="text-[12px] text-[var(--danger-text)] m-0">
+            {titleValidationError}
+          </p>
         )}
       </div>
 
-      <div className="upload-form-section">
-        <label className="upload-form-label">
+      <div className="grid gap-[6px]">
+        <label className="text-[13px] text-[var(--text-main)] grid gap-[6px]">
           {t('upload.description')}
           <textarea
-            className="upload-form-textarea"
+            className="bg-[var(--surface-0)] border border-[var(--border)] rounded-[12px] text-[var(--text-main)] font-inherit text-[14px] min-h-[80px] p-[10px_12px] resize-y transition-[border-color box-shadow] duration-[220ms] ease-in-out w-full focus:border-[var(--accent)] focus:shadow-[var(--focus-ring)] focus:outline-none placeholder:text-[var(--text-soft)]"
             value={description}
             onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
               setDescription(e.target.value)
@@ -390,12 +392,14 @@ export function StandupUploadForm({
           />
         </label>
         {descriptionValidationError && description.trim() && (
-          <p className="upload-form-error">{descriptionValidationError}</p>
+          <p className="text-[12px] text-[var(--danger-text)] m-0">
+            {descriptionValidationError}
+          </p>
         )}
       </div>
 
-      <div className="upload-form-section">
-        <label className="upload-form-label">
+      <div className="grid gap-[6px]">
+        <label className="text-[13px] text-[var(--text-main)] grid gap-[6px]">
           {t('upload.language')}
           <select
             className="auth-input"
@@ -414,19 +418,29 @@ export function StandupUploadForm({
         </label>
       </div>
 
-      <div className="upload-form-section">
-        <span className="upload-form-label">{t('upload.categories')}</span>
-        <p className="upload-form-hint">{t('upload.standupCategories')}</p>
+      <div className="grid gap-[6px]">
+        <span className="text-[13px] text-[var(--text-main)]">
+          {t('upload.categories')}
+        </span>
+        <p className="text-[12px] text-[var(--text-soft)] m-0">
+          {t('upload.standupCategories')}
+        </p>
       </div>
 
-      <div className="upload-form-section">
-        <span className="upload-form-label">{t('upload.releaseRights')}</span>
-        <p className="upload-form-hint">{t('upload.createdByMe')}</p>
+      <div className="grid gap-[6px]">
+        <span className="text-[13px] text-[var(--text-main)]">
+          {t('upload.releaseRights')}
+        </span>
+        <p className="text-[12px] text-[var(--text-soft)] m-0">
+          {t('upload.createdByMe')}
+        </p>
       </div>
 
-      <div className="upload-form-section">
-        <span className="upload-form-label">{t('upload.location')}</span>
-        <div className="upload-form-location-row">
+      <div className="grid gap-[6px]">
+        <span className="text-[13px] text-[var(--text-main)]">
+          {t('upload.location')}
+        </span>
+        <div className="flex gap-[8px]">
           <button
             type="button"
             className="secondary-button"
@@ -438,7 +452,7 @@ export function StandupUploadForm({
               : t('upload.useCurrentLocation')}
           </button>
         </div>
-        <div className="upload-form-location-presets">
+        <div className="flex flex-wrap gap-[8px] mt-[8px]">
           {LOCATION_PRESETS.map((preset) => {
             const isSelected = selectedPreset?.id === preset.id;
 
@@ -446,7 +460,7 @@ export function StandupUploadForm({
               <button
                 key={preset.id}
                 type="button"
-                className={`ghost-button upload-form-location-preset${isSelected ? ' is-selected' : ''}`}
+                className={`ghost-button ${isSelected ? 'border-[var(--accent)] text-[var(--accent)]' : ''}`}
                 onClick={() => handleUseLocationPreset(preset)}
                 disabled={isFetchingLocation || isUploading}
               >
@@ -455,30 +469,36 @@ export function StandupUploadForm({
             );
           })}
         </div>
-        <p className="upload-form-hint">
+        <p className="text-[12px] text-[var(--text-soft)] m-0">
           If current location does not work, choose one of the saved coordinates
           above.
         </p>
         {locationInfo && (
-          <p className="upload-form-hint">
+          <p className="text-[12px] text-[var(--text-soft)] m-0">
             {locationInfo.formattedAddress ||
               `${locationInfo.city ?? ''}, ${locationInfo.state ?? ''}, ${locationInfo.country ?? ''}`}
           </p>
         )}
         {!locationInfo && locationSourceLabel && (
-          <p className="upload-form-hint">{locationSourceLabel}</p>
+          <p className="text-[12px] text-[var(--text-soft)] m-0">
+            {locationSourceLabel}
+          </p>
         )}
         {location && !locationInfo && (
-          <p className="upload-form-hint">
+          <p className="text-[12px] text-[var(--text-soft)] m-0">
             {t('upload.location')}: {location.latitude.toFixed(5)},{' '}
             {location.longitude.toFixed(5)}
           </p>
         )}
-        {locationError && <p className="upload-form-error">{locationError}</p>}
+        {locationError && (
+          <p className="text-[12px] text-[var(--danger-text)] m-0">
+            {locationError}
+          </p>
+        )}
       </div>
 
       {!!audioBlob && (
-        <p className="upload-form-hint">
+        <p className="text-[12px] text-[var(--text-soft)] m-0">
           {t('upload.audioDuration', {
             seconds: audioDurationSeconds.toFixed(1),
           })}
@@ -486,15 +506,19 @@ export function StandupUploadForm({
       )}
 
       {!!audioBlob && !isAudioDurationValid && (
-        <p className="upload-form-error">{t('upload.tooShort')}</p>
+        <p className="text-[12px] text-[var(--danger-text)] m-0">
+          {t('upload.tooShort')}
+        </p>
       )}
 
       {isFileTooLarge && (
-        <p className="upload-form-error">{t('upload.tooLarge')}</p>
+        <p className="text-[12px] text-[var(--danger-text)] m-0">
+          {t('upload.tooLarge')}
+        </p>
       )}
 
       {uploadStep === 'uploading' && (
-        <p className="upload-form-hint">
+        <p className="text-[12px] text-[var(--text-soft)] m-0">
           {t('upload.uploadingChunks', {
             uploaded: uploadProgress.uploadedChunks,
             total: uploadProgress.totalChunks,
@@ -504,14 +528,18 @@ export function StandupUploadForm({
       )}
 
       {uploadStep === 'finalizing' && (
-        <p className="upload-form-hint">{t('upload.finalizing')}</p>
+        <p className="text-[12px] text-[var(--text-soft)] m-0">
+          {t('upload.finalizing')}
+        </p>
       )}
 
       {(errorMessage || uploadError) && (
-        <p className="upload-form-error">{errorMessage || uploadError}</p>
+        <p className="text-[12px] text-[var(--danger-text)] m-0">
+          {errorMessage || uploadError}
+        </p>
       )}
 
-      <div className="upload-form-actions">
+      <div className="flex flex-wrap gap-[8px] pt-[8px] border-t border-[var(--border)]">
         <button
           type="button"
           className="primary-button"
