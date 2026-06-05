@@ -6,10 +6,13 @@ interface Props {
   className?: string;
 }
 
-export function Spinner({ label, size = 'md', className }: Props) {
-  const sizes = { sm: 20, md: 32, lg: 48 };
-  const dim = sizes[size];
+const SIZE_CLASSES = {
+  sm: 'w-5 h-5', // 20px
+  md: 'w-8 h-8', // 32px
+  lg: 'w-12 h-12', // 48px
+};
 
+export function Spinner({ label, size = 'md', className }: Props) {
   return (
     <div
       className={cn(
@@ -18,27 +21,14 @@ export function Spinner({ label, size = 'md', className }: Props) {
       )}
     >
       <div
-        style={{
-          width: dim,
-          height: dim,
-          borderRadius: '50%',
-          border: '3px solid rgba(99, 102, 241, 0.12)',
-          borderTopColor: '#6366f1',
-          animation: 'spin 0.8s linear infinite',
-          boxShadow: '0 0 16px rgba(99, 102, 241, 0.15)',
-        }}
+        className={cn(
+          'rounded-full border-[3px] border-indigo-500/[0.12] border-t-indigo-500',
+          'shadow-[0_0_16px_rgba(99,102,241,0.15)] animate-[spin_0.8s_linear_infinite]',
+          SIZE_CLASSES[size]
+        )}
       />
       {label && (
-        <p
-          style={{
-            margin: 0,
-            fontSize: 13,
-            color: 'var(--slate-400)',
-            fontWeight: 500,
-          }}
-        >
-          {label}
-        </p>
+        <p className="text-[13px] font-medium text-slate-400 m-0">{label}</p>
       )}
     </div>
   );

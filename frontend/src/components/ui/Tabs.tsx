@@ -22,53 +22,39 @@ export function Tabs({ tabs, defaultTab, children, className }: TabsProps) {
       {/* Tab bar */}
       <div
         role="tablist"
-        style={{
-          display: 'flex',
-          gap: 4,
-          padding: 4,
-          borderRadius: 14,
-          background: 'rgba(255, 255, 255, 0.5)',
-          backdropFilter: 'blur(8px)',
-          border: '1px solid rgba(255, 255, 255, 0.6)',
-          marginBottom: 20,
-          overflowX: 'auto',
-        }}
-        className="no-scrollbar"
+        className={cn(
+          'flex gap-1 p-1 mb-5 overflow-x-auto no-scrollbar rounded-[14px]',
+          'backdrop-blur-[8px] transition-colors',
+          // Light mode glass
+          'bg-white/50 border border-white/60',
+          // Dark mode glass
+          'dark:bg-black/20 dark:border-white/10'
+        )}
       >
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            role="tab"
-            aria-selected={active === tab.id}
-            onClick={() => setActive(tab.id)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '8px 16px',
-              borderRadius: 10,
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: active === tab.id ? 600 : 500,
-              fontFamily: 'var(--font-display)',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.2s ease',
-              background:
-                active === tab.id
-                  ? 'linear-gradient(135deg, #4f46e5, #6366f1)'
-                  : 'transparent',
-              color: active === tab.id ? '#fff' : 'var(--slate-500)',
-              boxShadow:
-                active === tab.id
-                  ? '0 2px 8px rgba(79, 70, 229, 0.25)'
-                  : 'none',
-            }}
-          >
-            {tab.icon}
-            {tab.label}
-          </button>
-        ))}
+        {tabs.map((tab) => {
+          const isActive = active === tab.id;
+
+          return (
+            <button
+              key={tab.id}
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => setActive(tab.id)}
+              className={cn(
+                'flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-[13px] whitespace-nowrap outline-none',
+                'font-[family-name:var(--font-display)] transition-all duration-200',
+                isActive
+                  ? // Active State
+                    'font-semibold text-white bg-gradient-to-br from-indigo-600 to-indigo-500 shadow-[0_2px_8px_rgba(79,70,229,0.25)]'
+                  : // Inactive State
+                    'font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-white/5'
+              )}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Panel */}

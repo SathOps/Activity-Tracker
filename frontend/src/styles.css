@@ -1235,7 +1235,6 @@ select {
 
 .auth-input,
 .intern-search-input,
-.team-search-input,
 .date-input,
 .team-add-intern-input,
 .interns-list-search,
@@ -1257,7 +1256,6 @@ select {
 
 .auth-input::placeholder,
 .intern-search-input::placeholder,
-.team-search-input::placeholder,
 .team-add-intern-input::placeholder,
 .interns-list-search::placeholder,
 .modal-search-input::placeholder {
@@ -1266,7 +1264,6 @@ select {
 
 .auth-input:focus,
 .intern-search-input:focus,
-.team-search-input:focus,
 .date-input:focus,
 .team-add-intern-input:focus,
 .interns-list-search:focus,
@@ -1299,8 +1296,6 @@ select {
   gap: 8px;
 }
 
-.primary-button,
-.secondary-button,
 .ghost-button {
   border-radius: 10px;
   cursor: pointer;
@@ -1311,43 +1306,6 @@ select {
     transform 0.2s ease,
     box-shadow 0.2s ease,
     background-color 0.2s ease;
-}
-
-.primary-button {
-  background: linear-gradient(
-    135deg,
-    var(--accent-strong) 0%,
-    var(--accent) 100%
-  );
-  border: 1px solid var(--accent);
-  box-shadow: 0 8px 16px rgba(30, 79, 178, 0.24);
-  color: #ffffff;
-}
-
-.secondary-button {
-  border: none;
-
-  border-radius: 14px;
-
-  padding: 10px 16px;
-
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
-
-  color: white;
-
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition: 0.3s ease;
-
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.25);
-}
-
-.secondary-button:hover {
-  transform: translateY(-2px);
-
-  box-shadow: 0 0 35px rgba(59, 130, 246, 0.45);
 }
 
 .ghost-button {
@@ -1374,15 +1332,11 @@ select {
   background: rgba(59, 130, 246, 0.08);
 }
 
-.primary-button:hover,
-.secondary-button:hover,
 .ghost-button:hover {
   box-shadow: 0 10px 16px rgba(15, 23, 42, 0.12);
   transform: translateY(-1px);
 }
 
-.primary-button:disabled,
-.secondary-button:disabled,
 .ghost-button:disabled {
   cursor: not-allowed;
   opacity: 0.65;
@@ -3590,6 +3544,7 @@ select {
     transform: scale(0, 0);
     opacity: 0.5;
   }
+
   100% {
     transform: scale(40, 40);
     opacity: 0;
@@ -3601,9 +3556,11 @@ select {
   0% {
     box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5);
   }
+
   70% {
     box-shadow: 0 0 15px 8px rgba(37, 99, 235, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
   }
@@ -3639,13 +3596,12 @@ select {
 @keyframes border-glow-breathing {
   0%,
   100% {
-    border-color: rgba(245, 158, 11, 0.22);
     box-shadow:
       0 4px 20px rgba(245, 158, 11, 0.04),
       inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
+
   50% {
-    border-color: rgba(245, 158, 11, 0.45);
     box-shadow:
       0 6px 30px rgba(245, 158, 11, 0.15),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -3674,9 +3630,11 @@ select {
   0% {
     left: -150%;
   }
+
   35% {
     left: 150%;
   }
+
   100% {
     left: 150%;
   }
@@ -3696,6 +3654,7 @@ select {
     transform: scale(1);
     opacity: 0.9;
   }
+
   50% {
     transform: scale(1.2);
     opacity: 1;
@@ -3713,6 +3672,7 @@ select {
     opacity: 0;
     transform: translateY(16px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

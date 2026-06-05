@@ -105,55 +105,32 @@ export function DataTable<T extends Record<string, unknown>>({
               setPage(1);
             }}
             placeholder="Search…"
-            style={{
-              width: '100%',
-              paddingLeft: 36,
-              paddingRight: 14,
-              paddingTop: 10,
-              paddingBottom: 10,
-              borderRadius: 14,
-              border: '1px solid rgba(255,255,255,0.6)',
-              background: 'rgba(255,255,255,0.65)',
-              backdropFilter: 'blur(12px)',
-              fontSize: 14,
-              color: 'var(--slate-800)',
-              outline: 'none',
-            }}
+            className={cn(
+              'w-full pl-9 pr-3.5 py-2.5 rounded-[14px] outline-none text-sm text-slate-800',
+              'border border-white/60 bg-white/65 backdrop-blur-[12px]',
+              'focus:ring-2 focus:ring-brand-500/20 transition-shadow' // Added slight focus ring for UX
+            )}
           />
         </div>
       )}
 
-      <div
-        style={{
-          borderRadius: 18,
-          overflow: 'hidden',
-          background: 'rgba(255,255,255,0.72)',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255,255,255,0.6)',
-          boxShadow: 'var(--shadow-sm)',
-        }}
-      >
-        <table className="min-w-full" style={{ borderCollapse: 'collapse' }}>
+      <div className="rounded-[18px] overflow-hidden bg-white/[0.72] backdrop-blur-[16px] border border-white/60 shadow-sm">
+        <table className="min-w-full border-collapse">
           <thead>
-            <tr style={{ background: 'rgba(99,102,241,0.04)' }}>
+            <tr className="bg-indigo-500/[0.04]">
               {columns.map((col) => (
                 <th
                   key={String(col.key)}
                   scope="col"
-                  style={{
-                    ...(col.width ? { width: col.width } : {}),
-                    textAlign: 'left',
-                    fontSize: 11,
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    color: 'var(--slate-400)',
-                    padding: compact ? '10px 12px' : '12px 18px',
-                    borderBottom: '1px solid rgba(0,0,0,0.04)',
-                    cursor: col.sortable ? 'pointer' : 'default',
-                    userSelect: col.sortable ? 'none' : 'auto',
-                    fontFamily: 'var(--font-display)',
-                  }}
+                  className={cn(
+                    'text-left text-[11px] font-bold uppercase tracking-[0.06em] text-slate-400',
+                    'border-b border-black/[0.04] font-[family-name:var(--font-display)]',
+                    compact ? 'px-3 py-2.5' : 'px-[18px] py-3',
+                    col.sortable
+                      ? 'cursor-pointer select-none hover:bg-indigo-500/[0.02] transition-colors'
+                      : 'cursor-default select-auto'
+                  )}
+                  style={col.width ? { width: col.width } : {}}
                   onClick={() => col.sortable && handleSort(String(col.key))}
                 >
                   <span className="inline-flex items-center gap-1">
@@ -169,12 +146,7 @@ export function DataTable<T extends Record<string, unknown>>({
               <tr>
                 <td
                   colSpan={columns.length}
-                  style={{
-                    padding: '40px 18px',
-                    textAlign: 'center',
-                    fontSize: 14,
-                    color: 'var(--slate-400)',
-                  }}
+                  className="py-10 px-[18px] text-center text-sm text-slate-400"
                 >
                   No data found.
                 </td>
@@ -183,23 +155,22 @@ export function DataTable<T extends Record<string, unknown>>({
               pageData.map((row, idx) => (
                 <tr
                   key={keyFn(row)}
-                  style={{
-                    background:
-                      idx % 2 === 0 ? 'transparent' : 'rgba(99,102,241,0.015)',
-                    transition: 'background 0.15s',
-                    borderBottom: '1px solid rgba(0,0,0,0.03)',
-                  }}
+                  className={cn(
+                    'transition-colors duration-150 border-b border-black/[0.03]',
+                    idx % 2 === 0 ? 'bg-transparent' : 'bg-indigo-500/[0.015]'
+                  )}
                 >
                   {columns.map((col) => {
                     const raw = row[col.key as keyof T];
                     return (
                       <td
                         key={String(col.key)}
-                        style={{
-                          padding: compact ? '8px 12px' : '12px 18px',
-                          fontSize: compact ? 12 : 14,
-                          color: 'var(--slate-700)',
-                        }}
+                        className={cn(
+                          'text-slate-700',
+                          compact
+                            ? 'px-3 py-2 text-xs'
+                            : 'px-[18px] py-3 text-sm'
+                        )}
                       >
                         {col.render
                           ? col.render(raw, row)
@@ -216,54 +187,33 @@ export function DataTable<T extends Record<string, unknown>>({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div
-          style={{
-            marginTop: 16,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontSize: 13,
-            color: 'var(--slate-400)',
-          }}
-        >
+        <div className="mt-4 flex items-center justify-between text-[13px] text-slate-400">
           <span>
             {sorted.length} row{sorted.length !== 1 ? 's' : ''}
           </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div className="flex items-center gap-1.5">
             <button
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
-              style={{
-                padding: '6px 14px',
-                borderRadius: 10,
-                border: '1px solid var(--slate-200)',
-                background: 'rgba(255,255,255,0.6)',
-                fontSize: 12,
-                fontWeight: 500,
-                cursor: page === 1 ? 'default' : 'pointer',
-                opacity: page === 1 ? 0.3 : 1,
-                color: 'var(--slate-600)',
-              }}
+              className={cn(
+                'px-3.5 py-1.5 rounded-[10px] text-xs font-medium transition-all',
+                'border border-slate-200 bg-white/60 text-slate-600',
+                'hover:bg-white/80 disabled:opacity-30 disabled:cursor-default disabled:hover:bg-white/60'
+              )}
             >
               ← Prev
             </button>
-            <span style={{ fontSize: 12, fontWeight: 500 }}>
+            <span className="text-xs font-medium">
               {page} / {totalPages}
             </span>
             <button
               disabled={page === totalPages}
               onClick={() => setPage(page + 1)}
-              style={{
-                padding: '6px 14px',
-                borderRadius: 10,
-                border: '1px solid var(--slate-200)',
-                background: 'rgba(255,255,255,0.6)',
-                fontSize: 12,
-                fontWeight: 500,
-                cursor: page === totalPages ? 'default' : 'pointer',
-                opacity: page === totalPages ? 0.3 : 1,
-                color: 'var(--slate-600)',
-              }}
+              className={cn(
+                'px-3.5 py-1.5 rounded-[10px] text-xs font-medium transition-all',
+                'border border-slate-200 bg-white/60 text-slate-600',
+                'hover:bg-white/80 disabled:opacity-30 disabled:cursor-default disabled:hover:bg-white/60'
+              )}
             >
               Next →
             </button>

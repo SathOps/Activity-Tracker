@@ -18,6 +18,7 @@ import {
 import { getInternAudios } from '../../services/corpus';
 import type { InternAudioMetadata } from '../../services/corpus';
 import { RecordStandupModal } from '../RecordStandupModal';
+import { cn } from '../../lib/utils';
 
 type DashboardView = 'TEAMS' | 'INTERNS' | 'COMPLETED';
 type StatusView = 'DAILY' | 'WEEKLY';
@@ -1228,12 +1229,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {!isInlineStatusView ? (
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <section
-            className="flex glass p-1 max-w-fit w-full sm:w-auto rounded-full"
-            style={{
-              background: 'var(--glass-bg)',
-              border: '1px solid var(--glass-border)',
-              boxShadow: 'var(--shadow-sm)',
-            }}
+            className={cn(
+              'flex p-1 max-w-fit w-full sm:w-auto rounded-full shadow-sm',
+              'backdrop-blur-[20px] transition-colors duration-300',
+              'bg-white/45 border border-white/35',
+              'dark:bg-slate-900/45 dark:border-white/5'
+            )}
             aria-label={t('dashboard.viewSelector')}
           >
             {[
@@ -1247,7 +1248,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
               return (
                 <button
-                  className={`px-5 py-2 border-none rounded-full text-[13px] font-semibold cursor-pointer transition-all duration-200 ${
+                  className={`px-5 py-2 border border-transparent rounded-full text-[13px] font-semibold cursor-pointer transition-all duration-200 ${
                     isActive
                       ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm'
                       : 'bg-transparent text-[var(--text-subtle)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'
@@ -2331,39 +2332,32 @@ function getWeeklyDayClasses(count: number): string {
   const base =
     'relative overflow-hidden grid gap-1 px-3 py-2.5 rounded-[14px] ' +
     'backdrop-blur-[20px] transition-all duration-[450ms] ' +
-    'border text-[#ffedd5] [animation:border-glow-breathing_4s_infinite_ease-in-out] ' +
-    'hover:-translate-y-1 ' +
-    'hover:[box-shadow:0_15px_35px_rgba(59,130,246,0.08),inset_0_1px_0_rgba(255,255,255,0.04)] ' +
-    '[background:linear-gradient(135deg,transparent,transparent)]';
+    'border bg-transparent text-[#ffedd5] [animation:border-glow-breathing_4s_infinite_ease-in-out] ' +
+    'hover:-translate-y-1 hover:[box-shadow:0_15px_35px_rgba(59,130,246,0.08),inset_0_1px_0_rgba(255,255,255,0.04)]';
 
   if (count >= 4) {
     return (
       base +
-      ' border-[rgba(34,197,94,.80)] ' +
-      '[box-shadow:inset_0_6px_30px_rgba(34,197,94,0.06)]'
+      ' !border-emerald-400/40 shadow-[inset_0_0_0_1px_rgba(34,197,94,0.08)]'
     );
   }
 
   if (count === 3) {
     return (
       base +
-      ' border-[rgba(250,204,21,0.34)] ' +
-      '[box-shadow:inset_0_6px_30px_rgba(250,204,21,0.05)]'
+      ' !border-yellow-400/40 shadow-[inset_0_0_0_1px_rgba(250,204,21,0.08)]'
     );
   }
 
   if (count === 2) {
     return (
       base +
-      ' border-[rgba(249,115,22,0.30)] ' +
-      '[box-shadow:inset_0_6px_30px_rgba(249,115,22,0.05)]'
+      ' !border-orange-400/40 shadow-[inset_0_0_0_1px_rgba(249,115,22,0.08)]'
     );
   }
 
   return (
-    base +
-    ' border-[rgba(186, 0, 0, 1)] ' +
-    '[box-shadow:inset_0_6px_30px_rgba(248,113,113,0.06)]'
+    base + ' !border-red-400/40 shadow-[inset_0_0_0_1px_rgba(248,113,113,0.08)]'
   );
 }
 

@@ -9,35 +9,35 @@ interface Props {
 
 const VARIANTS: Record<
   string,
-  { bg: string; border: string; icon: string; title: string; text: string }
+  { wrapper: string; icon: string; title: string; text: string }
 > = {
   info: {
-    bg: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(99,102,241,0.02))',
-    border: 'rgba(99,102,241,0.15)',
+    wrapper:
+      'bg-gradient-to-br from-indigo-500/[0.06] to-indigo-500/[0.02] border-indigo-500/15',
     icon: '💡',
-    title: 'var(--indigo-700)',
-    text: 'var(--indigo-600)',
+    title: 'text-indigo-700',
+    text: 'text-indigo-600',
   },
   success: {
-    bg: 'linear-gradient(135deg, rgba(16,185,129,0.06), rgba(16,185,129,0.02))',
-    border: 'rgba(16,185,129,0.15)',
+    wrapper:
+      'bg-gradient-to-br from-emerald-500/[0.06] to-emerald-500/[0.02] border-emerald-500/15',
     icon: '✓',
-    title: 'var(--green-700)',
-    text: 'var(--green-600)',
+    title: 'text-emerald-700',
+    text: 'text-emerald-600',
   },
   warning: {
-    bg: 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.02))',
-    border: 'rgba(251,191,36,0.2)',
+    wrapper:
+      'bg-gradient-to-br from-amber-400/[0.08] to-amber-400/[0.02] border-amber-400/20',
     icon: '⚠',
-    title: 'var(--amber-600)',
-    text: '#92400e',
+    title: 'text-amber-600',
+    text: 'text-amber-900', // Translated #92400e to the closest Tailwind equivalent
   },
   error: {
-    bg: 'linear-gradient(135deg, rgba(244,63,94,0.06), rgba(244,63,94,0.02))',
-    border: 'rgba(244,63,94,0.15)',
+    wrapper:
+      'bg-gradient-to-br from-rose-500/[0.06] to-rose-500/[0.02] border-rose-500/15',
     icon: '✕',
-    title: 'var(--red-700)',
-    text: 'var(--red-600)',
+    title: 'text-rose-700',
+    text: 'text-rose-600',
   },
 };
 
@@ -46,34 +46,26 @@ export function Alert({ variant = 'info', title, children, className }: Props) {
 
   return (
     <div
-      className={cn(className)}
-      style={{
-        padding: '16px 20px',
-        borderRadius: 16,
-        background: v.bg,
-        border: `1px solid ${v.border}`,
-        backdropFilter: 'blur(8px)',
-      }}
+      className={cn(
+        'px-5 py-4 rounded-2xl border backdrop-blur-[8px]',
+        v.wrapper,
+        className
+      )}
     >
-      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-        <span style={{ fontSize: 16, lineHeight: 1.4, flexShrink: 0 }}>
-          {v.icon}
-        </span>
+      <div className="flex items-start gap-3">
+        <span className="text-base leading-snug shrink-0 mt-0.5">{v.icon}</span>
         <div>
           {title && (
             <p
-              style={{
-                margin: '0 0 4px',
-                fontSize: 14,
-                fontWeight: 700,
-                fontFamily: 'var(--font-display)',
-                color: v.title,
-              }}
+              className={cn(
+                'mb-1 text-sm font-bold font-[family-name:var(--font-display)]',
+                v.title
+              )}
             >
               {title}
             </p>
           )}
-          <div style={{ fontSize: 13, color: v.text, lineHeight: 1.6 }}>
+          <div className={cn('text-[13px] leading-relaxed', v.text)}>
             {children}
           </div>
         </div>
