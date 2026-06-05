@@ -78,7 +78,7 @@ def authenticate_corpus(session: Session, phone: str, password: str) -> tuple[di
             role = "mentor"
             username = "mock_mentor"
             full_name = "Mock Mentor"
-        elif len(phone_str) == 10 and phone_str[-3:].isdigit() and 1 <= int(phone_str[-3:]) <= 252:
+        elif len(phone_str) == 10 and phone_str[-3:].isdigit() and 1 <= int(phone_str[-3:]) <= 999:
             idx = int(phone_str[-3:])
             db_user = session.scalar(select(User).order_by(User.id).offset(idx - 1).limit(1))
             if db_user:
