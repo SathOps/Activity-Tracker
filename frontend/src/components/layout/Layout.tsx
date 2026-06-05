@@ -152,9 +152,44 @@ export function Layout({ children }: Props) {
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <main className="flex-1 overflow-y-auto relative bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.12),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(96,165,250,0.08),transparent_45%),linear-gradient(135deg,#0b1220_0%,#0d1f3d_40%,#112d5c_100%)]">
+      <main className="flex-1 overflow-y-auto relative bg-slate-50 dark:bg-[#090e1a] transition-colors duration-300">
+        {/* Animated background glow effect layers */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+          <div
+            style={{
+              position: 'absolute',
+              top: '-15%',
+              right: '-15%',
+              width: '600px',
+              height: '600px',
+              borderRadius: '50%',
+              background:
+                'radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%)',
+              filter: 'blur(90px)',
+            }}
+            className="animate-[pulse_7s_ease-in-out_infinite]"
+          />
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '-15%',
+              left: '-15%',
+              width: '600px',
+              height: '600px',
+              borderRadius: '50%',
+              background:
+                'radial-gradient(circle, rgba(99,102,241,0.14) 0%, transparent 70%)',
+              filter: 'blur(90px)',
+            }}
+            className="animate-[pulse_11s_ease-in-out_infinite]"
+          />
+        </div>
+
+        {/* Spaced dot grid pattern (subtle and clean) */}
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(rgba(148,163,184,0.18)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:24px_24px] z-0" />
+
         <div
-          className={`px-4 py-6 md:px-8 md:py-6 max-w-[1200px] mx-auto min-w-0 ${isStandupMode ? 'pb-24 md:pb-6' : ''}`}
+          className={`relative z-10 px-4 py-6 md:px-8 md:py-6 max-w-[1200px] mx-auto min-w-0 ${isStandupMode ? 'pb-24 md:pb-6' : ''}`}
         >
           {/* Glass header */}
           <div style={{ position: 'relative', marginBottom: 28 }}>
