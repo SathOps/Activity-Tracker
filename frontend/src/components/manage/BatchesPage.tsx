@@ -26,6 +26,19 @@ const glassInput =
   'transition-all duration-200 backdrop-blur-sm ' +
   '[color-scheme:dark]'; // makes date picker calendar dark
 
+/* ── Shared glass card style ─────────────────────────────── */
+const glassCard =
+  'relative z-10 rounded-[24px] backdrop-blur-[var(--glass-blur)] ' +
+  'transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 ' +
+  'bg-[rgba(255,255,255,0.55)] border border-[rgba(255,255,255,0.7)] ' +
+  'shadow-[0_10px_30px_-10px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] ' +
+  'hover:bg-[rgba(255,255,255,0.65)] hover:border-[rgba(30,79,178,0.25)] ' +
+  'hover:shadow-[0_20px_40px_-15px_rgba(31,38,135,0.12),inset_0_1px_0_rgba(255,255,255,0.95)] ' +
+  'dark:bg-[rgba(15,23,42,0.45)] dark:border-[rgba(255,255,255,0.06)] ' +
+  'dark:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.05)] ' +
+  'dark:hover:bg-[rgba(15,23,42,0.55)] dark:hover:border-[rgba(56,189,248,0.25)] ' +
+  'dark:hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.65),0_0_20px_rgba(56,189,248,0.1),inset_0_1px_0_rgba(255,255,255,0.08)]';
+
 export function BatchesPage() {
   const qc = useQueryClient();
   const { user } = useAuth();
@@ -100,7 +113,7 @@ export function BatchesPage() {
       {/* ── Create form (admin only) ───────────────────── */}
       {isAdmin ? (
         <div
-          className="glass-card"
+          className={glassCard}
           style={{
             padding: '22px 26px',
             borderColor: 'rgba(65, 120, 255, 0.35)',
@@ -235,7 +248,7 @@ export function BatchesPage() {
           return (
             <article
               key={batch.id}
-              className="glass-card"
+              className={glassCard}
               style={{ padding: '20px 24px' }}
             >
               {isEditing ? (
