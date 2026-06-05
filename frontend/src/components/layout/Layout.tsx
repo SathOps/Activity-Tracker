@@ -154,7 +154,7 @@ export function Layout({ children }: Props) {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <main className="flex-1 overflow-y-auto relative bg-slate-50 dark:bg-[#090e1a] transition-colors duration-300">
         {/* Animated background glow effect layers */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="fixed inset-0 md:left-[300px] pointer-events-none overflow-hidden z-0">
           <div
             style={{
               position: 'absolute',
@@ -186,7 +186,7 @@ export function Layout({ children }: Props) {
         </div>
 
         {/* Spaced dot grid pattern (subtle and clean) */}
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(rgba(148,163,184,0.18)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:24px_24px] z-0" />
+        <div className="fixed inset-0 md:left-[300px] pointer-events-none bg-[radial-gradient(rgba(148,163,184,0.18)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:24px_24px] z-0" />
 
         <div
           className={`relative z-10 px-4 py-6 md:px-8 md:py-6 max-w-[1200px] mx-auto min-w-0 ${isStandupMode ? 'pb-24 md:pb-6' : ''}`}
