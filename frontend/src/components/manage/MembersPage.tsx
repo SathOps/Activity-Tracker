@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, Upload } from 'lucide-react';
 import { getBatches } from '../../services/api/batches';
@@ -49,6 +49,7 @@ export function MembersPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [draft, setDraft] = useState<UserDraft>(EMPTY_DRAFT);
   const [importBatchId, setImportBatchId] = useState<number | ''>('');
   const [importFile, setImportFile] = useState<File | null>(null);
@@ -57,14 +58,22 @@ export function MembersPage() {
     errors: string[];
   } | null>(null);
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [query]);
+
   const batchesQuery = useQuery({
     queryKey: ['batches'],
     queryFn: getBatches,
   });
 
   const usersQuery = useQuery({
-    queryKey: ['users', query],
-    queryFn: () => (query.trim() ? searchUsers(query.trim()) : getUsers()),
+    queryKey: ['users', debouncedQuery],
+    queryFn: () =>
+      debouncedQuery.trim() ? searchUsers(debouncedQuery.trim()) : getUsers(),
   });
 
   const createMutation = useMutation({
@@ -104,7 +113,10 @@ export function MembersPage() {
 
   const users = useMemo(() => usersQuery.data ?? [], [usersQuery.data]);
 
-  if (batchesQuery.isLoading || usersQuery.isLoading) {
+  if (
+    (batchesQuery.isLoading && !batchesQuery.data) ||
+    (usersQuery.isLoading && !usersQuery.data)
+  ) {
     return <Spinner label="Loading users…" />;
   }
 

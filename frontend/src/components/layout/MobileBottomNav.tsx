@@ -1,7 +1,15 @@
 import React from 'react';
-import { LayoutGrid, Users, Mic, Users2, BarChart2 } from 'lucide-react';
+import {
+  LayoutGrid,
+  Users,
+  Mic,
+  Users2,
+  BarChart2,
+  ClipboardList,
+} from 'lucide-react';
 import { useConfigStore } from '../../stores/configStore';
 import { cn } from '../../lib/utils';
+import { useAuth } from '../../contexts/AuthContext';
 import type { StandupPanel } from '../../types';
 
 interface NavItem {
@@ -10,24 +18,40 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { id: 'status', label: 'Status', icon: <LayoutGrid size={20} /> },
-  { id: 'interns', label: 'Interns', icon: <Users size={20} /> },
-  { id: 'teams', label: 'Team Management', icon: <Users2 size={20} /> },
-  { id: 'analytics', label: 'Analytics', icon: <BarChart2 size={20} /> },
-];
-
 export function MobileBottomNav({
   onRecordClick,
 }: {
   onRecordClick: () => void;
 }) {
   const { activeStandupPanel, setActiveStandupPanel } = useConfigStore();
+  const { user } = useAuth();
+  const isIntern = user?.role === 'intern';
+
+  const navItems = React.useMemo((): NavItem[] => {
+    return [
+      { id: 'status', label: 'Status', icon: <LayoutGrid size={20} /> },
+      {
+        id: 'interns',
+        label: isIntern ? 'Standups Logs' : 'Interns',
+        icon: isIntern ? <ClipboardList size={20} /> : <Users size={20} />,
+      },
+      {
+        id: 'teams',
+        label: isIntern ? 'Manage Team' : 'Team Management',
+        icon: <Users2 size={20} />,
+      },
+      {
+        id: 'analytics',
+        label: isIntern ? 'Team Analytics' : 'Analytics',
+        icon: <BarChart2 size={20} />,
+      },
+    ];
+  }, [isIntern]);
 
   return (
     <nav className="mobile-bottom-nav">
       <div className="mobile-bottom-nav__items">
-        {NAV_ITEMS.slice(0, 2).map((item) => (
+        {navItems.slice(0, 2).map((item) => (
           <button
             key={item.id}
             className={cn(
@@ -52,7 +76,7 @@ export function MobileBottomNav({
           </button>
         </div>
 
-        {NAV_ITEMS.slice(2).map((item) => (
+        {navItems.slice(2).map((item) => (
           <button
             key={item.id}
             className={cn(

@@ -4,6 +4,7 @@ import TeamsDashboard from './TeamsDashboard';
 import type { Team } from './TeamList';
 import type { Intern } from '../intern/InternSearch';
 import { useConfigStore } from '../../stores/configStore';
+import { useAuth } from '../../contexts/AuthContext';
 
 export interface DashboardHomeProps {
   addedInterns: Intern[];
@@ -25,10 +26,12 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
   const activeStandupPanel = useConfigStore(
     (state) => state.activeStandupPanel
   );
+  const { user } = useAuth();
+  const isIntern = user?.role === 'intern';
 
   return (
     <>
-      {activeStandupPanel === 'interns' ? (
+      {activeStandupPanel === 'interns' && !isIntern ? (
         <InternsDashboard
           addedInterns={addedInterns}
           authToken={authToken}
@@ -41,11 +44,13 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
           addedInterns={addedInterns}
           canManageStandup={canManageInterns}
           mode={
-            activeStandupPanel === 'status'
-              ? 'status'
-              : activeStandupPanel === 'analytics'
-                ? 'analytics'
-                : 'teams'
+            isIntern && activeStandupPanel === 'interns'
+              ? 'logs'
+              : activeStandupPanel === 'status'
+                ? 'status'
+                : activeStandupPanel === 'analytics'
+                  ? 'analytics'
+                  : 'teams'
           }
           preloadedTeams={preloadedTeams}
           authToken={authToken}

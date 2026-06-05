@@ -16,11 +16,13 @@ export interface TeamIntern {
   teamProgressCount?: number;
   slotStatuses?: StandupSlotResult[];
   audios?: InternAudioMetadata[];
+  pendingApproval?: 'ADD' | 'REMOVE';
 }
 
 export interface Team {
   teamId: string;
   teamName: string;
+  startDate?: string;
   interns: TeamIntern[];
   todayStandupCount?: number;
   requiredStandupCount?: number;
@@ -32,6 +34,7 @@ export interface Team {
 export interface TeamListProps {
   teams: Team[];
   addedInterns?: Intern[];
+  isIntern?: boolean;
   selectedDateLabel?: string;
   activeAudioId?: string | null;
   onPlay?: (internId: string, audioId: string) => void;
@@ -43,6 +46,8 @@ export interface TeamListProps {
   onUpdateIntern?: (internId: string, newName: string) => void;
   onDeleteTeam?: (teamId: string) => void;
   onUpdateTeamName?: (teamId: string, newName: string) => void;
+  onApprovePending?: (internId: string) => void;
+  onRejectPending?: (internId: string) => void;
 }
 
 interface DropdownState {
@@ -60,6 +65,7 @@ const emptyDropdownState: DropdownState = {
 export const TeamList: React.FC<TeamListProps> = ({
   teams,
   addedInterns = [],
+  isIntern = false,
   selectedDateLabel,
   onVerifyTeam,
   verifyingTeamId,
@@ -71,6 +77,8 @@ export const TeamList: React.FC<TeamListProps> = ({
   onUpdateIntern,
   onDeleteTeam,
   onUpdateTeamName,
+  onApprovePending,
+  onRejectPending,
 }) => {
   const { t } = useTranslation();
   const [dropdownByTeam, setDropdownByTeam] = React.useState<
@@ -249,133 +257,137 @@ export const TeamList: React.FC<TeamListProps> = ({
             className="p-6 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300"
             key={team.teamId}
           >
-            <header className="flex flex-wrap items-start justify-between gap-4 mb-4">
-              <div className="grid gap-1.5 flex-1 min-w-0">
-                {editingTeamId === team.teamId ? (
-                  <div className="flex flex-wrap gap-2">
-                    <input
-                      aria-label={t('teams.editTeamNameFor', {
-                        name: team.teamName,
-                      })}
-                      onChange={(event) =>
-                        setTeamNameDraftById((prev) => ({
-                          ...prev,
-                          [team.teamId]: event.target.value,
-                        }))
-                      }
-                      className="bg-[var(--surface-0)] border border-[var(--border)] rounded text-[13px] text-[var(--text-main)] min-w-[220px] px-2 py-1.5"
-                      type="text"
-                      value={teamNameDraftById[team.teamId] ?? team.teamName}
-                    />
-                    <button
-                      className="ghost-button"
-                      onClick={() => handleSaveTeamRename(team.teamId)}
-                      type="button"
-                    >
-                      {t('button.save')}
-                    </button>
-                    <button
-                      className="ghost-button"
-                      onClick={handleCancelTeamRename}
-                      type="button"
-                    >
-                      {t('button.cancel')}
-                    </button>
-                  </div>
-                ) : (
-                  <h3 className="m-0 text-xl font-extrabold text-[var(--text-main)] tracking-tight truncate">
-                    {team.teamName}
-                  </h3>
-                )}
-
-                <div className="flex flex-wrap items-center gap-2 mt-1">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
-                    {qualifiedStandupLabel}:
-                  </span>
-                  <span className="text-xs font-bold bg-blue-500/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 px-2.5 py-0.5 rounded-full border border-blue-500/25 dark:border-blue-400/20 backdrop-blur-md shadow-[0_2px_8px_rgba(59,130,246,0.08)]">
-                    {standupCount}/{requiredCount}
-                  </span>
-                  <span
-                    className={`text-xs font-bold px-2.5 py-0.5 rounded-full border backdrop-blur-md ${
-                      teamStatus === 'COMPLETED'
-                        ? 'bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/25 dark:border-emerald-400/20 shadow-[0_2px_8px_rgba(16,185,129,0.08)]'
-                        : 'bg-amber-500/10 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25 dark:border-amber-400/20 shadow-[0_2px_8px_rgba(245,158,11,0.08)]'
-                    }`}
-                  >
-                    {teamStatus === 'COMPLETED' ? 'Completed' : 'Pending'}
-                  </span>
-                </div>
-
-                {/* Progress Indicator */}
-                <div className="w-full bg-slate-200/50 dark:bg-slate-800/55 h-2 rounded-full overflow-hidden mt-3 mb-2">
-                  <div
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${progressPercentage}%` }}
-                  />
-                </div>
-
-                {team.teamSlotStatuses?.length ? (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {team.teamSlotStatuses.map((slot) => (
-                      <span
-                        key={slot.slotId}
-                        className="inline-flex justify-center items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full border backdrop-blur-md transition-all duration-200"
-                        style={{
-                          backgroundColor: getSlotStatusBackground(slot.status),
-                          borderColor: getSlotStatusBorder(slot.status),
-                          color: getSlotStatusColor(slot.status),
-                        }}
-                        title={`${slot.label} (${slot.windowLabel}): ${slot.status}`}
+            {!isIntern && (
+              <header className="flex flex-wrap items-start justify-between gap-4 mb-4">
+                <div className="grid gap-1.5 flex-1 min-w-0">
+                  {editingTeamId === team.teamId ? (
+                    <div className="flex flex-wrap gap-2">
+                      <input
+                        aria-label={t('teams.editTeamNameFor', {
+                          name: team.teamName,
+                        })}
+                        onChange={(event) =>
+                          setTeamNameDraftById((prev) => ({
+                            ...prev,
+                            [team.teamId]: event.target.value,
+                          }))
+                        }
+                        className="bg-[var(--surface-0)] border border-[var(--border)] rounded text-[13px] text-[var(--text-main)] min-w-[220px] px-2 py-1.5"
+                        type="text"
+                        value={teamNameDraftById[team.teamId] ?? team.teamName}
+                      />
+                      <button
+                        className="ghost-button"
+                        onClick={() => handleSaveTeamRename(team.teamId)}
+                        type="button"
                       >
-                        {renderSlotIcon(slot.status)}
-                        <span>{getSlotTimeLabel(slot.slotId)}</span>
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-                {team.verifiedDate ? (
-                  <div className="text-[var(--text-soft)] text-xs font-medium mt-1.5">
-                    {t('teams.verifiedDate')}: {team.verifiedDate}
-                  </div>
-                ) : null}
-              </div>
+                        {t('button.save')}
+                      </button>
+                      <button
+                        className="ghost-button"
+                        onClick={handleCancelTeamRename}
+                        type="button"
+                      >
+                        {t('button.cancel')}
+                      </button>
+                    </div>
+                  ) : (
+                    <h3 className="m-0 text-xl font-extrabold text-[var(--text-main)] tracking-tight truncate">
+                      {team.teamName}
+                    </h3>
+                  )}
 
-              <div className="flex flex-wrap gap-2 shrink-0">
-                {onVerifyTeam ? (
-                  <button
-                    className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-xl shadow-sm hover:shadow transition-all duration-200 cursor-pointer border-none outline-none"
-                    onClick={() => onVerifyTeam(team.teamId)}
-                    type="button"
-                  >
-                    {verifyingTeamId === team.teamId
-                      ? t('teams.verifying')
-                      : t('teams.verifyTeam')}
-                  </button>
-                ) : null}
-                {onUpdateTeamName && editingTeamId !== team.teamId ? (
-                  <button
-                    className="px-4 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-800 dark:text-slate-200 rounded-xl border border-slate-300/60 dark:border-slate-700 shadow-sm transition-all duration-200 cursor-pointer outline-none"
-                    onClick={() =>
-                      handleStartTeamRename(team.teamId, team.teamName)
-                    }
-                    type="button"
-                  >
-                    {t('teams.editTeam')}
-                  </button>
-                ) : null}
-                {onDeleteTeam ? (
-                  <button
-                    className="px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 active:bg-red-700 rounded-xl shadow-sm hover:shadow transition-all duration-200 cursor-pointer border-none outline-none"
-                    onClick={() => onDeleteTeam(team.teamId)}
-                    type="button"
-                  >
-                    {t('teams.deleteTeam')}
-                  </button>
-                ) : null}
-              </div>
-            </header>
+                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
+                      {qualifiedStandupLabel}:
+                    </span>
+                    <span className="text-xs font-bold bg-blue-500/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 px-2.5 py-0.5 rounded-full border border-blue-500/25 dark:border-blue-400/20 backdrop-blur-md shadow-[0_2px_8px_rgba(59,130,246,0.08)]">
+                      {standupCount}/{requiredCount}
+                    </span>
+                    <span
+                      className={`text-xs font-bold px-2.5 py-0.5 rounded-full border backdrop-blur-md ${
+                        teamStatus === 'COMPLETED'
+                          ? 'bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/25 dark:border-emerald-400/20 shadow-[0_2px_8px_rgba(16,185,129,0.08)]'
+                          : 'bg-amber-500/10 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25 dark:border-amber-400/20 shadow-[0_2px_8px_rgba(245,158,11,0.08)]'
+                      }`}
+                    >
+                      {teamStatus === 'COMPLETED' ? 'Completed' : 'Pending'}
+                    </span>
+                  </div>
 
-            {onAddInternToTeam ? (
+                  {/* Progress Indicator */}
+                  <div className="w-full bg-slate-200/50 dark:bg-slate-800/55 h-2 rounded-full overflow-hidden mt-3 mb-2">
+                    <div
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${progressPercentage}%` }}
+                    />
+                  </div>
+
+                  {team.teamSlotStatuses?.length ? (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {team.teamSlotStatuses.map((slot) => (
+                        <span
+                          key={slot.slotId}
+                          className="inline-flex justify-center items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full border backdrop-blur-md transition-all duration-200"
+                          style={{
+                            backgroundColor: getSlotStatusBackground(
+                              slot.status
+                            ),
+                            borderColor: getSlotStatusBorder(slot.status),
+                            color: getSlotStatusColor(slot.status),
+                          }}
+                          title={`${slot.label} (${slot.windowLabel}): ${slot.status}`}
+                        >
+                          {renderSlotIcon(slot.status)}
+                          <span>{getSlotTimeLabel(slot.slotId)}</span>
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  {team.verifiedDate ? (
+                    <div className="text-[var(--text-soft)] text-xs font-medium mt-1.5">
+                      {t('teams.verifiedDate')}: {team.verifiedDate}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="flex flex-wrap gap-2 shrink-0">
+                  {onVerifyTeam ? (
+                    <button
+                      className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-xl shadow-sm hover:shadow transition-all duration-200 cursor-pointer border-none outline-none"
+                      onClick={() => onVerifyTeam(team.teamId)}
+                      type="button"
+                    >
+                      {verifyingTeamId === team.teamId
+                        ? t('teams.verifying')
+                        : t('teams.verifyTeam')}
+                    </button>
+                  ) : null}
+                  {onUpdateTeamName && editingTeamId !== team.teamId ? (
+                    <button
+                      className="px-4 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-800 dark:text-slate-200 rounded-xl border border-slate-300/60 dark:border-slate-700 shadow-sm transition-all duration-200 cursor-pointer outline-none"
+                      onClick={() =>
+                        handleStartTeamRename(team.teamId, team.teamName)
+                      }
+                      type="button"
+                    >
+                      {t('teams.editTeam')}
+                    </button>
+                  ) : null}
+                  {onDeleteTeam ? (
+                    <button
+                      className="px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 active:bg-red-700 rounded-xl shadow-sm hover:shadow transition-all duration-200 cursor-pointer border-none outline-none"
+                      onClick={() => onDeleteTeam(team.teamId)}
+                      type="button"
+                    >
+                      {t('teams.deleteTeam')}
+                    </button>
+                  ) : null}
+                </div>
+              </header>
+            )}
+
+            {onAddInternToTeam && !isIntern ? (
               <div className="flex flex-wrap items-start gap-2 mb-4">
                 <div className="relative flex-1 min-w-[220px]">
                   <input
@@ -393,7 +405,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                     value={state.inputValue}
                   />
 
-                  {state.showDropdown ? (
+                  {state.showDropdown && !isIntern ? (
                     <ul
                       className="absolute left-0 right-0 z-20 glass rounded-xl shadow-lg list-none m-1 max-h-[220px] overflow-y-auto p-1 backdrop-blur-xl"
                       style={{
@@ -479,6 +491,9 @@ export const TeamList: React.FC<TeamListProps> = ({
                   activeAudioId={activeAudioId}
                   onPlay={onPlay}
                   onPause={onPause}
+                  pendingApproval={intern.pendingApproval}
+                  onApprovePending={onApprovePending}
+                  onRejectPending={onRejectPending}
                 />
               ))}
             </div>

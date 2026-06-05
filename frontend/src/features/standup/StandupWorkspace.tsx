@@ -40,7 +40,7 @@ export default function StandupWorkspace() {
     if (!payload) {
       return [];
     }
-    return payload.teams.map((team): Team => {
+    const allTeams = payload.teams.map((team): Team => {
       const teamUsers = payload.users.filter(
         (appUser) =>
           appUser.team_id === team.id || appUser.team_name === team.name
@@ -48,6 +48,7 @@ export default function StandupWorkspace() {
       return {
         teamId: String(team.id),
         teamName: team.name,
+        startDate: team.start_date,
         interns: teamUsers.map((appUser) => {
           const identifier =
             appUser.corpus_username ||
@@ -62,7 +63,19 @@ export default function StandupWorkspace() {
         }),
       };
     });
-  }, [standupQuery.data]);
+
+    if (user?.role === 'intern') {
+      const userTeamIdStr = user.teamId ? String(user.teamId) : null;
+      const userTeamNameLower = user.teamName?.toLowerCase();
+      return allTeams.filter(
+        (team) =>
+          (userTeamIdStr && team.teamId === userTeamIdStr) ||
+          (userTeamNameLower &&
+            team.teamName.toLowerCase() === userTeamNameLower)
+      );
+    }
+    return allTeams;
+  }, [standupQuery.data, user]);
 
   useEffect(() => {
     const payload = standupQuery.data?.data;
@@ -124,7 +137,7 @@ export default function StandupWorkspace() {
         onInternsChange={setAddedInterns}
         onRemoveIntern={handleRemoveIntern}
         preloadedTeams={preloadedTeams}
-        canManageInterns={user?.role === 'admin'}
+        canManageInterns={user?.role === 'admin' || user?.role === 'intern'}
       />
     </section>
   );

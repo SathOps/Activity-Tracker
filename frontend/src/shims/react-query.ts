@@ -35,15 +35,42 @@ function subscribe(key: string, listener: () => void): () => void {
   };
 }
 
-function invalidate(key: QueryKey): void {
-  const keyString = keyToString(key);
-  versions.set(keyString, (versions.get(keyString) ?? 0) + 1);
-  const group = listeners.get(keyString);
-  if (!group) {
-    return;
+function isPrefix(prefix: QueryKey, key: QueryKey): boolean {
+  if (prefix.length > key.length) {
+    return false;
   }
-  for (const listener of group) {
-    listener();
+  for (let i = 0; i < prefix.length; i++) {
+    if (JSON.stringify(prefix[i]) !== JSON.stringify(key[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function invalidate(key: QueryKey): void {
+  for (const listenerKeyStr of listeners.keys()) {
+    try {
+      const activeKey = JSON.parse(listenerKeyStr);
+      if (Array.isArray(activeKey) && isPrefix(key, activeKey)) {
+        versions.set(listenerKeyStr, (versions.get(listenerKeyStr) ?? 0) + 1);
+        const group = listeners.get(listenerKeyStr);
+        if (group) {
+          for (const listener of group) {
+            listener();
+          }
+        }
+      }
+    } catch {
+      if (listenerKeyStr === keyToString(key)) {
+        versions.set(listenerKeyStr, (versions.get(listenerKeyStr) ?? 0) + 1);
+        const group = listeners.get(listenerKeyStr);
+        if (group) {
+          for (const listener of group) {
+            listener();
+          }
+        }
+      }
+    }
   }
 }
 
@@ -81,7 +108,7 @@ export function useQuery<TData>(options: {
       return;
     }
 
-    setIsLoading(true);
+    setIsLoading(data === undefined);
     setError(null);
     const attempts = typeof retry === 'number' ? retry + 1 : retry ? 2 : 1;
 
@@ -106,8 +133,12 @@ export function useQuery<TData>(options: {
   }, [enabled, retry]);
 
   useEffect(() => {
+    setVersion(versions.get(keyString) ?? 0);
+  }, [keyString]);
+
+  useEffect(() => {
     void run();
-  }, [run, version]);
+  }, [run, version, keyString]);
 
   return {
     data,

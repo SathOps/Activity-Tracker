@@ -1,6 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Clock, X, Calendar, BarChart3, RefreshCw } from 'lucide-react';
+import {
+  Check,
+  Clock,
+  X,
+  Calendar,
+  BarChart3,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import TeamList, { Team } from './TeamList';
 import TeamStatusRing from './TeamStatusRing';
 import InternCard from '../intern/InternCard';
@@ -19,6 +28,7 @@ import { getInternAudios } from '../../services/corpus';
 import type { InternAudioMetadata } from '../../services/corpus';
 import { RecordStandupModal } from '../RecordStandupModal';
 import { cn } from '../../lib/utils';
+import { useAuth } from '../../contexts/AuthContext';
 
 type DashboardView = 'TEAMS' | 'INTERNS' | 'COMPLETED';
 type StatusView = 'DAILY' | 'WEEKLY';
@@ -80,7 +90,7 @@ export interface DashboardLayoutProps {
   teams?: Team[];
   addedInterns?: Intern[];
   statusDisplay?: 'modal' | 'inline';
-  mode?: 'teams' | 'status' | 'analytics';
+  mode?: 'teams' | 'status' | 'analytics' | 'logs';
   authToken?: string;
   canManageStandup?: boolean;
 }
@@ -113,21 +123,37 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   canManageStandup = false,
 }) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const isIntern = user?.role === 'intern';
   const [managedTeams, setManagedTeams] = React.useState<Team[]>(
     () => teams ?? EMPTY_TEAMS
   );
-  const [selectedDateKey, setSelectedDateKey] = React.useState(() =>
-    getLocalDateKey(new Date())
-  );
+  const [selectedDateKey, setSelectedDateKey] = React.useState(() => {
+    if (mode === 'logs') {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return getLocalDateKey(d);
+    }
+    return getLocalDateKey(new Date());
+  });
+  const yesterdayDateKey = React.useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return getLocalDateKey(d);
+  }, []);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [isCreatingTeam, setIsCreatingTeam] = React.useState(false);
   const [newTeamName, setNewTeamName] = React.useState('');
-  const [activeView, setActiveView] =
-    React.useState<DashboardView>(DEFAULT_VIEW);
+  const [activeView, setActiveView] = React.useState<DashboardView>(() =>
+    mode === 'logs' ? 'INTERNS' : DEFAULT_VIEW
+  );
   const [verifyingTeamId, setVerifyingTeamId] = React.useState<string | null>(
     null
   );
   const [isStatusModalOpen, setIsStatusModalOpen] = React.useState(false);
+  const [activeSlotTab, setActiveSlotTab] = React.useState<
+    'S1' | 'S2' | 'S3' | 'S4'
+  >('S1');
   const [statusView, setStatusView] = React.useState<StatusView>('DAILY');
   const [analyticsQualityFilter, setAnalyticsQualityFilter] =
     React.useState<AnalyticsQualityFilter>('ALL');
@@ -142,6 +168,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     TeamWeeklyStatusRow[]
   >([]);
   const [analyticsTeamDailyTotals, setAnalyticsTeamDailyTotals] =
+    React.useState<Map<string, Map<string, number>>>(new Map());
+  const [analyticsInternDailyTotals, setAnalyticsInternDailyTotals] =
     React.useState<Map<string, Map<string, number>>>(new Map());
   const [analyticsQualityRows, setAnalyticsQualityRows] = React.useState<
     TeamAnalyticsQualityRow[]
@@ -169,6 +197,63 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
     setManagedTeams((prev) => prev.map((team) => resetTeamVerification(team)));
   }, [selectedDateKey]);
+
+  React.useEffect(() => {
+    if (mode === 'logs') {
+      setActiveView('INTERNS');
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      setSelectedDateKey(getLocalDateKey(d));
+    } else {
+      setActiveView('TEAMS');
+      const d = new Date();
+      setSelectedDateKey(getLocalDateKey(d));
+    }
+  }, [mode]);
+
+  React.useEffect(() => {
+    if (user?.role === 'intern' && managedTeams.length > 0) {
+      const team = managedTeams[0];
+      if (team.verifiedDate !== selectedDateKey && !verifyingTeamId) {
+        void handleVerifyTeam(team.teamId);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [managedTeams, selectedDateKey, user?.role, verifyingTeamId]);
+
+  const handleApprovePending = (internId: string) => {
+    setManagedTeams((prev) =>
+      prev.map((team) => ({
+        ...team,
+        interns: team.interns
+          .map((intern) => {
+            if (intern.internId !== internId) return intern;
+            if (intern.pendingApproval === 'REMOVE') return null;
+            return { ...intern, pendingApproval: undefined };
+          })
+          .filter(
+            (intern): intern is NonNullable<typeof intern> => intern !== null
+          ),
+      }))
+    );
+  };
+
+  const handleRejectPending = (internId: string) => {
+    setManagedTeams((prev) =>
+      prev.map((team) => ({
+        ...team,
+        interns: team.interns
+          .map((intern) => {
+            if (intern.internId !== internId) return intern;
+            if (intern.pendingApproval === 'ADD') return null;
+            return { ...intern, pendingApproval: undefined };
+          })
+          .filter(
+            (intern): intern is NonNullable<typeof intern> => intern !== null
+          ),
+      }))
+    );
+  };
 
   const teamProgressById = React.useMemo(
     () => buildTeamProgressById(managedTeams),
@@ -199,8 +284,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     [selectedDateKey]
   );
   const selectedWeekDateKeys = React.useMemo(
-    () => getWeekDateKeys(selectedDateKey),
-    [selectedDateKey]
+    () => getWeekDateKeys(selectedDateKey, user?.role === 'intern'),
+    [selectedDateKey, user?.role]
   );
   const selectedWeekLabel = React.useMemo(
     () =>
@@ -328,6 +413,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               status: 'PENDING',
               todayValidCount: 0,
               slotStatuses: createMissingSlotStatuses(),
+              pendingApproval: user?.role === 'intern' ? 'ADD' : undefined,
             },
           ],
         };
@@ -442,6 +528,17 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           return team;
         }
 
+        if (user?.role === 'intern') {
+          return {
+            ...team,
+            interns: team.interns.map((intern) =>
+              intern.internId === internId
+                ? { ...intern, pendingApproval: 'REMOVE' as const }
+                : intern
+            ),
+          };
+        }
+
         return {
           ...team,
           teamStatus: 'PENDING',
@@ -481,6 +578,43 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   const handleDeleteTeam = (teamId: string) => {
     setManagedTeams((prev) => prev.filter((team) => team.teamId !== teamId));
+  };
+
+  const handleAddInternPrompt = () => {
+    const input = prompt(
+      t('teams.enterInternNameOrIdPrompt', 'Enter intern name or ID to add:')
+    );
+    if (!input) return;
+    const query = input.trim().toLowerCase();
+
+    const matched = addedInterns?.find(
+      (intern) =>
+        intern.id.toLowerCase() === query ||
+        intern.name.toLowerCase() === query ||
+        (intern.username && intern.username.toLowerCase() === query)
+    );
+
+    if (!matched) {
+      alert(
+        t('interns.internNotFound', 'Intern not found in the enrolled list.')
+      );
+      return;
+    }
+
+    const team = displayTeams[0];
+    if (!team) return;
+
+    const inTeam = team.interns.some(
+      (intern) =>
+        intern.corpusUserId === matched.id || intern.internId === matched.id
+    );
+
+    if (inTeam) {
+      alert(t('interns.alreadyInTeam', 'Intern is already in this team.'));
+      return;
+    }
+
+    handleAddInternToTeam(team.teamId, matched);
   };
 
   const handleSelectedDateChange = (
@@ -657,6 +791,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       }
 
       setAnalyticsTeamDailyTotals(teamTotals);
+      setAnalyticsInternDailyTotals(countsByInternByDate);
       setAnalyticsQualityRows(qualityRows);
     } catch (error) {
       if (analyticsLoadRequestId.current !== requestId) {
@@ -666,6 +801,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       console.error('Unable to load analytics', error);
       setAnalyticsError(t('dashboard.unableToLoadAnalytics'));
       setAnalyticsTeamDailyTotals(new Map());
+      setAnalyticsInternDailyTotals(new Map());
       setAnalyticsQualityRows([]);
     } finally {
       if (analyticsLoadRequestId.current === requestId) {
@@ -876,7 +1012,81 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       statusView === 'DAILY' &&
       (!isInlineStatusView || !showDailyChart) ? (
         <section className="grid gap-3.5">
-          {teamDailyStatusRows.length === 0 ? (
+          {user?.role === 'intern' ? (
+            <section className="grid gap-4">
+              {/* 4 Tabs for Standups */}
+              <div className="flex gap-2 p-1 bg-slate-900/50 border border-slate-800/60 rounded-2xl max-w-lg">
+                {(['S1', 'S2', 'S3', 'S4'] as const).map((slotId) => {
+                  const timeLabel = getSlotTimeLabel(slotId);
+                  const isActive = activeSlotTab === slotId;
+                  return (
+                    <button
+                      key={slotId}
+                      onClick={() => setActiveSlotTab(slotId)}
+                      className={`flex-1 py-2 px-3 text-xs font-semibold rounded-xl transition-all duration-200 cursor-pointer border-none outline-none ${
+                        isActive
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/10'
+                          : 'text-slate-400 hover:text-slate-200 bg-transparent'
+                      }`}
+                      type="button"
+                    >
+                      Standup {slotId.slice(1)} ({timeLabel})
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Roster of members showing their status for the active slot tab */}
+              <div className="grid gap-3">
+                {displayTeams[0]?.interns.length === 0 ? (
+                  <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
+                    No team members available.
+                  </p>
+                ) : (
+                  displayTeams[0]?.interns.map((intern) => {
+                    const slot = intern.slotStatuses?.find(
+                      (s) => s.slotId === activeSlotTab
+                    );
+                    const slotStatus = slot?.status ?? 'UPCOMING';
+                    const timeWindow = slot?.windowLabel ?? '';
+
+                    return (
+                      <article
+                        key={intern.internId}
+                        className="p-5 flex items-center justify-between gap-4 bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/20 dark:border-blue-500/15 rounded-2xl backdrop-blur-md shadow-sm hover:border-blue-500/30 transition-all duration-200"
+                      >
+                        <div className="flex flex-col gap-0.5">
+                          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 m-0">
+                            {intern.internName}
+                          </h4>
+                          {timeWindow && (
+                            <span className="text-[11px] text-slate-500 dark:text-slate-450 font-medium">
+                              Window: {timeWindow}
+                            </span>
+                          )}
+                        </div>
+
+                        <span
+                          className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full border backdrop-blur-md"
+                          style={{
+                            backgroundColor:
+                              getStatusSlotBackground(slotStatus),
+                            borderColor: getStatusSlotBorder(slotStatus),
+                            color: getStatusSlotColor(slotStatus),
+                          }}
+                        >
+                          {renderSlotIcon(slotStatus)}
+                          <span className="capitalize">
+                            {slotStatus.toLowerCase()}
+                          </span>
+                        </span>
+                      </article>
+                    );
+                  })
+                )}
+              </div>
+            </section>
+          ) : teamDailyStatusRows.length === 0 ? (
             <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
               {t('dashboard.noTeamsForStatusTracking')}
             </p>
@@ -1052,30 +1262,38 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               />
             </label>
             <button
-              className="ghost-button"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-200 text-sm font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:bg-slate-500/10 dark:hover:bg-slate-950/30 transition-all duration-200 active:scale-95 cursor-pointer"
               onClick={() => handleShiftAnalyticsRange(-30)}
               type="button"
             >
-              {t('dashboard.previousRange')}
+              <ChevronLeft size={16} />
+              <span>{t('dashboard.previousRange')}</span>
             </button>
             <button
-              className="ghost-button"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-200 text-sm font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:bg-slate-500/10 dark:hover:bg-slate-950/30 transition-all duration-200 active:scale-95 cursor-pointer"
               onClick={() => handleShiftAnalyticsRange(30)}
               type="button"
             >
-              {t('dashboard.nextRange')}
+              <span>{t('dashboard.nextRange')}</span>
+              <ChevronRight size={16} />
             </button>
             <button
-              className="ghost-button"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-200 text-sm font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:bg-slate-500/10 dark:hover:bg-slate-950/30 transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
               disabled={analyticsLoading}
               onClick={() => {
                 void loadAnalytics();
               }}
               type="button"
             >
-              {analyticsLoading
-                ? t('dashboard.refreshing')
-                : t('button.refresh')}
+              <RefreshCw
+                size={14}
+                className={analyticsLoading ? 'animate-spin' : ''}
+              />
+              <span>
+                {analyticsLoading
+                  ? t('dashboard.refreshing')
+                  : t('button.refresh')}
+              </span>
             </button>
           </div>
         </header>
@@ -1127,51 +1345,79 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               </div>
             </div>
 
-            {renderTeamHeatmap(
-              rankedAnalyticsTeams,
-              [...analyticsDateKeys].reverse(),
-              analyticsTeamDailyTotals,
-              t('dashboard.noLeaderboardResults'),
-              t('dashboard.scrollToViewMore'),
-              t('dashboard.teamColumn')
-            )}
+            {user?.role === 'intern' && managedTeams.length > 0
+              ? renderInternHeatmap(
+                  managedTeams[0],
+                  [...analyticsDateKeys].reverse(),
+                  analyticsInternDailyTotals,
+                  analyticsTeamDailyTotals,
+                  t('dashboard.noLeaderboardResults'),
+                  t('dashboard.scrollToViewMore'),
+                  'Team Member'
+                )
+              : renderTeamHeatmap(
+                  rankedAnalyticsTeams,
+                  [...analyticsDateKeys].reverse(),
+                  analyticsTeamDailyTotals,
+                  t('dashboard.noLeaderboardResults'),
+                  t('dashboard.scrollToViewMore'),
+                  t('dashboard.teamColumn')
+                )}
           </section>
         ) : null}
       </section>
     );
   };
 
+  const showTotalTeams = !isIntern;
+  const showTotalInterns = !(
+    isIntern &&
+    (mode === 'logs' || mode === 'analytics')
+  );
+  const visibleCardsCount =
+    (showTotalTeams ? 1 : 0) + (showTotalInterns ? 1 : 0) + 1;
+  const gridColsClass =
+    visibleCardsCount === 3
+      ? 'grid-cols-1 sm:grid-cols-3'
+      : visibleCardsCount === 2
+        ? 'grid-cols-1 sm:grid-cols-2'
+        : 'grid-cols-1';
+
   return (
     <div className="w-full">
       {/* KPI Summary Cards */}
       {!isInlineStatusView && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div className="p-5 flex flex-col justify-between bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
-              {t('dashboard.totalTeams', 'Total Teams')}
-            </span>
-            <div className="flex items-baseline justify-between mt-2">
-              <strong className="text-2xl font-extrabold text-[var(--text-main)]">
-                {displayTeams.length}
-              </strong>
-              <span className="text-xs text-blue-500 font-semibold bg-blue-500/10 px-2 py-0.5 rounded-full">
-                Active
+        <div className={`grid ${gridColsClass} gap-4 mb-6`}>
+          {showTotalTeams && (
+            <div className="p-5 flex flex-col justify-between bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
+                {t('dashboard.totalTeams', 'Total Teams')}
               </span>
+              <div className="flex items-baseline justify-between mt-2">
+                <strong className="text-2xl font-extrabold text-[var(--text-main)]">
+                  {displayTeams.length}
+                </strong>
+                <span className="text-xs text-blue-500 font-semibold bg-blue-500/10 px-2 py-0.5 rounded-full">
+                  Active
+                </span>
+              </div>
             </div>
-          </div>
-          <div className="p-5 flex flex-col justify-between bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
-              {t('dashboard.totalInterns', 'Total Interns')}
-            </span>
-            <div className="flex items-baseline justify-between mt-2">
-              <strong className="text-2xl font-extrabold text-[var(--text-main)]">
-                {allInternRows.length}
-              </strong>
-              <span className="text-xs text-indigo-500 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded-full">
-                Enrolled
+          )}
+          {showTotalInterns && (
+            <div className="p-5 flex flex-col justify-between bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
+                {t('dashboard.totalInterns', 'Total Interns')}
               </span>
+              <div className="flex items-baseline justify-between mt-2">
+                <strong className="text-2xl font-extrabold text-[var(--text-main)]">
+                  {allInternRows.length}
+                </strong>
+                <span className="text-xs text-indigo-500 font-semibold bg-indigo-500/10 px-2 py-0.5 rounded-full">
+                  Enrolled
+                </span>
+              </div>
             </div>
-          </div>
+          )}
           <div className="p-5 flex flex-col justify-between bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300">
             <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
               {t('dashboard.standupCompletionRate', 'Completion Rate')}
@@ -1256,24 +1502,26 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             })}
           </section>
 
-          <div className="flex gap-3">
-            <button
-              className="secondary-button"
-              onClick={() => setIsRecordModalOpen(true)}
-              type="button"
-            >
-              Record Standup
-            </button>
-            {canManageStandup ? (
+          {!isIntern && (
+            <div className="flex gap-3">
               <button
-                className="primary-button"
-                onClick={() => setIsCreatingTeam((prev) => !prev)}
+                className="secondary-button"
+                onClick={() => setIsRecordModalOpen(true)}
                 type="button"
               >
-                {isCreatingTeam ? t('button.cancel') : t('teams.createTeam')}
+                Record Standup
               </button>
-            ) : null}
-          </div>
+              {canManageStandup ? (
+                <button
+                  className="primary-button"
+                  onClick={() => setIsCreatingTeam((prev) => !prev)}
+                  type="button"
+                >
+                  {isCreatingTeam ? t('button.cancel') : t('teams.createTeam')}
+                </button>
+              ) : null}
+            </div>
+          )}
         </div>
       ) : null}
 
@@ -1301,7 +1549,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </section>
           ) : null}
 
-          <section className="mb-4">
+          <section className="mb-4 flex flex-wrap items-end justify-between gap-4 w-full">
             <label className="grid gap-1.5 text-[var(--text-main)] text-[13px] max-w-[280px]">
               <span>{t('dashboard.standupVerificationDate')}</span>
               <input
@@ -1310,40 +1558,93 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 onChange={handleSelectedDateChange}
                 type="date"
                 value={selectedDateKey}
+                min={
+                  user?.role === 'intern' && mode === 'logs'
+                    ? displayTeams[0]?.startDate
+                    : undefined
+                }
+                max={
+                  user?.role === 'intern' && mode === 'logs'
+                    ? yesterdayDateKey
+                    : undefined
+                }
               />
             </label>
+
+            {user?.role === 'intern' && mode === 'teams' && (
+              <div className="flex gap-3 self-end">
+                {canManageStandup ? (
+                  <button
+                    className={`px-5 py-2.5 text-sm font-semibold rounded-xl border transition-all duration-200 cursor-pointer outline-none ${
+                      isCreatingTeam
+                        ? 'bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white border-rose-500/30'
+                        : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-300/60 dark:border-slate-700 shadow-sm'
+                    }`}
+                    onClick={() => setIsCreatingTeam((prev) => !prev)}
+                    type="button"
+                  >
+                    {isCreatingTeam
+                      ? t('button.cancel')
+                      : t('teams.createTeam')}
+                  </button>
+                ) : null}
+
+                <button
+                  className="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-xl shadow-sm hover:shadow transition-all duration-200 cursor-pointer border-none outline-none self-end"
+                  onClick={handleAddInternPrompt}
+                  type="button"
+                >
+                  {t('interns.addIntern', 'Add Intern')}
+                </button>
+              </div>
+            )}
           </section>
 
-          <section className="mb-4">
-            <input
-              aria-label={t('common.search')}
-              className="w-full px-4 py-2.5 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200"
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder={
-                activeView === 'TEAMS'
-                  ? t('dashboard.searchByTeamName')
-                  : t('dashboard.searchByInternOrTeamName')
-              }
-              type="text"
-              value={searchTerm}
-            />
-          </section>
+          {user?.role !== 'intern' && (
+            <section className="mb-4">
+              <input
+                aria-label={t('common.search')}
+                className="w-full px-4 py-2.5 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200"
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder={
+                  activeView === 'TEAMS'
+                    ? t('dashboard.searchByTeamName')
+                    : t('dashboard.searchByInternOrTeamName')
+                }
+                type="text"
+                value={searchTerm}
+              />
+            </section>
+          )}
 
           {activeView === 'TEAMS' ? (
             <TeamList
               addedInterns={addedInterns}
+              isIntern={user?.role === 'intern'}
               onAddInternToTeam={
                 canManageStandup ? handleAddInternToTeam : undefined
               }
               onDeleteIntern={canManageStandup ? handleDeleteIntern : undefined}
-              onDeleteTeam={canManageStandup ? handleDeleteTeam : undefined}
-              onUpdateIntern={canManageStandup ? handleUpdateIntern : undefined}
+              onDeleteTeam={
+                canManageStandup && user?.role !== 'intern'
+                  ? handleDeleteTeam
+                  : undefined
+              }
+              onUpdateIntern={
+                canManageStandup && user?.role !== 'intern'
+                  ? handleUpdateIntern
+                  : undefined
+              }
               onUpdateTeamName={
-                canManageStandup ? handleUpdateTeamName : undefined
+                canManageStandup && user?.role !== 'intern'
+                  ? handleUpdateTeamName
+                  : undefined
               }
               onVerifyTeam={(teamId) => {
                 void handleVerifyTeam(teamId);
               }}
+              onApprovePending={handleApprovePending}
+              onRejectPending={handleRejectPending}
               selectedDateLabel={selectedDateLabel}
               verifyingTeamId={verifyingTeamId}
               activeAudioId={activeAudioId}
@@ -1367,18 +1668,26 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     className="p-6 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300"
                     key={intern.internId}
                   >
-                    <header className="mb-3">
-                      <div>
-                        <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-450 m-0 uppercase tracking-wider">
-                          {intern.teamName}
-                        </h3>
-                      </div>
-                    </header>
+                    {user?.role !== 'intern' && (
+                      <header className="mb-3">
+                        <div>
+                          <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-450 m-0 uppercase tracking-wider">
+                            {intern.teamName}
+                          </h3>
+                        </div>
+                      </header>
+                    )}
                     <InternCard
                       internId={intern.internId}
                       internName={intern.internName}
-                      onDeleteIntern={handleDeleteIntern}
-                      onUpdateIntern={handleUpdateIntern}
+                      onDeleteIntern={
+                        canManageStandup ? handleDeleteIntern : undefined
+                      }
+                      onUpdateIntern={
+                        canManageStandup && user?.role !== 'intern'
+                          ? handleUpdateIntern
+                          : undefined
+                      }
                       standupDateLabel={selectedDateLabel}
                       todayValidCount={intern.todayValidCount}
                       slotStatuses={intern.slotStatuses}
@@ -1386,6 +1695,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       activeAudioId={activeAudioId}
                       onPlay={(_internId, audioId) => setActiveAudioId(audioId)}
                       onPause={() => setActiveAudioId(null)}
+                      pendingApproval={intern.pendingApproval}
+                      onApprovePending={handleApprovePending}
+                      onRejectPending={handleRejectPending}
                     />
                   </article>
                 ))
@@ -1595,12 +1907,12 @@ function renderTeamHeatmap(
             gridTemplateColumns: `120px repeat(${dateKeys.length}, minmax(28px, 1fr))`,
           }}
         >
-          <div className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             {teamColumnLabel}
           </div>
           {dateKeys.map((dateKey) => (
             <div
-              className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 text-center truncate"
+              className="text-[10px] font-bold text-slate-500 dark:text-slate-300 text-center truncate"
               key={dateKey}
             >
               {formatWeekdayShort(dateKey)}
@@ -1614,7 +1926,7 @@ function renderTeamHeatmap(
             return (
               <React.Fragment key={teamId}>
                 <div
-                  className="text-xs font-medium text-slate-700 dark:text-slate-350 truncate pr-2"
+                  className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate pr-2"
                   title={team.teamName}
                 >
                   {team.teamName}
@@ -1625,17 +1937,155 @@ function renderTeamHeatmap(
 
                   return (
                     <div
-                      className="w-6 h-6 mx-auto rounded-md border transition-all duration-200 hover:scale-110 cursor-pointer"
+                      className={`w-6 h-6 mx-auto rounded-md border transition-all duration-200 hover:scale-110 cursor-pointer ${
+                        count <= 0
+                          ? 'bg-slate-500/5 dark:bg-white/5 border-slate-300/20 dark:border-white/10 backdrop-blur-[2px] shadow-[0_0_8px_rgba(59,130,246,0.1)]'
+                          : ''
+                      }`}
                       key={`${teamId}-${dateKey}`}
                       title={`${team.teamName} | ${formatMonthDay(dateKey)}: ${count}/4 uploads`}
-                      style={{
-                        backgroundColor: intensity.background,
-                        borderColor: intensity.border,
-                      }}
+                      style={
+                        count > 0
+                          ? {
+                              backgroundColor: intensity.background,
+                              borderColor: intensity.border,
+                            }
+                          : undefined
+                      }
                     />
                   );
                 })}
               </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function renderInternHeatmap(
+  team: Team,
+  dateKeys: string[],
+  internTotals: Map<string, Map<string, number>>,
+  teamTotals: Map<string, Map<string, number>>,
+  noActivityLabel: string,
+  scrollToViewMoreLabel: string,
+  memberColumnLabel: string
+): React.ReactElement {
+  const members = team.interns;
+  const teamId = normalizeTeamId(team.teamId);
+  const teamDateCounts = teamTotals.get(teamId) ?? new Map();
+
+  if (members.length === 0 || dateKeys.length === 0) {
+    return (
+      <div className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
+        {noActivityLabel}
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full overflow-hidden flex flex-col gap-2">
+      <div className="text-[11px] text-slate-400 dark:text-slate-500 italic self-end block sm:hidden">
+        {scrollToViewMoreLabel}
+      </div>
+      <div className="w-full overflow-x-auto pb-2">
+        <div
+          className="grid gap-1 items-center"
+          style={{
+            gridTemplateColumns: `140px repeat(${dateKeys.length}, minmax(28px, 1fr))`,
+          }}
+        >
+          {/* Header Row */}
+          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            {memberColumnLabel}
+          </div>
+          {dateKeys.map((dateKey) => (
+            <div
+              className="text-[10px] font-bold text-slate-500 dark:text-slate-300 text-center truncate"
+              key={dateKey}
+            >
+              {formatWeekdayShort(dateKey)}
+            </div>
+          ))}
+
+          {/* Intern Rows */}
+          {members.map((intern) => {
+            const internId = intern.internId || intern.corpusUserId;
+            const internDateCounts = internTotals.get(internId) ?? new Map();
+
+            return (
+              <React.Fragment key={internId}>
+                <div
+                  className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate pr-2"
+                  title={intern.internName}
+                >
+                  {intern.internName}
+                </div>
+                {dateKeys.map((dateKey) => {
+                  const count = internDateCounts.get(dateKey) ?? 0;
+                  const intensity = getTeamHeatmapIntensity(count);
+
+                  return (
+                    <div
+                      className={`w-6 h-6 mx-auto rounded-md border transition-all duration-200 hover:scale-110 cursor-pointer ${
+                        count <= 0
+                          ? 'bg-slate-500/5 dark:bg-white/5 border-slate-300/20 dark:border-white/10 backdrop-blur-[2px] shadow-[0_0_8px_rgba(59,130,246,0.1)]'
+                          : ''
+                      }`}
+                      key={`${internId}-${dateKey}`}
+                      title={`${intern.internName} | ${formatMonthDay(dateKey)}: ${count} upload(s)`}
+                      style={
+                        count > 0
+                          ? {
+                              backgroundColor: intensity.background,
+                              borderColor: intensity.border,
+                            }
+                          : undefined
+                      }
+                    />
+                  );
+                })}
+              </React.Fragment>
+            );
+          })}
+
+          {/* Divider Row */}
+          <div
+            className="col-span-full border-t border-slate-500/10 dark:border-white/5 my-1"
+            aria-hidden="true"
+          />
+
+          {/* Combined Team Row */}
+          <div
+            className="text-xs font-bold text-blue-600 dark:text-blue-300 truncate pr-2"
+            title="Combined Total"
+          >
+            Combined Total
+          </div>
+          {dateKeys.map((dateKey) => {
+            const count = teamDateCounts.get(dateKey) ?? 0;
+            const intensity = getTeamHeatmapIntensity(count);
+
+            return (
+              <div
+                className={`w-6 h-6 mx-auto rounded-md border transition-all duration-200 hover:scale-110 cursor-pointer bg-blue-500/10 ${
+                  count <= 0
+                    ? 'border-slate-300/20 dark:border-white/10 backdrop-blur-[2px] shadow-[0_0_8px_rgba(59,130,246,0.1)]'
+                    : ''
+                }`}
+                key={`team-combined-${dateKey}`}
+                title={`Team Combined | ${formatMonthDay(dateKey)}: ${count}/4 uploads`}
+                style={
+                  count > 0
+                    ? {
+                        backgroundColor: intensity.background,
+                        borderColor: intensity.border,
+                      }
+                    : undefined
+                }
+              />
             );
           })}
         </div>
@@ -1999,7 +2449,10 @@ function getTeamInternEntries(
     );
 }
 
-function getWeekDateKeys(anchorDateKey: string): string[] {
+function getWeekDateKeys(
+  anchorDateKey: string,
+  startOnSunday = false
+): string[] {
   const anchorDate = new Date(`${anchorDateKey}T00:00:00`);
 
   if (Number.isNaN(anchorDate.getTime())) {
@@ -2007,9 +2460,11 @@ function getWeekDateKeys(anchorDateKey: string): string[] {
   }
 
   const anchorWeekday = anchorDate.getDay();
-  const daysSinceMonday = (anchorWeekday + 6) % 7;
+  const daysSinceStart = startOnSunday
+    ? anchorWeekday
+    : (anchorWeekday + 6) % 7;
   const weekStart = new Date(anchorDate);
-  weekStart.setDate(anchorDate.getDate() - daysSinceMonday);
+  weekStart.setDate(anchorDate.getDate() - daysSinceStart);
 
   const weekDateKeys: string[] = [];
 

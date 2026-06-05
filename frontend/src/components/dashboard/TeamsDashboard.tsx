@@ -6,7 +6,7 @@ import type { Intern } from '../intern/InternSearch';
 export interface TeamsDashboardProps {
   addedInterns: Intern[];
   preloadedTeams?: Team[];
-  mode?: 'teams' | 'status' | 'analytics';
+  mode?: 'teams' | 'status' | 'analytics' | 'logs';
   authToken?: string;
   canManageStandup?: boolean;
 }

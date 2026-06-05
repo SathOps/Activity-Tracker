@@ -4,6 +4,7 @@ import type { InternAudioMetadata } from '../../services/corpus/corpusService';
 import { getAudioRecordUrl } from '../../services/corpus/corpusService';
 import type { StandupSlotResult } from '../../utils/verification';
 import StandupAudioPlayer from '../audio/StandupAudioPlayer';
+import { useAuth } from '../../contexts/AuthContext';
 
 export type SubmissionStatus = 'COMPLETED' | 'PENDING';
 
@@ -19,6 +20,9 @@ export interface InternCardProps {
   onPause?: () => void;
   onDeleteIntern?: (internId: string) => void;
   onUpdateIntern?: (internId: string, newName: string) => void;
+  pendingApproval?: 'ADD' | 'REMOVE';
+  onApprovePending?: (internId: string) => void;
+  onRejectPending?: (internId: string) => void;
 }
 
 export const InternCard: React.FC<InternCardProps> = ({
@@ -33,8 +37,13 @@ export const InternCard: React.FC<InternCardProps> = ({
   onPause,
   onDeleteIntern,
   onUpdateIntern,
+  pendingApproval,
+  onApprovePending,
+  onRejectPending,
 }) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const isAdminOrMentor = user?.role === 'admin' || user?.role === 'mentor';
   const displayName = (internName ?? '').trim() || t('interns.unnamedIntern');
   const visibleSlotStatuses = slotStatuses.filter(
     (slot) => slot.status === 'GOOD' || slot.status === 'DELAYED'
@@ -119,8 +128,18 @@ export const InternCard: React.FC<InternCardProps> = ({
     <article className="p-4 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-2xl backdrop-blur-md shadow-[0_4px_20px_0_rgba(30,79,178,0.05)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.18)] hover:border-blue-500/45 transition-all duration-300 grid gap-3">
       <div className="flex justify-between items-start">
         <div className="grid gap-1">
-          <div className="text-slate-800 dark:text-slate-100 text-sm font-semibold">
-            {displayName}
+          <div className="text-slate-800 dark:text-slate-100 text-sm font-semibold flex flex-wrap items-center gap-2">
+            <span>{displayName}</span>
+            {pendingApproval === 'ADD' && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400">
+                Pending Add Approval
+              </span>
+            )}
+            {pendingApproval === 'REMOVE' && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 dark:bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-400">
+                Pending Removal Approval
+              </span>
+            )}
           </div>
           {isEditing ? (
             <div className="flex gap-2 flex-wrap">
@@ -184,6 +203,26 @@ export const InternCard: React.FC<InternCardProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          {pendingApproval && isAdminOrMentor && (
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => onApprovePending?.(internId)}
+                className="px-2.5 py-1 text-[10px] font-bold rounded-full bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer transition-all border-none outline-none shadow-sm"
+                type="button"
+                title="Approve request"
+              >
+                Approve
+              </button>
+              <button
+                onClick={() => onRejectPending?.(internId)}
+                className="px-2.5 py-1 text-[10px] font-bold rounded-full bg-slate-200 dark:bg-slate-800 hover:bg-slate-350 dark:hover:bg-slate-700 text-slate-705 dark:text-slate-300 cursor-pointer transition-all border-none outline-none shadow-sm"
+                type="button"
+                title="Reject request"
+              >
+                Reject
+              </button>
+            </div>
+          )}
           {audios.length > 0 && !isEditing && (
             <button
               className={`px-3 py-1 text-[11px] font-bold rounded-full border transition-all duration-200 cursor-pointer ${
