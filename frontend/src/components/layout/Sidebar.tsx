@@ -11,7 +11,6 @@ import { useMemo } from 'react';
 import { getGitlabLoginUrl } from '../../services/api/auth';
 import { useAuth } from '../../contexts/AuthContext';
 import { ROUTES, type AppRoute, type WorkspaceId } from '../../lib/appRoutes';
-import { cn } from '../../lib/utils';
 import { useRouter } from '../../lib/router';
 import { useConfigStore } from '../../stores/configStore';
 
@@ -488,7 +487,7 @@ export function Sidebar() {
                     onClick={() => {
                       window.location.href = getGitlabLoginUrl();
                     }}
-                    className="premium-gitlab-btn pulse-animation"
+                    className="relative overflow-hidden inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold text-white text-xs bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600 bg-[length:200%_auto] shadow-lg shadow-blue-600/30 hover:scale-105 hover:-translate-y-0.5 transition-all duration-300 animate-pulse"
                     style={{
                       padding: '9px 14px',
                       borderRadius: 10,
@@ -539,10 +538,6 @@ export function Sidebar() {
                     key={item.path}
                     type="button"
                     onClick={() => navigate(item.path)}
-                    className={cn(
-                      'sidebar-nav-item',
-                      isActive && 'sidebar-nav-item--active'
-                    )}
                     style={{
                       display: 'flex',
                       alignItems: 'center',

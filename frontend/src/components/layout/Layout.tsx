@@ -268,13 +268,12 @@ export function Layout({ children }: Props) {
 
           {isComplianceMode && !gitlabConnected && (
             <div
-              className="relative overflow-hidden flex items-center gap-3 px-5 py-4 rounded-[14px] bg-[linear-gradient(135deg,rgba(245,158,11,0.12),rgba(217,119,6,0.04))] backdrop-blur-[20px] border border-[rgba(245,158,11,0.25)] text-[#ffedd5] text-[13.5px] leading-[1.5] animate-border-glow-breathing"
+              className="relative overflow-hidden flex items-center gap-3 px-5 py-4 rounded-[14px] bg-[linear-gradient(135deg,rgba(245,158,11,0.12),rgba(217,119,6,0.04))] backdrop-blur-[20px] border border-[rgba(245,158,11,0.25)] text-[#ffedd5] text-[13.5px] leading-[1.5]"
               style={{
                 marginBottom: 24,
               }}
             >
               <svg
-                className="animate-icon-pulse-breathing"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
