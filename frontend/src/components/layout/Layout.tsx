@@ -45,7 +45,7 @@ export function Layout({ children }: Props) {
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto premium-background">
+      <main className="flex-1 overflow-y-auto relative bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.08),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(96,165,250,0.05),transparent_35%),linear-gradient(135deg,#010409,#020713,#040f20)]">
         <div style={{ padding: '24px 32px', maxWidth: 1200, margin: '0 auto' }}>
           {/* Glass header */}
           <div style={{ position: 'relative', marginBottom: 28 }}>
@@ -68,7 +68,7 @@ export function Layout({ children }: Props) {
               }}
             />
             <header
-              className="glass"
+              className="border border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-[20px]"
               style={{
                 borderRadius: 20,
                 padding: 0,
@@ -268,13 +268,13 @@ export function Layout({ children }: Props) {
 
           {isComplianceMode && !gitlabConnected && (
             <div
-              className="glass-warning-banner"
+              className="relative overflow-hidden flex items-center gap-3 px-5 py-4 rounded-[14px] bg-[linear-gradient(135deg,rgba(245,158,11,0.12),rgba(217,119,6,0.04))] backdrop-blur-[20px] border border-[rgba(245,158,11,0.25)] text-[#ffedd5] text-[13.5px] leading-[1.5] animate-border-glow-breathing"
               style={{
                 marginBottom: 24,
               }}
             >
               <svg
-                className="warning-icon-pulse"
+                className="animate-icon-pulse-breathing"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -301,7 +301,7 @@ export function Layout({ children }: Props) {
               </span>
             </div>
           )}
-          <div className="tracker-main__content">{children}</div>
+          <div className="min-w-0">{children}</div>
         </div>
 
         {isStandupMode && (
