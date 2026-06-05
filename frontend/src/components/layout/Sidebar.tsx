@@ -6,6 +6,7 @@ import {
   Mic,
   Trophy,
   User,
+  X,
 } from 'lucide-react';
 import { useMemo } from 'react';
 import { getGitlabLoginUrl } from '../../services/api/auth';
@@ -124,7 +125,12 @@ function UserAvatar({ name }: { name: string }) {
   );
 }
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const { pathname, navigate } = useRouter();
   const { user, gitlabConnected, logout } = useAuth();
   const { corpusUser } = useConfigStore();
@@ -157,320 +163,342 @@ export function Sidebar() {
   async function handleCorpusLogout() {
     await logout();
     navigate('/');
+    onClose?.();
   }
 
   const displayName =
     user?.name || corpusUser || user?.corpusUsername || 'User';
 
   return (
-    <aside
-      className="
-    w-[300px]
-    h-screen
-    flex
-    flex-col
-    shrink-0
-    relative
-    overflow-hidden
-  "
-      style={{
-        background:
-          'linear-gradient(180deg, #0f172a 0%, #0d1424 50%, #0b1120 100%)',
-        backdropFilter: 'blur(40px) saturate(1.4)',
-        WebkitBackdropFilter: 'blur(40px) saturate(1.4)',
-        borderRight: '1px solid rgba(30, 79, 178, 0.18)',
-        boxShadow:
-          '8px 0 32px rgba(0, 0, 0, 0.5), 16px 0 64px rgba(0, 0, 0, 0.3), inset -1px 0 0 rgba(30, 79, 178, 0.08)',
-      }}
-    >
-      {/* Top edge glow line */}
-      <div
-        aria-hidden="true"
+    <>
+      {/* Backdrop for mobile */}
+      {isOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm md:hidden cursor-default w-full h-full border-none outline-none"
+          onClick={onClose}
+          aria-label="Close sidebar overlay"
+        />
+      )}
+      <aside
+        className={`
+          w-[300px]
+          h-screen
+          flex
+          flex-col
+          shrink-0
+          z-50
+          transition-transform
+          duration-300
+          ease-in-out
+          fixed
+          inset-y-0
+          left-0
+          md:relative
+          md:translate-x-0
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 1,
           background:
-            'linear-gradient(90deg, transparent, rgba(30, 79, 178, 0.25), rgba(56, 189, 248, 0.12), transparent)',
-          zIndex: 2,
-        }}
-      />
-      {/* Right edge inner glow */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: 80,
-          background:
-            'linear-gradient(270deg, rgba(59, 130, 246, 0.04), transparent)',
-          pointerEvents: 'none',
-          zIndex: 1,
-        }}
-      />
-      {/* Ambient glow - top right */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: -80,
-          right: -80,
-          width: 240,
-          height: 240,
-          borderRadius: '50%',
-          background:
-            'radial-gradient(circle, rgba(30, 79, 178, 0.14), transparent 70%)',
-          pointerEvents: 'none',
-        }}
-      />
-      {/* Ambient glow - bottom left */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          bottom: -60,
-          left: -60,
-          width: 200,
-          height: 200,
-          borderRadius: '50%',
-          background:
-            'radial-gradient(circle, rgba(14, 165, 233, 0.07), transparent 70%)',
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Logo */}
-      <div
-        style={{
-          padding: '28px 24px 22px',
-          position: 'relative',
+            'linear-gradient(180deg, #0f172a 0%, #0d1424 50%, #0b1120 100%)',
+          backdropFilter: 'blur(40px) saturate(1.4)',
+          WebkitBackdropFilter: 'blur(40px) saturate(1.4)',
+          borderRight: '1px solid rgba(30, 79, 178, 0.18)',
+          boxShadow:
+            '8px 0 32px rgba(0, 0, 0, 0.5), 16px 0 64px rgba(0, 0, 0, 0.3), inset -1px 0 0 rgba(30, 79, 178, 0.08)',
         }}
       >
-        <div>
-          <h1
-            style={{
-              margin: 0,
-              fontSize: 17,
-              fontWeight: 800,
-              fontFamily: 'var(--font-display)',
-              color: '#f1f5f9',
-              letterSpacing: '-0.02em',
-              lineHeight: 1.3,
-            }}
-          >
-            Activity Tracker
-          </h1>
-          <p
-            style={{
-              margin: '4px 0 0',
-              fontSize: 12,
-              color: 'rgba(148, 163, 184, 0.5)',
-              letterSpacing: '0.01em',
-              fontWeight: 400,
-            }}
-          >
-            Internship workspace
-          </p>
-        </div>
-        {/* Subtle separator */}
+        {/* Top edge glow line */}
         <div
+          aria-hidden="true"
           style={{
             position: 'absolute',
-            bottom: 0,
-            left: 24,
-            right: 24,
+            top: 0,
+            left: 0,
+            right: 0,
             height: 1,
             background:
-              'linear-gradient(90deg, transparent, rgba(148,163,184,0.12), transparent)',
+              'linear-gradient(90deg, transparent, rgba(30, 79, 178, 0.25), rgba(56, 189, 248, 0.12), transparent)',
+            zIndex: 2,
           }}
         />
-      </div>
-
-      {/* Scrollable content */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 12px' }}>
-        {/* Workspace nav */}
-        <p
+        {/* Right edge inner glow */}
+        <div
+          aria-hidden="true"
           style={{
-            fontSize: 10,
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.16em',
-            color: 'rgba(148, 163, 184, 0.45)',
-            margin: '0 0 8px 8px',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: 80,
+            background:
+              'linear-gradient(270deg, rgba(59, 130, 246, 0.04), transparent)',
+            pointerEvents: 'none',
+            zIndex: 1,
           }}
-        >
-          Workspaces
-        </p>
-        <nav
+        />
+        {/* Ambient glow - top right */}
+        <div
+          aria-hidden="true"
           style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 4,
-            marginBottom: 20,
+            position: 'absolute',
+            top: -80,
+            right: -80,
+            width: 240,
+            height: 240,
+            borderRadius: '50%',
+            background:
+              'radial-gradient(circle, rgba(30, 79, 178, 0.14), transparent 70%)',
+            pointerEvents: 'none',
           }}
-        >
-          {workspaceItems.map((item) => {
-            const isActive = activeWorkspace === item.workspace;
-            return (
-              <button
-                key={item.workspace}
-                type="button"
-                onClick={() => navigate(item.path)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: 12,
-                  border: 'none',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.2s ease',
-                  background: isActive
-                    ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(79, 70, 229, 0.12))'
-                    : 'transparent',
-                  boxShadow: isActive
-                    ? '0 4px 16px rgba(37, 99, 235, 0.15)'
-                    : 'none',
-                  color: isActive ? '#e0e7ff' : 'var(--sidebar-text)',
-                  position: 'relative',
-                }}
-              >
-                {isActive && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: 0,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      width: 3,
-                      height: 20,
-                      borderRadius: 99,
-                      background: 'linear-gradient(180deg, #3b82f6, #4f46e5)',
-                    }}
-                  />
-                )}
-                <span
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 14,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: isActive
-                      ? 'linear-gradient(135deg, #2563eb, #4f46e5)'
-                      : 'rgba(255,255,255,0.04)',
-                    color: isActive ? '#fff' : 'var(--sidebar-text)',
-                    flexShrink: 0,
-                    boxShadow: isActive
-                      ? '0 4px 12px rgba(37, 99, 235, 0.3)'
-                      : 'none',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  {item.icon}
-                </span>
-                <div>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: 13,
-                      fontWeight: isActive ? 600 : 500,
-                      fontFamily: 'var(--font-display)',
-                    }}
-                  >
-                    {item.label}
-                  </p>
-                  <p
-                    style={{
-                      margin: '1px 0 0',
-                      fontSize: 11,
-                      color: isActive
-                        ? 'rgba(165, 180, 252, 0.7)'
-                        : 'rgba(148, 163, 184, 0.45)',
-                    }}
-                  >
-                    {item.desc}
-                  </p>
-                </div>
-              </button>
-            );
-          })}
-        </nav>
+        />
+        {/* Ambient glow - bottom left */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            bottom: -60,
+            left: -60,
+            width: 200,
+            height: 200,
+            borderRadius: '50%',
+            background:
+              'radial-gradient(circle, rgba(14, 165, 233, 0.07), transparent 70%)',
+            pointerEvents: 'none',
+          }}
+        />
 
-        {/* GitLab section for compliance */}
-        {activeWorkspace === 'compliance' ? (
-          <section style={{ marginBottom: 20 }}>
+        {/* Logo */}
+        <div
+          style={{
+            padding: '28px 24px 22px',
+            position: 'relative',
+          }}
+          className="flex items-center justify-between"
+        >
+          <div>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 17,
+                fontWeight: 800,
+                fontFamily: 'var(--font-display)',
+                color: '#f1f5f9',
+                letterSpacing: '-0.02em',
+                lineHeight: 1.3,
+              }}
+            >
+              Activity Tracker
+            </h1>
             <p
               style={{
-                fontSize: 10,
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.16em',
-                color: 'rgba(148, 163, 184, 0.45)',
-                margin: '0 0 8px 8px',
+                margin: '4px 0 0',
+                fontSize: 12,
+                color: 'rgba(148, 163, 184, 0.5)',
+                letterSpacing: '0.01em',
+                fontWeight: 400,
               }}
             >
-              GitLab Access
+              Internship workspace
             </p>
-            <div
-              style={{
-                padding: '14px 16px',
-                borderRadius: 14,
-                background:
-                  'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.03))',
-                border: '1px solid rgba(59, 130, 246, 0.15)',
-                boxShadow:
-                  '0 0 25px rgba(59, 130, 246, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-                backdropFilter: 'blur(24px)',
-                WebkitBackdropFilter: 'blur(24px)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 12,
-              }}
+          </div>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="md:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800/40 border border-transparent hover:border-slate-800/50 transition-all flex items-center justify-center shrink-0"
+              aria-label="Close Sidebar"
             >
-              {/* Status row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    background: gitlabConnected ? '#10b981' : '#94a3b8',
-                    flexShrink: 0,
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 500,
-                    color: gitlabConnected ? '#10b981' : 'var(--sidebar-text)',
-                  }}
-                >
-                  {gitlabConnected ? 'Connected' : 'Not connected'}
-                </span>
-              </div>
+              <X size={18} />
+            </button>
+          )}
+          {/* Subtle separator */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 24,
+              right: 24,
+              height: 1,
+              background:
+                'linear-gradient(90deg, transparent, rgba(148,163,184,0.12), transparent)',
+            }}
+          />
+        </div>
 
-              {gitlabConnected ? (
-                <p
+        {/* Scrollable content */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 12px' }}>
+          {/* Workspace nav */}
+          <p
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.16em',
+              color: 'rgba(148, 163, 184, 0.45)',
+              margin: '0 0 8px 8px',
+            }}
+          >
+            Workspaces
+          </p>
+          <nav
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4,
+              marginBottom: 20,
+            }}
+          >
+            {workspaceItems.map((item) => {
+              const isActive = activeWorkspace === item.workspace;
+              return (
+                <button
+                  key={item.workspace}
+                  type="button"
+                  onClick={() => {
+                    navigate(item.path);
+                    onClose?.();
+                  }}
                   style={{
-                    margin: 0,
-                    fontSize: 11,
-                    color: 'rgba(148,163,184,0.6)',
-                    lineHeight: 1.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: 12,
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.2s ease',
+                    background: isActive
+                      ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(79, 70, 229, 0.12))'
+                      : 'transparent',
+                    boxShadow: isActive
+                      ? '0 4px 16px rgba(37, 99, 235, 0.15)'
+                      : 'none',
+                    color: isActive ? '#e0e7ff' : 'var(--sidebar-text)',
+                    position: 'relative',
                   }}
                 >
-                  GitLab session is active. Compliance tools are fully
-                  available.
-                </p>
-              ) : (
-                <>
+                  {isActive && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: 3,
+                        height: 20,
+                        borderRadius: 99,
+                        background: 'linear-gradient(180deg, #3b82f6, #4f46e5)',
+                      }}
+                    />
+                  )}
+                  <span
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 14,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: isActive
+                        ? 'linear-gradient(135deg, #2563eb, #4f46e5)'
+                        : 'rgba(255,255,255,0.04)',
+                      color: isActive ? '#fff' : 'var(--sidebar-text)',
+                      flexShrink: 0,
+                      boxShadow: isActive
+                        ? '0 4px 12px rgba(37, 99, 235, 0.3)'
+                        : 'none',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {item.icon}
+                  </span>
+                  <div>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 13,
+                        fontWeight: isActive ? 600 : 500,
+                        fontFamily: 'var(--font-display)',
+                      }}
+                    >
+                      {item.label}
+                    </p>
+                    <p
+                      style={{
+                        margin: '1px 0 0',
+                        fontSize: 11,
+                        color: isActive
+                          ? 'rgba(165, 180, 252, 0.7)'
+                          : 'rgba(148, 163, 184, 0.45)',
+                      }}
+                    >
+                      {item.desc}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* GitLab section for compliance */}
+          {activeWorkspace === 'compliance' ? (
+            <section style={{ marginBottom: 20 }}>
+              <p
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.16em',
+                  color: 'rgba(148, 163, 184, 0.45)',
+                  margin: '0 0 8px 8px',
+                }}
+              >
+                GitLab Access
+              </p>
+              <div
+                style={{
+                  padding: '14px 16px',
+                  borderRadius: 14,
+                  background:
+                    'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.03))',
+                  border: '1px solid rgba(59, 130, 246, 0.15)',
+                  boxShadow:
+                    '0 0 25px rgba(59, 130, 246, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                  backdropFilter: 'blur(24px)',
+                  WebkitBackdropFilter: 'blur(24px)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 12,
+                }}
+              >
+                {/* Status row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: gitlabConnected ? '#10b981' : '#94a3b8',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: gitlabConnected
+                        ? '#10b981'
+                        : 'var(--sidebar-text)',
+                    }}
+                  >
+                    {gitlabConnected ? 'Connected' : 'Not connected'}
+                  </span>
+                </div>
+
+                {gitlabConnected ? (
                   <p
                     style={{
                       margin: 0,
@@ -479,241 +507,261 @@ export function Sidebar() {
                       lineHeight: 1.5,
                     }}
                   >
-                    Connect your GitLab account via OAuth to enable compliance
-                    features.
+                    GitLab session is active. Compliance tools are fully
+                    available.
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      window.location.href = getGitlabLoginUrl();
-                    }}
-                    className="relative overflow-hidden inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold text-white text-xs bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600 bg-[length:200%_auto] shadow-lg shadow-blue-600/30 hover:scale-105 hover:-translate-y-0.5 transition-all duration-300 animate-pulse"
-                    style={{
-                      padding: '9px 14px',
-                      borderRadius: 10,
-                      fontSize: 12,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 7,
-                    }}
-                  >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-hidden="true"
+                ) : (
+                  <>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 11,
+                        color: 'rgba(148,163,184,0.6)',
+                        lineHeight: 1.5,
+                      }}
                     >
-                      <path d="M22.65 14.39L12 22.13 1.35 14.39a.84.84 0 0 1-.3-.94l1.22-3.78 2.44-7.51A.42.42 0 0 1 4.82 2a.43.43 0 0 1 .58 0 .42.42 0 0 1 .11.18l2.44 7.49h8.1l2.44-7.51A.42.42 0 0 1 18.6 2a.43.43 0 0 1 .58 0 .42.42 0 0 1 .11.18l2.44 7.51L23 13.45a.84.84 0 0 1-.35.94z" />
-                    </svg>
-                    Connect with GitLab
-                  </button>
-                </>
-              )}
-            </div>
-          </section>
-        ) : null}
-
-        {/* Sub-navigation */}
-        {subnavItems.length > 0 ? (
-          <section>
-            <p
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.16em',
-                color: 'rgba(148, 163, 184, 0.45)',
-                margin: '0 0 8px 8px',
-              }}
-            >
-              Navigation
-            </p>
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {subnavItems.map((item) => {
-                const isActive = pathname === item.path;
-                return (
-                  <button
-                    key={item.path}
-                    type="button"
-                    onClick={() => navigate(item.path)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                      width: '100%',
-                      padding: '9px 14px',
-                      borderRadius: 10,
-                      border: 'none',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.18s ease',
-                      background: isActive
-                        ? 'rgba(255,255,255,0.06)'
-                        : 'transparent',
-                      color: isActive ? '#e0e7ff' : 'var(--sidebar-text)',
-                    }}
-                  >
-                    <span
-                      style={{ opacity: isActive ? 1 : 0.5, display: 'flex' }}
+                      Connect your GitLab account via OAuth to enable compliance
+                      features.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        window.location.href = getGitlabLoginUrl();
+                      }}
+                      className="relative overflow-hidden inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold text-white text-xs bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600 bg-[length:200%_auto] shadow-lg shadow-blue-600/30 hover:scale-105 hover:-translate-y-0.5 transition-all duration-300 animate-pulse"
+                      style={{
+                        padding: '9px 14px',
+                        borderRadius: 10,
+                        fontSize: 12,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 7,
+                      }}
                     >
-                      {item.icon}
-                    </span>
-                    <div>
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: 13,
-                          fontWeight: isActive ? 600 : 400,
-                        }}
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
                       >
-                        {item.label}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-            </nav>
-          </section>
-        ) : null}
-      </div>
+                        <path d="M22.65 14.39L12 22.13 1.35 14.39a.84.84 0 0 1-.3-.94l1.22-3.78 2.44-7.51A.42.42 0 0 1 4.82 2a.43.43 0 0 1 .58 0 .42.42 0 0 1 .11.18l2.44 7.49h8.1l2.44-7.51A.42.42 0 0 1 18.6 2a.43.43 0 0 1 .58 0 .42.42 0 0 1 .11.18l2.44 7.51L23 13.45a.84.84 0 0 1-.35.94z" />
+                      </svg>
+                      Connect with GitLab
+                    </button>
+                  </>
+                )}
+              </div>
+            </section>
+          ) : null}
 
-      {/* Subtle separator before footer */}
-      <div
-        style={{
-          height: 1,
-          margin: '0 20px',
-          background:
-            'linear-gradient(90deg, transparent, rgba(148,163,184,0.1), transparent)',
-        }}
-      />
+          {/* Sub-navigation */}
+          {subnavItems.length > 0 ? (
+            <section>
+              <p
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.16em',
+                  color: 'rgba(148, 163, 184, 0.45)',
+                  margin: '0 0 8px 8px',
+                }}
+              >
+                Navigation
+              </p>
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {subnavItems.map((item) => {
+                  const isActive = pathname === item.path;
+                  return (
+                    <button
+                      key={item.path}
+                      type="button"
+                      onClick={() => {
+                        navigate(item.path);
+                        onClose?.();
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        width: '100%',
+                        padding: '9px 14px',
+                        borderRadius: 10,
+                        border: 'none',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'all 0.18s ease',
+                        background: isActive
+                          ? 'rgba(255,255,255,0.06)'
+                          : 'transparent',
+                        color: isActive ? '#e0e7ff' : 'var(--sidebar-text)',
+                      }}
+                    >
+                      <span
+                        style={{ opacity: isActive ? 1 : 0.5, display: 'flex' }}
+                      >
+                        {item.icon}
+                      </span>
+                      <div>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: 13,
+                            fontWeight: isActive ? 600 : 400,
+                          }}
+                        >
+                          {item.label}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </nav>
+            </section>
+          ) : null}
+        </div>
 
-      {/* Footer / Profile Section */}
-      <div
-        style={{
-          padding: '16px 20px',
-          position: 'relative',
-          background:
-            'linear-gradient(180deg, rgba(255,255,255,.03), transparent)',
-        }}
-      >
-        {/* Profile Info & Trigger Row */}
+        {/* Subtle separator before footer */}
         <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
+            height: 1,
+            margin: '0 20px',
+            background:
+              'linear-gradient(90deg, transparent, rgba(148,163,184,0.1), transparent)',
+          }}
+        />
+
+        {/* Footer / Profile Section */}
+        <div
+          style={{
+            padding: '16px 20px',
+            position: 'relative',
+            background:
+              'linear-gradient(180deg, rgba(255,255,255,.03), transparent)',
           }}
         >
+          {/* Profile Info & Trigger Row */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 10,
-              minWidth: 0,
-              flex: 1,
+              justifyContent: 'space-between',
+              gap: 12,
             }}
           >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                minWidth: 0,
+                flex: 1,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  navigate('/my-profile');
+                  onClose?.();
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+                title="View my profile"
+              >
+                <UserAvatar name={displayName} />
+              </button>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'var(--sidebar-text-bright)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {displayName}
+                </p>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    marginTop: 4,
+                    padding: '2px 8px',
+                    borderRadius: 99,
+                    fontSize: 9,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    background:
+                      user?.role === 'admin'
+                        ? 'rgba(244, 63, 94, 0.15)'
+                        : user?.role === 'mentor'
+                          ? 'rgba(59, 130, 246, 0.15)'
+                          : 'rgba(16, 185, 129, 0.15)',
+                    color:
+                      user?.role === 'admin'
+                        ? '#fb7185'
+                        : user?.role === 'mentor'
+                          ? '#60a5fa'
+                          : '#34d399',
+                    border:
+                      user?.role === 'admin'
+                        ? '1px solid rgba(244, 63, 94, 0.25)'
+                        : user?.role === 'mentor'
+                          ? '1px solid rgba(59, 130, 246, 0.25)'
+                          : '1px solid rgba(16, 185, 129, 0.25)',
+                  }}
+                >
+                  {user?.role || 'intern'}
+                </span>
+              </div>
+            </div>
+
+            {/* Logout Button */}
             <button
               type="button"
-              onClick={() => navigate('/my-profile')}
+              onClick={handleCorpusLogout}
               style={{
-                background: 'none',
-                border: 'none',
-                padding: 0,
+                background: 'rgba(239, 68, 68, 0.08)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                borderRadius: 8,
+                padding: 8,
                 cursor: 'pointer',
-                flexShrink: 0,
+                color: '#f87171',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s',
               }}
-              title="View my profile"
+              title="Logout"
             >
-              <UserAvatar name={displayName} />
+              <LogOut size={16} />
             </button>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: 'var(--sidebar-text-bright)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {displayName}
-              </p>
-              <span
-                style={{
-                  display: 'inline-block',
-                  marginTop: 4,
-                  padding: '2px 8px',
-                  borderRadius: 99,
-                  fontSize: 9,
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  background:
-                    user?.role === 'admin'
-                      ? 'rgba(244, 63, 94, 0.15)'
-                      : user?.role === 'mentor'
-                        ? 'rgba(59, 130, 246, 0.15)'
-                        : 'rgba(16, 185, 129, 0.15)',
-                  color:
-                    user?.role === 'admin'
-                      ? '#fb7185'
-                      : user?.role === 'mentor'
-                        ? '#60a5fa'
-                        : '#34d399',
-                  border:
-                    user?.role === 'admin'
-                      ? '1px solid rgba(244, 63, 94, 0.25)'
-                      : user?.role === 'mentor'
-                        ? '1px solid rgba(59, 130, 246, 0.25)'
-                        : '1px solid rgba(16, 185, 129, 0.25)',
-                }}
-              >
-                {user?.role || 'intern'}
-              </span>
-            </div>
           </div>
 
-          {/* Logout Button */}
-          <button
-            type="button"
-            onClick={handleCorpusLogout}
+          {/* Small version text at the very bottom */}
+          <p
             style={{
-              background: 'rgba(239, 68, 68, 0.08)',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
-              borderRadius: 8,
-              padding: 8,
-              cursor: 'pointer',
-              color: '#f87171',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s',
+              margin: '8px 0 0 0',
+              fontSize: 9,
+              color: 'rgba(148, 163, 184, 0.25)',
+              letterSpacing: '0.02em',
+              textAlign: 'center',
             }}
-            title="Logout"
           >
-            <LogOut size={16} />
-          </button>
+            Activity Tracker v2.0
+          </p>
         </div>
-
-        {/* Small version text at the very bottom */}
-        <p
-          style={{
-            margin: '8px 0 0 0',
-            fontSize: 9,
-            color: 'rgba(148, 163, 184, 0.25)',
-            letterSpacing: '0.02em',
-            textAlign: 'center',
-          }}
-        >
-          Activity Tracker v2.0
-        </p>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }

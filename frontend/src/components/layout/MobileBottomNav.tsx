@@ -37,7 +37,7 @@ export function MobileBottomNav({
       },
       {
         id: 'teams',
-        label: isIntern ? 'Manage Team' : 'Team Management',
+        label: isIntern ? 'Manage Team' : 'Team Manage',
         icon: <Users2 size={20} />,
       },
       {
@@ -49,26 +49,29 @@ export function MobileBottomNav({
   }, [isIntern]);
 
   return (
-    <nav className="mobile-bottom-nav">
-      <div className="mobile-bottom-nav__items">
+    <nav className="fixed bottom-0 left-0 right-0 h-[76px] bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-xl border-t border-slate-800/60 dark:border-slate-800/40 shadow-[0_-8px_30px_rgba(0,0,0,0.4)] z-50 flex items-center justify-center px-4 transition-colors duration-300">
+      <div className="flex w-full max-w-[480px] items-center justify-between relative h-full">
         {navItems.slice(0, 2).map((item) => (
           <button
             key={item.id}
             className={cn(
-              'mobile-bottom-nav__item',
-              activeStandupPanel === item.id &&
-                'mobile-bottom-nav__item--active'
+              'flex-1 w-0 flex flex-col items-center justify-center gap-1 bg-transparent border-none cursor-pointer py-2 rounded-xl transition-all duration-200 h-full',
+              activeStandupPanel === item.id
+                ? 'text-blue-500 font-semibold drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]'
+                : 'text-slate-400 hover:text-slate-200'
             )}
             onClick={() => setActiveStandupPanel(item.id)}
           >
             {item.icon}
-            <span>{item.label}</span>
+            <span className="text-[10px] font-medium tracking-wide text-center leading-tight truncate w-full px-1">
+              {item.label}
+            </span>
           </button>
         ))}
 
-        <div className="mobile-bottom-nav__fab-container">
+        <div className="flex-1 w-0 flex items-center justify-center relative -top-5 h-[60px]">
           <button
-            className="mobile-bottom-nav__fab"
+            className="w-[54px] h-[54px] bg-gradient-to-r from-blue-600 to-indigo-600 border-none rounded-full text-white flex items-center justify-center cursor-pointer shadow-[0_4px_16px_rgba(37,99,235,0.45)] hover:scale-105 active:scale-95 transition-all duration-200 shrink-0"
             onClick={onRecordClick}
             title="Record Standup"
           >
@@ -80,14 +83,17 @@ export function MobileBottomNav({
           <button
             key={item.id}
             className={cn(
-              'mobile-bottom-nav__item',
-              activeStandupPanel === item.id &&
-                'mobile-bottom-nav__item--active'
+              'flex-1 w-0 flex flex-col items-center justify-center gap-1 bg-transparent border-none cursor-pointer py-2 rounded-xl transition-all duration-200 h-full',
+              activeStandupPanel === item.id
+                ? 'text-blue-500 font-semibold drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]'
+                : 'text-slate-400 hover:text-slate-200'
             )}
             onClick={() => setActiveStandupPanel(item.id)}
           >
             {item.icon}
-            <span>{item.label}</span>
+            <span className="text-[10px] font-medium tracking-wide text-center leading-tight truncate w-full px-1">
+              {item.label}
+            </span>
           </button>
         ))}
       </div>

@@ -324,6 +324,24 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     );
   }, [displayTeams, normalizedQuery]);
 
+  const filteredDailyStatusRows = React.useMemo(() => {
+    if (!normalizedQuery) {
+      return teamDailyStatusRows;
+    }
+    return teamDailyStatusRows.filter((row) =>
+      row.teamName.toLowerCase().includes(normalizedQuery)
+    );
+  }, [teamDailyStatusRows, normalizedQuery]);
+
+  const filteredWeeklyStatusRows = React.useMemo(() => {
+    if (!normalizedQuery) {
+      return teamWeeklyStatusRows;
+    }
+    return teamWeeklyStatusRows.filter((row) =>
+      row.teamName.toLowerCase().includes(normalizedQuery)
+    );
+  }, [teamWeeklyStatusRows, normalizedQuery]);
+
   const filteredInternRows = React.useMemo(() => {
     const source =
       activeView === 'COMPLETED'
@@ -895,8 +913,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </div>
       </header>
 
-      <section className="mb-4 mt-2">
-        <label className="grid gap-2 max-w-[320px]">
+      <section className="mb-4 mt-2 flex flex-wrap items-end gap-4">
+        <label className="grid gap-2 w-full max-w-[320px]">
           <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-soft)]">
             {t('dashboard.standupVerificationDate')}
           </span>
@@ -917,6 +935,22 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             />
           </div>
         </label>
+
+        {user?.role !== 'intern' && (
+          <label className="grid gap-2 w-full max-w-[320px]">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-soft)]">
+              Search Teams
+            </span>
+            <input
+              aria-label={t('common.search')}
+              className="w-full bg-slate-500/5 dark:bg-white/5 border border-slate-500/15 dark:border-white/10 rounded-xl text-[var(--text-main)] text-sm px-4 py-3 transition-all duration-200 outline-none hover:border-blue-500/35 focus:border-blue-500/50 focus:shadow-[0_0_15px_rgba(59,130,246,0.12)] cursor-pointer"
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Search by team name..."
+              type="text"
+              value={searchTerm}
+            />
+          </label>
+        )}
       </section>
 
       <section className="flex flex-wrap items-center justify-between gap-4 py-3 border-t border-slate-500/5 dark:border-white/5 mt-2">
@@ -978,7 +1012,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       isInlineStatusView &&
       statusView === 'DAILY' &&
       showDailyChart &&
-      teamDailyStatusRows.length > 0 ? (
+      filteredDailyStatusRows.length > 0 ? (
         <section
           className="status-glance-panel"
           aria-label={t('dashboard.atAGlanceStatisticsAria')}
@@ -993,7 +1027,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           </header>
 
           <section className="status-glance-grid">
-            {teamDailyStatusRows.map((row) => (
+            {filteredDailyStatusRows.map((row) => (
               <TeamStatusRing
                 key={row.teamId}
                 memberNames={teamMemberNamesById.get(row.teamId) ?? []}
@@ -1086,13 +1120,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 )}
               </div>
             </section>
-          ) : teamDailyStatusRows.length === 0 ? (
+          ) : filteredDailyStatusRows.length === 0 ? (
             <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
-              {t('dashboard.noTeamsForStatusTracking')}
+              {teamDailyStatusRows.length === 0
+                ? t('dashboard.noTeamsForStatusTracking')
+                : 'No matching teams found.'}
             </p>
           ) : (
             <section className="grid gap-4">
-              {teamDailyStatusRows.map((row) => (
+              {filteredDailyStatusRows.map((row) => (
                 <article
                   className="p-6 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300"
                   key={row.teamId}
@@ -1142,13 +1178,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       {!statusLoading && !statusError && statusView === 'WEEKLY' ? (
         <section className="grid gap-3.5">
-          {teamWeeklyStatusRows.length === 0 ? (
+          {filteredWeeklyStatusRows.length === 0 ? (
             <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
-              {t('dashboard.noTeamsForWeeklyStatusTracking')}
+              {teamWeeklyStatusRows.length === 0
+                ? t('dashboard.noTeamsForWeeklyStatusTracking')
+                : 'No matching teams found.'}
             </p>
           ) : (
             <section className="grid gap-4">
-              {teamWeeklyStatusRows.map((row) => (
+              {filteredWeeklyStatusRows.map((row) => (
                 <article
                   className="p-6 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300"
                   key={row.teamId}

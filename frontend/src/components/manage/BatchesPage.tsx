@@ -54,6 +54,7 @@ export function BatchesPage() {
     start_date: '',
     end_date: '',
   });
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const batchesQuery = useQuery({
     queryKey: ['batches'],
@@ -70,6 +71,7 @@ export function BatchesPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['batches'] });
       setDraft({ name: '', start_date: '', end_date: '' });
+      setIsFormOpen(false);
     },
   });
 
@@ -111,7 +113,38 @@ export function BatchesPage() {
   return (
     <section className="flex flex-col gap-6">
       {/* ── Create form (admin only) ───────────────────── */}
-      {isAdmin ? (
+      {isAdmin && (
+        <div className="flex justify-end z-10 relative">
+          <button
+            type="button"
+            onClick={() => setIsFormOpen(!isFormOpen)}
+            className="
+              h-[38px] px-4 rounded-xl
+              text-xs font-semibold whitespace-nowrap
+              flex inline-flex items-center gap-1.5
+              cursor-pointer transition-all duration-200
+              backdrop-blur-md
+              bg-blue-600/20 text-blue-300 border border-blue-500/35
+              shadow-[0_0_12px_rgba(59,130,246,0.15)]
+              hover:bg-blue-500/30 hover:border-blue-500/65 hover:text-blue-100
+            "
+          >
+            {isFormOpen ? (
+              <>
+                <X size={13} />
+                Cancel Create
+              </>
+            ) : (
+              <>
+                <Plus size={13} />
+                Create Batch
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {isAdmin && isFormOpen && (
         <div
           className={glassCard}
           style={{
@@ -130,8 +163,8 @@ export function BatchesPage() {
             Create internship cohorts and define their actual date range
           </p>
 
-          {/* 3 fields + button in one row */}
-          <div className="grid gap-3 grid-cols-[1.4fr_1fr_1fr_auto] items-end">
+          {/* 3 fields + button in one row on desktop, stacked on mobile */}
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr_auto] items-end">
             {/* Batch name */}
             <div className="flex flex-col gap-1.5">
               <label
@@ -213,13 +246,14 @@ export function BatchesPage() {
               className="
                 h-[42px] px-[18px] rounded-xl
                 text-sm font-semibold whitespace-nowrap
-                flex inline-flex items-center gap-1.5
+                flex inline-flex items-center justify-center gap-1.5
                 cursor-pointer transition-all duration-200
                 backdrop-blur-md
                 bg-blue-600/20 text-blue-300 border border-blue-500/35
                 shadow-[0_0_12px_rgba(59,130,246,0.15)]
                 hover:bg-blue-500/30 hover:border-blue-500/65 hover:text-blue-100
                 disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-white/5 disabled:border-blue-500/10 disabled:text-white/30 disabled:shadow-none
+                w-full md:w-auto
               "
               style={
                 !draft.name.trim() || createMutation.isPending
@@ -232,7 +266,7 @@ export function BatchesPage() {
             </button>
           </div>
         </div>
-      ) : null}
+      )}
 
       {/* ── Batch cards grid ──────────────────────────── */}
       <div

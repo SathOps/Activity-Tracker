@@ -9,6 +9,7 @@ import {
   ClipboardList,
   ChevronDown,
   ChevronUp,
+  Menu,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +41,99 @@ export function Layout({ children }: Props) {
   );
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [isIslandCollapsed, setIsIslandCollapsed] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const ThemeToggle = () => (
+    <button
+      aria-label={t('theme.switchMode', {
+        mode: themeMode === 'dark' ? t('theme.light') : t('theme.dark'),
+      })}
+      onClick={() =>
+        setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'))
+      }
+      type="button"
+      style={{
+        width: 58,
+        height: 32,
+        borderRadius: 99,
+        background:
+          themeMode === 'dark'
+            ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.35), rgba(79, 70, 229, 0.25))'
+            : 'rgba(0, 0, 0, 0.05)',
+        border: 'none',
+        padding: 4,
+        display: 'flex',
+        alignItems: 'center',
+        cursor: 'pointer',
+        position: 'relative',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow:
+          themeMode === 'dark'
+            ? 'inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 10px rgba(59, 130, 246, 0.15)'
+            : 'inset 0 2px 4px rgba(0, 0, 0, 0.05)',
+        outline: 'none',
+      }}
+    >
+      {/* Background Icons */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingLeft: 8,
+          paddingRight: 8,
+          pointerEvents: 'none',
+        }}
+      >
+        <Sun
+          size={11}
+          style={{
+            color: 'var(--amber-500)',
+            opacity: themeMode === 'dark' ? 0.35 : 0,
+            transition: 'opacity 0.3s ease',
+          }}
+        />
+        <Moon
+          size={11}
+          style={{
+            color: 'var(--indigo-400)',
+            opacity: themeMode === 'dark' ? 0 : 0.35,
+            transition: 'opacity 0.3s ease',
+          }}
+        />
+      </div>
+
+      {/* Sliding Handle */}
+      <div
+        style={{
+          width: 22,
+          height: 22,
+          borderRadius: '50%',
+          background:
+            themeMode === 'dark'
+              ? 'linear-gradient(135deg, #ffffff, #cbd5e1)'
+              : 'linear-gradient(135deg, #ffffff, #f1f5f9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
+          transform:
+            themeMode === 'dark' ? 'translateX(26px)' : 'translateX(0px)',
+          transition:
+            'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s',
+          zIndex: 2,
+        }}
+      >
+        {themeMode === 'dark' ? (
+          <Moon size={11} className="text-indigo-600 fill-indigo-600" />
+        ) : (
+          <Sun size={11} className="text-amber-500 fill-amber-500" />
+        )}
+      </div>
+    </button>
+  );
 
   const modeMeta = getRouteMeta(pathname);
   const isStandupMode = modeMeta.workspace === 'standup';
@@ -57,9 +151,11 @@ export function Layout({ children }: Props) {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <main className="flex-1 overflow-y-auto relative bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.08),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(96,165,250,0.05),transparent_35%),linear-gradient(135deg,#010409,#020713,#040f20)]">
-        <div style={{ padding: '24px 32px', maxWidth: 1200, margin: '0 auto' }}>
+        <div
+          className={`px-4 py-6 md:px-8 md:py-6 max-w-[1200px] mx-auto min-w-0 ${isStandupMode ? 'pb-24 md:pb-6' : ''}`}
+        >
           {/* Glass header */}
           <div style={{ position: 'relative', marginBottom: 28 }}>
             {/* Glow effect blob behind card */}
@@ -126,9 +222,26 @@ export function Layout({ children }: Props) {
 
               <div
                 style={{ padding: '20px 28px' }}
-                className="flex flex-wrap items-center justify-between gap-4"
+                className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
               >
-                <div>
+                {/* Mobile top controls bar */}
+                <div className="flex items-center justify-between md:hidden w-full pb-3 border-b border-[rgba(148,163,184,0.08)]">
+                  <button
+                    type="button"
+                    onClick={() => setIsSidebarOpen(true)}
+                    className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/40 rounded-xl transition-all border border-slate-800/40 flex items-center justify-center shrink-0"
+                    aria-label="Open Sidebar"
+                  >
+                    <Menu size={20} />
+                  </button>
+                  <div className="flex items-center gap-3">
+                    <LanguageSwitcher />
+                    <ThemeToggle />
+                  </div>
+                </div>
+
+                {/* Title block */}
+                <div className="min-w-0">
                   <p
                     style={{
                       margin: 0,
@@ -170,110 +283,10 @@ export function Layout({ children }: Props) {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                {/* Desktop controls */}
+                <div className="hidden md:flex items-center gap-3 shrink-0">
                   <LanguageSwitcher />
-                  <button
-                    aria-label={t('theme.switchMode', {
-                      mode:
-                        themeMode === 'dark'
-                          ? t('theme.light')
-                          : t('theme.dark'),
-                    })}
-                    onClick={() =>
-                      setThemeMode((prev) =>
-                        prev === 'dark' ? 'light' : 'dark'
-                      )
-                    }
-                    type="button"
-                    style={{
-                      width: 58,
-                      height: 32,
-                      borderRadius: 99,
-                      background:
-                        themeMode === 'dark'
-                          ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.35), rgba(79, 70, 229, 0.25))'
-                          : 'rgba(0, 0, 0, 0.05)',
-                      border: 'none',
-                      padding: 4,
-                      display: 'flex',
-                      alignItems: 'center',
-                      cursor: 'pointer',
-                      position: 'relative',
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                      boxShadow:
-                        themeMode === 'dark'
-                          ? 'inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 10px rgba(59, 130, 246, 0.15)'
-                          : 'inset 0 2px 4px rgba(0, 0, 0, 0.05)',
-                      outline: 'none',
-                    }}
-                  >
-                    {/* Background Icons */}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        paddingLeft: 8,
-                        paddingRight: 8,
-                        pointerEvents: 'none',
-                      }}
-                    >
-                      <Sun
-                        size={11}
-                        style={{
-                          color: 'var(--amber-500)',
-                          opacity: themeMode === 'dark' ? 0.35 : 0,
-                          transition: 'opacity 0.3s ease',
-                        }}
-                      />
-                      <Moon
-                        size={11}
-                        style={{
-                          color: 'var(--indigo-400)',
-                          opacity: themeMode === 'dark' ? 0 : 0.35,
-                          transition: 'opacity 0.3s ease',
-                        }}
-                      />
-                    </div>
-
-                    {/* Sliding Handle */}
-                    <div
-                      style={{
-                        width: 22,
-                        height: 22,
-                        borderRadius: '50%',
-                        background:
-                          themeMode === 'dark'
-                            ? 'linear-gradient(135deg, #ffffff, #cbd5e1)'
-                            : 'linear-gradient(135deg, #ffffff, #f1f5f9)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
-                        transform:
-                          themeMode === 'dark'
-                            ? 'translateX(26px)'
-                            : 'translateX(0px)',
-                        transition:
-                          'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s',
-                        zIndex: 2,
-                      }}
-                    >
-                      {themeMode === 'dark' ? (
-                        <Moon
-                          size={11}
-                          className="text-indigo-600 fill-indigo-600"
-                        />
-                      ) : (
-                        <Sun
-                          size={11}
-                          className="text-amber-500 fill-amber-500"
-                        />
-                      )}
-                    </div>
-                  </button>
+                  <ThemeToggle />
                 </div>
               </div>
             </header>
