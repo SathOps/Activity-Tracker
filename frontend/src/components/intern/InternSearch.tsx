@@ -259,17 +259,19 @@ const InternSearch: React.FC<InternSearchProps> = ({
   const hasQuery = searchQuery.trim().length > 0;
 
   return (
-    <div className="intern-search">
+    <div className="mb-5">
       {/* ── Add Intern Input ── */}
       {!hideHeader && (
-        <h3 className="intern-search-label">{t('interns.addIntern')}</h3>
+        <h3 className="text-[var(--text-main)] text-[22px] font-bold m-0 mb-[14px]">
+          {t('interns.addIntern')}
+        </h3>
       )}
 
-      <div className="intern-dropdown-wrapper">
-        <div className="intern-search-input-wrapper">
+      <div className="relative w-full">
+        <div className="relative w-full">
           <input
             id="intern-search-input"
-            className="intern-search-input"
+            className="w-full bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] rounded-[12px] text-[var(--text-main)] text-[14px] px-[12px] py-[10px] transition-[border-color,background-color,box-shadow] duration-[220ms] ease-in-out placeholder:text-[var(--text-soft)] focus:border-[var(--accent)] focus:shadow-[var(--focus-ring)] focus:outline-none"
             aria-label={t('interns.searchByNameAria')}
             type="text"
             placeholder={t('interns.searchByNamePlaceholder')}
@@ -282,14 +284,18 @@ const InternSearch: React.FC<InternSearchProps> = ({
           {/* ── Search Results Dropdown ── */}
           {showDropdown && hasQuery ? (
             <ul
-              className={`intern-dropdown${inlineResults ? ' intern-dropdown--inline' : ''}`}
+              className={`${
+                inlineResults
+                  ? 'static shadow-none mt-3 max-h-80'
+                  : 'absolute top-[calc(100%+8px)] left-0 shadow-[var(--shadow-hover)] max-h-[300px]'
+              } z-50 w-full bg-[var(--surface-0)] border border-[var(--border)] rounded-xl overflow-y-auto p-2 m-0 flex flex-col gap-1 list-none`}
             >
               {isLoading ? (
-                <li className="intern-dropdown-empty">
+                <li className="border border-dashed border-[var(--border-strong)] rounded-[12px] text-[var(--text-subtle)] text-[14px] m-0 px-[16px] py-[22px] text-center bg-[linear-gradient(180deg,var(--surface-1)_0%,var(--surface-2)_100%)]">
                   {t('interns.searching')}
                 </li>
               ) : searchResults.length === 0 ? (
-                <li className="intern-dropdown-empty">
+                <li className="border border-dashed border-[var(--border-strong)] rounded-[12px] text-[var(--text-subtle)] text-[14px] m-0 px-[16px] py-[22px] text-center bg-[linear-gradient(180deg,var(--surface-1)_0%,var(--surface-2)_100%)]">
                   {t('interns.noInternsFound')}
                 </li>
               ) : (
@@ -301,7 +307,11 @@ const InternSearch: React.FC<InternSearchProps> = ({
                   return (
                     <li
                       key={intern.id}
-                      className={`intern-dropdown-item${added ? ' disabled' : ''}`}
+                      className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition-colors focus:outline-none ${
+                        added
+                          ? 'opacity-60 cursor-not-allowed hover:bg-transparent'
+                          : 'cursor-pointer hover:bg-[var(--surface-1)] focus:bg-[var(--surface-1)]'
+                      }`}
                       tabIndex={added ? -1 : 0}
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => {
@@ -318,33 +328,33 @@ const InternSearch: React.FC<InternSearchProps> = ({
                         }
                       }}
                     >
-                      <div className="intern-dropdown-details">
-                        <div className="intern-dropdown-title-row">
-                          <span className="intern-dropdown-name">
+                      <div className="flex flex-col gap-1 w-full overflow-hidden">
+                        <div className="flex flex-col gap-[2px]">
+                          <span className="text-[14px] font-semibold text-[var(--text-main)] truncate">
                             {intern.name}
                           </span>
-                          <span className="intern-dropdown-username">
+                          <span className="text-[11px] font-medium text-[var(--text-subtle)] truncate">
                             {displayUsername}
                           </span>
                         </div>
                         {hasMeta ? (
-                          <div className="intern-dropdown-meta">
+                          <div className="flex flex-wrap gap-2 text-[11px] text-[var(--text-subtle)]">
                             {intern.email ? (
-                              <span className="intern-dropdown-meta-item">
-                                <span className="intern-dropdown-meta-label">
+                              <span className="flex items-center gap-1">
+                                <span className="font-semibold uppercase">
                                   {emailLabel}
                                 </span>
-                                <span className="intern-dropdown-meta-value">
+                                <span className="font-normal truncate">
                                   {intern.email}
                                 </span>
                               </span>
                             ) : null}
                             {intern.phone ? (
-                              <span className="intern-dropdown-meta-item">
-                                <span className="intern-dropdown-meta-label">
+                              <span className="flex items-center gap-1">
+                                <span className="font-semibold uppercase">
                                   {phoneLabel}
                                 </span>
-                                <span className="intern-dropdown-meta-value">
+                                <span className="font-normal truncate">
                                   {intern.phone}
                                 </span>
                               </span>
@@ -353,13 +363,13 @@ const InternSearch: React.FC<InternSearchProps> = ({
                         ) : null}
                       </div>
                       {added ? (
-                        <span className="intern-dropdown-badge">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-subtle)] bg-[var(--surface-2)] px-2 py-1 rounded-full ml-auto whitespace-nowrap">
                           {t('interns.added')}
                         </span>
                       ) : (
                         <button
                           type="button"
-                          className="secondary-button intern-dropdown-add-btn"
+                          className="text-[12px] ml-auto px-[10px] py-[4px] bg-[var(--surface-1)] border border-[var(--border)] rounded-[8px] text-[var(--text-main)] font-semibold transition-colors hover:bg-[var(--surface-2)] cursor-pointer whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
                           onMouseDown={(e) => e.preventDefault()}
                           onClick={(e) => {
                             e.stopPropagation();

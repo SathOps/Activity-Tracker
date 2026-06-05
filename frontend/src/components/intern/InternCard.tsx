@@ -103,7 +103,10 @@ export const InternCard: React.FC<InternCardProps> = ({
   };
 
   return (
-    <article className="intern-card" style={{ display: 'grid', gap: 12 }}>
+    <article
+      className="bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] rounded-[var(--radius-md)] p-[16px] shadow-[var(--shadow-sm)] transition-all duration-[220ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-[2px] hover:scale-[1.01] hover:shadow-[var(--shadow-md),0_0_20px_rgba(59,130,246,0.08)] hover:border-[rgba(59,130,246,0.35)] hover:bg-[rgba(255,255,255,0.55)] [[data-theme='dark']_&]:bg-[rgba(15,23,42,0.35)] [[data-theme='dark']_&:hover]:bg-[rgba(15,23,42,0.45)]"
+      style={{ display: 'grid', gap: 12 }}
+    >
       <div
         style={{
           display: 'flex',
@@ -112,7 +115,9 @@ export const InternCard: React.FC<InternCardProps> = ({
         }}
       >
         <div style={{ display: 'grid', gap: 4 }}>
-          <div className="intern-id">{displayName}</div>
+          <div className="text-[var(--text-main)] text-[14px] font-semibold">
+            {displayName}
+          </div>
           {isEditing ? (
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <input
@@ -134,14 +139,14 @@ export const InternCard: React.FC<InternCardProps> = ({
                 value={editedName}
               />
               <button
-                className="ghost-button"
+                className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[12px] text-white rounded-[14px] px-[16px] py-[10px] cursor-pointer text-[13px] font-semibold transition-all duration-300 hover:border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.08)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.12)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-[0.65]"
                 onClick={handleSave}
                 type="button"
               >
                 {t('button.save')}
               </button>
               <button
-                className="ghost-button"
+                className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[12px] text-white rounded-[14px] px-[16px] py-[10px] cursor-pointer text-[13px] font-semibold transition-all duration-300 hover:border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.08)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.12)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-[0.65]"
                 onClick={handleCancel}
                 type="button"
               >
@@ -212,12 +217,12 @@ export const InternCard: React.FC<InternCardProps> = ({
         </div>
 
         <div
-          className="intern-actions"
+          className="flex items-center gap-[8px]"
           style={{ display: 'flex', alignItems: 'center', gap: 8 }}
         >
           {audios.length > 0 && !isEditing && (
             <button
-              className="ghost-button"
+              className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[12px] text-white rounded-[14px] px-[16px] py-[10px] cursor-pointer text-[13px] font-semibold transition-all duration-300 hover:border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.08)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.12)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-[0.65]"
               onClick={toggleExpanded}
               style={{
                 padding: '5px 12px',
@@ -242,7 +247,7 @@ export const InternCard: React.FC<InternCardProps> = ({
           {onUpdateIntern ? (
             <button
               aria-label={t('interns.editAria', { name: displayName })}
-              className="ghost-button"
+              className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[12px] text-white rounded-[14px] px-[16px] py-[10px] cursor-pointer text-[13px] font-semibold transition-all duration-300 hover:border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.08)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.12)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-[0.65]"
               onClick={() => setIsEditing(true)}
               style={{
                 width: 28,
@@ -277,7 +282,7 @@ export const InternCard: React.FC<InternCardProps> = ({
           {onDeleteIntern ? (
             <button
               aria-label={t('interns.deleteAria', { name: displayName })}
-              className="ghost-button"
+              className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[12px] text-white rounded-[14px] px-[16px] py-[10px] cursor-pointer text-[13px] font-semibold transition-all duration-300 hover:border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.08)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.12)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-[0.65]"
               onClick={() => onDeleteIntern(internId)}
               style={{
                 width: 28,
@@ -317,7 +322,6 @@ export const InternCard: React.FC<InternCardProps> = ({
 
       {isExpanded && (
         <section
-          className="glass"
           style={{
             marginTop: 8,
             padding: 12,
@@ -360,7 +364,6 @@ export const InternCard: React.FC<InternCardProps> = ({
                 return (
                   <li
                     key={audio.id}
-                    className="glass"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -410,7 +413,7 @@ export const InternCard: React.FC<InternCardProps> = ({
                             onPause={() => onPause?.()}
                           />
                           <button
-                            className="ghost-button"
+                            className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[12px] text-white rounded-[14px] px-[16px] py-[10px] cursor-pointer text-[13px] font-semibold transition-all duration-300 hover:border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.08)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.12)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-[0.65]"
                             onClick={() => onPause?.()}
                             style={{
                               padding: '4px 8px',
@@ -451,7 +454,7 @@ export const InternCard: React.FC<InternCardProps> = ({
                         </span>
                       ) : (
                         <button
-                          className="ghost-button"
+                          className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[12px] text-white rounded-[14px] px-[16px] py-[10px] cursor-pointer text-[13px] font-semibold transition-all duration-300 hover:border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.08)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.12)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-[0.65]"
                           disabled={!audio.audioUrl && !audio.id}
                           onClick={() => handlePlay(audio.id, audio.audioUrl)}
                           style={{
