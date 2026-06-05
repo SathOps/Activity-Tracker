@@ -83,75 +83,29 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
 
   if (!audioUrl) {
     return (
-      <div
-        style={{
-          fontSize: 12,
-          color: 'var(--danger-text)',
-          padding: '8px',
-          textAlign: 'center',
-        }}
-      >
+      <div className="text-[12px] text-[var(--danger-text)] p-2 text-center">
         {t('audio.urlMissing')}
       </div>
     );
   }
 
   return (
-    <div
-      className="standup-audio-player"
-      style={{
-        display: 'grid',
-        gap: 8,
-        padding: '12px',
-        backgroundColor: 'var(--surface-0)',
-        color: 'var(--text-main)',
-        borderRadius: 10,
-        border: '1px solid var(--border)',
-        width: '100%',
-        maxWidth: '400px',
-        boxShadow: 'var(--shadow-soft)',
-      }}
-    >
+    <div className="grid gap-2 p-[12px] !bg-[var(--surface-0)] text-[var(--text-main)] rounded-[10px] !border !border-[var(--border)] w-full max-w-[400px] !shadow-[var(--shadow-soft)]">
       {/* Audio-only content; captions track not available for these short standup clips. */}
       {/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
       <audio ref={audioRef} src={audioUrl} autoPlay />
 
       {hasError ? (
-        <div
-          style={{
-            fontSize: 12,
-            color: 'var(--danger-text)',
-            textAlign: 'center',
-          }}
-        >
+        <div className="text-[12px] text-[var(--danger-text)] text-center">
           {t('audio.unableToPlay')}
         </div>
       ) : (
         <>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 4,
-            }}
-          >
-            <span
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: 'var(--text-main)',
-              }}
-            >
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[12px] font-semibold text-[var(--text-main)]">
               {label || t('audio.standupAudio')}
             </span>
-            <div
-              style={{
-                fontSize: 11,
-                color: 'var(--text-subtle)',
-                fontFamily: 'monospace',
-              }}
-            >
+            <div className="text-[11px] text-[var(--text-subtle)] font-mono">
               {formatTime(currentTime)} / {formatTime(duration)}
             </div>
           </div>
@@ -162,32 +116,13 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
             max={duration || 100}
             value={currentTime}
             onChange={handleSeek}
-            style={{
-              width: '100%',
-              height: 4,
-              accentColor: 'var(--accent)',
-              cursor: 'pointer',
-            }}
+            className="w-full h-1 accent-[var(--accent)] cursor-pointer"
           />
 
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 16,
-              marginTop: 4,
-            }}
-          >
+          <div className="flex items-center justify-center gap-4 mt-1">
             <button
               onClick={() => skip(-10)}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 18,
-                color: 'var(--text-subtle)',
-              }}
+              className="bg-transparent border-none cursor-pointer text-[18px] text-[var(--text-subtle)]"
               title={t('audio.rewind10')}
               type="button"
             >
@@ -198,21 +133,7 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
 
             <button
               onClick={togglePlay}
-              style={{
-                background:
-                  'linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%)',
-                border: 'none',
-                borderRadius: '50%',
-                width: 36,
-                height: 36,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: '#ffffff',
-                fontSize: 14,
-                boxShadow: '0 8px 14px rgba(30, 79, 178, 0.26)',
-              }}
+              className="bg-[linear-gradient(135deg,var(--accent)_0%,var(--accent-strong)_100%)] border-none rounded-full w-[36px] h-[36px] flex items-center justify-center cursor-pointer text-white text-[14px] shadow-[0_8px_14px_rgba(30,79,178,0.26)]"
               title={isPlaying ? t('audio.pause') : t('audio.play')}
               type="button"
             >
@@ -220,7 +141,7 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
                 <span
                   role="img"
                   aria-label={t('audio.pause')}
-                  style={{ fontSize: 12 }}
+                  className="text-[12px]"
                 >
                   ⏸
                 </span>
@@ -228,7 +149,7 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
                 <span
                   role="img"
                   aria-label={t('audio.play')}
-                  style={{ fontSize: 12, marginLeft: 2 }}
+                  className="text-[12px] ml-[2px]"
                 >
                   ▶
                 </span>
@@ -237,13 +158,7 @@ export const StandupAudioPlayer: React.FC<StandupAudioPlayerProps> = ({
 
             <button
               onClick={() => skip(10)}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 18,
-                color: 'var(--text-subtle)',
-              }}
+              className="bg-transparent border-none cursor-pointer text-[18px] text-[var(--text-subtle)]"
               title={t('audio.forward10')}
               type="button"
             >

@@ -224,36 +224,54 @@ export function ProfileCompletionPage() {
   if (isSetupMode) {
     return (
       <main className="relative flex h-screen w-screen items-center justify-center overflow-hidden p-0 font-body bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.15),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(139,92,246,0.12),transparent_40%),radial-gradient(circle_at_60%_10%,rgba(14,165,233,0.1),transparent_30%),linear-gradient(135deg,#eef0fa_0%,#e8ecf5_40%,#eff0fa_100%)] bg-[size:200%_200%] animate-[login-gradient-shift_15s_ease_infinite]">
-        <div className="portal-login-backdrop" />
+        <div
+          className="absolute inset-0 pointer-events-none bg-[linear-gradient(135deg,rgba(15,23,42,0.05),transparent_40%),linear-gradient(315deg,rgba(37,99,235,0.08),transparent_38%)]"
+          aria-hidden="true"
+        />
         <div className="relative w-screen h-screen overflow-hidden z-10 max-[800px]:flex max-[800px]:flex-col max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:w-full max-[800px]:overflow-visible">
           {/* Left Section (Hero) - Hidden on Mobile */}
-          <section className="portal-login-hero max-[800px]:hidden">
+          <section className="absolute left-0 top-0 w-[65vw] h-full z-[2] flex flex-col justify-center gap-12 p-[60px_48px] text-[#f8fbff] bg-[linear-gradient(145deg,rgba(11,18,32,0.98),rgba(17,45,92,0.96)),linear-gradient(180deg,rgba(255,255,255,0.05),transparent)] [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1024px]:min-[801px]:w-[65vw] max-[1024px]:min-[801px]:p-[50px_36px] max-[800px]:hidden">
+            <div
+              className="absolute -right-[80px] -top-[60px] w-[320px] h-[320px] pointer-events-none bg-[radial-gradient(circle,rgba(96,165,250,0.22),transparent_60%)]"
+              aria-hidden="true"
+            />
+
             <div className="relative z-10 pr-[12%] max-[800px]:pr-0">
-              <p className="portal-login-eyebrow">
+              <p className="text-[#b7ccf6] font-display text-[12px] font-bold tracking-[0.18em] uppercase m-0 mb-2 max-w-[600px] mr-auto">
                 Internship Activity Tracker
               </p>
-              <h1 className="portal-login-title">
+              <h1 className="text-white font-display text-[clamp(2.2rem,3.2vw,3.8rem)] font-bold tracking-[-0.04em] leading-[1.05] m-0 mb-3 max-w-[18ch] max-[1024px]:min-[801px]:text-[clamp(1.8rem,2.5vw,2.6rem)] max-[800px]:text-[2.2rem] max-[800px]:max-w-full">
                 Complete your profile to proceed.
               </h1>
-              <p className="portal-login-copy">
+              <p className="text-[rgba(228,238,255,0.9)] text-[15px] leading-[1.6] m-0 mb-4 max-w-[500px] relative z-10 mr-auto">
                 Set your GitLab username to proceed. Your GitLab username links
                 your activity data and enables the full workspace.
               </p>
 
-              <div className="portal-feature-grid">
-                <article className="portal-feature-card">
-                  <span className="portal-feature-badge">01</span>
-                  <h2 className="portal-feature-title">Profile Setup</h2>
-                  <p className="portal-feature-copy">
+              <div className="grid grid-cols-2 gap-5 mt-3 relative z-10 max-w-[640px] mr-auto max-[1024px]:min-[801px]:gap-3 max-[1024px]:min-[801px]:pt-5 max-[800px]:grid-cols-1 max-[800px]:gap-3 max-[800px]:pt-8 max-[800px]:max-w-full">
+                <article className="group relative flex flex-col p-[22px] rounded-2xl cursor-pointer backdrop-blur-md bg-[linear-gradient(135deg,rgba(15,23,42,0.4)_0%,rgba(30,41,59,0.2)_100%)] border border-[rgba(147,197,253,0.1)] shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-400 hover:-translate-y-2 hover:scale-[1.03] hover:border-[rgba(96,165,250,0.4)] hover:bg-[linear-gradient(135deg,rgba(20,30,55,0.6)_0%,rgba(37,99,235,0.1)_100%)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.45),0_0_25px_rgba(37,99,235,0.15),inset_0_1px_0_rgba(255,255,255,0.1)] overflow-hidden [animation:card-entrance_0.8s_cubic-bezier(0.16,1,0.3,1)_both,card-idle-float_6s_infinite_ease-in-out_alternate] max-[1024px]:min-[801px]:p-3.5 max-[800px]:p-5 max-[800px]:rounded-xl">
+                  <div className="absolute top-0 -left-[150%] w-1/2 h-full bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)] -skew-x-[20deg] transition-none group-hover:left-[150%] group-hover:duration-800 group-hover:ease-in-out" />
+                  <span className="inline-flex w-fit px-3 py-1.5 mb-[14px] font-display text-[11px] font-bold tracking-[0.12em] text-[#93c5fd] bg-[rgba(96,165,250,0.1)] border border-[rgba(147,197,253,0.15)] rounded-full transition-all duration-300 group-hover:bg-[rgba(96,165,250,0.25)] group-hover:border-[rgba(147,197,253,0.4)] group-hover:text-white group-hover:shadow-[0_0_10px_rgba(96,165,250,0.3)]">
+                    01
+                  </span>
+                  <h2 className="text-white font-display text-[19px] font-semibold m-0 mb-2.5 transition-colors duration-300 group-hover:text-[#60a5fa]">
+                    Profile Setup
+                  </h2>
+                  <p className="text-[#94a3b8] text-[13.5px] leading-[1.6] m-0 transition-colors duration-300 group-hover:text-[#e2e8f0]">
                     Provide your GitLab username and other details to complete
                     your registration in the activity tracker.
                   </p>
                 </article>
 
-                <article className="portal-feature-card">
-                  <span className="portal-feature-badge">02</span>
-                  <h2 className="portal-feature-title">GitLab Verification</h2>
-                  <p className="portal-feature-copy">
+                <article className="group relative flex flex-col p-[22px] rounded-2xl cursor-pointer backdrop-blur-md bg-[linear-gradient(135deg,rgba(15,23,42,0.4)_0%,rgba(30,41,59,0.2)_100%)] border border-[rgba(147,197,253,0.1)] shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-400 hover:-translate-y-2 hover:scale-[1.03] hover:border-[rgba(96,165,250,0.4)] hover:bg-[linear-gradient(135deg,rgba(20,30,55,0.6)_0%,rgba(37,99,235,0.1)_100%)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.45),0_0_25px_rgba(37,99,235,0.15),inset_0_1px_0_rgba(255,255,255,0.1)] overflow-hidden [animation:card-entrance_0.8s_cubic-bezier(0.16,1,0.3,1)_both,card-idle-float_6s_infinite_ease-in-out_alternate] max-[1024px]:min-[801px]:p-3.5 max-[800px]:p-5 max-[800px]:rounded-xl">
+                  <div className="absolute top-0 -left-[150%] w-1/2 h-full bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)] -skew-x-[20deg] transition-none group-hover:left-[150%] group-hover:duration-800 group-hover:ease-in-out" />
+                  <span className="inline-flex w-fit px-3 py-1.5 mb-[14px] font-display text-[11px] font-bold tracking-[0.12em] text-[#93c5fd] bg-[rgba(96,165,250,0.1)] border border-[rgba(147,197,253,0.15)] rounded-full transition-all duration-300 group-hover:bg-[rgba(96,165,250,0.25)] group-hover:border-[rgba(147,197,253,0.4)] group-hover:text-white group-hover:shadow-[0_0_10px_rgba(96,165,250,0.3)]">
+                    02
+                  </span>
+                  <h2 className="text-white font-display text-[19px] font-semibold m-0 mb-2.5 transition-colors duration-300 group-hover:text-[#60a5fa]">
+                    GitLab Verification
+                  </h2>
+                  <p className="text-[#94a3b8] text-[13.5px] leading-[1.6] m-0 transition-colors duration-300 group-hover:text-[#e2e8f0]">
                     Authorize via GitLab OIDC to securely link your profile and
                     start submitting daily standups.
                   </p>
@@ -263,8 +281,8 @@ export function ProfileCompletionPage() {
           </section>
 
           {/* Right Section (Form) */}
-          <section className="portal-login-panel max-[800px]:relative max-[800px]:w-full max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:flex max-[800px]:items-center max-[800px]:justify-start max-[800px]:pt-12 max-[800px]:pb-16 max-[800px]:px-6 max-[800px]:bg-[linear-gradient(to_bottom,#eff2f9_0%,#f8fafc_15%,#f8fafc_100%)] max-[800px]:overflow-y-auto">
-            <div className="portal-login-card max-[800px]:max-w-[440px] max-[800px]:py-8 max-[800px]:my-auto max-[800px]:mx-auto">
+          <section className="absolute right-0 top-0 w-screen h-full z-[1] flex flex-col items-center justify-center pl-[68vw] pr-[4vw] py-0 bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_40%,#f1f5f9_100%)] overflow-hidden max-[1024px]:min-[801px]:pl-[68vw] max-[1024px]:min-[801px]:pr-[4vw] max-[800px]:relative max-[800px]:w-full max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:flex max-[800px]:items-center max-[800px]:justify-start max-[800px]:pt-12 max-[800px]:pb-16 max-[800px]:px-6 max-[800px]:bg-[linear-gradient(to_bottom,#eff2f9_0%,#f8fafc_15%,#f8fafc_100%)] max-[800px]:overflow-y-auto">
+            <div className="w-full max-w-[380px] flex flex-col gap-0 animate-[panel-fade-in_0.6s_cubic-bezier(0.16,1,0.3,1)_both] max-[800px]:max-w-[440px] max-[800px]:py-8 max-[800px]:my-auto max-[800px]:mx-auto">
               {/* Mobile Brand Header */}
               <div className="hidden max-[800px]:flex flex-col items-center text-center mb-6">
                 <div className="w-12 h-12 rounded-2xl bg-[linear-gradient(135deg,#4f46e5_0%,#3b82f6_100%)] flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-3 animate-[pulse-border_2s_infinite_ease-in-out]">
@@ -292,18 +310,18 @@ export function ProfileCompletionPage() {
                 </h1>
               </div>
 
-              <div className="portal-login-card-accent max-[800px]:mx-auto max-[800px]:mb-6" />
+              <div className="w-12 h-1 rounded border-none bg-[linear-gradient(90deg,#6366f1,#818cf8,#a5b4fc)] bg-[size:200%_100%] animate-[accent-shimmer_3s_ease-in-out_infinite] mb-5 max-[800px]:mx-auto max-[800px]:mb-6" />
 
-              <div className="portal-login-card-header max-[800px]:mb-5 max-[800px]:text-center">
+              <div className="mb-7 max-[800px]:mb-5 max-[800px]:text-center">
                 {step === 1 ? (
                   <>
                     <span className="text-indigo-600 font-display text-xs font-bold tracking-wide uppercase block mb-1">
                       Welcome, {user?.name ?? 'intern'}
                     </span>
-                    <h2 className="portal-login-panel-title">
+                    <h2 className="text-[#0f172a] font-display text-[clamp(26px,2.5vw,32px)] font-bold tracking-[-0.03em] leading-[1.15] m-0 mb-2 max-[800px]:text-[26px]">
                       Complete Profile
                     </h2>
-                    <p className="portal-login-panel-copy">
+                    <p className="text-[#64748b] text-[14.5px] leading-[1.6] m-0">
                       Set your GitLab username to complete
                       <br />
                       registration and connect your profile.
@@ -314,10 +332,10 @@ export function ProfileCompletionPage() {
                     <span className="text-indigo-600 font-display text-xs font-bold tracking-wide uppercase block mb-1">
                       Additional Info
                     </span>
-                    <h2 className="portal-login-panel-title">
+                    <h2 className="text-[#0f172a] font-display text-[clamp(26px,2.5vw,32px)] font-bold tracking-[-0.03em] leading-[1.15] m-0 mb-2 max-[800px]:text-[26px]">
                       Optional Details
                     </h2>
-                    <p className="portal-login-panel-copy">
+                    <p className="text-[#64748b] text-[14.5px] leading-[1.6] m-0">
                       Provide optional details below or
                       <br />
                       save to finish the setup process.
@@ -366,7 +384,7 @@ export function ProfileCompletionPage() {
                 </div>
               </div>
 
-              <form className="portal-login-form" onSubmit={handleSubmit}>
+              <form className="grid gap-5 w-full" onSubmit={handleSubmit}>
                 {step === 1 && (
                   <>
                     <div className="grid gap-1.5 w-full">
@@ -449,22 +467,25 @@ export function ProfileCompletionPage() {
                     <button
                       type="submit"
                       disabled={!gitlabUsername.trim() || !dateOfJoining}
-                      className="portal-login-submit mt-2"
+                      className="group/btn relative flex items-center justify-center gap-2 w-full min-h-[48px] px-5 mt-2 rounded-xl text-white font-display text-[14px] font-bold tracking-[0.01em] bg-[linear-gradient(135deg,#0b1530_0%,#1e3b8a_50%,#2563eb_100%)] shadow-[0_4px_14px_rgba(30,58,138,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] transition-all duration-200 hover:enabled:shadow-[0_8px_24px_rgba(30,58,138,0.4),inset_0_1px_0_rgba(255,255,255,0.15)] hover:enabled:-translate-y-[1.5px] active:enabled:translate-y-0 disabled:opacity-65 disabled:cursor-wait overflow-hidden cursor-pointer border-none"
                     >
-                      <span>Next Step</span>
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                        <polyline points="12 5 19 12 12 19" />
-                      </svg>
+                      <div className="absolute top-0 -left-[150%] w-1/2 h-full bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.28),transparent)] -skew-x-[25deg] pointer-events-none animate-[button-shimmer_6s_infinite_ease-in-out] group-hover/btn:animate-[button-shimmer_1.5s_infinite_ease-in-out]" />
+                      <span className="flex items-center justify-center gap-2 relative z-10">
+                        <span>Next Step</span>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                          <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      </span>
                     </button>
                   </>
                 )}
@@ -538,38 +559,45 @@ export function ProfileCompletionPage() {
                       </div>
                     </div>
 
-                    {error && <p className="portal-login-error">{error}</p>}
+                    {error && (
+                      <p className="bg-[linear-gradient(135deg,#fef2f2,#fff1f2)] border border-[#fecdd3] rounded-[10px] text-[#be123c] text-[13px] leading-[1.6] m-0 p-[10px_14px]">
+                        {error}
+                      </p>
+                    )}
 
                     <button
                       type="submit"
                       disabled={
                         saving || !gitlabUsername.trim() || !dateOfJoining
                       }
-                      className="portal-login-submit mt-2"
+                      className="group/btn relative flex items-center justify-center gap-2 w-full min-h-[48px] px-5 mt-2 rounded-xl text-white font-display text-[14px] font-bold tracking-[0.01em] bg-[linear-gradient(135deg,#0b1530_0%,#1e3b8a_50%,#2563eb_100%)] shadow-[0_4px_14px_rgba(30,58,138,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] transition-all duration-200 hover:enabled:shadow-[0_8px_24px_rgba(30,58,138,0.4),inset_0_1px_0_rgba(255,255,255,0.15)] hover:enabled:-translate-y-[1.5px] active:enabled:translate-y-0 disabled:opacity-65 disabled:cursor-wait overflow-hidden cursor-pointer border-none"
                     >
-                      {saving ? (
-                        <span className="portal-login-submit-content">
-                          <span className="portal-login-spinner" />
-                          {'Saving…'}
-                        </span>
-                      ) : (
-                        <>
-                          <span>Save & Connect GitLab</span>
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                            <polyline points="12 5 19 12 12 19" />
-                          </svg>
-                        </>
-                      )}
+                      <div className="absolute top-0 -left-[150%] w-1/2 h-full bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.28),transparent)] -skew-x-[25deg] pointer-events-none animate-[button-shimmer_6s_infinite_ease-in-out] group-hover/btn:animate-[button-shimmer_1.5s_infinite_ease-in-out]" />
+                      <span className="flex items-center justify-center gap-2 relative z-10">
+                        {saving ? (
+                          <>
+                            <span className="w-4 h-4 border-2 border-white/30 rounded-full border-t-white animate-[portal-spin_0.8s_linear_infinite]" />
+                            {'Saving…'}
+                          </>
+                        ) : (
+                          <>
+                            <span>Save & Connect GitLab</span>
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <line x1="5" y1="12" x2="19" y2="12" />
+                              <polyline points="12 5 19 12 12 19" />
+                            </svg>
+                          </>
+                        )}
+                      </span>
                     </button>
                   </>
                 )}
@@ -583,9 +611,9 @@ export function ProfileCompletionPage() {
                 </button>
               </form>
 
-              <div className="portal-login-card-footer">
-                <div className="portal-login-divider" />
-                <p className="portal-login-footer-text">
+              <div className="mt-6">
+                <div className="h-[1px] bg-[linear-gradient(90deg,transparent,#e2e8f0,transparent)] mb-4" />
+                <p className="text-[#94a3b8] text-[12px] leading-[1.5] m-0 mb-3 text-center">
                   You will be redirected to GitLab to complete the connection
                   after saving.
                 </p>

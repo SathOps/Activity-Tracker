@@ -26,7 +26,7 @@ export function GitComplianceWorkspace({ children }: Props) {
   if (!gitlabConnected) {
     return (
       <section
-        className="fade-in-up-container gitlab-access-card-interactive"
+        className="opacity-0 animate-[fadeInUp_0.5s_cubic-bezier(0.16,1,0.3,1)_forwards] transition-all duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.08)] hover:!border-[rgba(59,130,246,0.3)]"
         style={{
           padding: '32px',
           borderRadius: 14,
@@ -55,7 +55,7 @@ export function GitComplianceWorkspace({ children }: Props) {
             onClick={() => {
               window.location.href = getGitlabLoginUrl();
             }}
-            className="premium-gitlab-btn pulse-animation"
+            className="relative overflow-hidden inline-flex items-center gap-2 border-none bg-[linear-gradient(135deg,#2563eb,#60a5fa,#2563eb)] bg-[length:200%_auto] text-white font-semibold cursor-pointer transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] shadow-[0_4px_12px_rgba(37,99,235,0.3)] hover:scale-[1.04] hover:-translate-y-[2px] hover:bg-[position:right_center] hover:shadow-[0_0_25px_rgba(59,130,246,0.5),0_4px_12px_rgba(37,99,235,0.4)] active:scale-[0.97] active:translate-y-0 after:content-[''] after:absolute after:top-1/2 after:left-1/2 after:w-[5px] after:h-[5px] after:bg-[rgba(255,255,255,0.4)] after:opacity-0 after:rounded-full after:-translate-x-1/2 after:-translate-y-1/2 after:origin-center focus:not(:active):after:animate-[ripple_0.6s_ease-out] animate-[btn-idle-pulse_2.2s_infinite]"
             style={{
               padding: '11px 22px',
               borderRadius: 10,
