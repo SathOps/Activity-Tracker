@@ -1235,6 +1235,7 @@ select {
 
 .auth-input,
 .intern-search-input,
+.team-search-input,
 .date-input,
 .team-add-intern-input,
 .interns-list-search,
@@ -1256,6 +1257,7 @@ select {
 
 .auth-input::placeholder,
 .intern-search-input::placeholder,
+.team-search-input::placeholder,
 .team-add-intern-input::placeholder,
 .interns-list-search::placeholder,
 .modal-search-input::placeholder {
@@ -1264,6 +1266,7 @@ select {
 
 .auth-input:focus,
 .intern-search-input:focus,
+.team-search-input:focus,
 .date-input:focus,
 .team-add-intern-input:focus,
 .interns-list-search:focus,
@@ -1271,6 +1274,10 @@ select {
   border-color: var(--accent);
   box-shadow: var(--focus-ring);
   outline: none;
+}
+
+.team-search-input {
+  max-width: 360px;
 }
 
 .auth-submit {
