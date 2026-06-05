@@ -254,7 +254,7 @@ export const TeamList: React.FC<TeamListProps> = ({
 
         return (
           <article
-            className="p-6 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300"
+            className="p-6 relative overflow-hidden bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-xl transition-all duration-300"
             key={team.teamId}
           >
             {!isIntern && (
@@ -272,7 +272,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                             [team.teamId]: event.target.value,
                           }))
                         }
-                        className="bg-[var(--surface-0)] border border-[var(--border)] rounded text-[13px] text-[var(--text-main)] min-w-[220px] px-2 py-1.5"
+                        className="bg-white/30 dark:bg-slate-950/20 border border-slate-300/60 dark:border-white/10 rounded text-[13px] text-[var(--text-main)] min-w-[220px] px-2 py-1.5 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50"
                         type="text"
                         value={teamNameDraftById[team.teamId] ?? team.teamName}
                       />
@@ -394,7 +394,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                     aria-label={t('teams.addInternToTeam', {
                       name: team.teamName,
                     })}
-                    className="w-full px-4 py-2 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200"
+                    className="w-full px-4 py-2 bg-white/30 dark:bg-slate-950/20 border border-slate-300/60 dark:border-white/10 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400/70 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 backdrop-blur-sm"
                     onChange={(event) =>
                       handleInputChange(team.teamId, event.target.value)
                     }
@@ -406,13 +406,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                   />
 
                   {state.showDropdown && !isIntern ? (
-                    <ul
-                      className="absolute left-0 right-0 z-20 glass rounded-xl shadow-lg list-none m-1 max-h-[220px] overflow-y-auto p-1 backdrop-blur-xl"
-                      style={{
-                        background: 'var(--glass-bg)',
-                        border: '1px solid var(--glass-border)',
-                      }}
-                    >
+                    <ul className="absolute left-0 right-0 z-20 rounded-xl shadow-lg list-none m-1 max-h-[220px] overflow-y-auto p-1 bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 backdrop-blur-xl">
                       {addedInterns.length === 0 ? (
                         <li className="text-[var(--text-subtle)] text-[13px] list-none p-[10px_12px] text-center">
                           {t('interns.noInternsAvailable')}

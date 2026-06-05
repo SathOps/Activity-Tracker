@@ -33,16 +33,11 @@ const EMPTY_DRAFT: UserDraft = {
 
 /* ── Shared glass card style ─────────────────────────────── */
 const glassCard =
-  'relative z-10 rounded-[24px] backdrop-blur-[var(--glass-blur)] ' +
+  'relative z-10 rounded-[24px] backdrop-blur-xl ' +
+  'bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 ' +
+  'shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.37)] ' +
   'transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 ' +
-  'bg-[rgba(255,255,255,0.55)] border border-[rgba(255,255,255,0.7)] ' +
-  'shadow-[0_10px_30px_-10px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,0.9)] ' +
-  'hover:bg-[rgba(255,255,255,0.65)] hover:border-[rgba(30,79,178,0.25)] ' +
-  'hover:shadow-[0_20px_40px_-15px_rgba(31,38,135,0.12),inset_0_1px_0_rgba(255,255,255,0.95)] ' +
-  'dark:bg-[rgba(15,23,42,0.45)] dark:border-[rgba(255,255,255,0.06)] ' +
-  'dark:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.05)] ' +
-  'dark:hover:bg-[rgba(15,23,42,0.55)] dark:hover:border-[rgba(56,189,248,0.25)] ' +
-  'dark:hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.65),0_0_20px_rgba(56,189,248,0.1),inset_0_1px_0_rgba(255,255,255,0.08)]';
+  'hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-xl dark:hover:shadow-blue-900/10';
 
 export function MembersPage() {
   const qc = useQueryClient();
@@ -159,14 +154,7 @@ export function MembersPage() {
                   }))
                 }
                 placeholder="Full name"
-                style={{
-                  padding: '10px 14px',
-                  borderRadius: 12,
-                  border: '1px solid var(--slate-200)',
-                  background: 'rgba(255,255,255,0.8)',
-                  fontSize: 14,
-                  outline: 'none',
-                }}
+                className="px-3.5 py-2.5 rounded-xl border border-slate-300/60 dark:border-white/10 bg-white/30 dark:bg-slate-950/20 text-slate-800 dark:text-slate-100 placeholder-slate-400/70 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 backdrop-blur-sm"
               />
               <input
                 type="text"
@@ -178,14 +166,7 @@ export function MembersPage() {
                   }))
                 }
                 placeholder="Corpus username"
-                style={{
-                  padding: '10px 14px',
-                  borderRadius: 12,
-                  border: '1px solid var(--slate-200)',
-                  background: 'rgba(255,255,255,0.8)',
-                  fontSize: 14,
-                  outline: 'none',
-                }}
+                className="px-3.5 py-2.5 rounded-xl border border-slate-300/60 dark:border-white/10 bg-white/30 dark:bg-slate-950/20 text-slate-800 dark:text-slate-100 placeholder-slate-400/70 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 backdrop-blur-sm"
               />
               <select
                 value={draft.batch_id}
@@ -195,14 +176,7 @@ export function MembersPage() {
                     batch_id: Number(event.target.value) || '',
                   }))
                 }
-                style={{
-                  padding: '10px 14px',
-                  borderRadius: 12,
-                  border: '1px solid var(--slate-200)',
-                  background: 'rgba(255,255,255,0.8)',
-                  fontSize: 14,
-                  outline: 'none',
-                }}
+                className="px-3.5 py-2.5 rounded-xl border border-slate-300/60 dark:border-white/10 bg-white/30 dark:bg-slate-950/20 text-slate-800 dark:text-slate-100 placeholder-slate-450 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 backdrop-blur-sm cursor-pointer"
               >
                 <option value="">Select batch</option>
                 {batchesQuery.data?.map((batch) => (
@@ -221,14 +195,7 @@ export function MembersPage() {
                   }))
                 }
                 placeholder="Team name (optional)"
-                style={{
-                  padding: '10px 14px',
-                  borderRadius: 12,
-                  border: '1px solid var(--slate-200)',
-                  background: 'rgba(255,255,255,0.8)',
-                  fontSize: 14,
-                  outline: 'none',
-                }}
+                className="px-3.5 py-2.5 rounded-xl border border-slate-300/60 dark:border-white/10 bg-white/30 dark:bg-slate-950/20 text-slate-800 dark:text-slate-100 placeholder-slate-400/70 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 backdrop-blur-sm"
               />
               <input
                 type="text"
@@ -240,14 +207,7 @@ export function MembersPage() {
                   }))
                 }
                 placeholder="GitLab username"
-                style={{
-                  padding: '10px 14px',
-                  borderRadius: 12,
-                  border: '1px solid var(--slate-200)',
-                  background: 'rgba(255,255,255,0.8)',
-                  fontSize: 14,
-                  outline: 'none',
-                }}
+                className="px-3.5 py-2.5 rounded-xl border border-slate-300/60 dark:border-white/10 bg-white/30 dark:bg-slate-950/20 text-slate-800 dark:text-slate-100 placeholder-slate-400/70 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 backdrop-blur-sm"
               />
               <input
                 type="text"
@@ -322,7 +282,7 @@ export function MembersPage() {
                 onChange={(event) =>
                   setImportBatchId(Number(event.target.value) || '')
                 }
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="w-full rounded-xl border border-slate-300/60 dark:border-white/10 px-3.5 py-2.5 text-sm bg-white/30 dark:bg-slate-950/20 text-slate-800 dark:text-slate-100 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 cursor-pointer"
               >
                 <option value="">Select target batch</option>
                 {batchesQuery.data?.map((batch) => (
@@ -337,7 +297,7 @@ export function MembersPage() {
                 onChange={(event) =>
                   setImportFile(event.target.files?.[0] ?? null)
                 }
-                className="w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm"
+                className="w-full text-sm text-slate-650 file:mr-3 file:rounded-xl file:border-0 file:bg-blue-600/10 file:px-4 file:py-2.5 file:text-xs file:font-semibold file:text-blue-500 file:hover:bg-blue-600/20 transition-all"
               />
               <button
                 type="button"
@@ -345,19 +305,7 @@ export function MembersPage() {
                 disabled={
                   !importBatchId || !importFile || importMutation.isPending
                 }
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '10px 18px',
-                  borderRadius: 12,
-                  border: 'none',
-                  background: 'var(--slate-900)',
-                  color: '#fff',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
+                className="inline-flex items-center gap-2 px-[18px] py-2.5 rounded-xl text-[13px] font-semibold text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 shadow-sm transition-all duration-200 cursor-pointer disabled:opacity-50 border-none outline-none"
               >
                 <Upload size={14} />
                 Import CSV
@@ -404,7 +352,7 @@ export function MembersPage() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search users"
-            className="w-full max-w-sm rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="w-full max-w-sm rounded-xl border border-slate-300/60 dark:border-white/10 px-4 py-2 text-sm bg-white/30 dark:bg-slate-950/20 text-slate-800 dark:text-slate-100 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200"
           />
         </div>
 

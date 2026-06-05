@@ -196,17 +196,17 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           left-0
           md:relative
           md:translate-x-0
+          bg-white/45
+          dark:bg-slate-900/45
+          border-r
+          border-white/20
+          dark:border-white/5
+          backdrop-blur-xl
+          shadow-xl
+          shadow-slate-200/50
+          dark:shadow-[8px_0_32px_rgba(0,0,0,0.35)]
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
-        style={{
-          background:
-            'linear-gradient(180deg, #0f172a 0%, #0d1424 50%, #0b1120 100%)',
-          backdropFilter: 'blur(40px) saturate(1.4)',
-          WebkitBackdropFilter: 'blur(40px) saturate(1.4)',
-          borderRight: '1px solid rgba(30, 79, 178, 0.18)',
-          boxShadow:
-            '8px 0 32px rgba(0, 0, 0, 0.5), 16px 0 64px rgba(0, 0, 0, 0.3), inset -1px 0 0 rgba(30, 79, 178, 0.08)',
-        }}
       >
         {/* Top edge glow line */}
         <div
@@ -458,22 +458,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               >
                 GitLab Access
               </p>
-              <div
-                style={{
-                  padding: '14px 16px',
-                  borderRadius: 14,
-                  background:
-                    'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.03))',
-                  border: '1px solid rgba(59, 130, 246, 0.15)',
-                  boxShadow:
-                    '0 0 25px rgba(59, 130, 246, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-                  backdropFilter: 'blur(24px)',
-                  WebkitBackdropFilter: 'blur(24px)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 12,
-                }}
-              >
+              <div className="p-[14px_16px] rounded-[14px] bg-blue-500/5 border border-blue-500/15 backdrop-blur-md flex flex-col gap-3 shadow-md shadow-blue-500/5 dark:shadow-none">
                 {/* Status row */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span
@@ -634,14 +619,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         />
 
         {/* Footer / Profile Section */}
-        <div
-          style={{
-            padding: '16px 20px',
-            position: 'relative',
-            background:
-              'linear-gradient(180deg, rgba(255,255,255,.03), transparent)',
-          }}
-        >
+        <div className="p-[16px_20px] relative bg-white/5 dark:bg-transparent border-t border-white/5">
           {/* Profile Info & Trigger Row */}
           <div
             style={{

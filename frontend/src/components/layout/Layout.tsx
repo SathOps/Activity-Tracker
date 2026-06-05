@@ -176,24 +176,7 @@ export function Layout({ children }: Props) {
                 zIndex: 0,
               }}
             />
-            <header
-              className="border border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-[20px]"
-              style={{
-                borderRadius: 20,
-                padding: 0,
-                overflow: 'hidden',
-                position: 'relative',
-                zIndex: 1,
-                background:
-                  themeMode === 'dark'
-                    ? 'rgba(15, 23, 42, 0.75)'
-                    : 'rgba(255, 255, 255, 0.7)',
-                boxShadow:
-                  themeMode === 'dark'
-                    ? '0 8px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(99, 130, 255, 0.08), 0 0 60px rgba(59, 130, 246, 0.15)'
-                    : '0 8px 32px rgba(31, 38, 135, 0.06), 0 0 0 1px rgba(59, 130, 246, 0.08), 0 0 60px rgba(59, 130, 246, 0.08)',
-              }}
-            >
+            <header className="relative z-10 overflow-hidden border border-white/20 dark:border-white/5 bg-white/45 dark:bg-slate-900/45 backdrop-blur-xl rounded-[20px] shadow-lg shadow-slate-200/50 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
               {/* Gradient accent bar */}
               <div
                 style={{
@@ -343,7 +326,7 @@ export function Layout({ children }: Props) {
                 className={`w-full h-full flex items-center transition-all duration-500 ${
                   isIslandCollapsed
                     ? 'bg-transparent border-transparent backdrop-blur-none shadow-none justify-center'
-                    : 'bg-slate-950/80 dark:bg-slate-900/90 border border-slate-800/80 dark:border-slate-800/60 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.4)] px-8 justify-between rounded-full [mask-image:radial-gradient(circle_at_50%_0,transparent_34px,black_35px)] [-webkit-mask-image:radial-gradient(circle_at_50%_0,transparent_34px,black_35px)]'
+                    : 'bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 backdrop-blur-xl shadow-lg dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] px-8 justify-between rounded-full [mask-image:radial-gradient(circle_at_50%_0,transparent_34px,black_35px)] [-webkit-mask-image:radial-gradient(circle_at_50%_0,transparent_34px,black_35px)]'
                 }`}
                 onClick={
                   isIslandCollapsed
@@ -382,8 +365,8 @@ export function Layout({ children }: Props) {
                       className={`flex flex-col items-center justify-center gap-1 w-16 h-12 transition-all duration-200 hover:scale-105 bg-transparent border-none cursor-pointer ${
                         activeStandupPanel === 'status' &&
                         pathname === '/standup'
-                          ? 'text-blue-400 font-semibold'
-                          : 'text-slate-400 hover:text-slate-200'
+                          ? 'text-blue-600 dark:text-blue-400 font-semibold'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                       }`}
                     >
                       <LayoutGrid size={18} />
@@ -400,8 +383,8 @@ export function Layout({ children }: Props) {
                       className={`flex flex-col items-center justify-center gap-1 w-20 h-12 transition-all duration-200 hover:scale-105 bg-transparent border-none cursor-pointer ${
                         activeStandupPanel === 'teams' &&
                         pathname === '/standup'
-                          ? 'text-blue-400 font-semibold'
-                          : 'text-slate-400 hover:text-slate-200'
+                          ? 'text-blue-600 dark:text-blue-400 font-semibold'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                       }`}
                     >
                       <Users2 size={18} />
@@ -425,8 +408,8 @@ export function Layout({ children }: Props) {
                       className={`flex flex-col items-center justify-center gap-1 w-20 h-12 transition-all duration-200 hover:scale-105 bg-transparent border-none cursor-pointer ${
                         activeStandupPanel === 'interns' &&
                         pathname === '/standup'
-                          ? 'text-blue-400 font-semibold'
-                          : 'text-slate-400 hover:text-slate-200'
+                          ? 'text-blue-600 dark:text-blue-400 font-semibold'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                       }`}
                     >
                       {user?.role === 'intern' ? (
@@ -451,8 +434,8 @@ export function Layout({ children }: Props) {
                       className={`flex flex-col items-center justify-center gap-1 w-16 h-12 transition-all duration-200 hover:scale-105 bg-transparent border-none cursor-pointer ${
                         activeStandupPanel === 'analytics' &&
                         pathname === '/standup'
-                          ? 'text-blue-400 font-semibold'
-                          : 'text-slate-400 hover:text-slate-200'
+                          ? 'text-blue-600 dark:text-blue-400 font-semibold'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                       }`}
                     >
                       <BarChart2 size={18} />

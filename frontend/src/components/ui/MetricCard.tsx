@@ -22,7 +22,7 @@ export function MetricCard({ label, value, icon, className, sub }: Props) {
       />
 
       <div className="flex items-center justify-between mb-3 relative">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">
           {label}
         </p>
         {icon && (
@@ -32,11 +32,15 @@ export function MetricCard({ label, value, icon, className, sub }: Props) {
         )}
       </div>
 
-      <p className="text-[32px] font-extrabold font-[family-name:var(--font-display)] text-slate-900 leading-none tracking-[-0.02em] relative">
+      <p className="text-[32px] font-extrabold font-[family-name:var(--font-display)] text-slate-900 dark:text-slate-50 leading-none tracking-[-0.02em] relative">
         {value}
       </p>
 
-      {sub && <p className="mt-1.5 text-xs text-slate-400">{sub}</p>}
+      {sub && (
+        <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+          {sub}
+        </p>
+      )}
     </GlassCard>
   );
 }

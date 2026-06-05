@@ -88,7 +88,7 @@ export function MyProfilePage() {
   return (
     <div className="max-w-[680px] mx-auto px-4 py-2">
       {/* Header card */}
-      <div className="flex flex-col sm:flex-row items-center gap-5 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 mb-5 shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-all">
+      <div className="flex flex-col sm:flex-row items-center gap-5 p-6 rounded-2xl bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 backdrop-blur-xl mb-5 shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] transition-all">
         <Avatar name={user.name} />
         <div className="flex-1 min-w-0 text-center sm:text-left">
           <h3 className="m-0 mb-1 text-[22px] font-bold text-slate-900 dark:text-slate-50 font-display">
@@ -104,7 +104,7 @@ export function MyProfilePage() {
         <button
           type="button"
           onClick={() => navigate('/profile-setup')}
-          className="px-[18px] py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-[#475569] dark:text-slate-300 text-[13px] font-medium cursor-pointer whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors"
+          className="px-[18px] py-2 rounded-xl border border-slate-200/50 dark:border-white/10 bg-white/30 dark:bg-slate-850/30 text-[#475569] dark:text-slate-300 text-[13px] font-medium cursor-pointer whitespace-nowrap hover:bg-white/55 dark:hover:bg-slate-800/50 transition-colors backdrop-blur-sm shadow-sm"
         >
           Edit Profile
         </button>
@@ -113,7 +113,7 @@ export function MyProfilePage() {
       {/* Info sections */}
       <div className="grid gap-4">
         {/* Account */}
-        <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[14px] p-5 sm:p-6 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+        <section className="bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 backdrop-blur-xl rounded-[14px] p-5 sm:p-6 shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
           <h4 className="m-0 mb-3.5 text-[13px] font-bold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-500">
             Account
           </h4>
@@ -126,7 +126,7 @@ export function MyProfilePage() {
         </section>
 
         {/* Team & Batch */}
-        <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[14px] p-5 sm:p-6 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+        <section className="bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 backdrop-blur-xl rounded-[14px] p-5 sm:p-6 shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
           <h4 className="m-0 mb-3.5 text-[13px] font-bold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-500">
             Team &amp; Batch
           </h4>
@@ -137,7 +137,7 @@ export function MyProfilePage() {
         </section>
 
         {/* GitLab / Global */}
-        <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[14px] p-5 sm:p-6 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+        <section className="bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 backdrop-blur-xl rounded-[14px] p-5 sm:p-6 shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
           <h4 className="m-0 mb-3.5 text-[13px] font-bold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-500">
             GitLab &amp; Global
           </h4>

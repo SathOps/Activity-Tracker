@@ -117,47 +117,16 @@ function HourCell({
         type="button"
         onClick={() => hasEvents && setOpen((o) => !o)}
         title={`${HOUR_LABELS[hour]}${events.length ? ` — ${events.length} event(s)` : ''}`}
-        style={
-          active
-            ? {
-                background: '#22c55e',
-                borderColor: '#16a34a',
-                color: '#fff',
-                boxShadow: '0 1px 4px rgba(34,197,94,0.4)',
-              }
-            : {
-                background: '#f8fafc',
-                borderColor: '#e2e8f0',
-                color: '#cbd5e1',
-              }
-        }
         className={cn(
           'relative h-8 w-full rounded-md text-[9px] font-bold transition-all border flex items-center justify-center',
           hasEvents ? 'cursor-pointer' : 'cursor-default',
-          active ? 'hover:opacity-90' : 'hover:bg-slate-100'
+          active
+            ? 'bg-green-500 dark:bg-green-600 border-green-600 dark:border-green-700 text-white shadow-[0_1px_4px_rgba(34,197,94,0.4)] hover:opacity-90'
+            : 'bg-white/30 dark:bg-slate-950/15 border-slate-200/50 dark:border-white/5 text-slate-400 dark:text-slate-600 hover:bg-white/50 dark:hover:bg-slate-800/30 backdrop-blur-[2px]'
         )}
       >
         {active && events.length > 0 && (
-          <span
-            style={{
-              position: 'absolute',
-              top: -6,
-              right: -6,
-              height: 16,
-              width: 16,
-              borderRadius: '50%',
-              background: '#fff',
-              color: '#15803d',
-              fontSize: 8,
-              fontWeight: 700,
-              border: '1.5px solid #86efac',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
-              lineHeight: 1,
-            }}
-          >
+          <span className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-white dark:bg-slate-900 text-[8px] font-bold text-green-700 dark:text-green-400 border border-green-300 dark:border-green-800 flex items-center justify-center shadow-md leading-none">
             {events.length}
           </span>
         )}
@@ -166,8 +135,8 @@ function HourCell({
 
       {/* Popover */}
       {open && hasEvents && (
-        <div className="absolute z-50 left-0 top-10 w-72 rounded-xl border border-slate-200 bg-white shadow-xl p-3 space-y-1.5">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-2">
+        <div className="absolute z-50 left-0 top-10 w-72 rounded-xl border border-white/20 dark:border-white/5 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl shadow-xl p-3 space-y-1.5">
+          <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
             {HOUR_LABELS[hour]} · {events.length} event
             {events.length > 1 ? 's' : ''}
           </p>
@@ -177,7 +146,7 @@ function HourCell({
               href={e.url || '#'}
               target="_blank"
               rel="noreferrer"
-              className="flex items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 group"
+              className="flex items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-white/50 dark:hover:bg-slate-800/50 group"
               title={e.title}
             >
               <span
@@ -186,12 +155,12 @@ function HourCell({
                   EVENT_COLOURS[e.type] ?? 'bg-slate-400'
                 )}
               />
-              <span className="flex-1 text-xs text-slate-700 group-hover:text-blue-700 line-clamp-2 leading-snug">
+              <span className="flex-1 text-xs text-slate-700 dark:text-slate-350 group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2 leading-snug">
                 {e.title}
               </span>
               <ExternalLink
                 size={10}
-                className="flex-shrink-0 mt-0.5 text-slate-300 group-hover:text-blue-400"
+                className="flex-shrink-0 mt-0.5 text-slate-300 dark:text-slate-650 group-hover:text-blue-400"
               />
             </a>
           ))}
@@ -230,14 +199,14 @@ function MediaRecord({
         href={url}
         target="_blank"
         rel="noreferrer"
-        className="flex items-center gap-2 rounded-lg border border-purple-100 bg-purple-50 px-3 py-2 text-xs text-purple-800 hover:bg-purple-100 hover:text-purple-900 transition-colors group"
+        className="flex items-center gap-2 rounded-lg border border-purple-200/50 dark:border-purple-500/20 bg-purple-500/5 dark:bg-purple-950/15 px-3 py-2 text-xs text-purple-800 dark:text-purple-300 hover:bg-purple-500/10 dark:hover:bg-purple-950/25 transition-colors group backdrop-blur-sm"
         title={label}
       >
         <Video size={12} className="flex-shrink-0 text-purple-500" />
         <span className="flex-1 truncate">{label}</span>
         <ExternalLink
           size={10}
-          className="flex-shrink-0 text-purple-400 group-hover:text-purple-600"
+          className="flex-shrink-0 text-purple-400 dark:text-purple-500 group-hover:text-purple-600 dark:group-hover:text-purple-300"
         />
       </a>
     );
@@ -268,11 +237,17 @@ function MediaRecord({
   }
 
   return (
-    <div className="rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-2 space-y-1.5">
+    <div className="rounded-lg border border-indigo-200/50 dark:border-indigo-500/20 bg-indigo-500/5 dark:bg-indigo-950/15 px-3 py-2 space-y-1.5 backdrop-blur-sm">
       {/* Title + open-in-browser link */}
       <div className="flex items-center gap-2">
-        <Mic size={11} className="flex-shrink-0 text-indigo-500" />
-        <span className="flex-1 text-xs text-indigo-800 truncate" title={label}>
+        <Mic
+          size={11}
+          className="flex-shrink-0 text-indigo-500 dark:text-indigo-400"
+        />
+        <span
+          className="flex-1 text-xs text-indigo-800 dark:text-indigo-300 truncate"
+          title={label}
+        >
           {label}
         </span>
         <a
@@ -358,10 +333,10 @@ function DayRow({
   return (
     <div
       className={cn(
-        'rounded-xl border p-4 space-y-3 transition-colors',
+        'rounded-xl border p-4 space-y-3 transition-colors backdrop-blur-md shadow-sm',
         hasActivity
-          ? 'border-green-200 bg-white'
-          : 'border-slate-100 bg-slate-50'
+          ? 'border-green-500/20 dark:border-green-500/15 bg-green-500/5 dark:bg-green-950/15 shadow-green-500/5'
+          : 'border-slate-200/50 dark:border-white/5 bg-white/45 dark:bg-slate-900/45 shadow-black/5'
       )}
     >
       {/* Date header */}
@@ -373,7 +348,9 @@ function DayRow({
           <p
             className={cn(
               'text-sm font-semibold',
-              hasActivity ? 'text-slate-800' : 'text-slate-400'
+              hasActivity
+                ? 'text-slate-800 dark:text-slate-100'
+                : 'text-slate-400 dark:text-slate-500'
             )}
           >
             {formatDate(date)}
@@ -384,7 +361,9 @@ function DayRow({
           <span
             className={cn(
               'flex items-center gap-1',
-              gl.commits > 0 ? 'text-blue-600 font-semibold' : 'text-slate-300'
+              gl.commits > 0
+                ? 'text-blue-600 dark:text-blue-400 font-semibold'
+                : 'text-slate-300 dark:text-slate-650'
             )}
           >
             <GitCommit size={10} /> {gl.commits} commits
@@ -392,7 +371,9 @@ function DayRow({
           <span
             className={cn(
               'flex items-center gap-1',
-              gl.mrs > 0 ? 'text-purple-600 font-semibold' : 'text-slate-300'
+              gl.mrs > 0
+                ? 'text-purple-600 dark:text-purple-400 font-semibold'
+                : 'text-slate-300 dark:text-slate-650'
             )}
           >
             <GitMerge size={10} /> {gl.mrs} MRs
@@ -400,7 +381,9 @@ function DayRow({
           <span
             className={cn(
               'flex items-center gap-1',
-              gl.issues > 0 ? 'text-amber-600 font-semibold' : 'text-slate-300'
+              gl.issues > 0
+                ? 'text-amber-600 dark:text-amber-400 font-semibold'
+                : 'text-slate-300 dark:text-slate-650'
             )}
           >
             <AlertCircle size={10} /> {gl.issues} issues
@@ -408,13 +391,15 @@ function DayRow({
           <span
             className={cn(
               'flex items-center gap-1',
-              gl.time_spent_seconds > 0 ? 'text-slate-600' : 'text-slate-300'
+              gl.time_spent_seconds > 0
+                ? 'text-slate-600 dark:text-slate-350'
+                : 'text-slate-300 dark:text-slate-650'
             )}
           >
             <Clock size={10} /> {formatSeconds(gl.time_spent_seconds)}
           </span>
           {mediaRecords.length > 0 && (
-            <span className="flex items-center gap-1 text-indigo-500 font-semibold">
+            <span className="flex items-center gap-1 text-indigo-500 dark:text-indigo-400 font-semibold">
               <Mic size={10} /> {mediaRecords.length} recording
               {mediaRecords.length > 1 ? 's' : ''}
             </span>
@@ -446,7 +431,10 @@ function DayRow({
         style={{ gridTemplateColumns: `repeat(${OFFICE_HOURS.length}, 1fr)` }}
       >
         {OFFICE_HOURS.map((hr) => (
-          <span key={hr} className="text-center text-[8px] text-slate-400">
+          <span
+            key={hr}
+            className="text-center text-[8px] text-slate-400 dark:text-slate-500"
+          >
             {HOUR_LABELS[hr]}
           </span>
         ))}
@@ -454,8 +442,8 @@ function DayRow({
 
       {/* Media records */}
       {mediaRecords.length > 0 && (
-        <div className="pt-2 border-t border-slate-100 space-y-2">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+        <div className="pt-2 border-t border-slate-200/50 dark:border-white/5 space-y-2">
+          <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
             Recordings ({mediaRecords.length})
           </p>
           {mediaRecords.map((rec, i) => (
@@ -466,8 +454,8 @@ function DayRow({
 
       {/* Commits */}
       {commits.length > 0 && (
-        <div className="pt-2 border-t border-slate-100 space-y-1">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+        <div className="pt-2 border-t border-slate-200/50 dark:border-white/5 space-y-1">
+          <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
             Commits ({commits.length})
           </p>
           {commits.map((c, i) => (
@@ -476,24 +464,24 @@ function DayRow({
               href={c.web_url || '#'}
               target="_blank"
               rel="noreferrer"
-              className="flex items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 group"
+              className="flex items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-white/50 dark:hover:bg-slate-800/30 group"
             >
               <GitCommit
                 size={10}
                 className="mt-0.5 flex-shrink-0 text-blue-400"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-700 group-hover:text-blue-700 line-clamp-2 leading-snug">
+                <p className="text-xs text-slate-700 dark:text-slate-350 group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2 leading-snug">
                   {c.message}
                 </p>
-                <p className="text-[10px] text-slate-400 mt-0.5">
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
                   {c.project_name} · {c.time}
                   {c.sha ? ` · ${c.sha.slice(0, 7)}` : ''}
                 </p>
               </div>
               <ExternalLink
                 size={10}
-                className="flex-shrink-0 mt-0.5 text-slate-300 group-hover:text-blue-400"
+                className="flex-shrink-0 mt-0.5 text-slate-300 dark:text-slate-650 group-hover:text-blue-400"
               />
             </a>
           ))}
@@ -621,10 +609,10 @@ export function WeeklyPerformance() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-slate-800">
+        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
           Weekly Performance Tracker
         </h2>
-        <p className="text-sm text-slate-500 mt-0.5">
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
           {isIntern
             ? 'Your daily GitLab activity, active hours, and standup recordings.'
             : 'Per-day breakdown — commits, MRs, issues, time, active hours, and recordings.'}
@@ -662,10 +650,10 @@ export function WeeklyPerformance() {
                   type="button"
                   onClick={() => setActiveTab(i)}
                   className={cn(
-                    'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                    'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors backdrop-blur-sm',
                     i === activeTab
                       ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      : 'border border-slate-200/50 dark:border-white/5 bg-white/35 dark:bg-slate-900/35 text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-850/50'
                   )}
                 >
                   {r.intern_name || r.gitlab_username}
@@ -679,22 +667,22 @@ export function WeeklyPerformance() {
               {/* Header */}
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-base font-semibold text-slate-800">
+                  <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">
                     {activeResult.intern_name}
-                    <span className="ml-2 text-sm font-normal text-slate-500">
+                    <span className="ml-2 text-sm font-normal text-slate-500 dark:text-slate-400">
                       @{activeResult.gitlab_username}
                     </span>
                   </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     {sortedDates[0]} → {sortedDates[sortedDates.length - 1]}
                     {' · '}
-                    <span className="text-green-600 font-medium">
+                    <span className="text-green-600 dark:text-green-400 font-medium">
                       {activeDayCount} active
                     </span>
                     {' / '}
                     {sortedDates.length} days
                     {activeResult.audio_fetched && (
-                      <span className="ml-2 text-indigo-500">
+                      <span className="ml-2 text-indigo-500 dark:text-indigo-400">
                         · recordings fetched
                       </span>
                     )}
@@ -708,7 +696,7 @@ export function WeeklyPerformance() {
                       `weekly_${activeResult.gitlab_username}.json`
                     )
                   }
-                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-200/50 dark:border-white/10 bg-white/30 dark:bg-slate-900/30 px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-white/55 dark:hover:bg-slate-800/50 transition-colors backdrop-blur-sm shadow-sm"
                 >
                   <Download size={13} /> Export JSON
                 </button>
@@ -717,8 +705,10 @@ export function WeeklyPerformance() {
               <SummaryCards activity={activeResult} />
 
               {/* Legend */}
-              <div className="flex flex-wrap items-center gap-4 rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5 text-[10px] text-slate-500">
-                <span className="font-semibold text-slate-600">Legend:</span>
+              <div className="flex flex-wrap items-center gap-4 rounded-lg bg-white/25 dark:bg-slate-950/15 border border-white/20 dark:border-white/5 backdrop-blur-md px-4 py-2.5 text-[10px] text-slate-500 dark:text-slate-400 shadow-sm shadow-black/5">
+                <span className="font-semibold text-slate-600 dark:text-slate-300">
+                  Legend:
+                </span>
                 <span className="flex items-center gap-1.5">
                   <span className="h-3 w-3 rounded bg-gradient-to-b from-green-400 to-green-600 inline-block" />
                   Active hour (click to see events)
@@ -736,10 +726,18 @@ export function WeeklyPerformance() {
                   Issue
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Mic size={10} className="text-indigo-500" /> Audio recording
+                  <Mic
+                    size={10}
+                    className="text-indigo-500 dark:text-indigo-400"
+                  />{' '}
+                  Audio recording
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Video size={10} className="text-purple-500" /> Video link
+                  <Video
+                    size={10}
+                    className="text-purple-500 dark:text-purple-400"
+                  />{' '}
+                  Video link
                 </span>
               </div>
 

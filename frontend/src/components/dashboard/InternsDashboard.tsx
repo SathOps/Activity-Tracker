@@ -45,7 +45,7 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
   return (
     <div className="w-full flex flex-col gap-6">
       {/* ── Left: Interns List ── */}
-      <section className="w-full bg-slate-900/10 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-3xl p-6 backdrop-blur-md shadow-lg">
+      <section className="w-full bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 rounded-3xl p-6 backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
         <header className="flex flex-col gap-4 mb-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 m-0 tracking-tight flex items-center gap-2">
@@ -72,7 +72,7 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
 
           <input
             type="text"
-            className="w-full px-4 py-2.5 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200"
+            className="w-full px-4 py-2.5 bg-white/30 dark:bg-slate-950/20 border border-slate-300/60 dark:border-white/10 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400/70 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 backdrop-blur-sm"
             placeholder={t('interns.searchByNameOrIdPlaceholder')}
             aria-label={t('interns.searchListAria')}
             value={listSearchQuery}
@@ -93,7 +93,7 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filteredInterns.map((intern) => (
                 <article
-                  className="p-4 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-2xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.05)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.18)] hover:border-blue-500/40 transition-all duration-300 flex items-center justify-between gap-3"
+                  className="p-4 relative overflow-hidden bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 rounded-2xl backdrop-blur-xl shadow-md shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-lg transition-all duration-300 flex items-center justify-between gap-3"
                   key={intern.id}
                 >
                   <div className="flex flex-col gap-1 min-w-0">
@@ -132,7 +132,7 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
           onKeyDown={handleKeyDown}
           tabIndex={-1}
         >
-          <div className="w-full max-w-[520px] bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl p-6 relative overflow-hidden flex flex-col gap-4 animate-[fade-in_0.2s_ease-out]">
+          <div className="w-full max-w-[520px] bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 rounded-3xl shadow-2xl p-6 backdrop-blur-xl relative overflow-hidden flex flex-col gap-4 animate-[fade-in_0.2s_ease-out]">
             <header className="flex items-center justify-between border-b border-slate-800 pb-4">
               <h3 className="text-lg font-bold text-slate-100 m-0">
                 {t('interns.addIntern')}
