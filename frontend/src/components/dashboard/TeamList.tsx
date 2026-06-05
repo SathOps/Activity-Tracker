@@ -246,12 +246,8 @@ export const TeamList: React.FC<TeamListProps> = ({
 
         return (
           <article
-            className="glass-card p-6 relative overflow-hidden"
+            className="p-6 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300"
             key={team.teamId}
-            style={{
-              padding: '24px',
-              borderRadius: '24px',
-            }}
           >
             <header className="flex flex-wrap items-start justify-between gap-4 mb-4">
               <div className="grid gap-1.5 flex-1 min-w-0">
@@ -347,7 +343,7 @@ export const TeamList: React.FC<TeamListProps> = ({
               <div className="flex flex-wrap gap-2 shrink-0">
                 {onVerifyTeam ? (
                   <button
-                    className="secondary-button"
+                    className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-xl shadow-sm hover:shadow transition-all duration-200 cursor-pointer border-none outline-none"
                     onClick={() => onVerifyTeam(team.teamId)}
                     type="button"
                   >
@@ -358,7 +354,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                 ) : null}
                 {onUpdateTeamName && editingTeamId !== team.teamId ? (
                   <button
-                    className="secondary-button"
+                    className="px-4 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-800 dark:text-slate-200 rounded-xl border border-slate-300/60 dark:border-slate-700 shadow-sm transition-all duration-200 cursor-pointer outline-none"
                     onClick={() =>
                       handleStartTeamRename(team.teamId, team.teamName)
                     }
@@ -369,7 +365,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                 ) : null}
                 {onDeleteTeam ? (
                   <button
-                    className="secondary-button"
+                    className="px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 active:bg-red-700 rounded-xl shadow-sm hover:shadow transition-all duration-200 cursor-pointer border-none outline-none"
                     onClick={() => onDeleteTeam(team.teamId)}
                     type="button"
                   >
@@ -386,7 +382,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                     aria-label={t('teams.addInternToTeam', {
                       name: team.teamName,
                     })}
-                    className="team-add-intern-input w-full"
+                    className="w-full px-4 py-2 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200"
                     onChange={(event) =>
                       handleInputChange(team.teamId, event.target.value)
                     }
@@ -459,7 +455,7 @@ export const TeamList: React.FC<TeamListProps> = ({
                 </div>
 
                 <button
-                  className="secondary-button"
+                  className="px-4 py-2.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-xl shadow-sm hover:shadow transition-all duration-200 cursor-pointer border-none outline-none"
                   onClick={() => handleAddIntern(team.teamId)}
                   type="button"
                 >

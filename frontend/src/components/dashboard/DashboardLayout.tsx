@@ -827,10 +827,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       </section>
 
       {statusLoading ? (
-        <p className="team-empty">{t('dashboard.loadingTeamStatus')}</p>
+        <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
+          {t('dashboard.loadingTeamStatus')}
+        </p>
       ) : null}
       {!statusLoading && statusError ? (
-        <p className="team-empty">{statusError}</p>
+        <p className="text-red-500 dark:text-red-400 text-sm font-medium py-12 text-center border border-dashed border-red-500/35 rounded-2xl bg-red-500/5">
+          {statusError}
+        </p>
       ) : null}
 
       {!statusLoading &&
@@ -873,24 +877,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       (!isInlineStatusView || !showDailyChart) ? (
         <section className="grid gap-3.5">
           {teamDailyStatusRows.length === 0 ? (
-            <p className="team-empty">
+            <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
               {t('dashboard.noTeamsForStatusTracking')}
             </p>
           ) : (
             <section className="grid gap-4">
               {teamDailyStatusRows.map((row) => (
                 <article
-                  className="glass-card p-6 relative overflow-hidden"
+                  className="p-6 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300"
                   key={row.teamId}
-                  style={{
-                    padding: '24px',
-                    borderRadius: '24px',
-                  }}
                 >
                   <header className="flex items-start justify-between gap-2">
                     <div className="grid gap-0.5">
                       <h3
-                        className="team-name cursor-help"
+                        className="text-base font-bold text-slate-800 dark:text-slate-100 cursor-help m-0"
                         title={formatContributorTooltip(
                           row.contributorDetails,
                           t('dashboard.noUploadsForSelection')
@@ -898,7 +898,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       >
                         {row.teamName}
                       </h3>
-                      <div className="team-id">
+                      <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                         {t('dashboard.progressLabel')}: {row.standupCount}/
                         {row.requiredStandupCount}
                       </div>
@@ -933,23 +933,21 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {!statusLoading && !statusError && statusView === 'WEEKLY' ? (
         <section className="grid gap-3.5">
           {teamWeeklyStatusRows.length === 0 ? (
-            <p className="team-empty">
+            <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
               {t('dashboard.noTeamsForWeeklyStatusTracking')}
             </p>
           ) : (
-            <section className="team-list grid gap-4">
+            <section className="grid gap-4">
               {teamWeeklyStatusRows.map((row) => (
                 <article
-                  className="glass-card p-6 relative overflow-hidden"
+                  className="p-6 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300"
                   key={row.teamId}
-                  style={{
-                    padding: '24px',
-                    borderRadius: '24px',
-                  }}
                 >
                   <header className="mb-2.5">
-                    <h3 className="team-name">{row.teamName}</h3>
-                    <div className="team-id">
+                    <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 m-0">
+                      {row.teamName}
+                    </h3>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                       {t('dashboard.completedDays')}: {row.completedDaysCount}/
                       {row.dayStatuses.length}
                     </div>
@@ -998,12 +996,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </section>
           )}
 
-          <section className="team-card bg-[var(--surface-1)]">
-            <h3 className="team-name mb-2">
+          <section className="p-6 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-lg">
+            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 m-0 mb-2">
               {t('dashboard.weeklyPendingSummary')}
             </h3>
             {pendingWeeklyRows.length === 0 ? (
-              <p className="team-id">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                 {t('dashboard.allTeamsCompletedWeeklyStandups')}
               </p>
             ) : (
@@ -1047,7 +1045,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <span>{t('dashboard.customDate')}</span>
               <input
                 aria-label={t('dashboard.customDate')}
-                className="date-input"
+                className="px-4 py-2 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
                 onChange={handleSelectedDateChange}
                 type="date"
                 value={selectedDateKey}
@@ -1083,18 +1081,22 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </header>
 
         {analyticsLoading ? (
-          <p className="team-empty">{t('dashboard.loadingAnalytics')}</p>
+          <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
+            {t('dashboard.loadingAnalytics')}
+          </p>
         ) : null}
         {!analyticsLoading && analyticsError ? (
-          <p className="team-empty">{analyticsError}</p>
+          <p className="text-red-500 dark:text-red-400 text-sm font-medium py-12 text-center border border-dashed border-red-500/35 rounded-2xl bg-red-500/5">
+            {analyticsError}
+          </p>
         ) : null}
 
         {!analyticsLoading && !analyticsError ? (
-          <section className="team-card bg-[#f8fafc] overflow-x-hidden">
+          <section className="p-6 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-lg overflow-x-hidden">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div className="grid gap-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="team-name m-0">
+                  <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 m-0">
                     {t('dashboard.memberActivityHeatmap')}
                   </h3>
                   {(
@@ -1144,10 +1146,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {/* KPI Summary Cards */}
       {!isInlineStatusView && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div
-            className="glass-card p-5 flex flex-col justify-between"
-            style={{ padding: '20px' }}
-          >
+          <div className="p-5 flex flex-col justify-between bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300">
             <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
               {t('dashboard.totalTeams', 'Total Teams')}
             </span>
@@ -1160,10 +1159,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               </span>
             </div>
           </div>
-          <div
-            className="glass-card p-5 flex flex-col justify-between"
-            style={{ padding: '20px' }}
-          >
+          <div className="p-5 flex flex-col justify-between bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300">
             <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
               {t('dashboard.totalInterns', 'Total Interns')}
             </span>
@@ -1176,10 +1172,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               </span>
             </div>
           </div>
-          <div
-            className="glass-card p-5 flex flex-col justify-between"
-            style={{ padding: '20px' }}
-          >
+          <div className="p-5 flex flex-col justify-between bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300">
             <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
               {t('dashboard.standupCompletionRate', 'Completion Rate')}
             </span>
@@ -1230,7 +1223,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <section
             className={cn(
-              'flex p-1 max-w-fit w-full sm:w-auto rounded-full shadow-sm',
+              'hidden p-1 max-w-fit w-full sm:w-auto rounded-full shadow-sm',
               'backdrop-blur-[20px] transition-colors duration-300',
               'bg-white/45 border border-white/35',
               'dark:bg-slate-900/45 dark:border-white/5'
@@ -1292,7 +1285,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <section className="flex flex-wrap items-center gap-2 mb-3.5">
               <input
                 aria-label={t('teams.newTeamName')}
-                className="team-search-input min-w-[260px]"
+                className="px-4 py-2.5 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 min-w-[260px]"
                 onChange={(event) => setNewTeamName(event.target.value)}
                 placeholder={t('teams.enterTeamName')}
                 type="text"
@@ -1313,7 +1306,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <span>{t('dashboard.standupVerificationDate')}</span>
               <input
                 aria-label={t('dashboard.standupVerificationDate')}
-                className="date-input"
+                className="px-4 py-2 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
                 onChange={handleSelectedDateChange}
                 type="date"
                 value={selectedDateKey}
@@ -1324,7 +1317,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           <section className="mb-4">
             <input
               aria-label={t('common.search')}
-              className="team-search-input"
+              className="w-full px-4 py-2.5 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200"
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder={
                 activeView === 'TEAMS'
@@ -1361,9 +1354,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           ) : null}
 
           {activeView !== 'TEAMS' ? (
-            <section className="team-list grid gap-4">
+            <section className="grid gap-4">
               {filteredInternRows.length === 0 ? (
-                <p className="team-empty">
+                <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
                   {activeView === 'COMPLETED'
                     ? t('dashboard.noCompletedInternsFound')
                     : t('dashboard.noInternsForCurrentSearch')}
@@ -1371,16 +1364,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               ) : (
                 filteredInternRows.map((intern) => (
                   <article
-                    className="glass-card p-6 relative overflow-hidden"
+                    className="p-6 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-3xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.1)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.25)] hover:border-blue-500/40 transition-all duration-300"
                     key={intern.internId}
-                    style={{
-                      padding: '24px',
-                      borderRadius: '24px',
-                    }}
                   >
-                    <header className="team-header">
+                    <header className="mb-3">
                       <div>
-                        <h3 className="team-name">{intern.teamName}</h3>
+                        <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-450 m-0 uppercase tracking-wider">
+                          {intern.teamName}
+                        </h3>
                       </div>
                     </header>
                     <InternCard
@@ -1585,22 +1576,33 @@ function renderTeamHeatmap(
   const rows = teams.filter((team) => normalizeTeamId(team.teamId));
 
   if (rows.length === 0 || dateKeys.length === 0) {
-    return <div className="team-empty">{noActivityLabel}</div>;
+    return (
+      <div className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
+        {noActivityLabel}
+      </div>
+    );
   }
 
   return (
-    <div className="team-heatmap-box">
-      <div className="team-heatmap-scroll-hint">{scrollToViewMoreLabel}</div>
-      <div className="team-heatmap-wrap">
+    <div className="w-full overflow-hidden flex flex-col gap-2">
+      <div className="text-[11px] text-slate-400 dark:text-slate-500 italic self-end block sm:hidden">
+        {scrollToViewMoreLabel}
+      </div>
+      <div className="w-full overflow-x-auto pb-2">
         <div
-          className="team-heatmap-grid"
-          style={
-            { '--heatmap-days': `${dateKeys.length}` } as React.CSSProperties
-          }
+          className="grid gap-1 items-center"
+          style={{
+            gridTemplateColumns: `120px repeat(${dateKeys.length}, minmax(28px, 1fr))`,
+          }}
         >
-          <div className="team-heatmap-team-header">{teamColumnLabel}</div>
+          <div className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            {teamColumnLabel}
+          </div>
           {dateKeys.map((dateKey) => (
-            <div className="team-heatmap-day-header" key={dateKey}>
+            <div
+              className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 text-center truncate"
+              key={dateKey}
+            >
               {formatWeekdayShort(dateKey)}
             </div>
           ))}
@@ -1611,7 +1613,10 @@ function renderTeamHeatmap(
 
             return (
               <React.Fragment key={teamId}>
-                <div className="team-heatmap-team-name" title={team.teamName}>
+                <div
+                  className="text-xs font-medium text-slate-700 dark:text-slate-350 truncate pr-2"
+                  title={team.teamName}
+                >
                   {team.teamName}
                 </div>
                 {dateKeys.map((dateKey) => {
@@ -1620,7 +1625,7 @@ function renderTeamHeatmap(
 
                   return (
                     <div
-                      className="team-heatmap-cell"
+                      className="w-6 h-6 mx-auto rounded-md border transition-all duration-200 hover:scale-110 cursor-pointer"
                       key={`${teamId}-${dateKey}`}
                       title={`${team.teamName} | ${formatMonthDay(dateKey)}: ${count}/4 uploads`}
                       style={{

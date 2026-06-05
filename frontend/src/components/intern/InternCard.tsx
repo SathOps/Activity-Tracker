@@ -102,51 +102,46 @@ export const InternCard: React.FC<InternCardProps> = ({
     onPlay?.(internId, audioId);
   };
 
+  const getSlotStatusClass = (status: StandupSlotResult['status']) => {
+    switch (status) {
+      case 'GOOD':
+        return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400';
+      case 'DELAYED':
+        return 'bg-amber-500/10 border-amber-500/25 text-amber-600 dark:text-amber-400';
+      case 'MISSING':
+        return 'bg-rose-500/10 border-rose-500/25 text-rose-600 dark:text-rose-400';
+      default:
+        return 'bg-slate-500/10 border-slate-500/20 text-slate-600 dark:text-slate-400';
+    }
+  };
+
   return (
-    <article
-      className="bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] rounded-[var(--radius-md)] p-[16px] shadow-[var(--shadow-sm)] transition-all duration-[220ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-[2px] hover:scale-[1.01] hover:shadow-[var(--shadow-md),0_0_20px_rgba(59,130,246,0.08)] hover:border-[rgba(59,130,246,0.35)] hover:bg-[rgba(255,255,255,0.55)] [[data-theme='dark']_&]:bg-[rgba(15,23,42,0.35)] [[data-theme='dark']_&:hover]:bg-[rgba(15,23,42,0.45)]"
-      style={{ display: 'grid', gap: 12 }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-        }}
-      >
-        <div style={{ display: 'grid', gap: 4 }}>
-          <div className="text-[var(--text-main)] text-[14px] font-semibold">
+    <article className="p-4 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-2xl backdrop-blur-md shadow-[0_4px_20px_0_rgba(30,79,178,0.05)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.18)] hover:border-blue-500/45 transition-all duration-300 grid gap-3">
+      <div className="flex justify-between items-start">
+        <div className="grid gap-1">
+          <div className="text-slate-800 dark:text-slate-100 text-sm font-semibold">
             {displayName}
           </div>
           {isEditing ? (
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div className="flex gap-2 flex-wrap">
               <input
                 aria-label={t('interns.editInternNameFor', {
                   name: displayName,
                 })}
                 onChange={(event) => setEditedName(event.target.value)}
-                style={{
-                  border: '1px solid var(--glass-border)',
-                  borderRadius: 8,
-                  color: 'var(--text-main)',
-                  fontSize: 12,
-                  backgroundColor: 'var(--glass-bg)',
-                  backdropFilter: 'blur(var(--glass-blur))',
-                  minWidth: 180,
-                  padding: '6px 8px',
-                }}
+                className="px-3 py-1.5 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 text-xs min-w-[180px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200"
                 type="text"
                 value={editedName}
               />
               <button
-                className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[12px] text-white rounded-[14px] px-[16px] py-[10px] cursor-pointer text-[13px] font-semibold transition-all duration-300 hover:border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.08)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.12)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-[0.65]"
+                className="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 rounded-lg shadow-sm hover:shadow transition-all duration-200 cursor-pointer border-none outline-none"
                 onClick={handleSave}
                 type="button"
               >
                 {t('button.save')}
               </button>
               <button
-                className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[12px] text-white rounded-[14px] px-[16px] py-[10px] cursor-pointer text-[13px] font-semibold transition-all duration-300 hover:border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.08)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.12)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-[0.65]"
+                className="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 active:bg-slate-300 rounded-lg border border-slate-300 dark:border-slate-700 shadow-sm transition-all duration-200 cursor-pointer outline-none"
                 onClick={handleCancel}
                 type="button"
               >
@@ -155,7 +150,7 @@ export const InternCard: React.FC<InternCardProps> = ({
             </div>
           ) : (
             <>
-              <div style={{ color: 'var(--text-subtle)', fontSize: 13 }}>
+              <div className="text-slate-500 dark:text-slate-400 text-xs">
                 {t('interns.qualifiedUploads')}
                 {standupDateLabel
                   ? t('interns.onDate', { date: standupDateLabel })
@@ -163,49 +158,21 @@ export const InternCard: React.FC<InternCardProps> = ({
                 : {todayValidCount ?? 0}
               </div>
               {visibleSlotStatuses.length > 0 ? (
-                <div
-                  style={{
-                    display: 'grid',
-                    gap: 6,
-                    marginTop: 6,
-                  }}
-                >
+                <div className="grid gap-1.5 mt-1.5">
                   {visibleSlotStatuses.map((slot) => (
                     <div
                       key={slot.slotId}
-                      style={{
-                        alignItems: 'center',
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: 6,
-                      }}
+                      className="flex flex-wrap items-center gap-1.5"
                     >
-                      <span
-                        style={{
-                          color: 'var(--text-main)',
-                          fontSize: 12,
-                          fontWeight: 600,
-                          minWidth: 78,
-                        }}
-                      >
+                      <span className="text-slate-700 dark:text-slate-200 text-xs font-semibold min-w-[78px]">
                         {slot.label}
                       </span>
                       <span
-                        style={{
-                          backgroundColor: getSlotStatusBackground(slot.status),
-                          border: `1px solid ${getSlotStatusBorder(slot.status)}`,
-                          borderRadius: 9999,
-                          color: getSlotStatusColor(slot.status),
-                          fontSize: 11,
-                          fontWeight: 700,
-                          padding: '2px 8px',
-                        }}
+                        className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${getSlotStatusClass(slot.status)}`}
                       >
                         {slot.status}
                       </span>
-                      <span
-                        style={{ color: 'var(--text-subtle)', fontSize: 11 }}
-                      >
+                      <span className="text-slate-400 dark:text-slate-500 text-[11px]">
                         {slot.windowLabel}
                       </span>
                     </div>
@@ -216,27 +183,15 @@ export const InternCard: React.FC<InternCardProps> = ({
           )}
         </div>
 
-        <div
-          className="flex items-center gap-[8px]"
-          style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-        >
+        <div className="flex items-center gap-2">
           {audios.length > 0 && !isEditing && (
             <button
-              className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[12px] text-white rounded-[14px] px-[16px] py-[10px] cursor-pointer text-[13px] font-semibold transition-all duration-300 hover:border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.08)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.12)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-[0.65]"
+              className={`px-3 py-1 text-[11px] font-bold rounded-full border transition-all duration-200 cursor-pointer ${
+                isExpanded
+                  ? 'bg-blue-500/10 border-blue-500/35 text-blue-600 dark:text-blue-400'
+                  : 'bg-slate-500/5 dark:bg-slate-950/20 border-slate-300 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-blue-500/40 hover:text-blue-600 dark:hover:text-blue-400'
+              }`}
               onClick={toggleExpanded}
-              style={{
-                padding: '5px 12px',
-                fontSize: 11,
-                fontWeight: 600,
-                color: 'var(--accent)',
-                border: '1px solid var(--glass-border)',
-                borderRadius: 99,
-                backgroundColor: isExpanded
-                  ? 'var(--accent-soft)'
-                  : 'var(--glass-bg)',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
               type="button"
             >
               {isExpanded
@@ -247,21 +202,8 @@ export const InternCard: React.FC<InternCardProps> = ({
           {onUpdateIntern ? (
             <button
               aria-label={t('interns.editAria', { name: displayName })}
-              className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[12px] text-white rounded-[14px] px-[16px] py-[10px] cursor-pointer text-[13px] font-semibold transition-all duration-300 hover:border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.08)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.12)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-[0.65]"
               onClick={() => setIsEditing(true)}
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 0,
-                border: '1px solid var(--glass-border)',
-                background: 'var(--glass-bg)',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
+              className="w-7 h-7 rounded-full flex items-center justify-center border border-slate-300 dark:border-slate-800 bg-slate-500/5 dark:bg-slate-950/20 hover:border-blue-500/50 hover:bg-blue-500/10 text-blue-600 dark:text-blue-400 transition-all duration-250 cursor-pointer outline-none"
               title={t('button.edit')}
               type="button"
             >
@@ -272,7 +214,7 @@ export const InternCard: React.FC<InternCardProps> = ({
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                style={{ color: '#2563eb', width: 12, height: 12 }}
+                className="w-3.5 h-3.5"
               >
                 <path d="M12 20h9" />
                 <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
@@ -282,22 +224,8 @@ export const InternCard: React.FC<InternCardProps> = ({
           {onDeleteIntern ? (
             <button
               aria-label={t('interns.deleteAria', { name: displayName })}
-              className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[12px] text-white rounded-[14px] px-[16px] py-[10px] cursor-pointer text-[13px] font-semibold transition-all duration-300 hover:border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.08)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.12)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-[0.65]"
               onClick={() => onDeleteIntern(internId)}
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 0,
-                border: '1px solid var(--glass-border)',
-                background: 'var(--glass-bg)',
-                color: 'var(--danger-text)',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
+              className="w-7 h-7 rounded-full flex items-center justify-center border border-slate-300 dark:border-slate-800 bg-slate-500/5 dark:bg-slate-950/20 hover:border-red-500/50 hover:bg-red-500/10 text-red-650 dark:text-red-400 transition-all duration-250 cursor-pointer outline-none"
               title={t('button.delete')}
               type="button"
             >
@@ -308,7 +236,7 @@ export const InternCard: React.FC<InternCardProps> = ({
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                style={{ color: '#ef4444', width: 12, height: 12 }}
+                className="w-3.5 h-3.5"
               >
                 <polyline points="3 6 5 6 21 6" />
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -321,35 +249,13 @@ export const InternCard: React.FC<InternCardProps> = ({
       </div>
 
       {isExpanded && (
-        <section
-          style={{
-            marginTop: 8,
-            padding: 12,
-            borderRadius: 14,
-            border: '1px solid var(--glass-border)',
-            background: 'var(--glass-bg)',
-          }}
-        >
+        <section className="mt-2 p-3 rounded-xl border border-slate-300 dark:border-slate-800 bg-slate-500/5 dark:bg-slate-950/20">
           {audios.length === 0 ? (
-            <div
-              style={{
-                fontSize: 12,
-                color: 'var(--text-subtle)',
-                textAlign: 'center',
-              }}
-            >
+            <div className="text-xs text-slate-500 dark:text-slate-400 text-center">
               {t('interns.noStandupAudios')}
             </div>
           ) : (
-            <ul
-              style={{
-                listStyle: 'none',
-                padding: 0,
-                margin: 0,
-                display: 'grid',
-                gap: 8,
-              }}
-            >
+            <ul className="list-none p-0 m-0 grid gap-2">
               {audios.map((audio, index) => {
                 const isPlaying = activeAudioId === audio.id;
                 const audioDate = audio.uploadedAt
@@ -364,45 +270,25 @@ export const InternCard: React.FC<InternCardProps> = ({
                 return (
                   <li
                     key={audio.id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 8,
-                      fontSize: 12,
-                      padding: '8px 12px',
-                      background: isPlaying
-                        ? 'var(--accent-soft)'
-                        : 'rgba(255, 255, 255, 0.03)',
-                      border: '1px solid rgba(255, 255, 255, 0.05)',
-                      borderRadius: 10,
-                    }}
+                    className={`flex items-center justify-between gap-2 text-xs p-2 rounded-lg border transition-all duration-200 ${
+                      isPlaying
+                        ? 'bg-blue-500/10 border-blue-500/25 text-blue-700 dark:text-blue-300'
+                        : 'bg-white/45 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+                    }`}
                   >
-                    <div style={{ display: 'grid' }}>
-                      <strong>
+                    <div className="grid">
+                      <strong className="text-slate-800 dark:text-slate-200">
                         {t('interns.standupIndex', { index: index + 1 })}
                       </strong>
-                      <span
-                        style={{ color: 'var(--text-subtle)', fontSize: 11 }}
-                      >
+                      <span className="text-[11px] text-slate-400 dark:text-slate-500">
                         {audioDate}
                       </span>
                     </div>
 
-                    <div
-                      style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-                    >
+                    <div className="flex items-center gap-1.5">
                       {isPlaying &&
                       (resolvedUrls[audio.id] || audio.audioUrl) ? (
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 8,
-                            width: '100%',
-                            maxWidth: 300,
-                          }}
-                        >
+                        <div className="flex items-center gap-2 w-full max-w-[300px]">
                           <StandupAudioPlayer
                             audioUrl={
                               resolvedUrls[audio.id] || audio.audioUrl || ''
@@ -413,20 +299,8 @@ export const InternCard: React.FC<InternCardProps> = ({
                             onPause={() => onPause?.()}
                           />
                           <button
-                            className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[12px] text-white rounded-[14px] px-[16px] py-[10px] cursor-pointer text-[13px] font-semibold transition-all duration-300 hover:border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.08)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.12)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-[0.65]"
+                            className="px-2 py-1 h-8 flex items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-655 dark:text-red-400 cursor-pointer transition-colors duration-200"
                             onClick={() => onPause?.()}
-                            style={{
-                              padding: '4px 8px',
-                              color: 'var(--danger-text)',
-                              height: 32,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              borderRadius: 8,
-                              border: '1px solid var(--danger-border)',
-                              background: 'var(--danger-bg)',
-                              cursor: 'pointer',
-                            }}
                             title={t('audio.closePlayer')}
                             type="button"
                           >
@@ -437,11 +311,7 @@ export const InternCard: React.FC<InternCardProps> = ({
                               strokeWidth="2.5"
                               strokeLinecap="round"
                               strokeLinejoin="round"
-                              style={{
-                                color: '#ef4444',
-                                width: 12,
-                                height: 12,
-                              }}
+                              className="w-3.5 h-3.5"
                             >
                               <line x1="18" y1="6" x2="6" y2="18" />
                               <line x1="6" y1="6" x2="18" y2="18" />
@@ -449,27 +319,14 @@ export const InternCard: React.FC<InternCardProps> = ({
                           </button>
                         </div>
                       ) : resolvingId === audio.id ? (
-                        <span style={{ color: 'var(--accent)', fontSize: 11 }}>
+                        <span className="text-[11px] text-blue-600 dark:text-blue-400 animate-pulse">
                           {t('interns.resolving')}
                         </span>
                       ) : (
                         <button
-                          className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] backdrop-blur-[12px] text-white rounded-[14px] px-[16px] py-[10px] cursor-pointer text-[13px] font-semibold transition-all duration-300 hover:border-[rgba(59,130,246,0.3)] hover:bg-[rgba(59,130,246,0.08)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.12)] hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-[0.65]"
                           disabled={!audio.audioUrl && !audio.id}
                           onClick={() => handlePlay(audio.id, audio.audioUrl)}
-                          style={{
-                            padding: '6px 14px',
-                            background:
-                              'linear-gradient(135deg, #2563eb, #3b82f6)',
-                            color: '#ffffff',
-                            border: 'none',
-                            borderRadius: 99,
-                            fontSize: 11,
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            opacity: !audio.audioUrl && !audio.id ? 0.5 : 1,
-                            transition: 'all 0.2s',
-                          }}
+                          className="px-3.5 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full text-[11px] font-bold cursor-pointer hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-none"
                           type="button"
                         >
                           {t('audio.play')}
@@ -486,17 +343,5 @@ export const InternCard: React.FC<InternCardProps> = ({
     </article>
   );
 };
-
-function getSlotStatusBackground(status: StandupSlotResult['status']): string {
-  return `var(--slot-${status.toLowerCase()}-bg)`;
-}
-
-function getSlotStatusBorder(status: StandupSlotResult['status']): string {
-  return `var(--slot-${status.toLowerCase()}-border)`;
-}
-
-function getSlotStatusColor(status: StandupSlotResult['status']): string {
-  return `var(--slot-${status.toLowerCase()}-text)`;
-}
 
 export default InternCard;

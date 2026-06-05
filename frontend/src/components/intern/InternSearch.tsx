@@ -271,7 +271,7 @@ const InternSearch: React.FC<InternSearchProps> = ({
         <div className="relative w-full">
           <input
             id="intern-search-input"
-            className="w-full bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)] rounded-[12px] text-[var(--text-main)] text-[14px] px-[12px] py-[10px] transition-[border-color,background-color,box-shadow] duration-[220ms] ease-in-out placeholder:text-[var(--text-soft)] focus:border-[var(--accent)] focus:shadow-[var(--focus-ring)] focus:outline-none"
+            className="w-full px-4 py-2.5 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200"
             aria-label={t('interns.searchByNameAria')}
             type="text"
             placeholder={t('interns.searchByNamePlaceholder')}
@@ -287,15 +287,15 @@ const InternSearch: React.FC<InternSearchProps> = ({
               className={`${
                 inlineResults
                   ? 'static shadow-none mt-3 max-h-80'
-                  : 'absolute top-[calc(100%+8px)] left-0 shadow-[var(--shadow-hover)] max-h-[300px]'
-              } z-50 w-full bg-[var(--surface-0)] border border-[var(--border)] rounded-xl overflow-y-auto p-2 m-0 flex flex-col gap-1 list-none`}
+                  : 'absolute top-[calc(100%+8px)] left-0 shadow-xl max-h-[300px]'
+              } z-50 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-y-auto p-2 m-0 flex flex-col gap-1 list-none`}
             >
               {isLoading ? (
-                <li className="border border-dashed border-[var(--border-strong)] rounded-[12px] text-[var(--text-subtle)] text-[14px] m-0 px-[16px] py-[22px] text-center bg-[linear-gradient(180deg,var(--surface-1)_0%,var(--surface-2)_100%)]">
+                <li className="border border-dashed border-slate-300 dark:border-slate-800 rounded-xl text-slate-500 dark:text-slate-400 text-sm m-0 px-4 py-5 text-center bg-slate-50 dark:bg-slate-950/20">
                   {t('interns.searching')}
                 </li>
               ) : searchResults.length === 0 ? (
-                <li className="border border-dashed border-[var(--border-strong)] rounded-[12px] text-[var(--text-subtle)] text-[14px] m-0 px-[16px] py-[22px] text-center bg-[linear-gradient(180deg,var(--surface-1)_0%,var(--surface-2)_100%)]">
+                <li className="border border-dashed border-slate-300 dark:border-slate-800 rounded-xl text-slate-500 dark:text-slate-400 text-sm m-0 px-4 py-5 text-center bg-slate-50 dark:bg-slate-950/20">
                   {t('interns.noInternsFound')}
                 </li>
               ) : (
@@ -310,7 +310,7 @@ const InternSearch: React.FC<InternSearchProps> = ({
                       className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition-colors focus:outline-none ${
                         added
                           ? 'opacity-60 cursor-not-allowed hover:bg-transparent'
-                          : 'cursor-pointer hover:bg-[var(--surface-1)] focus:bg-[var(--surface-1)]'
+                          : 'cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 focus:bg-slate-100 dark:focus:bg-slate-800'
                       }`}
                       tabIndex={added ? -1 : 0}
                       onMouseDown={(e) => e.preventDefault()}
@@ -330,15 +330,15 @@ const InternSearch: React.FC<InternSearchProps> = ({
                     >
                       <div className="flex flex-col gap-1 w-full overflow-hidden">
                         <div className="flex flex-col gap-[2px]">
-                          <span className="text-[14px] font-semibold text-[var(--text-main)] truncate">
+                          <span className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
                             {intern.name}
                           </span>
-                          <span className="text-[11px] font-medium text-[var(--text-subtle)] truncate">
+                          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-450 truncate">
                             {displayUsername}
                           </span>
                         </div>
                         {hasMeta ? (
-                          <div className="flex flex-wrap gap-2 text-[11px] text-[var(--text-subtle)]">
+                          <div className="flex flex-wrap gap-2 text-[11px] text-slate-500 dark:text-slate-400">
                             {intern.email ? (
                               <span className="flex items-center gap-1">
                                 <span className="font-semibold uppercase">
@@ -363,13 +363,13 @@ const InternSearch: React.FC<InternSearchProps> = ({
                         ) : null}
                       </div>
                       {added ? (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-subtle)] bg-[var(--surface-2)] px-2 py-1 rounded-full ml-auto whitespace-nowrap">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full ml-auto whitespace-nowrap">
                           {t('interns.added')}
                         </span>
                       ) : (
                         <button
                           type="button"
-                          className="text-[12px] ml-auto px-[10px] py-[4px] bg-[var(--surface-1)] border border-[var(--border)] rounded-[8px] text-[var(--text-main)] font-semibold transition-colors hover:bg-[var(--surface-2)] cursor-pointer whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                          className="text-xs ml-auto px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 font-semibold border border-slate-300/80 dark:border-slate-700 rounded-lg transition-colors cursor-pointer whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50"
                           onMouseDown={(e) => e.preventDefault()}
                           onClick={(e) => {
                             e.stopPropagation();

@@ -1,4 +1,12 @@
-import { Sun, Moon } from 'lucide-react';
+import {
+  Sun,
+  Moon,
+  LayoutGrid,
+  Users2,
+  Mic,
+  Users,
+  BarChart2,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../LanguageSwitcher';
@@ -20,8 +28,9 @@ type ThemeMode = 'light' | 'dark';
 
 export function Layout({ children }: Props) {
   const { t } = useTranslation();
-  const { pathname } = useRouter();
-  const { corpusToken } = useConfigStore();
+  const { pathname, navigate } = useRouter();
+  const { corpusToken, activeStandupPanel, setActiveStandupPanel } =
+    useConfigStore();
   const { gitlabConnected } = useAuth();
   const [themeMode, setThemeMode] = useState<ThemeMode>(() =>
     readStoredThemeMode()
@@ -304,7 +313,96 @@ export function Layout({ children }: Props) {
         </div>
 
         {isStandupMode && (
-          <MobileBottomNav onRecordClick={() => setIsRecordModalOpen(true)} />
+          <>
+            {/* Desktop Floating Island Navigation */}
+            <nav className="fixed bottom-6 left-[calc(50%+150px)] -translate-x-1/2 z-50 hidden md:flex items-center gap-6 bg-slate-950/80 dark:bg-slate-900/90 border border-slate-800/80 dark:border-slate-800/60 backdrop-blur-xl px-8 py-2.5 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.4)] transition-all duration-300 hover:scale-[1.01] hover:border-slate-700/80">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveStandupPanel('status');
+                  if (pathname !== '/standup') navigate('/standup');
+                }}
+                className={`flex flex-col items-center justify-center gap-1 w-16 h-12 transition-all duration-200 hover:scale-105 bg-transparent border-none cursor-pointer ${
+                  activeStandupPanel === 'status' && pathname === '/standup'
+                    ? 'text-blue-400 font-semibold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <LayoutGrid size={18} />
+                <span className="text-[10px] tracking-wide">Status</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveStandupPanel('teams');
+                  if (pathname !== '/standup') navigate('/standup');
+                }}
+                className={`flex flex-col items-center justify-center gap-1 w-20 h-12 transition-all duration-200 hover:scale-105 bg-transparent border-none cursor-pointer ${
+                  activeStandupPanel === 'teams' && pathname === '/standup'
+                    ? 'text-blue-400 font-semibold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Users2 size={18} />
+                <span className="text-[10px] tracking-wide text-center leading-none">
+                  Team Manage
+                </span>
+              </button>
+
+              <div className="relative -mt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsRecordModalOpen(true)}
+                  className="w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30 transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 hover:shadow-blue-500/50 border-none cursor-pointer"
+                  title="Record Standup"
+                >
+                  <Mic size={24} />
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveStandupPanel('interns');
+                  if (pathname !== '/standup') navigate('/standup');
+                }}
+                className={`flex flex-col items-center justify-center gap-1 w-20 h-12 transition-all duration-200 hover:scale-105 bg-transparent border-none cursor-pointer ${
+                  activeStandupPanel === 'interns' && pathname === '/standup'
+                    ? 'text-blue-400 font-semibold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Users size={18} />
+                <span className="text-[10px] tracking-wide text-center leading-none">
+                  Intern Directory
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveStandupPanel('analytics');
+                  if (pathname !== '/standup') navigate('/standup');
+                }}
+                className={`flex flex-col items-center justify-center gap-1 w-16 h-12 transition-all duration-200 hover:scale-105 bg-transparent border-none cursor-pointer ${
+                  activeStandupPanel === 'analytics' && pathname === '/standup'
+                    ? 'text-blue-400 font-semibold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <BarChart2 size={18} />
+                <span className="text-[10px] tracking-wide">Analytics</span>
+              </button>
+            </nav>
+
+            {/* Mobile Bottom Nav */}
+            <div className="md:hidden">
+              <MobileBottomNav
+                onRecordClick={() => setIsRecordModalOpen(true)}
+              />
+            </div>
+          </>
         )}
       </main>
 

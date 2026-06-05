@@ -43,27 +43,27 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
     : addedInterns;
 
   return (
-    <div className="interns-dashboard">
+    <div className="w-full flex flex-col gap-6">
       {/* ── Left: Interns List ── */}
-      <section className="interns-list-panel">
-        <header className="interns-list-header">
+      <section className="w-full bg-slate-900/10 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-3xl p-6 backdrop-blur-md shadow-lg">
+        <header className="flex flex-col gap-4 mb-4">
           <div className="flex items-center justify-between">
-            <h2 className="interns-list-title m-0">
+            <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 m-0 tracking-tight flex items-center gap-2">
               {t('interns.title')}{' '}
-              <span className="interns-list-count">
+              <span className="text-xs text-blue-500 font-semibold bg-blue-500/10 px-2.5 py-0.5 rounded-full">
                 ({addedInterns.length})
               </span>
             </h2>
             {canManageInterns ? (
               <button
                 type="button"
-                className="btn-primary py-1.5 px-3.5 text-[13px]"
+                className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 rounded-xl shadow-sm hover:shadow transition-all duration-200 cursor-pointer border-none outline-none"
                 onClick={() => setShowAddForm(true)}
               >
                 + Add Intern
               </button>
             ) : (
-              <span className="text-xs text-[var(--text-secondary)] italic max-w-[420px] text-right">
+              <span className="text-xs text-slate-400 dark:text-slate-500 italic max-w-[420px] text-right">
                 Intern list is visible here, but roster edits require
                 admin-granted standup edit permission.
               </span>
@@ -72,7 +72,7 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
 
           <input
             type="text"
-            className="interns-list-search"
+            className="w-full px-4 py-2.5 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200"
             placeholder={t('interns.searchByNameOrIdPlaceholder')}
             aria-label={t('interns.searchListAria')}
             value={listSearchQuery}
@@ -80,28 +80,33 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
           />
         </header>
 
-        <div className="interns-list-body">
+        <div className="w-full">
           {addedInterns.length === 0 ? (
-            <p className="interns-list-empty">{t('interns.noneAddedYet')}</p>
+            <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
+              {t('interns.noneAddedYet')}
+            </p>
           ) : filteredInterns.length === 0 ? (
-            <p className="interns-list-empty">
+            <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
               {t('interns.noMatchingInterns')}
             </p>
           ) : (
-            <div className="interns-list-items">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filteredInterns.map((intern) => (
-                <article className="interns-list-card" key={intern.id}>
-                  <div className="interns-list-card-info">
-                    <span className="interns-list-card-name">
+                <article
+                  className="p-4 relative overflow-hidden bg-blue-600/5 dark:bg-blue-950/15 border border-blue-500/30 dark:border-blue-500/20 rounded-2xl backdrop-blur-md shadow-[0_8px_32px_0_rgba(30,79,178,0.05)] hover:shadow-[0_8px_32px_0_rgba(30,79,178,0.18)] hover:border-blue-500/40 transition-all duration-300 flex items-center justify-between gap-3"
+                  key={intern.id}
+                >
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <span className="text-slate-800 dark:text-slate-200 text-sm font-semibold truncate">
                       {intern.name}
                     </span>
-                    <span className="interns-list-card-id">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
                       {t('interns.idPrefix', { id: intern.id })}
                     </span>
                   </div>
                   <button
                     type="button"
-                    className="ghost-button"
+                    className="w-7 h-7 rounded-full flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 dark:bg-red-500/15 dark:hover:bg-red-500/25 text-red-600 dark:text-red-400 text-xs font-bold transition-colors cursor-pointer border-none outline-none shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label={t('interns.removeAria', { name: intern.name })}
                     title={t('interns.removeTitle')}
                     onClick={() => onRemoveIntern(intern.id)}
@@ -119,7 +124,7 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
       {/* ── Modal Pop-up: Add Intern ── */}
       {showAddForm && canManageInterns && (
         <div
-          className="modal-backdrop"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4"
           role="dialog"
           aria-modal="true"
           aria-label={t('interns.addIntern')}
@@ -127,24 +132,21 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
           onKeyDown={handleKeyDown}
           tabIndex={-1}
         >
-          <div
-            className="modal-container animate-panel-fade-in"
-            style={{ width: '100%', maxWidth: '520px' }}
-          >
-            <header className="modal-header">
-              <h3 className="modal-title font-display font-bold text-lg text-[var(--text-primary)]">
+          <div className="w-full max-w-[520px] bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl p-6 relative overflow-hidden flex flex-col gap-4 animate-[fade-in_0.2s_ease-out]">
+            <header className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <h3 className="text-lg font-bold text-slate-100 m-0">
                 {t('interns.addIntern')}
               </h3>
               <button
                 type="button"
-                className="modal-close-btn"
+                className="w-7 h-7 rounded-full flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 text-xs font-semibold cursor-pointer border-none outline-none"
                 onClick={() => setShowAddForm(false)}
                 aria-label="Close"
               >
                 ✕
               </button>
             </header>
-            <div className="modal-body" style={{ padding: '20px' }}>
+            <div className="flex flex-col gap-4 pt-2">
               <InternSearch
                 addedInterns={addedInterns}
                 authToken={authToken}
@@ -152,10 +154,10 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
                 hideHeader
                 inlineResults
               />
-              <div className="mt-6 flex justify-end gap-2 border-t border-[var(--border)] pt-4">
+              <div className="mt-6 flex justify-end gap-2 border-t border-slate-800 pt-4">
                 <button
                   type="button"
-                  className="btn-secondary py-2 px-4 text-xs font-semibold"
+                  className="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 shadow-sm transition-all duration-200 cursor-pointer outline-none"
                   onClick={() => setShowAddForm(false)}
                 >
                   {t('button.cancel') || 'Cancel'}
