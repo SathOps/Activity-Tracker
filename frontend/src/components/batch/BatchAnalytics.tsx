@@ -39,7 +39,7 @@ export function BatchAnalytics() {
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-slate-800">📊 Batch Analytics</h2>
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Batch Analytics</h2>
         <p className="mt-1 text-sm text-slate-500">
           Select users from a batch and team, then run a comprehensive GitLab
           activity report. Results stream in live as each user completes.

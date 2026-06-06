@@ -39,7 +39,7 @@ export function RankingTable({ teams }: Props) {
       <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <h3 className="text-sm font-semibold text-slate-700">
-            🏆 Team Rankings
+            Team Rankings
           </h3>
           <button
             onClick={exportAll}
@@ -118,7 +118,7 @@ export function RankingTable({ teams }: Props) {
         <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-100">
             <h3 className="text-sm font-semibold text-slate-700">
-              🧑‍💻 Individual Rankings
+              Individual Rankings
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
               Score = Commits×1 + Merged MRs×5 + Total MRs×2 + Issues Closed×3

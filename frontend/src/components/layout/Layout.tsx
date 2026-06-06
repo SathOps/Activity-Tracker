@@ -153,37 +153,7 @@ export function Layout({ children }: Props) {
     <div className="flex h-screen overflow-hidden">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <main className="flex-1 overflow-y-auto relative bg-slate-50 dark:bg-[#090e1a] transition-colors duration-300">
-        {/* Animated background glow effect layers */}
-        <div className="fixed inset-0 md:left-[300px] pointer-events-none overflow-hidden z-0">
-          <div
-            style={{
-              position: 'absolute',
-              top: '-15%',
-              right: '-15%',
-              width: '600px',
-              height: '600px',
-              borderRadius: '50%',
-              background:
-                'radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%)',
-              filter: 'blur(90px)',
-            }}
-            className="animate-[pulse_7s_ease-in-out_infinite]"
-          />
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '-15%',
-              left: '-15%',
-              width: '600px',
-              height: '600px',
-              borderRadius: '50%',
-              background:
-                'radial-gradient(circle, rgba(99,102,241,0.14) 0%, transparent 70%)',
-              filter: 'blur(90px)',
-            }}
-            className="animate-[pulse_11s_ease-in-out_infinite]"
-          />
-        </div>
+
 
         {/* Spaced dot grid pattern (subtle and clean) */}
         <div className="fixed inset-0 md:left-[300px] pointer-events-none bg-[radial-gradient(rgba(148,163,184,0.18)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:24px_24px] z-0" />

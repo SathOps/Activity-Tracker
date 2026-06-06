@@ -36,7 +36,21 @@ function icon(symbol: ReactNode) {
 export const AlertCircle = icon('!');
 export const BarChart2 = icon('▥');
 export const BarChart3 = icon('▥');
-export const Briefcase = icon('▣');
+export const Briefcase = icon(
+  <svg
+    width="100%"
+    height="100%"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+    <rect width="20" height="14" x="2" y="6" rx="2" />
+  </svg>
+);
 export const Calendar = icon('◫');
 export const Check = icon('✓');
 export const CheckCircle2 = icon('✓');
@@ -103,7 +117,24 @@ export const Search = icon('⌕');
 export const Sun = icon('☀');
 export const Trash2 = icon('🗑');
 export const TriangleAlert = icon('▲');
-export const Trophy = icon('🏆');
+export const Trophy = icon(
+  <svg
+    width="100%"
+    height="100%"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+    <path d="M4 22h16" />
+    <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34" />
+    <path d="M12 2a6 6 0 0 1 6 6v1a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8a6 6 0 0 1 6-6z" />
+  </svg>
+);
 export const Upload = icon('↑');
 export const User = icon('👤');
 export const Users = icon('👥');

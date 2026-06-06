@@ -388,7 +388,7 @@ export function HierarchicalSelector({
         }`}
       >
         {isRunning && <Spinner size="sm" label="" />}
-        {isRunning ? 'Running…' : `🚀 ${runLabel}`}
+        {isRunning ? 'Running…' : runLabel}
         {!isRunning && selectedUsers.length > 0 && (
           <span className="rounded-full bg-white/20 px-2 py-[1px] text-xs">
             {selectedUsers.length}

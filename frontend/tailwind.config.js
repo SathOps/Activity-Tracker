@@ -19,9 +19,33 @@ export default {
             'box-shadow': '0 0 15px rgba(59, 130, 246, 0.15)',
           },
         },
+        'background-light-sweep': {
+          '0%': {
+            transform: 'translate3d(-150%, 0, 0) skewX(-20deg)',
+            opacity: '0',
+          },
+          '8%': {
+            opacity: '0',
+          },
+          '18%': {
+            opacity: '0.3',
+          },
+          '32%': {
+            opacity: '0.3',
+          },
+          '42%': {
+            transform: 'translate3d(850%, 0, 0) skewX(-20deg)',
+            opacity: '0',
+          },
+          '100%': {
+            transform: 'translate3d(850%, 0, 0) skewX(-20deg)',
+            opacity: '0',
+          },
+        },
       },
       animation: {
         'pulse-border': 'pulse-border 2s infinite ease-in-out',
+        'light-sweep': 'background-light-sweep 22s cubic-bezier(0.22, 1, 0.36, 1) infinite',
       },
     },
   },

@@ -1348,9 +1348,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             {analyticsError}
           </p>
         ) : null}
-
         {!analyticsLoading && !analyticsError ? (
-          <section className="p-4 sm:p-5 md:p-6 relative overflow-hidden bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] overflow-x-hidden">
+          <section className="p-4 sm:p-5 md:p-6 relative overflow-hidden bg-white/45 dark:bg-slate-900/45 border border-blue-200/80 dark:border-blue-500/25 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:border-blue-500/50 dark:hover:border-blue-400/40 transition-all duration-300 overflow-x-hidden">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div className="grid gap-1">
                 <div className="flex flex-wrap items-center gap-2">

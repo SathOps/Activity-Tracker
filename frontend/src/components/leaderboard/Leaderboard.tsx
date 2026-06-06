@@ -61,8 +61,8 @@ export function Leaderboard() {
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-slate-800">
-          🏆 Team Leaderboard
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+          Team Leaderboard
         </h2>
         <p className="mt-1 text-sm text-slate-500">
           Select batches, teams, and users to compare GitLab activity scores.{' '}
@@ -73,36 +73,49 @@ export function Leaderboard() {
       </div>
 
       {/* Page tabs */}
-      <div className="mb-6 flex gap-2">
+      <div
+        className={cn(
+          'flex gap-1 p-1 mb-6 overflow-x-auto no-scrollbar rounded-[14px] w-max',
+          'backdrop-blur-[8px] transition-colors',
+          // Light mode glass
+          'bg-white/50 border border-white/60',
+          // Dark mode glass
+          'dark:bg-black/20 dark:border-white/10'
+        )}
+      >
         {(
           [
             ['workspace', 'Workspace', 'briefcase'],
             ['ranking', 'Leaderboard Ranking', 'trophy'],
           ] as const
-        ).map(([id, label, icon]) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setPage(id)}
-            className={cn(
-              'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
-              page === id
-                ? 'bg-brand-600 text-white shadow-sm'
-                : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-            )}
-          >
-            {icon === 'briefcase' ? (
-              <Briefcase size={14} />
-            ) : (
-              <Trophy size={14} />
-            )}
-            {label}
-          </button>
-        ))}
+        ).map(([id, label, icon]) => {
+          const isActive = page === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setPage(id)}
+              className={cn(
+                'flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-[13px] whitespace-nowrap outline-none',
+                'font-semibold transition-all duration-200',
+                isActive
+                  ? 'text-white bg-gradient-to-br from-indigo-600 to-indigo-500 shadow-[0_2px_8px_rgba(79,70,229,0.25)]'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-white/5'
+              )}
+            >
+              {icon === 'briefcase' ? (
+                <Briefcase size={14} />
+              ) : (
+                <Trophy size={14} />
+              )}
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {page === 'workspace' && (
-        <div className="space-y-5">
+        <div className="space-y-5 animate-fadeInUp">
           {/* Hierarchical selector */}
           <HierarchicalSelector
             runLabel="Run Analysis"
@@ -142,22 +155,25 @@ export function Leaderboard() {
         </div>
       )}
 
-      {page === 'ranking' &&
-        (analysisResult ? (
-          <RankingTable teams={analysisResult} />
-        ) : (
-          <div className="rounded-xl border border-dashed border-slate-200 p-12 text-center">
-            <Trophy size={40} className="mx-auto mb-3 text-slate-200" />
-            <p className="text-sm text-slate-500">No analysis data yet.</p>
-            <button
-              type="button"
-              onClick={() => setPage('workspace')}
-              className="mt-3 text-sm text-brand-600 hover:underline"
-            >
-              Go to Workspace → Run Analysis
-            </button>
-          </div>
-        ))}
+      {page === 'ranking' && (
+        <div className="animate-fadeInUp">
+          {analysisResult ? (
+            <RankingTable teams={analysisResult} />
+          ) : (
+            <div className="rounded-xl border border-dashed border-slate-200 p-12 text-center">
+              <Trophy size={40} className="mx-auto mb-3 text-slate-200" />
+              <p className="text-sm text-slate-500">No analysis data yet.</p>
+              <button
+                type="button"
+                onClick={() => setPage('workspace')}
+                className="mt-3 text-sm text-brand-600 hover:underline"
+              >
+                Go to Workspace → Run Analysis
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
