@@ -135,15 +135,7 @@ export function MembersPage() {
       {isAdmin ? (
         <div className="grid gap-6 xl:grid-cols-2">
           <div className={glassCard} style={{ padding: '24px 28px' }}>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 18,
-                fontWeight: 700,
-                fontFamily: 'var(--font-display)',
-                color: 'var(--slate-900)',
-              }}
-            >
+            <h2 className="m-0 text-lg font-bold font-display text-slate-900 dark:text-slate-100">
               Add user
             </h2>
             <p className="mt-1 text-sm text-slate-500">
@@ -226,14 +218,7 @@ export function MembersPage() {
                   }))
                 }
                 placeholder="Institution"
-                style={{
-                  padding: '10px 14px',
-                  borderRadius: 12,
-                  border: '1px solid var(--slate-200)',
-                  background: 'rgba(255,255,255,0.8)',
-                  fontSize: 14,
-                  outline: 'none',
-                }}
+                className="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white/80 text-sm outline-none"
               />
             </div>
 
@@ -246,21 +231,7 @@ export function MembersPage() {
                 !draft.batch_id ||
                 createMutation.isPending
               }
-              style={{
-                marginTop: 16,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '10px 18px',
-                borderRadius: 12,
-                border: 'none',
-                background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
-                color: '#fff',
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(79,70,229,0.25)',
-              }}
+              className="mt-4 inline-flex items-center gap-2 px-[18px] py-2.5 rounded-xl border-none bg-gradient-to-br from-indigo-600 to-indigo-500 text-white text-[13px] font-semibold cursor-pointer shadow-[0_4px_14px_rgba(79,70,229,0.25)] hover:shadow-[0_6px_18px_rgba(79,70,229,0.35)] hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 disabled:opacity-50"
             >
               <Plus size={14} />
               Add user
@@ -268,15 +239,7 @@ export function MembersPage() {
           </div>
 
           <div className={glassCard} style={{ padding: '24px 28px' }}>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 18,
-                fontWeight: 700,
-                fontFamily: 'var(--font-display)',
-                color: 'var(--slate-900)',
-              }}
-            >
+            <h2 className="m-0 text-lg font-bold font-display text-slate-900 dark:text-slate-100">
               CSV import
             </h2>
             <p className="mt-1 text-sm text-slate-500">
@@ -338,15 +301,7 @@ export function MembersPage() {
       <div className={blueGlassCard} style={{ padding: '24px 28px' }}>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 18,
-                fontWeight: 700,
-                fontFamily: 'var(--font-display)',
-                color: 'var(--slate-900)',
-              }}
-            >
+            <h2 className="m-0 text-lg font-bold font-display text-slate-900 dark:text-slate-100">
               Users
             </h2>
             <p className="mt-1 text-sm text-slate-500">

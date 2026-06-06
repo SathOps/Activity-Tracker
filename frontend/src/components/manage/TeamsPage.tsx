@@ -143,24 +143,10 @@ export function TeamsPage() {
         <div className={glassCard} style={{ padding: '24px 28px' }}>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: 18,
-                  fontWeight: 700,
-                  fontFamily: 'var(--font-display)',
-                  color: 'var(--slate-900)',
-                }}
-              >
+              <h2 className="m-0 text-lg font-bold font-display text-slate-900 dark:text-slate-100">
                 Teams
               </h2>
-              <p
-                style={{
-                  margin: '4px 0 0',
-                  fontSize: 14,
-                  color: 'var(--slate-500)',
-                }}
-              >
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 Review active teams by batch and open full team breakdowns.
               </p>
             </div>
@@ -212,26 +198,7 @@ export function TeamsPage() {
                   !newTeamBatchId ||
                   createMutation.isPending
                 }
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '10px 18px',
-                  borderRadius: 12,
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
-                  color: '#fff',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  opacity:
-                    !newTeamName.trim() ||
-                    !newTeamBatchId ||
-                    createMutation.isPending
-                      ? 0.5
-                      : 1,
-                  boxShadow: '0 4px 14px rgba(79,70,229,0.25)',
-                }}
+                className={`inline-flex items-center gap-2 px-[18px] py-2.5 rounded-xl border-none bg-gradient-to-br from-indigo-600 to-indigo-500 text-white text-[13px] font-semibold cursor-pointer shadow-[0_4px_14px_rgba(79,70,229,0.25)] hover:shadow-[0_6px_18px_rgba(79,70,229,0.35)] hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ${!newTeamName.trim() || !newTeamBatchId || createMutation.isPending ? 'opacity-50' : ''}`}
               >
                 <Plus size={14} />
                 Create team
@@ -466,40 +433,15 @@ export function TeamsPage() {
         className={glassCard}
         style={{ padding: '24px 28px', alignSelf: 'start' }}
       >
-        <h2
-          style={{
-            margin: 0,
-            fontSize: 18,
-            fontWeight: 700,
-            fontFamily: 'var(--font-display)',
-            color: 'var(--slate-900)',
-          }}
-        >
+        <h2 className="m-0 text-lg font-bold font-display text-slate-900 dark:text-slate-100">
           Team operations
         </h2>
-        <p
-          style={{
-            margin: '8px 0 0',
-            fontSize: 14,
-            lineHeight: 1.7,
-            color: 'var(--slate-500)',
-          }}
-        >
+        <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
           Team creation, roster changes, and membership history now use backend
           APIs directly. This keeps Standup Tracker and Compliance Checker on
           the same source of truth.
         </p>
-        <ul
-          style={{
-            marginTop: 20,
-            paddingLeft: 18,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 10,
-            fontSize: 14,
-            color: 'var(--slate-600)',
-          }}
-        >
+        <ul className="mt-5 pl-[18px] flex flex-col gap-2.5 text-sm text-slate-600 dark:text-slate-400">
           <li>Use batch filtering to focus mentor-scoped work.</li>
           <li>
             Open a team to inspect current members and historical joins/leaves.

@@ -8,84 +8,6 @@
     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-display: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
 
-  /* ── Brand palette ──────────────────────────────────────────────── */
-  --brand-50: #f0f0ff;
-  --brand-100: #e0e0ff;
-  --brand-200: #c7c4ff;
-  --brand-300: #a5a0fb;
-  --brand-500: #7c6bf5;
-  --brand-600: #6c54e8;
-  --brand-700: #5a3dd5;
-
-  /* ── Slate ──────────────────────────────────────────────────────── */
-  --slate-50: #f8f9fc;
-  --slate-100: #f0f2f7;
-  --slate-200: #e2e5ee;
-  --slate-300: #c8cdd8;
-  --slate-400: #8f96a8;
-  --slate-500: #64697e;
-  --slate-600: #474d63;
-  --slate-700: #2f3549;
-  --slate-800: #1c2035;
-  --slate-900: #0e1121;
-
-  /* ── Blue ───────────────────────────────────────────────────────── */
-  --blue-50: #eef4ff;
-  --blue-100: #dae8ff;
-  --blue-300: #7eb8ff;
-  --blue-500: #3b82f6;
-  --blue-600: #2563eb;
-  --blue-700: #1d4ed8;
-
-  /* ── Green ──────────────────────────────────────────────────────── */
-  --green-50: #edfcf2;
-  --green-100: #d1fae2;
-  --green-200: #a7f3c9;
-  --green-500: #10b981;
-  --green-600: #059669;
-  --green-700: #047857;
-
-  /* ── Amber ──────────────────────────────────────────────────────── */
-  --amber-50: #fffbeb;
-  --amber-100: #fef3c7;
-  --amber-400: #fbbf24;
-  --amber-600: #d97706;
-
-  /* ── Red ────────────────────────────────────────────────────────── */
-  --red-50: #fff1f2;
-  --red-100: #ffe4e6;
-  --red-500: #f43f5e;
-  --red-600: #e11d48;
-  --red-700: #be123c;
-
-  /* ── Purple ─────────────────────────────────────────────────────── */
-  --purple-100: #f3e8ff;
-  --purple-400: #c084fc;
-  --purple-700: #7e22ce;
-
-  /* ── Indigo ─────────────────────────────────────────────────────── */
-  --indigo-50: #eef2ff;
-  --indigo-200: #c7d2fe;
-  --indigo-300: #a5b4fc;
-  --indigo-400: #818cf8;
-  --indigo-500: #6366f1;
-  --indigo-600: #4f46e5;
-  --indigo-700: #4338ca;
-
-  /* ── Shadows ────────────────────────────────────────────────────── */
-  --shadow-sm:
-    0 1px 3px rgba(15, 20, 40, 0.04), 0 1px 2px rgba(15, 20, 40, 0.06);
-  --shadow-md:
-    0 4px 16px rgba(15, 20, 40, 0.06), 0 1px 4px rgba(15, 20, 40, 0.04);
-  --shadow-lg:
-    0 16px 48px rgba(15, 20, 40, 0.1), 0 4px 12px rgba(15, 20, 40, 0.06);
-  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
-
-  /* ── Glass ──────────────────────────────────────────────────────── */
-  --glass-bg: rgba(255, 255, 255, 0.45);
-  --glass-border: rgba(255, 255, 255, 0.35);
-  --glass-blur: 20px;
-
   /* ── Sidebar ────────────────────────────────────────────────────── */
   --sidebar-bg: linear-gradient(180deg, #0f172a 0%, #0d1424 50%, #0b1120 100%);
   --sidebar-border: rgba(30, 79, 178, 0.15);
@@ -99,55 +21,21 @@
   );
 }
 
-[data-theme='dark'] {
-  --glass-bg: rgba(15, 23, 42, 0.45);
-  --glass-border: rgba(255, 255, 255, 0.04);
-  --glass-blur: 20px;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
-
-body {
-  font-family: var(--font-body);
-  background: linear-gradient(135deg, #f0f2f8 0%, #e8ecf5 50%, #f0f0fa 100%);
-  background-attachment: fixed;
-  color: var(--slate-800);
-  line-height: 1.6;
-  margin: 0;
-}
-
 /* ── Scrollbar ────────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  @apply w-1.5 h-1.5;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  @apply bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--slate-300);
-  border-radius: 99px;
+  @apply bg-slate-300 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--slate-400);
-}
-
-/* ── Glass utilities ──────────────────────────────────────────────── */
-[data-theme='dark'] body {
-  background: #02040a;
+  @apply bg-slate-400;
 }
 
 /* ── Premium Custom Animations ─────────────────────────────────────── */
@@ -239,19 +127,28 @@ body {
   }
 }
 
+@keyframes flowing-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 /* ── Custom Utilities for Git Connection Card ──────────────────────── */
 
 .git-connect-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: 20px;
+  @apply relative overflow-hidden rounded-[20px] backdrop-blur-[24px];
   background: linear-gradient(
     135deg,
     rgba(30, 41, 59, 0.45) 0%,
     rgba(15, 23, 42, 0.25) 100%
   );
   border: 1px solid rgba(59, 130, 246, 0.15);
-  backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   animation: border-glow-pulse 6s infinite ease-in-out;
   transition:
@@ -260,7 +157,7 @@ body {
 }
 
 .git-connect-card:hover {
-  transform: translateY(-4px);
+  @apply -translate-y-1;
   box-shadow:
     0 20px 40px rgba(0, 0, 0, 0.45),
     0 0 40px rgba(59, 130, 246, 0.2),
@@ -270,43 +167,30 @@ body {
 
 /* Ambient Floating Blobs */
 .ambient-blob {
-  position: absolute;
-  border-radius: 50%;
+  @apply absolute rounded-full pointer-events-none z-0 opacity-[0.15];
   filter: blur(80px);
-  opacity: 0.15;
-  pointer-events: none;
-  z-index: 0;
 }
 
 [data-theme='light'] .ambient-blob {
-  opacity: 0.08;
+  @apply opacity-[0.08];
   filter: blur(60px);
 }
 
 .ambient-blob-1 {
+  @apply w-[250px] h-[250px] -top-20 -right-[50px];
   background: radial-gradient(circle, #3b82f6 0%, #2563eb 100%);
-  width: 250px;
-  height: 250px;
-  top: -80px;
-  right: -50px;
   animation: float-blob-1 18s infinite ease-in-out alternate;
 }
 
 .ambient-blob-2 {
+  @apply w-[300px] h-[300px] -bottom-[100px] -left-20;
   background: radial-gradient(circle, #8b5cf6 0%, #6d28d9 100%);
-  width: 300px;
-  height: 300px;
-  bottom: -100px;
-  left: -80px;
   animation: float-blob-2 24s infinite ease-in-out alternate;
 }
 
 .ambient-blob-3 {
+  @apply w-[180px] h-[180px] top-[40%] left-[30%];
   background: radial-gradient(circle, #06b6d4 0%, #0891b2 100%);
-  width: 180px;
-  height: 180px;
-  top: 40%;
-  left: 30%;
   animation: float-blob-3 15s infinite ease-in-out alternate;
 }
 
@@ -333,28 +217,16 @@ body {
 
 /* GitLab Shimmering Button */
 .gitlab-shimmer-btn {
-  position: relative;
-  overflow: hidden;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  border: none;
+  @apply relative overflow-hidden inline-flex items-center gap-2.5 border-none font-display font-bold cursor-pointer px-[26px] py-3 rounded-xl text-sm tracking-[0.02em];
   background: linear-gradient(135deg, #e24329 0%, #fc6d26 50%, #fca326 100%);
   background-size: 200% auto;
   color: white !important;
-  font-family: var(--font-display);
-  font-weight: 700;
-  cursor: pointer;
-  padding: 12px 26px;
-  border-radius: 12px;
-  font-size: 14px;
-  letter-spacing: 0.02em;
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 4px 15px rgba(240, 74, 32, 0.35);
 }
 
 .gitlab-shimmer-btn:hover {
-  transform: translateY(-2px) scale(1.03);
+  @apply -translate-y-0.5 scale-[1.03];
   box-shadow:
     0 10px 25px rgba(240, 74, 32, 0.5),
     0 0 15px rgba(252, 109, 38, 0.3);
@@ -362,16 +234,13 @@ body {
 }
 
 .gitlab-shimmer-btn:active {
-  transform: translateY(0) scale(0.98);
+  @apply translate-y-0 scale-[0.98];
 }
 
 .gitlab-shimmer-btn::after {
+  @apply absolute top-0 w-1/2 h-full pointer-events-none;
   content: '';
-  position: absolute;
-  top: 0;
   left: -100%;
-  width: 50%;
-  height: 100%;
   background: linear-gradient(
     90deg,
     transparent,
@@ -379,17 +248,14 @@ body {
     transparent
   );
   transform: skewX(-25deg);
-  pointer-events: none;
   animation: shimmer-sweep 3s infinite ease-in-out;
 }
 
 /* Feature grid item styling */
 .feature-item-card {
+  @apply rounded-xl p-4 transition-all duration-300;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 16px;
-  transition: all 0.3s ease;
 }
 
 [data-theme='light'] .feature-item-card {
@@ -398,21 +264,18 @@ body {
 }
 
 .feature-item-card:hover {
+  @apply -translate-y-0.5;
   background: rgba(59, 130, 246, 0.06);
   border-color: rgba(59, 130, 246, 0.2);
-  transform: translateY(-2px);
 }
 
 /* ── At-a-Glance Statistics Panel ────────────────────────────────── */
 
 .status-glance-panel {
-  position: relative;
-  overflow: hidden;
+  @apply relative overflow-hidden rounded-3xl backdrop-blur-[24px];
   padding: 28px 24px 24px;
-  border-radius: 24px;
   background: rgba(255, 255, 255, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   box-shadow:
     0 8px 32px rgba(15, 23, 42, 0.06),
@@ -447,16 +310,11 @@ body {
 }
 
 .status-glance-header {
-  margin-bottom: 20px;
+  @apply mb-5;
 }
 
 .status-glance-title {
-  margin: 0 0 4px;
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  color: var(--text-main);
+  @apply m-0 mb-1 font-display text-[1.15rem] font-extrabold tracking-tight;
   background: linear-gradient(135deg, var(--text-main) 0%, var(--accent) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -464,48 +322,40 @@ body {
 }
 
 .status-glance-copy {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 500;
+  @apply m-0 text-[0.8rem] font-medium;
   color: var(--text-soft);
 }
 
 .status-glance-grid {
-  display: grid;
+  @apply grid gap-4;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
 }
 
 @media (max-width: 640px) {
   .status-glance-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px;
+    @apply gap-3;
   }
 
   .status-glance-panel {
-    padding: 20px 16px 16px;
-    border-radius: 20px;
+    @apply p-4 pt-5 rounded-[20px];
   }
 }
 
 /* ── Team Status Card Glassmorphism ───────────────────────────────── */
 
 .team-status-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: 20px;
+  @apply relative overflow-hidden rounded-[20px] backdrop-blur-[16px] transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)];
   background: rgba(255, 255, 255, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   box-shadow:
     0 8px 32px rgba(15, 23, 42, 0.05),
     0 1px 0 rgba(255, 255, 255, 0.4) inset;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .team-status-card:hover {
-  transform: translateY(-4px);
+  @apply -translate-y-1;
   border-color: rgba(59, 130, 246, 0.35);
   box-shadow:
     0 16px 40px rgba(15, 23, 42, 0.08),
@@ -531,9 +381,9 @@ body {
 
 /* Team Status Ring Inner Circle */
 .team-status-ring-inner {
+  @apply transition-all duration-300;
   background: var(--surface-0);
   border: 1px solid var(--border);
-  transition: all 0.3s ease;
 }
 
 [data-theme='dark'] .team-status-ring-inner {
@@ -543,45 +393,30 @@ body {
 
 /* Team Status Card Overlay */
 .team-status-card-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 20px 16px 16px;
+  @apply absolute inset-0 flex flex-col gap-2.5 p-4 pt-5 pointer-events-none opacity-0 translate-y-3 backdrop-blur-[20px];
   color: var(--text-main);
-  pointer-events: none;
-  opacity: 0;
-  transform: translateY(12px);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-
   background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
 
 [data-theme='dark'] .team-status-card-overlay {
+  @apply text-slate-100;
   background: rgba(15, 23, 42, 0.9);
   border-color: rgba(255, 255, 255, 0.08);
-  color: #f1f5f9;
 }
 
 .team-status-card:hover .team-status-card-overlay,
 .team-status-card:focus-within .team-status-card-overlay {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
+  @apply opacity-100 pointer-events-auto translate-y-0;
 }
 
 /* ── Flowing Gradient Line ────────────────────────────────────────── */
 
 .flowing-gradient-line,
 .flowing-gradient-line-bottom {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
+  @apply absolute left-0 right-0 h-0.5 z-20;
   background: linear-gradient(
     90deg,
     #c084fc,
@@ -594,27 +429,28 @@ body {
   );
   background-size: 200% 100%;
   animation: flowing-gradient 6s linear infinite;
-  z-index: 20;
 }
 
 .flowing-gradient-line {
-  top: 0;
+  @apply top-0;
   box-shadow: 0 1px 8px rgba(59, 130, 246, 0.3);
 }
 
 .flowing-gradient-line-bottom {
-  bottom: 0;
+  @apply bottom-0;
   box-shadow: 0 -1px 8px rgba(59, 130, 246, 0.3);
 }
 
-@keyframes flowing-gradient {
-  0% {
-    background-position: 0% 50%;
+@layer components {
+  .primary-button {
+    @apply inline-flex items-center justify-center gap-2 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-semibold text-[13.5px] px-5 py-2.5 rounded-xl cursor-pointer transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(59,130,246,0.18)] hover:shadow-[0_6px_16px_rgba(59,130,246,0.28)] hover:-translate-y-[1px] active:translate-y-0;
   }
-  50% {
-    background-position: 100% 50%;
+
+  .secondary-button {
+    @apply inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 font-semibold text-[13.5px] px-5 py-2.5 rounded-xl cursor-pointer transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-[1px] active:translate-y-0;
   }
-  100% {
-    background-position: 0% 50%;
+
+  .ghost-button {
+    @apply inline-flex items-center justify-center gap-2 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-semibold text-[13.5px] px-5 py-2.5 rounded-xl cursor-pointer transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 }

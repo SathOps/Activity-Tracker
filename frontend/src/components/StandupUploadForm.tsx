@@ -71,6 +71,7 @@ interface StandupUploadFormProps {
   onUpload: (payload: CorpusUploadPayload) => Promise<void>;
   onSuccess: () => void;
   onReset: () => void;
+  onClose: () => void;
 }
 
 function getCurrentLocation(): Promise<CorpusUploadLocation> {
@@ -154,6 +155,7 @@ export function StandupUploadForm({
   onUpload,
   onSuccess,
   onReset,
+  onClose,
 }: StandupUploadFormProps) {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
@@ -560,10 +562,24 @@ export function StandupUploadForm({
         <button
           type="button"
           className="ghost-button"
-          onClick={onReset}
+          onClick={(e) => {
+            e.stopPropagation();
+            onReset();
+          }}
           disabled={isUploading}
         >
           {t('upload.reset')}
+        </button>
+        <button
+          type="button"
+          className="ghost-button border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          disabled={isUploading}
+        >
+          {t('button.cancel') || 'Cancel'}
         </button>
       </div>
     </div>
