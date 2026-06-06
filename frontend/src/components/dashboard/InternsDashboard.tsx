@@ -90,10 +90,10 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
               {t('interns.noMatchingInterns')}
             </p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6 md:gap-4">
               {filteredInterns.map((intern) => (
                 <article
-                  className="p-4 relative overflow-hidden bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 rounded-2xl backdrop-blur-xl shadow-md shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-lg transition-all duration-300 flex items-center justify-between gap-3"
+                  className="p-4 sm:p-5 relative overflow-hidden bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 rounded-2xl backdrop-blur-xl shadow-md shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-lg transition-all duration-300 flex items-center justify-between gap-3"
                   key={intern.id}
                 >
                   <div className="flex flex-col gap-1 min-w-0">

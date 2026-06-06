@@ -63,13 +63,13 @@ export function CorpusLoginPage() {
   }
 
   return (
-    <main className="relative flex h-screen w-screen items-center justify-center overflow-hidden p-0 font-body bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.15),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(139,92,246,0.12),transparent_40%),radial-gradient(circle_at_60%_10%,rgba(14,165,233,0.1),transparent_30%),linear-gradient(135deg,#eef0fa_0%,#e8ecf5_40%,#eff0fa_100%)] bg-[size:200%_200%] animate-[login-gradient-shift_15s_ease_infinite] max-[800px]:h-screen max-[800px]:w-screen max-[800px]:items-center max-[800px]:justify-center max-[800px]:overflow-hidden max-[800px]:bg-[radial-gradient(circle_at_50%_20%,rgba(99,102,241,0.25),transparent_50%),linear-gradient(180deg,#090d16_0%,#0f172a_100%)]">
+    <main className="relative flex h-screen w-screen items-center justify-center overflow-hidden p-0 font-body bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.15),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(139,92,246,0.12),transparent_40%),radial-gradient(circle_at_60%_10%,rgba(14,165,233,0.1),transparent_30%),linear-gradient(135deg,#eef0fa_0%,#e8ecf5_40%,#eff0fa_100%)] bg-[size:200%_200%] animate-[login-gradient-shift_15s_ease_infinite] max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:items-start max-[800px]:overflow-y-auto max-[800px]:bg-[linear-gradient(180deg,#0b1220_0%,#102a57_40%,#f8fafc_40%,#f8fafc_100%)]">
       <div
         className="absolute inset-0 pointer-events-none bg-[linear-gradient(135deg,rgba(15,23,42,0.05),transparent_40%),linear-gradient(315deg,rgba(37,99,235,0.08),transparent_38%)]"
         aria-hidden="true"
       />
-      <div className="relative w-screen h-screen overflow-hidden z-10 max-[800px]:w-full max-[800px]:h-full max-[800px]:flex max-[800px]:items-center max-[800px]:justify-center max-[800px]:overflow-hidden">
-        <section className="absolute left-0 top-0 w-[65vw] h-full z-20 flex flex-col justify-center gap-12 p-[60px_48px] text-[#f8fbff] [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)] bg-[linear-gradient(145deg,#0b1220,#112d5c)] overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1024px]:min-[801px]:w-[65vw] max-[1024px]:min-[801px]:p-[50px_36px] max-[800px]:hidden">
+      <div className="relative w-screen h-screen overflow-hidden z-10 max-[800px]:flex max-[800px]:flex-col max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:w-full max-[800px]:overflow-visible">
+        <section className="absolute left-0 top-0 w-[65vw] h-full z-20 flex flex-col justify-center gap-12 p-[60px_48px] text-[#f8fbff] [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)] bg-[linear-gradient(145deg,#0b1220,#112d5c)] overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1024px]:min-[801px]:w-[65vw] max-[1024px]:min-[801px]:p-[50px_36px] max-[800px]:relative max-[800px]:left-auto max-[800px]:top-auto max-[800px]:h-auto max-[800px]:min-h-[44vh] max-[800px]:w-full max-[800px]:justify-start max-[800px]:gap-0 max-[800px]:p-[28px_22px_42px] max-[800px]:[clip-path:none] max-[800px]:bg-[radial-gradient(circle_at_78%_12%,rgba(59,130,246,0.3),transparent_28%),linear-gradient(155deg,#07111f_0%,#102a57_100%)] max-[800px]:overflow-hidden">
           <div className="relative z-10 pr-[12%] max-[800px]:pr-0 max-[800px]:pt-6">
             <p className="text-[#b7ccf6] font-display text-xs font-bold tracking-[0.18em] uppercase m-0 mb-2 max-w-[600px]">
               Internship Activity Tracker
@@ -147,11 +147,11 @@ export function CorpusLoginPage() {
           />
         </div>
 
-        <section className="absolute right-0 top-0 w-screen h-full z-10 flex flex-col items-center justify-center pl-[68vw] pr-[4vw] py-0 bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_40%,#f1f5f9_100%)] overflow-hidden max-[1024px]:min-[801px]:pl-[68vw] max-[1024px]:min-[801px]:pr-[4vw] max-[800px]:absolute max-[800px]:inset-0 max-[800px]:w-full max-[800px]:h-full max-[800px]:flex max-[800px]:items-center max-[800px]:justify-center max-[800px]:px-4 max-[800px]:py-0 max-[800px]:bg-transparent max-[800px]:overflow-hidden">
-          <div className="w-full max-w-[380px] flex flex-col gap-0 animate-[panel-fade-in_0.6s_cubic-bezier(0.16,1,0.3,1)_both] max-[800px]:max-w-[400px] max-[800px]:bg-slate-900/60 max-[800px]:backdrop-blur-xl max-[800px]:border max-[800px]:border-white/10 max-[800px]:shadow-[0_24px_48px_rgba(0,0,0,0.5)] max-[800px]:rounded-[24px] max-[800px]:p-7 max-[800px]:mx-auto">
+        <section className="absolute right-0 top-0 w-screen h-full z-10 flex flex-col items-center justify-center pl-[68vw] pr-[4vw] py-0 bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_40%,#f1f5f9_100%)] overflow-hidden max-[1024px]:min-[801px]:pl-[68vw] max-[1024px]:min-[801px]:pr-[4vw] max-[800px]:relative max-[800px]:w-full max-[800px]:h-auto max-[800px]:min-h-0 max-[800px]:flex max-[800px]:items-center max-[800px]:justify-start max-[800px]:px-5 max-[800px]:py-9 max-[800px]:bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] max-[800px]:overflow-visible">
+          <div className="w-full max-w-[380px] flex flex-col gap-0 animate-[panel-fade-in_0.6s_cubic-bezier(0.16,1,0.3,1)_both] max-[800px]:max-w-[440px] max-[800px]:py-0 max-[800px]:my-0 max-[800px]:mx-auto">
             {/* Mobile Brand Header */}
-            <div className="hidden max-[800px]:flex flex-col items-center text-center mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-[linear-gradient(135deg,#3b82f6_0%,#6366f1_100%)] flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-3 animate-[pulse-border_2s_infinite_ease-in-out]">
+            <div className="hidden flex-col items-center text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-[linear-gradient(135deg,#4f46e5_0%,#3b82f6_100%)] flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-3 animate-[pulse-border_2s_infinite_ease-in-out]">
                 <svg
                   className="text-white"
                   width="24"
@@ -168,23 +168,23 @@ export function CorpusLoginPage() {
                   <path d="M2 12l10 5 10-5" />
                 </svg>
               </div>
-              <span className="text-indigo-600 max-[800px]:text-blue-400 font-display text-[10px] font-bold tracking-[0.18em] uppercase">
+              <span className="text-indigo-600 font-display text-[10px] font-bold tracking-[0.18em] uppercase">
                 Swecha Internship
               </span>
-              <h1 className="text-[#0f172a] max-[800px]:text-white font-display text-base font-bold tracking-tight mt-0.5">
+              <h1 className="text-[#0f172a] font-display text-base font-bold tracking-tight mt-0.5">
                 Activity Tracker
               </h1>
             </div>
 
             <div
-              className="w-12 h-1 rounded-sm mb-5 bg-[linear-gradient(90deg,#6366f1,#818cf8,#a5b4fc)] bg-[size:200%_100%] animate-[accent-shimmer_3s_ease-in-out_infinite] max-[800px]:hidden"
+              className="w-12 h-1 rounded-sm mb-5 bg-[linear-gradient(90deg,#6366f1,#818cf8,#a5b4fc)] bg-[size:200%_100%] animate-[accent-shimmer_3s_ease-in-out_infinite] max-[800px]:mx-auto max-[800px]:mb-6"
               aria-hidden="true"
             />
             <div className="mb-7 max-[800px]:mb-5 max-[800px]:text-center">
-              <h2 className="text-[#0f172a] max-[800px]:text-white font-display text-[clamp(26px,2.5vw,32px)] font-bold tracking-[-0.03em] leading-tight m-0 mb-2 max-[800px]:text-2xl">
+              <h2 className="text-[#0f172a] font-display text-[clamp(26px,2.5vw,32px)] font-bold tracking-[-0.03em] leading-tight m-0 mb-2 max-[800px]:text-2xl">
                 Login
               </h2>
-              <p className="text-[#64748b] max-[800px]:text-slate-300 text-[14.5px] leading-relaxed m-0 max-[800px]:text-sm">
+              <p className="text-[#64748b] text-[14.5px] leading-relaxed m-0 max-[800px]:text-sm">
                 Sign in with your Corpus credentials to access the internship
                 workspace.
               </p>
@@ -204,18 +204,18 @@ export function CorpusLoginPage() {
                   }}
                   pattern="[0-9]{10}"
                   title="Please enter a 10-digit phone number"
-                  className="peer w-full min-h-[52px] bg-white max-[800px]:bg-slate-950/40 border-[1.5px] border-[#e2e8f0] max-[800px]:border-slate-800 rounded-xl text-[#0f172a] max-[800px]:text-white text-sm p-[18px_14px_6px_42px] transition-all duration-200 focus:bg-white max-[800px]:focus:bg-slate-950/60 focus:border-[#2563eb] max-[800px]:focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(37,99,235,0.12)] max-[800px]:focus:shadow-[0_0_0_4px_rgba(59,130,246,0.15)] focus:outline-none"
+                  className="peer w-full min-h-[52px] bg-white border-[1.5px] border-[#e2e8f0] rounded-xl text-[#0f172a] text-sm p-[18px_14px_6px_42px] transition-all duration-200 focus:bg-white focus:border-[#2563eb] focus:shadow-[0_0_0_4px_rgba(37,99,235,0.12)] focus:outline-none"
                   placeholder=" "
                   required
                 />
                 <label
-                  className="absolute left-[42px] top-1/2 -translate-y-1/2 text-sm font-medium text-[#64748b] max-[800px]:text-slate-400 pointer-events-none transition-all duration-200 origin-top-left peer-focus:top-[15px] peer-focus:scale-[0.8] peer-focus:text-[#2563eb] max-[800px]:peer-focus:text-blue-400 peer-focus:font-semibold peer-[:not(:placeholder-shown)]:top-[15px] peer-[:not(:placeholder-shown)]:scale-[0.8] peer-[:not(:placeholder-shown)]:text-[#64748b] max-[800px]:peer-[:not(:placeholder-shown)]:text-slate-400 peer-focus:peer-[:not(:placeholder-shown)]:text-[#2563eb] max-[800px]:peer-focus:peer-[:not(:placeholder-shown)]:text-blue-400"
+                  className="absolute left-[42px] top-1/2 -translate-y-1/2 text-sm font-medium text-[#64748b] pointer-events-none transition-all duration-200 origin-top-left peer-focus:top-[15px] peer-focus:scale-[0.8] peer-focus:text-[#2563eb] peer-focus:font-semibold peer-[:not(:placeholder-shown)]:top-[15px] peer-[:not(:placeholder-shown)]:scale-[0.8] peer-[:not(:placeholder-shown)]:text-[#64748b] peer-focus:peer-[:not(:placeholder-shown)]:text-[#2563eb]"
                   htmlFor="corpus-login-phone"
                 >
                   Phone Number
                 </label>
                 <svg
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] max-[800px]:text-slate-500 pointer-events-none transition-all duration-200 peer-focus:text-[#2563eb] max-[800px]:peer-focus:text-blue-400 peer-focus:scale-[1.15] peer-focus:[filter:drop-shadow(0_0_4px_rgba(37,99,235,0.25))]"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none transition-all duration-200 peer-focus:text-[#2563eb] peer-focus:scale-[1.15] peer-focus:[filter:drop-shadow(0_0_4px_rgba(37,99,235,0.25))]"
                   width="16"
                   height="16"
                   viewBox="0 0 24 24"
@@ -235,18 +235,18 @@ export function CorpusLoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="peer w-full min-h-[52px] bg-white max-[800px]:bg-slate-950/40 border-[1.5px] border-[#e2e8f0] max-[800px]:border-slate-800 rounded-xl text-[#0f172a] max-[800px]:text-white text-sm p-[18px_40px_6px_42px] transition-all duration-200 focus:bg-white max-[800px]:focus:bg-slate-950/60 focus:border-[#2563eb] max-[800px]:focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(37,99,235,0.12)] max-[800px]:focus:shadow-[0_0_0_4px_rgba(59,130,246,0.15)] focus:outline-none"
+                  className="peer w-full min-h-[52px] bg-white border-[1.5px] border-[#e2e8f0] rounded-xl text-[#0f172a] text-sm p-[18px_40px_6px_42px] transition-all duration-200 focus:bg-white focus:border-[#2563eb] focus:shadow-[0_0_0_4px_rgba(37,99,235,0.12)] focus:outline-none"
                   placeholder=" "
                   required
                 />
                 <label
-                  className="absolute left-[42px] top-1/2 -translate-y-1/2 text-sm font-medium text-[#64748b] max-[800px]:text-slate-400 pointer-events-none transition-all duration-200 origin-top-left peer-focus:top-[15px] peer-focus:scale-[0.8] peer-focus:text-[#2563eb] max-[800px]:peer-focus:text-blue-400 peer-focus:font-semibold peer-[:not(:placeholder-shown)]:top-[15px] peer-[:not(:placeholder-shown)]:scale-[0.8] peer-[:not(:placeholder-shown)]:text-[#64748b] max-[800px]:peer-[:not(:placeholder-shown)]:text-slate-400 peer-focus:peer-[:not(:placeholder-shown)]:text-[#2563eb] max-[800px]:peer-focus:peer-[:not(:placeholder-shown)]:text-blue-400"
+                  className="absolute left-[42px] top-1/2 -translate-y-1/2 text-sm font-medium text-[#64748b] pointer-events-none transition-all duration-200 origin-top-left peer-focus:top-[15px] peer-focus:scale-[0.8] peer-focus:text-[#2563eb] peer-focus:font-semibold peer-[:not(:placeholder-shown)]:top-[15px] peer-[:not(:placeholder-shown)]:scale-[0.8] peer-[:not(:placeholder-shown)]:text-[#64748b] peer-focus:peer-[:not(:placeholder-shown)]:text-[#2563eb]"
                   htmlFor="corpus-login-password"
                 >
                   Password
                 </label>
                 <svg
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] max-[800px]:text-slate-500 pointer-events-none transition-all duration-200 peer-focus:text-[#2563eb] max-[800px]:peer-focus:text-blue-400 peer-focus:scale-[1.15] peer-focus:[filter:drop-shadow(0_0_4px_rgba(37,99,235,0.25))]"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none transition-all duration-200 peer-focus:text-[#2563eb] peer-focus:scale-[1.15] peer-focus:[filter:drop-shadow(0_0_4px_rgba(37,99,235,0.25))]"
                   width="16"
                   height="16"
                   viewBox="0 0 24 24"
@@ -262,7 +262,7 @@ export function CorpusLoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] max-[800px]:text-slate-500 hover:text-[#0f172a] max-[800px]:hover:text-white transition-all duration-150 p-1 flex items-center justify-center rounded-lg hover:bg-slate-50 max-[800px]:hover:bg-slate-800/50 focus:outline-none focus:text-[#2563eb]"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#0f172a] transition-all duration-150 p-1 flex items-center justify-center rounded-lg hover:bg-slate-50 focus:outline-none focus:text-[#2563eb]"
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -310,7 +310,7 @@ export function CorpusLoginPage() {
             </form>
 
             <div className="mt-6">
-              <div className="h-[1px] bg-[linear-gradient(90deg,transparent,#e2e8f0,transparent)] max-[800px]:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] mb-4" />
+              <div className="h-[1px] bg-[linear-gradient(90deg,transparent,#e2e8f0,transparent)] mb-4" />
               <p className="text-[#94a3b8] text-xs leading-relaxed m-0 mb-3 text-center">
                 Corpus is the only required login to enter the product.
               </p>
@@ -332,11 +332,11 @@ export function CorpusLoginPage() {
             </div>
 
             {/* Mobile About Section Button & Toggle */}
-            <div className="hidden max-[800px]:block mt-7 w-full text-center">
+            <div className="hidden max-[800px]:block mt-10 w-full text-center">
               <button
                 type="button"
                 onClick={() => setShowAbout(!showAbout)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 border border-slate-200 max-[800px]:border-white/10 bg-white max-[800px]:bg-slate-800/40 hover:bg-slate-50 max-[800px]:hover:bg-slate-800/70 text-slate-600 max-[800px]:text-slate-300 rounded-xl text-xs font-semibold shadow-sm transition-all duration-150 active:scale-95 focus:outline-none"
+                className="inline-flex items-center gap-1.5 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 rounded-xl text-xs font-semibold shadow-sm transition-all duration-150 active:scale-95 focus:outline-none"
               >
                 <svg
                   width="14"
@@ -359,32 +359,32 @@ export function CorpusLoginPage() {
 
               {showAbout && (
                 <div className="flex flex-col gap-4 mt-6 text-left animate-[panel-fade-in_0.4s_cubic-bezier(0.16,1,0.3,1)_both]">
-                  <article className="p-5 rounded-2xl bg-white max-[800px]:bg-slate-950/40 border border-slate-100 max-[800px]:border-white/5 shadow-[0_2px_8px_rgba(15,23,42,0.02)]">
+                  <article className="p-5 rounded-2xl bg-white border border-slate-100 shadow-[0_2px_8px_rgba(15,23,42,0.02)]">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold text-indigo-600 max-[800px]:text-blue-400 bg-indigo-50/80 max-[800px]:bg-blue-500/10">
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold text-indigo-600 bg-indigo-50/80">
                         01
                       </span>
-                      <h4 className="text-slate-900 max-[800px]:text-white font-display font-bold text-sm">
+                      <h4 className="text-slate-900 font-display font-bold text-sm">
                         Standup Tracker
                       </h4>
                     </div>
-                    <p className="text-slate-500 max-[800px]:text-slate-400 text-xs leading-relaxed">
+                    <p className="text-slate-500 text-xs leading-relaxed">
                       Track standup uploads, verify team completion, review
                       audio evidence, and manage daily status from one
                       operational surface.
                     </p>
                   </article>
 
-                  <article className="p-5 rounded-2xl bg-white max-[800px]:bg-slate-950/40 border border-slate-100 max-[800px]:border-white/5 shadow-[0_2px_8px_rgba(15,23,42,0.02)]">
+                  <article className="p-5 rounded-2xl bg-white border border-slate-100 shadow-[0_2px_8px_rgba(15,23,42,0.02)]">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold text-indigo-600 max-[800px]:text-blue-400 bg-indigo-50/80 max-[800px]:bg-blue-500/10">
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold text-indigo-600 bg-indigo-50/80">
                         02
                       </span>
-                      <h4 className="text-slate-900 max-[800px]:text-white font-display font-bold text-sm">
+                      <h4 className="text-slate-900 font-display font-bold text-sm">
                         Git Compliance Checker
                       </h4>
                     </div>
-                    <p className="text-slate-500 max-[800px]:text-slate-400 text-xs leading-relaxed">
+                    <p className="text-slate-500 text-xs leading-relaxed">
                       Add GitLab access after login to inspect developer
                       activity, weekly trends, team rankings, batch analytics,
                       and roster data.

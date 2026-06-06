@@ -75,7 +75,7 @@ const TeamStatusRing: React.FC<TeamStatusRingProps> = ({
   }, [normalizedStatuses]);
 
   return (
-    <article className="team-status-card group grid gap-2.5 p-3">
+    <article className="team-status-card group grid gap-4 p-5 sm:p-6">
       <div
         className="h-[min(192px,50vw)] w-[min(192px,50vw)] p-[clamp(11px,1.2vw,15px)] justify-self-center rounded-full"
         style={

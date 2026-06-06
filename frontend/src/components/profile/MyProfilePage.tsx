@@ -111,7 +111,7 @@ export function MyProfilePage() {
       </div>
 
       {/* Info sections */}
-      <div className="grid gap-4">
+      <div className="grid gap-5 sm:gap-6 md:gap-4">
         {/* Account */}
         <section className="bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 backdrop-blur-xl rounded-[14px] p-5 sm:p-6 shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
           <h4 className="m-0 mb-3.5 text-[13px] font-bold uppercase tracking-[0.08em] text-slate-400 dark:text-slate-500">

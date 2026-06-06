@@ -236,7 +236,7 @@ export const TeamList: React.FC<TeamListProps> = ({
   }
 
   return (
-    <section className="grid gap-4">
+    <section className="grid gap-5 sm:gap-6 md:gap-4">
       {teams.map((team) => {
         const state = getState(team.teamId);
         const filtered = getFilteredInterns(team.teamId);
@@ -470,7 +470,7 @@ export const TeamList: React.FC<TeamListProps> = ({
               </div>
             ) : null}
 
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4 mt-4">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-5 sm:gap-6 md:gap-4 mt-4">
               {team.interns.map((intern) => (
                 <InternCard
                   key={intern.internId}

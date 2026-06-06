@@ -125,7 +125,7 @@ export const InternCard: React.FC<InternCardProps> = ({
   };
 
   return (
-    <article className="p-4 relative overflow-hidden bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 rounded-2xl backdrop-blur-xl shadow-md shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-lg transition-all duration-300 grid gap-3">
+    <article className="p-5 sm:p-6 relative overflow-hidden bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 rounded-2xl backdrop-blur-xl shadow-md shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-lg transition-all duration-300 grid gap-4">
       <div className="flex justify-between items-start">
         <div className="grid gap-1">
           <div className="text-slate-800 dark:text-slate-100 text-sm font-semibold flex flex-wrap items-center gap-2">

@@ -147,9 +147,8 @@ export function BatchesPage() {
 
       {isAdmin && isFormOpen && (
         <div
-          className={glassCard}
+          className={`${glassCard} p-4 sm:p-5 md:p-[22px_26px]`}
           style={{
-            padding: '22px 26px',
             borderColor: 'rgba(65, 120, 255, 0.35)',
           }}
         >
@@ -263,9 +262,8 @@ export function BatchesPage() {
 
       {/* ── Batch cards grid ──────────────────────────── */}
       <div
+        className="grid gap-5 sm:gap-6 md:gap-4"
         style={{
-          display: 'grid',
-          gap: 14,
           gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
         }}
       >
@@ -275,8 +273,7 @@ export function BatchesPage() {
           return (
             <article
               key={batch.id}
-              className={blueGlassCard}
-              style={{ padding: '20px 24px' }}
+              className={`${blueGlassCard} p-4 sm:p-5 md:p-[20px_24px]`}
             >
               {isEditing ? (
                 /* ── Edit form ── */

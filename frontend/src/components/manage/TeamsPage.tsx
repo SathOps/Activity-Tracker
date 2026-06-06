@@ -140,7 +140,7 @@ export function TeamsPage() {
   return (
     <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
       <div className="space-y-6">
-        <div className={glassCard} style={{ padding: '24px 28px' }}>
+        <div className={`${glassCard} p-4 sm:p-5 md:p-[24px_28px]`}>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h2 className="m-0 text-lg font-bold font-display text-slate-900 dark:text-slate-100">
@@ -215,8 +215,7 @@ export function TeamsPage() {
             return (
               <article
                 key={team.id}
-                className={blueGlassCard}
-                style={{ padding: '22px 24px' }}
+                className={`${blueGlassCard} p-4 sm:p-5 md:p-[22px_24px]`}
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
@@ -302,7 +301,7 @@ export function TeamsPage() {
                 </div>
 
                 {isExpanded ? (
-                  <div className="mt-5 rounded-xl border border-slate-100 bg-slate-50 p-4">
+                  <div className="mt-5 rounded-xl border border-slate-100 bg-slate-50 p-3 sm:p-4">
                     {teamDetailQuery.isLoading ? (
                       <Spinner label="Loading team detail…" />
                     ) : teamDetailQuery.isError ? (
@@ -312,7 +311,7 @@ export function TeamsPage() {
                     ) : selectedTeamDetail ? (
                       <div className="space-y-4">
                         <div className="grid gap-3 md:grid-cols-3">
-                          <div className="rounded-lg bg-white px-4 py-3">
+                          <div className="rounded-lg bg-white px-3 py-2.5 sm:px-4 sm:py-3">
                             <p className="text-xs uppercase tracking-wide text-slate-400">
                               Active users
                             </p>
@@ -320,7 +319,7 @@ export function TeamsPage() {
                               {selectedTeamDetail.member_count}
                             </p>
                           </div>
-                          <div className="rounded-lg bg-white px-4 py-3">
+                          <div className="rounded-lg bg-white px-3 py-2.5 sm:px-4 sm:py-3">
                             <p className="text-xs uppercase tracking-wide text-slate-400">
                               Started
                             </p>
@@ -328,7 +327,7 @@ export function TeamsPage() {
                               {selectedTeamDetail.start_date || 'Not set'}
                             </p>
                           </div>
-                          <div className="rounded-lg bg-white px-4 py-3">
+                          <div className="rounded-lg bg-white px-3 py-2.5 sm:px-4 sm:py-3">
                             <p className="text-xs uppercase tracking-wide text-slate-400">
                               Closed
                             </p>
@@ -338,7 +337,7 @@ export function TeamsPage() {
                           </div>
                         </div>
 
-                        <div className="rounded-lg bg-white p-4">
+                        <div className="rounded-lg bg-white p-3 sm:p-4">
                           <div className="flex items-center justify-between gap-4">
                             <div>
                               <h4 className="text-sm font-semibold text-slate-900">
@@ -391,7 +390,7 @@ export function TeamsPage() {
                             {selectedTeamDetail.users.map((appUser) => (
                               <div
                                 key={appUser.id}
-                                className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3"
+                                className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 sm:px-4 sm:py-3"
                               >
                                 <div>
                                   <p className="text-sm font-medium text-slate-900">
@@ -429,10 +428,7 @@ export function TeamsPage() {
         </div>
       </div>
 
-      <aside
-        className={glassCard}
-        style={{ padding: '24px 28px', alignSelf: 'start' }}
-      >
+      <aside className={`${glassCard} p-4 sm:p-5 md:p-[24px_28px] self-start`}>
         <h2 className="m-0 text-lg font-bold font-display text-slate-900 dark:text-slate-100">
           Team operations
         </h2>

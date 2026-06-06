@@ -134,7 +134,7 @@ export function MembersPage() {
     <section className="space-y-6">
       {isAdmin ? (
         <div className="grid gap-6 xl:grid-cols-2">
-          <div className={glassCard} style={{ padding: '24px 28px' }}>
+          <div className={`${glassCard} p-4 sm:p-5 md:p-[24px_28px]`}>
             <h2 className="m-0 text-lg font-bold font-display text-slate-900 dark:text-slate-100">
               Add user
             </h2>
@@ -238,7 +238,7 @@ export function MembersPage() {
             </button>
           </div>
 
-          <div className={glassCard} style={{ padding: '24px 28px' }}>
+          <div className={`${glassCard} p-4 sm:p-5 md:p-[24px_28px]`}>
             <h2 className="m-0 text-lg font-bold font-display text-slate-900 dark:text-slate-100">
               CSV import
             </h2>
@@ -298,7 +298,7 @@ export function MembersPage() {
         </div>
       ) : null}
 
-      <div className={blueGlassCard} style={{ padding: '24px 28px' }}>
+      <div className={`${blueGlassCard} p-4 sm:p-5 md:p-[24px_28px]`}>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 className="m-0 text-lg font-bold font-display text-slate-900 dark:text-slate-100">

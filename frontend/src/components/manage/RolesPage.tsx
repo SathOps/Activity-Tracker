@@ -75,7 +75,7 @@ export function RolesPage() {
 
   return (
     <section className="space-y-6">
-      <div className={glassCard} style={{ padding: '24px 28px' }}>
+      <div className={`${glassCard} p-4 sm:p-5 md:p-[24px_28px]`}>
         <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 m-0">
           Role assignment
         </h2>
@@ -129,12 +129,11 @@ export function RolesPage() {
         </div>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-5 sm:gap-6 md:gap-4">
         {filteredUsers.map((appUser) => (
           <article
             key={appUser.id}
-            className={blueGlassCard}
-            style={{ padding: '24px 28px' }}
+            className={`${blueGlassCard} p-4 sm:p-5 md:p-[24px_28px]`}
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>

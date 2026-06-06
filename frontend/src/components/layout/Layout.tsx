@@ -189,10 +189,26 @@ export function Layout({ children }: Props) {
         <div className="fixed inset-0 md:left-[300px] pointer-events-none bg-[radial-gradient(rgba(148,163,184,0.18)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:24px_24px] z-0" />
 
         <div
-          className={`relative z-10 px-4 py-6 md:px-8 md:py-6 max-w-[1200px] mx-auto min-w-0 ${isStandupMode ? 'pb-24 md:pb-6' : ''}`}
+          className={`relative z-10 px-4 pt-3 pb-6 md:px-8 md:py-6 max-w-[1200px] mx-auto min-w-0 ${isStandupMode ? 'pb-24 md:pb-6' : ''}`}
         >
+          {/* Mobile top controls bar (Outside of card) */}
+          <div className="flex items-center justify-between md:hidden w-full mb-3 px-1">
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/40 rounded-xl transition-all border border-slate-200 dark:border-slate-800/40 flex items-center justify-center shrink-0 bg-transparent"
+              aria-label="Open Sidebar"
+            >
+              <Menu size={20} />
+            </button>
+            <div className="flex items-center gap-3">
+              <LanguageSwitcher />
+              <ThemeToggle />
+            </div>
+          </div>
+
           {/* Glass header */}
-          <div className="relative mb-4 md:mb-7">
+          <div className="relative mb-3 md:mb-7">
             {/* Glow effect blob behind card */}
             <div
               className="absolute -inset-4 pointer-events-none z-0 blur-[30px] rounded-[30px]"
@@ -223,23 +239,7 @@ export function Layout({ children }: Props) {
                 }}
               />
 
-              <div className="p-4 md:p-[20px_28px] flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                {/* Mobile top controls bar */}
-                <div className="flex items-center justify-between md:hidden w-full pb-3 border-b border-[rgba(148,163,184,0.08)]">
-                  <button
-                    type="button"
-                    onClick={() => setIsSidebarOpen(true)}
-                    className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/40 rounded-xl transition-all border border-slate-800/40 flex items-center justify-center shrink-0"
-                    aria-label="Open Sidebar"
-                  >
-                    <Menu size={20} />
-                  </button>
-                  <div className="flex items-center gap-3">
-                    <LanguageSwitcher />
-                    <ThemeToggle />
-                  </div>
-                </div>
-
+              <div className="p-4 md:p-[20px_28px] flex items-center justify-between gap-4">
                 {/* Title block */}
                 <div className="min-w-0">
                   <p className="m-0 text-[10px] md:text-[11px] font-bold uppercase tracking-widest bg-gradient-to-r from-indigo-500 to-blue-500 bg-clip-text text-transparent font-display">
@@ -248,7 +248,7 @@ export function Layout({ children }: Props) {
                   <h1 className="m-0 mt-1 text-lg md:text-[26px] font-extrabold font-display text-slate-900 dark:text-slate-50 tracking-tight leading-tight">
                     {modeMeta.title}
                   </h1>
-                  <p className="m-0 mt-1.5 text-xs md:text-sm text-slate-500 dark:text-slate-400 max-w-[60ch] leading-relaxed hidden sm:block">
+                  <p className="m-0 mt-1.5 text-xs md:text-sm text-slate-500 dark:text-slate-400 max-w-[60ch] leading-relaxed">
                     {modeMeta.description}
                   </p>
                 </div>
