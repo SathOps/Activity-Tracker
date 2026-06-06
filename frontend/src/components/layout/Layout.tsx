@@ -478,9 +478,47 @@ export function Layout({ children }: Props) {
 
             {/* Mobile Bottom Nav */}
             <div className="md:hidden">
-              <MobileBottomNav
-                onRecordClick={() => setIsRecordModalOpen(true)}
-              />
+              {isIslandCollapsed ? (
+                /* Collapsed Mobile Nav */
+                <button
+                  type="button"
+                  className="fixed bottom-6 right-6 z-50 w-12 h-12 pointer-events-auto bg-transparent border-none p-0"
+                  onClick={() => setIsIslandCollapsed(false)}
+                  title="Expand Panel"
+                >
+                  <div className="w-full h-full rounded-full bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-xl border border-slate-800/60 dark:border-slate-800/40 shadow-[0_4px_20px_rgba(0,0,0,0.35)] flex items-center justify-center cursor-pointer animate-bounce">
+                    <ChevronUp
+                      size={24}
+                      className="text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                    />
+                  </div>
+                </button>
+              ) : (
+                /* Expanded Mobile Nav with Collapse Button */
+                <div className="relative">
+                  {/* Absolutely Positioned Collapse Arrow Wrapper for Mobile (sits above the bottom nav) */}
+                  <div className="fixed bottom-[84px] right-6 z-50 w-12 h-8 flex items-center justify-center pointer-events-auto">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsIslandCollapsed(true);
+                      }}
+                      className="text-white cursor-pointer border-none bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-md rounded-full hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center w-8 h-8 shadow-[0_2px_10px_rgba(0,0,0,0.25)] border border-slate-800/60 dark:border-slate-800/40"
+                      title="Collapse Panel"
+                    >
+                      <ChevronDown
+                        size={18}
+                        strokeWidth={2.5}
+                        className="text-blue-500 drop-shadow-[0_0_6px_rgba(59,130,246,0.4)]"
+                      />
+                    </button>
+                  </div>
+                  <MobileBottomNav
+                    onRecordClick={() => setIsRecordModalOpen(true)}
+                  />
+                </div>
+              )}
             </div>
           </>
         )}
