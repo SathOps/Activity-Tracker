@@ -254,7 +254,7 @@ export const TeamList: React.FC<TeamListProps> = ({
 
         return (
           <article
-            className="p-6 relative overflow-hidden bg-white/45 dark:bg-slate-900/45 border border-blue-200/80 dark:border-blue-500/25 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/50 dark:hover:border-blue-400/40 hover:shadow-xl transition-all duration-300"
+            className="p-6 relative overflow-hidden bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-xl transition-all duration-300"
             key={team.teamId}
           >
             {!isIntern && (
