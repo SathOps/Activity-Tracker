@@ -230,6 +230,15 @@ body {
   }
 }
 
+@keyframes slit-glow-shimmer {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 0% 200%;
+  }
+}
+
 /* ── Custom Utilities for Git Connection Card ──────────────────────── */
 
 .git-connect-card {

@@ -84,10 +84,11 @@ function UserSearchBox({
   const showDropdown = open && debouncedQuery.length >= 1;
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', flex: 1 }}>
+    <div ref={containerRef} className="relative flex-1">
       <div className="flex gap-3">
-        <div style={{ position: 'relative', flex: 1 }}>
+        <div className="relative flex-1">
           <input
+            id="user-search-input"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -95,17 +96,10 @@ function UserSearchBox({
             }}
             onFocus={() => setOpen(true)}
             placeholder="Search by name or corpus username…"
-            className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            className="w-full px-4 py-2.5 bg-white/20 dark:bg-slate-950/30 border border-slate-300/50 dark:border-white/10 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-450 dark:placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:focus:ring-blue-400/40 hover:border-blue-500/40 transition-all duration-200 backdrop-blur-md"
           />
           {isLoading && (
-            <span
-              style={{
-                position: 'absolute',
-                right: 12,
-                top: '50%',
-                transform: 'translateY(-50%)',
-              }}
-            >
+            <span className="absolute right-3 top-1/2 -translate-y-1/2">
               <Spinner size="sm" label="" />
             </span>
           )}
@@ -113,21 +107,7 @@ function UserSearchBox({
       </div>
 
       {showDropdown && (results ?? []).length > 0 && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 'calc(100% + 4px)',
-            left: 0,
-            right: 0,
-            background: '#fff',
-            border: '1px solid #e2e8f0',
-            borderRadius: 10,
-            boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-            zIndex: 50,
-            maxHeight: 280,
-            overflowY: 'auto',
-          }}
-        >
+        <div className="absolute top-[calc(100%+6px)] left-0 right-0 z-50 max-h-[280px] overflow-y-auto p-2 bg-white/75 dark:bg-slate-900/75 border border-slate-200/50 dark:border-white/5 rounded-xl shadow-xl shadow-black/10 dark:shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl flex flex-col gap-1">
           {results!.map((appUser) => {
             const hasGitlab = !!appUser.gitlab_username?.trim();
             return (
@@ -136,35 +116,17 @@ function UserSearchBox({
                 type="button"
                 onClick={() => handleSelect(appUser)}
                 disabled={!hasGitlab}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '10px 14px',
-                  background: 'none',
-                  border: 'none',
-                  borderBottom: '1px solid #f1f5f9',
-                  cursor: hasGitlab ? 'pointer' : 'not-allowed',
-                  opacity: hasGitlab ? 1 : 0.45,
-                  textAlign: 'left',
-                }}
-                className="hover:bg-slate-50"
+                className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-left transition-colors border-none bg-transparent ${
+                  hasGitlab
+                    ? 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 text-slate-850 dark:text-slate-200'
+                    : 'cursor-not-allowed opacity-45'
+                }`}
               >
                 {/* Avatar */}
                 <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
                   style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
                     background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: '#fff',
-                    flexShrink: 0,
                   }}
                 >
                   {(appUser.name ||
@@ -172,21 +134,11 @@ function UserSearchBox({
                 </div>
 
                 {/* Info */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: '#1e293b',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
+                <div className="flex-1 min-w-0">
+                  <p className="m-0 text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
                     {appUser.name || appUser.corpus_username}
                   </p>
-                  <p style={{ margin: 0, fontSize: 11, color: '#94a3b8' }}>
+                  <p className="m-0 text-[11px] text-slate-500 dark:text-slate-400 truncate">
                     @{appUser.corpus_username}
                     {appUser.gitlab_username
                       ? ` · GitLab: ${appUser.gitlab_username}`
@@ -196,26 +148,13 @@ function UserSearchBox({
 
                 {/* Role badge */}
                 <span
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    padding: '2px 7px',
-                    borderRadius: 99,
-                    background:
-                      appUser.role === 'admin'
-                        ? '#fee2e2'
-                        : appUser.role === 'mentor'
-                          ? '#dbeafe'
-                          : '#d1fae5',
-                    color:
-                      appUser.role === 'admin'
-                        ? '#991b1b'
-                        : appUser.role === 'mentor'
-                          ? '#1e40af'
-                          : '#065f46',
-                    flexShrink: 0,
-                  }}
+                  className={`text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0 ${
+                    appUser.role === 'admin'
+                      ? 'bg-red-500/10 text-red-650 dark:text-red-400'
+                      : appUser.role === 'mentor'
+                        ? 'bg-blue-500/10 text-blue-650 dark:text-blue-400'
+                        : 'bg-emerald-500/10 text-emerald-650 dark:text-emerald-450'
+                  }`}
                 >
                   {appUser.role ?? 'intern'}
                 </span>
@@ -229,22 +168,7 @@ function UserSearchBox({
         !isLoading &&
         debouncedQuery.length >= 1 &&
         (results ?? []).length === 0 && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 'calc(100% + 4px)',
-              left: 0,
-              right: 0,
-              background: '#fff',
-              border: '1px solid #e2e8f0',
-              borderRadius: 10,
-              boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-              zIndex: 50,
-              padding: '12px 16px',
-              fontSize: 13,
-              color: '#94a3b8',
-            }}
-          >
+          <div className="absolute top-[calc(100%+6px)] left-0 right-0 z-50 p-4 bg-white/75 dark:bg-slate-900/75 border border-slate-200/50 dark:border-white/5 rounded-xl shadow-xl shadow-black/10 dark:shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl text-sm text-slate-500 dark:text-slate-400">
             No users found for &quot;{debouncedQuery}&quot;
           </div>
         )}

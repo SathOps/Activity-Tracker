@@ -69,12 +69,7 @@ export function CorpusLoginPage() {
         aria-hidden="true"
       />
       <div className="relative w-screen h-screen overflow-hidden z-10 max-[800px]:flex max-[800px]:flex-col max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:w-full max-[800px]:overflow-visible">
-        <section className="absolute left-0 top-0 w-[65vw] h-full z-20 flex flex-col justify-center gap-12 p-[60px_48px] text-[#f8fbff] [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)] bg-[linear-gradient(145deg,rgba(11,18,32,0.98),rgba(17,45,92,0.96)),linear-gradient(180deg,rgba(255,255,255,0.05),transparent)] overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1024px]:min-[801px]:w-[65vw] max-[1024px]:min-[801px]:p-[50px_36px] max-[800px]:hidden">
-          <div
-            className="absolute -right-20 -top-[60px] w-80 h-80 pointer-events-none bg-[radial-gradient(circle,rgba(96,165,250,0.22),transparent_60%)]"
-            aria-hidden="true"
-          />
-
+        <section className="absolute left-0 top-0 w-[65vw] h-full z-20 flex flex-col justify-center gap-12 p-[60px_48px] text-[#f8fbff] [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)] bg-[linear-gradient(145deg,#0b1220,#112d5c)] overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1024px]:min-[801px]:w-[65vw] max-[1024px]:min-[801px]:p-[50px_36px] max-[800px]:hidden">
           <div className="relative z-10 pr-[12%] max-[800px]:pr-0">
             <p className="text-[#b7ccf6] font-display text-xs font-bold tracking-[0.18em] uppercase m-0 mb-2 max-w-[600px]">
               Internship Activity Tracker
@@ -121,6 +116,25 @@ export function CorpusLoginPage() {
             </div>
           </div>
         </section>
+
+        {/* Glowing border slit separator */}
+        <div
+          className="absolute left-0 top-0 w-screen h-full pointer-events-none max-[800px]:hidden"
+          style={{
+            zIndex: 30,
+            filter:
+              'drop-shadow(0 0 6px rgba(59, 130, 246, 0.95)) drop-shadow(0 0 15px rgba(14, 165, 233, 0.65))',
+          }}
+          aria-hidden="true"
+        >
+          <div
+            className="w-full h-full bg-[linear-gradient(to_bottom,#1e40af_0%,#3b82f6_20%,#0ea5e9_40%,#60a5fa_50%,#0ea5e9_60%,#3b82f6_80%,#1e40af_100%)] bg-[size:100%_200%] animate-[slit-glow-shimmer_4s_linear_infinite]"
+            style={{
+              clipPath:
+                'polygon(calc(65vw - 3px) 0, calc(65vw + 3px) 0, calc(52vw + 3px) 100%, calc(52vw - 3px) 100%)',
+            }}
+          />
+        </div>
 
         <section className="absolute right-0 top-0 w-screen h-full z-10 flex flex-col items-center justify-center pl-[68vw] pr-[4vw] py-0 bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_40%,#f1f5f9_100%)] overflow-hidden max-[1024px]:min-[801px]:pl-[68vw] max-[1024px]:min-[801px]:pr-[4vw] max-[800px]:relative max-[800px]:w-full max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:flex max-[800px]:items-center max-[800px]:justify-start max-[800px]:pt-12 max-[800px]:pb-16 max-[800px]:px-6 max-[800px]:bg-[linear-gradient(to_bottom,#eff2f9_0%,#f8fafc_15%,#f8fafc_100%)] max-[800px]:overflow-y-auto">
           <div className="w-full max-w-[380px] flex flex-col gap-0 animate-[panel-fade-in_0.6s_cubic-bezier(0.16,1,0.3,1)_both] max-[800px]:max-w-[440px] max-[800px]:py-8 max-[800px]:my-auto max-[800px]:mx-auto">

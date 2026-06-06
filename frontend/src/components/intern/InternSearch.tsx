@@ -271,7 +271,7 @@ const InternSearch: React.FC<InternSearchProps> = ({
         <div className="relative w-full">
           <input
             id="intern-search-input"
-            className="w-full px-4 py-2.5 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200"
+            className="w-full px-4 py-2.5 bg-white/20 dark:bg-slate-950/30 border border-slate-300/50 dark:border-white/10 rounded-xl text-slate-800 dark:text-slate-100 placeholder-slate-450 dark:placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:focus:ring-blue-400/40 hover:border-blue-500/40 transition-all duration-200 backdrop-blur-md"
             aria-label={t('interns.searchByNameAria')}
             type="text"
             placeholder={t('interns.searchByNamePlaceholder')}
@@ -288,14 +288,14 @@ const InternSearch: React.FC<InternSearchProps> = ({
                 inlineResults
                   ? 'static shadow-none mt-3 max-h-80'
                   : 'absolute top-[calc(100%+8px)] left-0 shadow-xl max-h-[300px]'
-              } z-50 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-y-auto p-2 m-0 flex flex-col gap-1 list-none`}
+              } z-50 w-full p-2 m-0 bg-white/75 dark:bg-slate-900/75 border border-slate-200/50 dark:border-white/5 rounded-xl shadow-xl shadow-black/10 dark:shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl flex flex-col gap-1 list-none overflow-y-auto`}
             >
               {isLoading ? (
-                <li className="border border-dashed border-slate-300 dark:border-slate-800 rounded-xl text-slate-500 dark:text-slate-400 text-sm m-0 px-4 py-5 text-center bg-slate-50 dark:bg-slate-950/20">
+                <li className="border border-dashed border-slate-300/50 dark:border-white/10 rounded-xl text-slate-500 dark:text-slate-400 text-sm m-0 px-4 py-5 text-center bg-white/20 dark:bg-slate-950/10">
                   {t('interns.searching')}
                 </li>
               ) : searchResults.length === 0 ? (
-                <li className="border border-dashed border-slate-300 dark:border-slate-800 rounded-xl text-slate-500 dark:text-slate-400 text-sm m-0 px-4 py-5 text-center bg-slate-50 dark:bg-slate-950/20">
+                <li className="border border-dashed border-slate-300/50 dark:border-white/10 rounded-xl text-slate-500 dark:text-slate-400 text-sm m-0 px-4 py-5 text-center bg-white/20 dark:bg-slate-950/10">
                   {t('interns.noInternsFound')}
                 </li>
               ) : (
@@ -310,7 +310,7 @@ const InternSearch: React.FC<InternSearchProps> = ({
                       className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition-colors focus:outline-none ${
                         added
                           ? 'opacity-60 cursor-not-allowed hover:bg-transparent'
-                          : 'cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 focus:bg-slate-100 dark:focus:bg-slate-800'
+                          : 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/5'
                       }`}
                       tabIndex={added ? -1 : 0}
                       onMouseDown={(e) => e.preventDefault()}
@@ -363,13 +363,13 @@ const InternSearch: React.FC<InternSearchProps> = ({
                         ) : null}
                       </div>
                       {added ? (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full ml-auto whitespace-nowrap">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 bg-white/20 dark:bg-white/5 px-2 py-1 rounded-full ml-auto whitespace-nowrap">
                           {t('interns.added')}
                         </span>
                       ) : (
                         <button
                           type="button"
-                          className="text-xs ml-auto px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 font-semibold border border-slate-300/80 dark:border-slate-700 rounded-lg transition-colors cursor-pointer whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50"
+                          className="text-xs ml-auto px-3 py-1 bg-white/30 hover:bg-white/50 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-slate-100 font-semibold border border-slate-300/40 dark:border-white/5 rounded-lg transition-colors cursor-pointer whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:focus:ring-blue-400/40"
                           onMouseDown={(e) => e.preventDefault()}
                           onClick={(e) => {
                             e.stopPropagation();
