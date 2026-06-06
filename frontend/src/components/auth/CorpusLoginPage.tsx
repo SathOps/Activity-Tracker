@@ -128,6 +128,24 @@ export function CorpusLoginPage() {
           aria-hidden="true"
         />
 
+        {/* Shadow depth cast behind the sidebar/glow onto the right panel */}
+        <div
+          className="absolute left-0 top-0 w-screen h-full pointer-events-none max-[800px]:hidden"
+          style={{
+            zIndex: 15,
+            filter:
+              'drop-shadow(3px 0 6px rgba(0, 0, 0, 0.35)) drop-shadow(8px 0 16px rgba(0, 0, 0, 0.15))',
+          }}
+          aria-hidden="true"
+        >
+          <div
+            className="w-full h-full bg-black"
+            style={{
+              clipPath: 'polygon(0 0, 65vw 0, 52vw 100%, 0 100%)',
+            }}
+          />
+        </div>
+
         {/* Glowing border slit separator */}
         <div
           className="absolute left-0 top-0 w-screen h-full pointer-events-none max-[800px]:hidden"
