@@ -196,15 +196,14 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           left-0
           md:relative
           md:translate-x-0
-          bg-white/45
-          dark:bg-slate-900/45
+          bg-white/60
+          dark:bg-[#0b0f19]/70
           border-r
           border-white/20
           dark:border-white/5
-          backdrop-blur-xl
-          shadow-xl
-          shadow-slate-200/50
-          dark:shadow-[8px_0_32px_rgba(0,0,0,0.35)]
+          backdrop-blur-[24px]
+          shadow-[15px_0_40px_rgba(15,23,42,0.06)]
+          dark:shadow-[18px_0_48px_rgba(0,0,0,0.55)]
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >

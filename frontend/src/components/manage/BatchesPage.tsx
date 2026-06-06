@@ -34,6 +34,13 @@ const glassCard =
   'transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 ' +
   'hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-xl dark:hover:shadow-blue-900/10';
 
+const blueGlassCard =
+  'relative z-10 rounded-[24px] backdrop-blur-xl ' +
+  'bg-white/45 dark:bg-slate-900/45 border border-blue-200/80 dark:border-blue-500/25 ' +
+  'shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.37)] ' +
+  'transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 ' +
+  'hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/50 dark:hover:border-blue-400/40 hover:shadow-xl dark:hover:shadow-blue-900/10';
+
 export function BatchesPage() {
   const qc = useQueryClient();
   const { user } = useAuth();
@@ -119,9 +126,8 @@ export function BatchesPage() {
               flex inline-flex items-center gap-1.5
               cursor-pointer transition-all duration-200
               backdrop-blur-md
-              bg-blue-600/20 text-blue-300 border border-blue-500/35
-              shadow-[0_0_12px_rgba(59,130,246,0.15)]
-              hover:bg-blue-500/30 hover:border-blue-500/65 hover:text-blue-100
+              bg-slate-500/5 dark:bg-white/5 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300
+              hover:bg-slate-500/10 dark:hover:bg-white/10 hover:border-slate-400 dark:hover:border-slate-700
             "
           >
             {isFormOpen ? (
@@ -243,18 +249,10 @@ export function BatchesPage() {
                 text-sm font-semibold whitespace-nowrap
                 flex inline-flex items-center justify-center gap-1.5
                 cursor-pointer transition-all duration-200
-                backdrop-blur-md
-                bg-blue-600/20 text-blue-300 border border-blue-500/35
-                shadow-[0_0_12px_rgba(59,130,246,0.15)]
-                hover:bg-blue-500/30 hover:border-blue-500/65 hover:text-blue-100
-                disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-white/5 disabled:border-blue-500/10 disabled:text-white/30 disabled:shadow-none
-                w-full md:w-auto
+                bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white shadow-sm
+                disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/5 disabled:text-white/30
+                w-full md:w-auto border-none outline-none
               "
-              style={
-                !draft.name.trim() || createMutation.isPending
-                  ? { borderColor: 'rgba(65, 120, 255, 0.15)' }
-                  : undefined
-              }
             >
               <Plus size={14} />
               Add batch
@@ -277,7 +275,7 @@ export function BatchesPage() {
           return (
             <article
               key={batch.id}
-              className={glassCard}
+              className={blueGlassCard}
               style={{ padding: '20px 24px' }}
             >
               {isEditing ? (

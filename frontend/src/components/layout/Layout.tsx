@@ -150,7 +150,17 @@ export function Layout({ children }: Props) {
   }, [themeMode]);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden relative">
+      {/* Ambient background glow specifically behind the sidebar to add color depth */}
+      <div
+        className="
+          fixed inset-y-0 left-0 w-[300px] pointer-events-none z-0 hidden md:block
+          bg-[radial-gradient(circle_at_100px_35%,rgba(99,102,241,0.06)_0%,rgba(59,130,246,0.02)_60%,transparent_100%)]
+          dark:bg-[radial-gradient(circle_at_100px_35%,rgba(99,102,241,0.15)_0%,rgba(59,130,246,0.05)_60%,transparent_100%)]
+          blur-[20px]
+        "
+        aria-hidden="true"
+      />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <main className="flex-1 overflow-y-auto relative bg-slate-50 dark:bg-[#090e1a] transition-colors duration-300">
         {/* Animated background glow effect layers */}

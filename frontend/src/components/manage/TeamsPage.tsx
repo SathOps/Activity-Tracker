@@ -24,6 +24,13 @@ const glassCard =
   'transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 ' +
   'hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-xl dark:hover:shadow-blue-900/10';
 
+const blueGlassCard =
+  'relative z-10 rounded-[24px] backdrop-blur-xl ' +
+  'bg-white/45 dark:bg-slate-900/45 border border-blue-200/80 dark:border-blue-500/25 ' +
+  'shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.37)] ' +
+  'transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 ' +
+  'hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/50 dark:hover:border-blue-400/40 hover:shadow-xl dark:hover:shadow-blue-900/10';
+
 export function TeamsPage() {
   const qc = useQueryClient();
   const { user } = useAuth();
@@ -241,7 +248,7 @@ export function TeamsPage() {
             return (
               <article
                 key={team.id}
-                className={glassCard}
+                className={blueGlassCard}
                 style={{ padding: '22px 24px' }}
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
