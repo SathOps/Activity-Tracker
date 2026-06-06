@@ -103,23 +103,7 @@ function UserAvatar({ name }: { name: string }) {
     .toUpperCase()
     .slice(0, 2);
   return (
-    <div
-      style={{
-        width: 36,
-        height: 36,
-        borderRadius: '50%',
-        background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: 13,
-        fontWeight: 700,
-        color: '#fff',
-        letterSpacing: '0.02em',
-        flexShrink: 0,
-        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)',
-      }}
-    >
+    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-650 to-blue-450 dark:from-blue-600 dark:to-blue-400 flex items-center justify-center text-[13px] font-bold text-white tracking-wider shrink-0 shadow-md shadow-blue-500/20">
       {initials}
     </div>
   );
@@ -196,10 +180,15 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           left-0
           md:relative
           md:translate-x-0
-          bg-white/60
-          dark:bg-[#0b0f19]/70
+          bg-gradient-to-b
+          from-blue-50/90
+          via-slate-50/95
+          to-slate-100/90
+          dark:from-[#182647]
+          dark:via-[#111c34]
+          dark:to-[#0c1222]
           border-r
-          border-white/20
+          border-slate-200/60
           dark:border-white/5
           backdrop-blur-[24px]
           shadow-[15px_0_40px_rgba(15,23,42,0.06)]
@@ -209,21 +198,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       >
         {/* Top edge glow line */}
         <div aria-hidden="true" className="flowing-gradient-line" />
-        {/* Right edge inner glow */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            width: 80,
-            background:
-              'linear-gradient(270deg, rgba(59, 130, 246, 0.04), transparent)',
-            pointerEvents: 'none',
-            zIndex: 1,
-          }}
-        />
+
         {/* Ambient glow - top right */}
         <div
           aria-hidden="true"
@@ -255,37 +230,13 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           }}
         />
 
-        {/* Logo */}
-        <div
-          style={{
-            padding: '28px 24px 22px',
-            position: 'relative',
-          }}
-          className="flex items-center justify-between"
-        >
+        {/* Logo / Header */}
+        <div className="py-7 px-6 relative z-10 flex items-center justify-between">
           <div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: 17,
-                fontWeight: 800,
-                fontFamily: 'var(--font-display)',
-                color: '#f1f5f9',
-                letterSpacing: '-0.02em',
-                lineHeight: 1.3,
-              }}
-            >
+            <h1 className="m-0 text-xl font-extrabold font-display text-slate-900 dark:text-slate-50 tracking-tight leading-none">
               Activity Tracker
             </h1>
-            <p
-              style={{
-                margin: '4px 0 0',
-                fontSize: 12,
-                color: 'rgba(148, 163, 184, 0.5)',
-                letterSpacing: '0.01em',
-                fontWeight: 400,
-              }}
-            >
+            <p className="m-0 mt-1.5 text-[10.5px] font-bold font-display uppercase tracking-[0.14em] text-slate-400/80 dark:text-slate-500">
               Internship workspace
             </p>
           </div>
@@ -293,205 +244,109 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             <button
               type="button"
               onClick={onClose}
-              className="md:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800/40 border border-transparent hover:border-slate-800/50 transition-all flex items-center justify-center shrink-0"
+              className="md:hidden p-1.5 text-slate-550 dark:text-slate-400 hover:text-slate-850 dark:hover:text-white rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-800/40 border border-transparent transition-all flex items-center justify-center shrink-0"
               aria-label="Close Sidebar"
             >
               <X size={18} />
             </button>
           )}
-          {/* Subtle separator */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 24,
-              right: 24,
-              height: 1,
-              background:
-                'linear-gradient(90deg, transparent, rgba(148,163,184,0.12), transparent)',
-            }}
-          />
+          {/* Solid light blue separator line */}
+          <div className="absolute bottom-0 left-6 right-6 h-[1.5px] bg-blue-500/15 dark:bg-blue-400/20" />
         </div>
 
         {/* Scrollable content */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 12px' }}>
-          {/* Workspace nav */}
-          <p
-            style={{
-              fontSize: 10,
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.16em',
-              color: 'rgba(148, 163, 184, 0.45)',
-              margin: '0 0 8px 8px',
-            }}
-          >
-            Workspaces
-          </p>
-          <nav
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 4,
-              marginBottom: 20,
-            }}
-          >
-            {workspaceItems.map((item) => {
-              const isActive = activeWorkspace === item.workspace;
-              return (
-                <button
-                  key={item.workspace}
-                  type="button"
-                  onClick={() => {
-                    navigate(item.path);
-                    onClose?.();
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 12,
-                    border: 'none',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.2s ease',
-                    background: isActive
-                      ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(79, 70, 229, 0.12))'
-                      : 'transparent',
-                    boxShadow: isActive
-                      ? '0 4px 16px rgba(37, 99, 235, 0.15)'
-                      : 'none',
-                    color: isActive ? '#e0e7ff' : 'var(--sidebar-text)',
-                    position: 'relative',
-                  }}
-                >
-                  {isActive && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        left: 0,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        width: 3,
-                        height: 20,
-                        borderRadius: 99,
-                        background: 'linear-gradient(180deg, #3b82f6, #4f46e5)',
-                      }}
-                    />
-                  )}
-                  <span
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 14,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      background: isActive
-                        ? 'linear-gradient(135deg, #2563eb, #4f46e5)'
-                        : 'rgba(255,255,255,0.04)',
-                      color: isActive ? '#fff' : 'var(--sidebar-text)',
-                      flexShrink: 0,
-                      boxShadow: isActive
-                        ? '0 4px 12px rgba(37, 99, 235, 0.3)'
-                        : 'none',
-                      transition: 'all 0.2s',
+        <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-6 relative z-10">
+          {/* Workspace section */}
+          <div>
+            <p className="font-display tracking-[0.16em] uppercase text-[10px] font-bold text-slate-400 dark:text-slate-500 m-0 mb-3.5 ml-2">
+              Workspaces
+            </p>
+            <nav className="flex flex-col gap-2">
+              {workspaceItems.map((item) => {
+                const isActive = activeWorkspace === item.workspace;
+                return (
+                  <button
+                    key={item.workspace}
+                    type="button"
+                    onClick={() => {
+                      navigate(item.path);
+                      onClose?.();
                     }}
+                    className={`flex items-center gap-3.5 w-full p-3 rounded-xl border-none cursor-pointer text-left transition-all duration-200 relative group
+                      ${
+                        isActive
+                          ? 'bg-gradient-to-r from-blue-600/10 to-indigo-650/5 text-blue-600 dark:text-blue-100 shadow-[0_4px_16px_rgba(37,99,235,0.06)] border border-blue-500/10 dark:border-blue-500/15'
+                          : 'bg-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100/60 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-slate-200 border border-transparent'
+                      }
+                    `}
                   >
-                    {item.icon}
-                  </span>
-                  <div>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: 13,
-                        fontWeight: isActive ? 600 : 500,
-                        fontFamily: 'var(--font-display)',
-                      }}
+                    {isActive && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-gradient-to-b from-blue-500 to-indigo-600" />
+                    )}
+                    <span
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300
+                        ${
+                          isActive
+                            ? 'bg-gradient-to-br from-blue-600 to-indigo-650 text-white shadow-md shadow-blue-600/20'
+                            : 'bg-slate-100/80 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200/80 dark:group-hover:bg-slate-800/80 group-hover:text-slate-700 dark:group-hover:text-slate-200'
+                        }
+                      `}
                     >
-                      {item.label}
-                    </p>
-                    <p
-                      style={{
-                        margin: '1px 0 0',
-                        fontSize: 11,
-                        color: isActive
-                          ? 'rgba(165, 180, 252, 0.7)'
-                          : 'rgba(148, 163, 184, 0.45)',
-                      }}
-                    >
-                      {item.desc}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
-          </nav>
+                      {item.icon}
+                    </span>
+                    <div>
+                      <p
+                        className={`m-0 text-[13px] font-semibold font-display tracking-tight transition-colors
+                        ${isActive ? 'text-slate-900 dark:text-slate-50' : 'text-slate-750 dark:text-slate-350'}
+                      `}
+                      >
+                        {item.label}
+                      </p>
+                      <p
+                        className={`m-0 mt-0.5 text-[11px] font-medium transition-colors
+                        ${isActive ? 'text-blue-650/70 dark:text-indigo-300/60' : 'text-slate-400 dark:text-slate-500'}
+                      `}
+                      >
+                        {item.desc}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
 
-          {/* GitLab section for compliance */}
+          {/* GitLab section */}
           {activeWorkspace === 'compliance' ? (
-            <section style={{ marginBottom: 20 }}>
-              <p
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.16em',
-                  color: 'rgba(148, 163, 184, 0.45)',
-                  margin: '0 0 8px 8px',
-                }}
-              >
+            <section className="mb-2">
+              <p className="font-display tracking-[0.16em] uppercase text-[10px] font-bold text-slate-400 dark:text-slate-500 m-0 mb-2.5 ml-2">
                 GitLab Access
               </p>
-              <div className="p-[14px_16px] rounded-[14px] bg-blue-500/5 border border-blue-500/15 backdrop-blur-md flex flex-col gap-3 shadow-md shadow-blue-500/5 dark:shadow-none">
+              <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-550/10 dark:border-blue-500/15 backdrop-blur-md flex flex-col gap-3 shadow-sm shadow-blue-550/5 dark:shadow-none">
                 {/* Status row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="flex items-center gap-2">
                   <span
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      background: gitlabConnected ? '#10b981' : '#94a3b8',
-                      flexShrink: 0,
-                    }}
+                    className={`w-2 h-2 rounded-full shrink-0 animate-pulse
+                    ${gitlabConnected ? 'bg-emerald-500 shadow-sm shadow-emerald-500/50' : 'bg-slate-400 dark:bg-slate-500'}
+                  `}
                   />
                   <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 500,
-                      color: gitlabConnected
-                        ? '#10b981'
-                        : 'var(--sidebar-text)',
-                    }}
+                    className={`text-xs font-semibold tracking-tight
+                    ${gitlabConnected ? 'text-emerald-600 dark:text-emerald-450' : 'text-slate-650 dark:text-slate-400'}
+                  `}
                   >
                     {gitlabConnected ? 'Connected' : 'Not connected'}
                   </span>
                 </div>
 
                 {gitlabConnected ? (
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: 11,
-                      color: 'rgba(148,163,184,0.6)',
-                      lineHeight: 1.5,
-                    }}
-                  >
+                  <p className="m-0 text-[11px] text-slate-450 dark:text-slate-500 leading-relaxed font-sans font-medium">
                     GitLab session is active. Compliance tools are fully
                     available.
                   </p>
                 ) : (
                   <>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: 11,
-                        color: 'rgba(148,163,184,0.6)',
-                        lineHeight: 1.5,
-                      }}
-                    >
+                    <p className="m-0 text-[11px] text-slate-450 dark:text-slate-500 leading-relaxed font-sans font-medium">
                       Connect your GitLab account via OAuth to enable compliance
                       features.
                     </p>
@@ -500,16 +355,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                       onClick={() => {
                         window.location.href = getGitlabLoginUrl();
                       }}
-                      className="relative overflow-hidden inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold text-white text-xs bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600 bg-[length:200%_auto] shadow-lg shadow-blue-600/30 hover:scale-105 hover:-translate-y-0.5 transition-all duration-300 animate-pulse"
-                      style={{
-                        padding: '9px 14px',
-                        borderRadius: 10,
-                        fontSize: 12,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 7,
-                      }}
+                      className="relative overflow-hidden flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white text-xs bg-gradient-to-r from-blue-600 via-blue-500 to-blue-650 bg-[length:200%_auto] shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-98 transition-all duration-300 border-none cursor-pointer"
                     >
                       <svg
                         width="14"
@@ -531,19 +377,10 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           {/* Sub-navigation */}
           {subnavItems.length > 0 ? (
             <section>
-              <p
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.16em',
-                  color: 'rgba(148, 163, 184, 0.45)',
-                  margin: '0 0 8px 8px',
-                }}
-              >
+              <p className="font-display tracking-[0.16em] uppercase text-[10px] font-bold text-slate-400 dark:text-slate-500 m-0 mb-2.5 ml-2">
                 Navigation
               </p>
-              <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <nav className="flex flex-col gap-1">
                 {subnavItems.map((item) => {
                   const isActive = pathname === item.path;
                   return (
@@ -554,39 +391,24 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                         navigate(item.path);
                         onClose?.();
                       }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 12,
-                        width: '100%',
-                        padding: '9px 14px',
-                        borderRadius: 10,
-                        border: 'none',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        transition: 'all 0.18s ease',
-                        background: isActive
-                          ? 'rgba(255,255,255,0.06)'
-                          : 'transparent',
-                        color: isActive ? '#e0e7ff' : 'var(--sidebar-text)',
-                      }}
+                      className={`flex items-center gap-3.5 w-full px-3.5 py-2.5 rounded-xl border-none cursor-pointer text-left transition-all duration-200 group
+                        ${
+                          isActive
+                            ? 'bg-blue-500/10 dark:bg-blue-500/15 text-blue-650 dark:text-blue-100 font-semibold'
+                            : 'bg-transparent text-slate-600 dark:text-slate-450 hover:bg-slate-100/50 dark:hover:bg-slate-800/20 hover:text-slate-900 dark:hover:text-slate-200'
+                        }
+                      `}
                     >
                       <span
-                        style={{ opacity: isActive ? 1 : 0.5, display: 'flex' }}
+                        className={`transition-transform duration-250 flex items-center group-hover:scale-110
+                        ${isActive ? 'text-blue-650 dark:text-blue-400 opacity-100' : 'text-slate-400 dark:text-slate-550 opacity-70 group-hover:opacity-100'}
+                      `}
                       >
                         {item.icon}
                       </span>
-                      <div>
-                        <p
-                          style={{
-                            margin: 0,
-                            fontSize: 13,
-                            fontWeight: isActive ? 600 : 400,
-                          }}
-                        >
-                          {item.label}
-                        </p>
-                      </div>
+                      <span className="font-display text-[12.5px] font-semibold tracking-tight">
+                        {item.label}
+                      </span>
                     </button>
                   );
                 })}
@@ -596,95 +418,37 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         </div>
 
         {/* Subtle separator before footer */}
-        <div
-          style={{
-            height: 1,
-            margin: '0 20px',
-            background:
-              'linear-gradient(90deg, transparent, rgba(148,163,184,0.1), transparent)',
-          }}
-        />
+        <div className="h-px mx-5 bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent relative z-10" />
 
-        {/* Footer / Profile Section */}
-        <div className="p-[16px_20px] relative bg-white/5 dark:bg-transparent border-t border-white/5">
-          {/* Profile Info & Trigger Row */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                minWidth: 0,
-                flex: 1,
-              }}
-            >
+        {/* Footer */}
+        <div className="p-5 relative z-10 border-t border-slate-200/40 dark:border-slate-800/40 bg-slate-50/20 dark:bg-slate-900/10">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
               <button
                 type="button"
                 onClick={() => {
                   navigate('/my-profile');
                   onClose?.();
                 }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                }}
+                className="bg-transparent border-none p-0 cursor-pointer shrink-0 transition-transform active:scale-95"
                 title="View my profile"
               >
                 <UserAvatar name={displayName} />
               </button>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: 'var(--sidebar-text-bright)',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
+              <div className="min-w-0 flex-1">
+                <p className="m-0 text-sm font-semibold font-display text-slate-800 dark:text-slate-200 truncate leading-snug">
                   {displayName}
                 </p>
                 <span
-                  style={{
-                    display: 'inline-block',
-                    marginTop: 4,
-                    padding: '2px 8px',
-                    borderRadius: 99,
-                    fontSize: 9,
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    background:
-                      user?.role === 'admin'
-                        ? 'rgba(244, 63, 94, 0.15)'
-                        : user?.role === 'mentor'
-                          ? 'rgba(59, 130, 246, 0.15)'
-                          : 'rgba(16, 185, 129, 0.15)',
-                    color:
-                      user?.role === 'admin'
-                        ? '#fb7185'
-                        : user?.role === 'mentor'
-                          ? '#60a5fa'
-                          : '#34d399',
-                    border:
-                      user?.role === 'admin'
-                        ? '1px solid rgba(244, 63, 94, 0.25)'
-                        : user?.role === 'mentor'
-                          ? '1px solid rgba(59, 130, 246, 0.25)'
-                          : '1px solid rgba(16, 185, 129, 0.25)',
-                  }}
+                  className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider border
+                  ${
+                    user?.role === 'admin'
+                      ? 'bg-rose-500/10 text-rose-600 dark:text-rose-450 border-rose-500/20'
+                      : user?.role === 'mentor'
+                        ? 'bg-blue-500/10 text-blue-600 dark:text-blue-450 border-blue-500/20'
+                        : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-450 border-emerald-500/20'
+                  }
+                `}
                 >
                   {user?.role || 'intern'}
                 </span>
@@ -695,38 +459,19 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             <button
               type="button"
               onClick={handleCorpusLogout}
-              style={{
-                background: 'rgba(239, 68, 68, 0.08)',
-                border: '1px solid rgba(239, 68, 68, 0.2)',
-                borderRadius: 8,
-                padding: 8,
-                cursor: 'pointer',
-                color: '#f87171',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.2s',
-              }}
+              className="flex items-center justify-center p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 dark:bg-rose-500/5 dark:hover:bg-rose-500/15 border border-rose-500/20 text-rose-500 hover:text-rose-650 cursor-pointer transition-all duration-200 active:scale-95"
               title="Logout"
             >
-              <LogOut size={16} />
+              <LogOut size={15} />
             </button>
           </div>
 
-          {/* Small version text at the very bottom */}
-          <p
-            style={{
-              margin: '8px 0 0 0',
-              fontSize: 9,
-              color: 'rgba(148, 163, 184, 0.25)',
-              letterSpacing: '0.02em',
-              textAlign: 'center',
-            }}
-          >
+          {/* Version text */}
+          <p className="m-0 mt-3 text-[9px] font-sans font-medium text-slate-400 dark:text-slate-600 tracking-wider text-center">
             Activity Tracker v2.0
           </p>
         </div>
-        {/* Flowing gradient line at the bottom of the sidebar */}
+        {/* Flowing gradient line at the bottom */}
         <div aria-hidden="true" className="flowing-gradient-line-bottom" />
       </aside>
     </>

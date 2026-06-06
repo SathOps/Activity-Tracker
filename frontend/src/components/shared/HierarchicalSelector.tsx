@@ -314,7 +314,11 @@ export function HierarchicalSelector({
 
       {/* Step 3 — Users */}
       <div>
-        <MultiSelectDropdown<any>
+        <MultiSelectDropdown<{
+          id: number;
+          name: string;
+          gitlab_username?: string;
+        }>
           label="3. Select Users"
           placeholder={
             selectedTeamIds.size === 0
