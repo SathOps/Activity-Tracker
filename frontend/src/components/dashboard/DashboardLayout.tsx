@@ -1017,6 +1017,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           className="status-glance-panel"
           aria-label={t('dashboard.atAGlanceStatisticsAria')}
         >
+          {/* Flowing Gradient Line */}
+          <div className="flowing-gradient-line" aria-hidden="true" />
           <header className="status-glance-header">
             <h3 className="status-glance-title">
               {t('dashboard.atAGlanceStatisticsTitle')}

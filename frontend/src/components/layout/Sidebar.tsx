@@ -209,19 +209,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         `}
       >
         {/* Top edge glow line */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 1,
-            background:
-              'linear-gradient(90deg, transparent, rgba(30, 79, 178, 0.25), rgba(56, 189, 248, 0.12), transparent)',
-            zIndex: 2,
-          }}
-        />
+        <div aria-hidden="true" className="flowing-gradient-line" />
         {/* Right edge inner glow */}
         <div
           aria-hidden="true"
@@ -739,6 +727,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             Activity Tracker v2.0
           </p>
         </div>
+        {/* Flowing gradient line at the bottom of the sidebar */}
+        <div aria-hidden="true" className="flowing-gradient-line-bottom" />
       </aside>
     </>
   );

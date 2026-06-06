@@ -212,15 +212,8 @@ export function Layout({ children }: Props) {
               }}
             />
             <header className="relative z-10 overflow-hidden border border-white/20 dark:border-white/5 bg-white/45 dark:bg-slate-900/45 backdrop-blur-xl rounded-[20px] shadow-lg shadow-slate-200/50 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
-              {/* Gradient accent bar */}
-              <div
-                style={{
-                  height: 3,
-                  background:
-                    'linear-gradient(90deg, #6366f1 0%, #3b82f6 30%, #06b6d4 60%, #8b5cf6 100%)',
-                  borderRadius: '20px 20px 0 0',
-                }}
-              />
+              {/* Gradient accent bar (flowing) */}
+              <div className="flowing-gradient-line" aria-hidden="true" />
 
               {/* Inner highlight edge */}
               <div

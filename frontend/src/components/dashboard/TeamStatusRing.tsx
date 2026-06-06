@@ -18,10 +18,10 @@ const STATUS_LABEL_BY_KEY = {
 } as const;
 
 const COLOR_BY_STATUS = {
-  GOOD: 'var(--slot-good-bg)',
-  DELAYED: 'var(--slot-delayed-bg)',
-  MISSING: 'var(--slot-missing-bg)',
-  UPCOMING: 'var(--slot-upcoming-bg)',
+  GOOD: 'var(--ring-good)',
+  DELAYED: 'var(--ring-delayed)',
+  MISSING: 'var(--ring-missing)',
+  UPCOMING: 'var(--ring-upcoming)',
 } as const;
 
 type SlotStatusKey = keyof typeof STATUS_LABEL_BY_KEY;
@@ -75,7 +75,7 @@ const TeamStatusRing: React.FC<TeamStatusRingProps> = ({
   }, [normalizedStatuses]);
 
   return (
-    <article className="group relative overflow-hidden grid gap-2.5 bg-gradient-to-br from-[var(--surface-0)] to-[var(--surface-1)] border border-[var(--border)] rounded-xl p-3 shadow-[var(--shadow-soft)]">
+    <article className="team-status-card group grid gap-2.5 p-3">
       <div
         className="h-[min(192px,50vw)] w-[min(192px,50vw)] p-[clamp(11px,1.2vw,15px)] justify-self-center rounded-full"
         style={
@@ -84,7 +84,7 @@ const TeamStatusRing: React.FC<TeamStatusRingProps> = ({
           } as React.CSSProperties
         }
       >
-        <div className="flex items-center justify-center bg-[var(--surface-0)] border border-[var(--border)] rounded-full h-full w-full p-2.5 text-center">
+        <div className="team-status-ring-inner flex items-center justify-center rounded-full h-full w-full p-2.5 text-center">
           <strong className="text-[var(--text-main)] text-[clamp(0.85rem,1.4vw,1rem)] leading-tight">
             {teamName}
           </strong>
@@ -92,7 +92,7 @@ const TeamStatusRing: React.FC<TeamStatusRingProps> = ({
       </div>
 
       <div className="grid gap-1.5 text-center">
-        <p className="text-[var(--text-subtle)] text-xs m-0">
+        <p className="text-[var(--text-subtle)] text-xs m-0 font-medium">
           {t('dashboard.standupsComplete', {
             completed: standupCount,
             required: requiredStandupCount,
@@ -113,19 +113,19 @@ const TeamStatusRing: React.FC<TeamStatusRingProps> = ({
           ] as const
         ).map(([status, count]) => (
           <span
-            className="inline-flex items-center text-[var(--text-subtle)] text-[11px] gap-1.25"
+            className="inline-flex items-center text-[var(--text-subtle)] text-[11px] gap-1"
             key={status}
           >
             <span
               aria-hidden="true"
               className={`inline-flex h-2 w-2 rounded-full ${
                 status === 'GOOD'
-                  ? 'bg-[var(--slot-good-border)]'
+                  ? 'bg-[var(--ring-good)]'
                   : status === 'DELAYED'
-                    ? 'bg-[var(--slot-delayed-border)]'
+                    ? 'bg-[var(--ring-delayed)]'
                     : status === 'MISSING'
-                      ? 'bg-[var(--slot-missing-border)]'
-                      : 'bg-[var(--slot-upcoming-border)]'
+                      ? 'bg-[var(--ring-missing)]'
+                      : 'bg-[var(--ring-upcoming)]'
               }`}
             />
             {t(STATUS_LABEL_BY_KEY[status])}: {count}
@@ -133,11 +133,8 @@ const TeamStatusRing: React.FC<TeamStatusRingProps> = ({
         ))}
       </div>
 
-      <div
-        className="absolute inset-0 grid gap-2 p-[18px_14px_14px] align-content-center bg-white/98 text-[var(--text-main)] pointer-events-none opacity-0 translate-y-2 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 dark:bg-black/96 dark:text-white"
-        role="presentation"
-      >
-        <p className="border-b border-[var(--border)] text-inherit text-xs font-bold tracking-wider m-0 pb-1.5 uppercase">
+      <div className="team-status-card-overlay" role="presentation">
+        <p className="border-b border-black/10 dark:border-white/10 text-inherit text-xs font-bold tracking-wider m-0 pb-1.5 uppercase">
           {t('dashboard.teamMembers')}
         </p>
         {memberNames.length === 0 ? (
@@ -148,7 +145,7 @@ const TeamStatusRing: React.FC<TeamStatusRingProps> = ({
           <ul className="grid gap-1.5 list-none mt-0.5 overflow-y-auto p-0">
             {memberNames.map((memberName) => (
               <li
-                className="bg-[var(--surface-1)] border border-[var(--border)] rounded-full text-inherit text-xs px-2.5 py-1 dark:bg-blue-900/20"
+                className="bg-white/45 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-full text-inherit text-xs px-2.5 py-1 backdrop-blur-sm"
                 key={memberName}
               >
                 {memberName}
