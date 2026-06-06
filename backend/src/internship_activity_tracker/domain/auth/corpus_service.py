@@ -12,6 +12,15 @@ CORPUS_BASE_URL = "https://api.corpus.swecha.org"
 
 def authenticate(phone: str, password: str) -> dict[str, Any]:
     """Authenticate against Corpus and return the raw response payload."""
+    import os
+    if os.getenv("MOCK_CORPUS", "false").lower() == "true":
+        username = phone.strip()
+        return {
+            "access_token": f"mock_token_{username}",
+            "token_type": "bearer",
+            "user_id": f"mock-id-{username}",
+        }
+
     try:
         response = requests.post(
             f"{CORPUS_BASE_URL}/api/v1/auth/login",
@@ -45,6 +54,24 @@ def authenticate(phone: str, password: str) -> dict[str, Any]:
 
 def fetch_profile(token: str) -> dict[str, Any]:
     """Fetch `/auth/me` and enrich institution name when possible."""
+    import os
+    if os.getenv("MOCK_CORPUS", "false").lower() == "true" or token.startswith("mock_token_"):
+        username = token.replace("mock_token_", "") if token.startswith("mock_token_") else "mock_admin"
+        role = "intern"
+        if "admin" in username.lower():
+            role = "admin"
+        elif "mentor" in username.lower():
+            role = "mentor"
+        
+        return {
+            "username": username,
+            "full_name": username.replace("_", " ").title(),
+            "email": f"{username}@example.com",
+            "institution_id": "1",
+            "institution_name": "Mock Institution",
+            "roles": [{"name": role}],
+        }
+
     try:
         response = requests.get(
             f"{CORPUS_BASE_URL}/api/v1/auth/me",
