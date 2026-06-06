@@ -103,7 +103,7 @@ function UserAvatar({ name }: { name: string }) {
     .toUpperCase()
     .slice(0, 2);
   return (
-    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-650 to-blue-450 dark:from-blue-600 dark:to-blue-400 flex items-center justify-center text-[13px] font-bold text-white tracking-wider shrink-0 shadow-md shadow-blue-500/20">
+    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 flex items-center justify-center text-[13px] font-bold text-white tracking-wider shrink-0 shadow-md shadow-blue-500/30 ring-2 ring-blue-500/20 dark:ring-blue-400/20 transition-all">
       {initials}
     </div>
   );
@@ -255,7 +255,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-6 relative z-10">
+        <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-6 relative z-10 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [-webkit-overflow-scrolling:touch]">
           {/* Workspace section */}
           <div>
             <p className="font-display tracking-[0.16em] uppercase text-[10px] font-bold text-slate-400 dark:text-slate-500 m-0 mb-3.5 ml-2">
@@ -272,11 +272,11 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                       navigate(item.path);
                       onClose?.();
                     }}
-                    className={`flex items-center gap-3.5 w-full p-3 rounded-xl border-none cursor-pointer text-left transition-all duration-200 relative group
+                    className={`flex items-center gap-3.5 w-full p-3 rounded-xl border-none cursor-pointer text-left transition-all duration-300 relative group hover:scale-[1.015] hover:-translate-y-[1px]
                       ${
                         isActive
-                          ? 'bg-gradient-to-r from-blue-600/10 to-indigo-650/5 text-blue-600 dark:text-blue-100 shadow-[0_4px_16px_rgba(37,99,235,0.06)] border border-blue-500/10 dark:border-blue-500/15'
-                          : 'bg-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-100/60 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-slate-200 border border-transparent'
+                          ? 'bg-gradient-to-r from-blue-500/20 via-blue-500/15 to-indigo-500/10 dark:from-blue-600/30 dark:via-blue-600/20 dark:to-indigo-600/15 text-blue-700 dark:text-blue-50 shadow-[0_4px_16px_rgba(37,99,235,0.08)] hover:shadow-[0_8px_20px_rgba(37,99,235,0.14)] border border-blue-500/20 dark:border-blue-500/30'
+                          : 'bg-transparent text-slate-600 dark:text-slate-455 hover:bg-slate-100/50 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-slate-200 border border-transparent'
                       }
                     `}
                   >
@@ -287,7 +287,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                       className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300
                         ${
                           isActive
-                            ? 'bg-gradient-to-br from-blue-600 to-indigo-650 text-white shadow-md shadow-blue-600/20'
+                            ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 dark:shadow-blue-500/45'
                             : 'bg-slate-100/80 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200/80 dark:group-hover:bg-slate-800/80 group-hover:text-slate-700 dark:group-hover:text-slate-200'
                         }
                       `}
@@ -304,7 +304,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                       </p>
                       <p
                         className={`m-0 mt-0.5 text-[11px] font-medium transition-colors
-                        ${isActive ? 'text-blue-650/70 dark:text-indigo-300/60' : 'text-slate-400 dark:text-slate-500'}
+                        ${isActive ? 'text-blue-600/80 dark:text-blue-300/80' : 'text-slate-400 dark:text-slate-500'}
                       `}
                       >
                         {item.desc}
@@ -417,53 +417,52 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           ) : null}
         </div>
 
-        {/* Subtle separator before footer */}
-        <div className="h-px mx-5 bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent relative z-10" />
+        {/* Floating Footer Section */}
+        <div className="px-4 pb-4 pt-2 mt-auto relative z-10">
+          <div className="p-4 rounded-2xl border border-slate-200/50 dark:border-white/5 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_24px_rgba(15,23,42,0.06)] dark:shadow-[0_12px_32px_rgba(0,0,0,0.35)] hover:shadow-[0_12px_32px_rgba(15,23,42,0.12)] dark:hover:shadow-[0_16px_40px_rgba(0,0,0,0.45)] hover:border-slate-350/60 dark:hover:border-white/10 hover:scale-[1.01] transition-all duration-300">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate('/my-profile');
+                    onClose?.();
+                  }}
+                  className="bg-transparent border-none p-0 cursor-pointer shrink-0 transition-transform active:scale-95"
+                  title="View my profile"
+                >
+                  <UserAvatar name={displayName} />
+                </button>
+                <div className="min-w-0 flex-1">
+                  <p className="m-0 text-sm font-semibold font-display text-slate-850 dark:text-white truncate leading-snug">
+                    {displayName}
+                  </p>
+                  <span
+                    className={`inline-block mt-1 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border
+                    ${
+                      user?.role === 'admin'
+                        ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                        : user?.role === 'mentor'
+                          ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                          : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-450 border-emerald-500/20'
+                    }
+                  `}
+                  >
+                    {user?.role || 'intern'}
+                  </span>
+                </div>
+              </div>
 
-        {/* Footer */}
-        <div className="p-5 relative z-10 border-t border-slate-200/40 dark:border-slate-800/40 bg-slate-50/20 dark:bg-slate-900/10">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0 flex-1">
+              {/* Logout Button */}
               <button
                 type="button"
-                onClick={() => {
-                  navigate('/my-profile');
-                  onClose?.();
-                }}
-                className="bg-transparent border-none p-0 cursor-pointer shrink-0 transition-transform active:scale-95"
-                title="View my profile"
+                onClick={handleCorpusLogout}
+                className="flex items-center justify-center p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 dark:bg-rose-500/5 dark:hover:bg-rose-500/15 border border-rose-500/20 text-rose-500 hover:text-rose-650 cursor-pointer transition-all duration-200 active:scale-95"
+                title="Logout"
               >
-                <UserAvatar name={displayName} />
+                <LogOut size={15} />
               </button>
-              <div className="min-w-0 flex-1">
-                <p className="m-0 text-sm font-semibold font-display text-slate-800 dark:text-slate-200 truncate leading-snug">
-                  {displayName}
-                </p>
-                <span
-                  className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider border
-                  ${
-                    user?.role === 'admin'
-                      ? 'bg-rose-500/10 text-rose-600 dark:text-rose-450 border-rose-500/20'
-                      : user?.role === 'mentor'
-                        ? 'bg-blue-500/10 text-blue-600 dark:text-blue-450 border-blue-500/20'
-                        : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-450 border-emerald-500/20'
-                  }
-                `}
-                >
-                  {user?.role || 'intern'}
-                </span>
-              </div>
             </div>
-
-            {/* Logout Button */}
-            <button
-              type="button"
-              onClick={handleCorpusLogout}
-              className="flex items-center justify-center p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 dark:bg-rose-500/5 dark:hover:bg-rose-500/15 border border-rose-500/20 text-rose-500 hover:text-rose-650 cursor-pointer transition-all duration-200 active:scale-95"
-              title="Logout"
-            >
-              <LogOut size={15} />
-            </button>
           </div>
 
           {/* Version text */}

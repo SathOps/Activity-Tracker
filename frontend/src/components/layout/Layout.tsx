@@ -89,11 +89,19 @@ export function Layout({ children }: Props) {
       >
         <Sun
           size={11}
-          className={`text-amber-500 transition-opacity duration-300 ${themeMode === 'dark' ? 'opacity-35' : 'opacity-0'}`}
+          style={{
+            color: 'var(--amber-500)',
+            opacity: themeMode === 'dark' ? 0.35 : 0,
+            transition: 'opacity 0.3s ease',
+          }}
         />
         <Moon
           size={11}
-          className={`text-indigo-400 transition-opacity duration-300 ${themeMode === 'dark' ? 'opacity-0' : 'opacity-35'}`}
+          style={{
+            color: 'var(--indigo-400)',
+            opacity: themeMode === 'dark' ? 0 : 0.35,
+            transition: 'opacity 0.3s ease',
+          }}
         />
       </div>
 
@@ -142,17 +150,7 @@ export function Layout({ children }: Props) {
   }, [themeMode]);
 
   return (
-    <div className="flex h-screen overflow-hidden relative">
-      {/* Ambient background glow specifically behind the sidebar to add color depth */}
-      <div
-        className="
-          fixed inset-y-0 left-0 w-[300px] pointer-events-none z-0 hidden md:block
-          bg-[radial-gradient(circle_at_100px_35%,rgba(99,102,241,0.06)_0%,rgba(59,130,246,0.02)_60%,transparent_100%)]
-          dark:bg-[radial-gradient(circle_at_100px_35%,rgba(99,102,241,0.15)_0%,rgba(59,130,246,0.05)_60%,transparent_100%)]
-          blur-[20px]
-        "
-        aria-hidden="true"
-      />
+    <div className="flex h-screen overflow-hidden">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <main className="flex-1 overflow-y-auto relative bg-slate-50 dark:bg-[#090e1a] transition-colors duration-300">
         {/* Animated background glow effect layers */}
@@ -194,26 +192,18 @@ export function Layout({ children }: Props) {
           className={`relative z-10 px-4 py-6 md:px-8 md:py-6 max-w-[1200px] mx-auto min-w-0 ${isStandupMode ? 'pb-24 md:pb-6' : ''}`}
         >
           {/* Glass header */}
-          <div style={{ position: 'relative', marginBottom: 28 }}>
+          <div className="relative mb-4 md:mb-7">
             {/* Glow effect blob behind card */}
             <div
+              className="absolute -inset-4 pointer-events-none z-0 blur-[30px] rounded-[30px]"
               style={{
-                position: 'absolute',
-                top: -15,
-                left: -15,
-                right: -15,
-                bottom: 0,
                 background:
                   themeMode === 'dark'
                     ? 'radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.18) 0%, rgba(59, 130, 246, 0.08) 50%, transparent 100%)'
                     : 'radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, rgba(59, 130, 246, 0.05) 50%, transparent 100%)',
-                filter: 'blur(30px)',
-                borderRadius: 30,
-                pointerEvents: 'none',
-                zIndex: 0,
               }}
             />
-            <header className="relative z-10 overflow-hidden border border-white/20 dark:border-white/5 bg-white/45 dark:bg-slate-900/45 backdrop-blur-xl rounded-[20px] shadow-lg shadow-slate-200/50 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
+            <header className="relative z-10 overflow-hidden border border-white/20 dark:border-white/5 bg-white/45 dark:bg-slate-900/45 backdrop-blur-xl rounded-xl md:rounded-[20px] shadow-sm md:shadow-lg shadow-slate-200/50 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
               {/* Gradient accent bar (flowing) */}
               <div className="flowing-gradient-line" aria-hidden="true" />
 
@@ -233,10 +223,7 @@ export function Layout({ children }: Props) {
                 }}
               />
 
-              <div
-                style={{ padding: '20px 28px' }}
-                className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-              >
+              <div className="p-4 md:p-[20px_28px] flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 {/* Mobile top controls bar */}
                 <div className="flex items-center justify-between md:hidden w-full pb-3 border-b border-[rgba(148,163,184,0.08)]">
                   <button
@@ -255,43 +242,13 @@ export function Layout({ children }: Props) {
 
                 {/* Title block */}
                 <div className="min-w-0">
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: 11,
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.16em',
-                      background: 'linear-gradient(135deg, #6366f1, #3b82f6)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      fontFamily: 'var(--font-display)',
-                    }}
-                  >
+                  <p className="m-0 text-[10px] md:text-[11px] font-bold uppercase tracking-widest bg-gradient-to-r from-indigo-500 to-blue-500 bg-clip-text text-transparent font-display">
                     {modeMeta.section}
                   </p>
-                  <h1
-                    style={{
-                      margin: '8px 0 0',
-                      fontSize: 26,
-                      fontWeight: 800,
-                      fontFamily: 'var(--font-display)',
-                      color: themeMode === 'dark' ? '#F8FAFC' : '#0F172A',
-                      letterSpacing: '-0.02em',
-                      lineHeight: 1.2,
-                    }}
-                  >
+                  <h1 className="m-0 mt-1 text-lg md:text-[26px] font-extrabold font-display text-slate-900 dark:text-slate-50 tracking-tight leading-tight">
                     {modeMeta.title}
                   </h1>
-                  <p
-                    style={{
-                      margin: '8px 0 0',
-                      fontSize: 14,
-                      color: themeMode === 'dark' ? '#94A3B8' : '#64748B',
-                      maxWidth: '60ch',
-                      lineHeight: 1.6,
-                    }}
-                  >
+                  <p className="m-0 mt-1.5 text-xs md:text-sm text-slate-500 dark:text-slate-400 max-w-[60ch] leading-relaxed hidden sm:block">
                     {modeMeta.description}
                   </p>
                 </div>
@@ -521,47 +478,9 @@ export function Layout({ children }: Props) {
 
             {/* Mobile Bottom Nav */}
             <div className="md:hidden">
-              {isIslandCollapsed ? (
-                /* Collapsed Mobile Nav */
-                <button
-                  type="button"
-                  className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-12 h-12 pointer-events-auto bg-transparent border-none p-0"
-                  onClick={() => setIsIslandCollapsed(false)}
-                  title="Expand Panel"
-                >
-                  <div className="w-full h-full rounded-full bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-xl border border-slate-800/60 dark:border-slate-800/40 shadow-[0_4px_20px_rgba(0,0,0,0.35)] flex items-center justify-center cursor-pointer animate-bounce">
-                    <ChevronUp
-                      size={24}
-                      className="text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
-                    />
-                  </div>
-                </button>
-              ) : (
-                /* Expanded Mobile Nav with Collapse Button */
-                <div className="relative">
-                  {/* Absolutely Positioned Collapse Arrow Wrapper for Mobile (sits above the bottom nav) */}
-                  <div className="fixed bottom-[84px] left-1/2 -translate-x-1/2 z-50 w-12 h-8 flex items-center justify-center pointer-events-auto">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsIslandCollapsed(true);
-                      }}
-                      className="text-white cursor-pointer border-none bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-md rounded-full hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center w-8 h-8 shadow-[0_2px_10px_rgba(0,0,0,0.25)] border border-slate-800/60 dark:border-slate-800/40"
-                      title="Collapse Panel"
-                    >
-                      <ChevronDown
-                        size={18}
-                        strokeWidth={2.5}
-                        className="text-blue-500 drop-shadow-[0_0_6px_rgba(59,130,246,0.4)]"
-                      />
-                    </button>
-                  </div>
-                  <MobileBottomNav
-                    onRecordClick={() => setIsRecordModalOpen(true)}
-                  />
-                </div>
-              )}
+              <MobileBottomNav
+                onRecordClick={() => setIsRecordModalOpen(true)}
+              />
             </div>
           </>
         )}
