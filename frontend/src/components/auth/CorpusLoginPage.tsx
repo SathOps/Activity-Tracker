@@ -130,39 +130,18 @@ export function CorpusLoginPage() {
 
         {/* Shadow depth cast behind the sidebar/glow onto the right panel */}
         <div
-          className="absolute left-0 top-0 w-screen h-full pointer-events-none max-[800px]:hidden"
-          style={{
-            zIndex: 15,
-            filter:
-              'drop-shadow(3px 0 6px rgba(0, 0, 0, 0.35)) drop-shadow(8px 0 16px rgba(0, 0, 0, 0.15))',
-          }}
+          className="absolute left-0 top-0 w-screen h-full pointer-events-none max-[800px]:hidden z-[15] [filter:drop-shadow(3px_0_6px_rgba(0,0,0,0.35))_drop-shadow(8px_0_16px_rgba(0,0,0,0.15))]"
           aria-hidden="true"
         >
-          <div
-            className="w-full h-full bg-black"
-            style={{
-              clipPath: 'polygon(0 0, 65vw 0, 52vw 100%, 0 100%)',
-            }}
-          />
+          <div className="w-full h-full bg-black [clip-path:polygon(0_0,65vw_0,52vw_100%,0_100%)]" />
         </div>
 
         {/* Glowing border slit separator */}
         <div
-          className="absolute left-0 top-0 w-screen h-full pointer-events-none max-[800px]:hidden"
-          style={{
-            zIndex: 30,
-            filter:
-              'drop-shadow(0 0 6px rgba(59, 130, 246, 0.95)) drop-shadow(0 0 15px rgba(14, 165, 233, 0.65))',
-          }}
+          className="absolute left-0 top-0 w-screen h-full pointer-events-none max-[800px]:hidden z-30 [filter:drop-shadow(0_0_6px_rgba(59,130,246,0.95))_drop-shadow(0_0_15px_rgba(14,165,233,0.65))]"
           aria-hidden="true"
         >
-          <div
-            className="w-full h-full bg-[linear-gradient(to_bottom,#1e40af_0%,#3b82f6_20%,#0ea5e9_40%,#60a5fa_50%,#0ea5e9_60%,#3b82f6_80%,#1e40af_100%)] bg-[size:100%_200%] animate-[slit-glow-shimmer_4s_linear_infinite]"
-            style={{
-              clipPath:
-                'polygon(calc(65vw - 3px) 0, calc(65vw + 3px) 0, calc(52vw + 3px) 100%, calc(52vw - 3px) 100%)',
-            }}
-          />
+          <div className="w-full h-full bg-[linear-gradient(to_bottom,#1e40af_0%,#3b82f6_20%,#0ea5e9_40%,#60a5fa_50%,#0ea5e9_60%,#3b82f6_80%,#1e40af_100%)] bg-[size:100%_200%] animate-[slit-glow-shimmer_4s_linear_infinite] [clip-path:polygon(calc(65vw_-_3px)_0,calc(65vw_+_3px)_0,calc(52vw_+_3px)_100%,calc(52vw_-_3px)_100%)]" />
         </div>
 
         <section className="absolute right-0 top-0 w-screen h-full z-10 flex flex-col items-center justify-center pl-[68vw] pr-[4vw] py-0 bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_40%,#f1f5f9_100%)] overflow-hidden max-[1024px]:min-[801px]:pl-[68vw] max-[1024px]:min-[801px]:pr-[4vw] max-[800px]:relative max-[800px]:w-full max-[800px]:h-auto max-[800px]:min-h-0 max-[800px]:flex max-[800px]:items-center max-[800px]:justify-start max-[800px]:px-5 max-[800px]:py-9 max-[800px]:bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] max-[800px]:overflow-visible">
