@@ -39,6 +39,7 @@ function MultiSelectDropdown<T extends { id: number; name: string }>({
   disabled,
   isLoading,
   renderItem,
+  emptyPlaceholder,
 }: {
   label: string;
   placeholder: string;
@@ -48,6 +49,7 @@ function MultiSelectDropdown<T extends { id: number; name: string }>({
   disabled?: boolean;
   isLoading?: boolean;
   renderItem?: (item: T) => string;
+  emptyPlaceholder?: string;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -85,7 +87,7 @@ function MultiSelectDropdown<T extends { id: number; name: string }>({
 
   return (
     <div>
-      <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500">
+      <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500 dark:text-slate-400">
         {label}
       </p>
       <div ref={ref} className="relative">
@@ -93,14 +95,14 @@ function MultiSelectDropdown<T extends { id: number; name: string }>({
           type="button"
           disabled={disabled || isLoading}
           onClick={() => !disabled && setOpen((o) => !o)}
-          className={`flex w-full items-center justify-between gap-2 rounded-[10px] border border-slate-200 px-3.5 py-[9px] text-left text-[13px] ${
+          className={`flex w-full items-center justify-between gap-2 rounded-xl border px-3.5 py-[9.5px] text-left text-[13px] transition-all duration-200 backdrop-blur-sm ${
             disabled
-              ? 'cursor-not-allowed bg-slate-50'
-              : 'cursor-pointer bg-white'
+              ? 'cursor-not-allowed bg-slate-100/10 border-slate-200/20 text-slate-400 dark:text-slate-650'
+              : 'cursor-pointer bg-white/30 dark:bg-slate-950/20 border-slate-300/60 dark:border-white/10 text-slate-800 dark:text-slate-100 hover:border-blue-500/50 hover:bg-white/40 dark:hover:bg-slate-950/30'
           } ${
             selectedCount === 0
-              ? 'font-normal text-slate-400'
-              : 'font-medium text-slate-800'
+              ? 'font-normal text-slate-400 dark:text-slate-500'
+              : 'font-medium text-slate-850 dark:text-slate-200'
           }`}
         >
           <span className="flex-1 truncate">
@@ -109,23 +111,23 @@ function MultiSelectDropdown<T extends { id: number; name: string }>({
           {isLoading ? (
             <Spinner size="sm" label="" />
           ) : (
-            <span className="text-[10px] text-slate-400">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500">
               {open ? '▲' : '▾'}
             </span>
           )}
         </button>
 
         {open && !disabled && items.length > 0 && (
-          <div className="absolute inset-x-0 top-[calc(100%+4px)] z-50 max-h-[240px] overflow-y-auto rounded-[10px] border border-slate-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+          <div className="absolute inset-x-0 top-[calc(100%+4px)] z-50 max-h-[240px] overflow-y-auto rounded-xl border border-white/20 dark:border-white/10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-xl shadow-black/10 text-slate-800 dark:text-slate-100">
             {/* Select all */}
-            <label className="flex cursor-pointer items-center gap-2.5 border-b border-slate-100 bg-slate-50 px-3.5 py-[9px]">
+            <label className="flex cursor-pointer items-center gap-2.5 border-b border-slate-100/30 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/40 px-3.5 py-[9px]">
               <input
                 type="checkbox"
                 checked={selectedCount === items.length && items.length > 0}
                 onChange={toggleAll}
-                className="accent-indigo-500"
+                className="accent-blue-500"
               />
-              <span className="text-xs font-semibold text-slate-600">
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                 Select all ({items.length})
               </span>
             </label>
@@ -133,15 +135,15 @@ function MultiSelectDropdown<T extends { id: number; name: string }>({
             {items.map((item) => (
               <label
                 key={item.id}
-                className="flex cursor-pointer items-center gap-2.5 border-b border-slate-50 px-3.5 py-[9px] hover:bg-slate-50"
+                className="flex cursor-pointer items-center gap-2.5 border-b border-slate-100/10 dark:border-slate-850 px-3.5 py-[9px] hover:bg-slate-50/50 dark:hover:bg-slate-950/30"
               >
                 <input
                   type="checkbox"
                   checked={selected.has(item.id)}
                   onChange={() => toggle(item.id)}
-                  className="accent-indigo-500"
+                  className="accent-blue-500"
                 />
-                <span className="flex-1 truncate text-[13px] text-slate-800">
+                <span className="flex-1 truncate text-[13px] text-slate-750 dark:text-slate-200">
                   {renderItem ? renderItem(item) : item.name}
                 </span>
               </label>
@@ -150,8 +152,8 @@ function MultiSelectDropdown<T extends { id: number; name: string }>({
         )}
 
         {open && !disabled && !isLoading && items.length === 0 && (
-          <div className="absolute inset-x-0 top-[calc(100%+4px)] z-50 rounded-[10px] border border-slate-200 bg-white px-3.5 py-3 text-[13px] text-slate-400 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
-            None available
+          <div className="absolute inset-x-0 top-[calc(100%+4px)] z-50 rounded-xl border border-white/20 dark:border-white/10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-3.5 py-3 text-[13px] text-slate-400 dark:text-slate-500 shadow-xl shadow-black/10">
+            {emptyPlaceholder ?? 'None available'}
           </div>
         )}
       </div>
@@ -259,11 +261,18 @@ export function HierarchicalSelector({
   const canRun =
     selectedUsers.length > 0 && !!startDate && !!endDate && !isRunning;
 
+  const glassInput =
+    'w-full rounded-xl px-3 py-2 text-[13px] outline-none ' +
+    'bg-white/30 dark:bg-slate-950/20 border border-slate-300/60 dark:border-white/10 text-slate-800 dark:text-slate-100 placeholder:text-slate-450 ' +
+    'focus:border-blue-500/50 focus:bg-white/40 dark:focus:bg-slate-950/35 focus:ring-0 ' +
+    'transition-all duration-200 backdrop-blur-sm ' +
+    '[color-scheme:light] dark:[color-scheme:dark]';
+
   return (
-    <div className="flex flex-col gap-[18px] rounded-2xl border border-slate-200 bg-white px-6 py-5">
+    <div className="flex flex-col gap-[18px] rounded-[24px] bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.37)] px-6 py-5 transition-all">
       {/* Empty state for no batches */}
       {!selectorQuery.isLoading && batches.length === 0 && (
-        <p className="py-3 text-center text-[13px] text-slate-400">
+        <p className="py-3 text-center text-[13px] text-slate-400 dark:text-slate-500">
           No batches assigned. Contact your admin.
         </p>
       )}
@@ -305,85 +314,24 @@ export function HierarchicalSelector({
 
       {/* Step 3 — Users */}
       <div>
-        <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500">
-          3. Select Users
-        </p>
-
-        {selectedTeamIds.size === 0 ? (
-          <p className="py-2.5 text-[13px] text-slate-400">
-            Select a team to load users.
-          </p>
-        ) : selectorQuery.isLoading ? (
-          <div className="flex items-center gap-2 py-2.5">
-            <Spinner size="sm" label="" />
-            <span className="text-[13px] text-slate-400">Loading users…</span>
-          </div>
-        ) : validUsers.length === 0 ? (
-          <p className="py-2.5 text-[13px] text-slate-400">
-            No users with GitLab usernames found in the selected team(s).
-          </p>
-        ) : (
-          <div className="max-h-[260px] overflow-hidden overflow-y-auto rounded-[10px] border border-slate-200">
-            {/* Select all */}
-            <label className="flex cursor-pointer items-center gap-2.5 border-b border-slate-100 bg-slate-50 px-3.5 py-[9px]">
-              <input
-                type="checkbox"
-                checked={
-                  selectedUserIds.size === validUsers.length &&
-                  validUsers.length > 0
-                }
-                onChange={() =>
-                  setSelectedUserIds(
-                    selectedUserIds.size === validUsers.length
-                      ? new Set()
-                      : new Set(validUsers.map((appUser) => appUser.id))
-                  )
-                }
-                className="accent-indigo-500"
-              />
-              <span className="text-xs font-semibold text-slate-600">
-                Select all ({validUsers.length})
-              </span>
-            </label>
-
-            {validUsers.map((appUser) => {
-              const showTeam = selectedTeamIds.size > 1;
-              return (
-                <label
-                  key={appUser.id}
-                  aria-label={appUser.name}
-                  className="flex cursor-pointer items-center gap-2.5 border-b border-slate-50 px-3.5 py-[9px] hover:bg-slate-50"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedUserIds.has(appUser.id)}
-                    onChange={() => {
-                      const next = new Set(selectedUserIds);
-                      if (next.has(appUser.id)) next.delete(appUser.id);
-                      else next.add(appUser.id);
-                      setSelectedUserIds(next);
-                    }}
-                    className="accent-indigo-500"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="m-0 truncate text-[13px] font-medium text-slate-800">
-                      {appUser.name}
-                    </p>
-                    <p className="m-0 text-[11px] text-slate-400">
-                      @{appUser.gitlab_username}
-                      {showTeam && appUser.team_name
-                        ? ` · ${appUser.team_name}`
-                        : ''}
-                    </p>
-                  </div>
-                </label>
-              );
-            })}
-          </div>
-        )}
+        <MultiSelectDropdown<any>
+          label="3. Select Users"
+          placeholder={
+            selectedTeamIds.size === 0
+              ? 'Select a team first'
+              : 'Choose one or more users…'
+          }
+          items={validUsers}
+          selected={selectedUserIds}
+          onChange={setSelectedUserIds}
+          disabled={selectedTeamIds.size === 0}
+          isLoading={selectorQuery.isLoading}
+          emptyPlaceholder="No users with GitLab usernames found in the selected team(s)"
+          renderItem={(u) => `${u.name} (@${u.gitlab_username})`}
+        />
 
         {selectedUsers.length > 0 && (
-          <p className="mt-1.5 text-[11px] text-indigo-500">
+          <p className="mt-1.5 text-[11px] text-indigo-500 dark:text-indigo-400">
             {selectedUsers.length} user
             {selectedUsers.length > 1 ? 's' : ''} selected
           </p>
@@ -394,7 +342,7 @@ export function HierarchicalSelector({
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label
-            className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500"
+            className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500 dark:text-slate-400"
             htmlFor="hs-start-date"
           >
             Start Date
@@ -404,12 +352,12 @@ export function HierarchicalSelector({
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full rounded-[10px] border border-slate-200 px-3 py-[9px] text-[13px] focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            className={glassInput}
           />
         </div>
         <div>
           <label
-            className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500"
+            className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500 dark:text-slate-400"
             htmlFor="hs-end-date"
           >
             End Date
@@ -419,7 +367,7 @@ export function HierarchicalSelector({
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="w-full rounded-[10px] border border-slate-200 px-3 py-[9px] text-[13px] focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            className={glassInput}
           />
         </div>
       </div>
@@ -429,10 +377,10 @@ export function HierarchicalSelector({
         type="button"
         onClick={handleRun}
         disabled={!canRun}
-        className={`flex items-center justify-center gap-2 rounded-[10px] px-6 py-[11px] text-sm font-semibold transition-opacity duration-200 ${
+        className={`flex items-center justify-center gap-2 rounded-xl px-6 py-[11px] text-sm font-semibold transition-all duration-200 ${
           canRun
-            ? 'cursor-pointer bg-gradient-to-br from-indigo-600 to-indigo-500 text-white'
-            : 'cursor-not-allowed bg-slate-200 text-slate-400'
+            ? 'cursor-pointer bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 hover:scale-[1.01] active:scale-95'
+            : 'cursor-not-allowed bg-slate-500/5 dark:bg-white/5 border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600'
         }`}
       >
         {isRunning && <Spinner size="sm" label="" />}
