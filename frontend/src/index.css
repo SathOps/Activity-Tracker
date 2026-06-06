@@ -251,6 +251,42 @@
   animation: shimmer-sweep 3s infinite ease-in-out;
 }
 
+/* GitLab Blue Shimmering Button */
+.gitlab-blue-shimmer-btn {
+  @apply relative overflow-hidden inline-flex items-center gap-2.5 border-none font-display font-bold cursor-pointer px-4 py-2.5 rounded-xl text-xs tracking-[0.02em];
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #1d4ed8 100%);
+  background-size: 200% auto;
+  color: white !important;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.25);
+}
+
+.gitlab-blue-shimmer-btn:hover {
+  @apply -translate-y-0.5 scale-[1.015];
+  box-shadow:
+    0 8px 20px rgba(37, 99, 235, 0.35),
+    0 0 12px rgba(59, 130, 246, 0.2);
+  background-position: right center;
+}
+
+.gitlab-blue-shimmer-btn:active {
+  @apply translate-y-0 scale-[0.98];
+}
+
+.gitlab-blue-shimmer-btn::after {
+  @apply absolute top-0 w-1/2 h-full pointer-events-none;
+  content: '';
+  left: -100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  transform: skewX(-25deg);
+  animation: shimmer-sweep 3s infinite ease-in-out;
+}
+
 /* Feature grid item styling */
 .feature-item-card {
   @apply rounded-xl p-4 transition-all duration-300;

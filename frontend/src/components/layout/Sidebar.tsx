@@ -355,7 +355,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                       onClick={() => {
                         window.location.href = getGitlabLoginUrl();
                       }}
-                      className="relative overflow-hidden flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white text-xs bg-gradient-to-r from-blue-600 via-blue-500 to-blue-650 bg-[length:200%_auto] shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-98 transition-all duration-300 border-none cursor-pointer"
+                      className="gitlab-blue-shimmer-btn w-full justify-center"
                     >
                       <svg
                         width="14"
