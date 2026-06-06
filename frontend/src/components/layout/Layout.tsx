@@ -242,9 +242,11 @@ export function Layout({ children }: Props) {
               <div className="p-4 md:p-[20px_28px] flex items-center justify-between gap-4">
                 {/* Title block */}
                 <div className="min-w-0">
-                  <p className="m-0 text-[10px] md:text-[11px] font-bold uppercase tracking-widest bg-gradient-to-r from-indigo-500 to-blue-500 bg-clip-text text-transparent font-display">
-                    {modeMeta.section}
-                  </p>
+                  {modeMeta.section !== modeMeta.title && (
+                    <p className="m-0 text-[10px] md:text-[11px] font-bold uppercase tracking-widest bg-gradient-to-r from-indigo-500 to-blue-500 bg-clip-text text-transparent font-display">
+                      {modeMeta.section}
+                    </p>
+                  )}
                   <h1 className="m-0 mt-1 text-lg md:text-[26px] font-extrabold font-display text-slate-900 dark:text-slate-50 tracking-tight leading-tight">
                     {modeMeta.title}
                   </h1>

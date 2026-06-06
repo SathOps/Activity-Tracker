@@ -27,7 +27,7 @@ export const ROUTES: RouteMeta[] = [
     path: '/standup',
     workspace: 'standup',
     title: 'Standup Tracker',
-    section: 'Standup Tracker',
+    section: 'Daily Standups',
     description:
       'Manage daily standup submissions, verification, audio evidence, and team progress.',
     roles: ['admin', 'mentor', 'intern'],
