@@ -266,7 +266,7 @@ export function Layout({ children }: Props) {
 
           {isComplianceMode && !gitlabConnected && (
             <div
-              className="relative overflow-hidden flex items-center gap-3 px-5 py-4 rounded-[14px] bg-[linear-gradient(135deg,rgba(245,158,11,0.12),rgba(217,119,6,0.04))] backdrop-blur-[20px] border border-[rgba(245,158,11,0.25)] text-[#ffedd5] text-[13.5px] leading-[1.5]"
+              className="relative overflow-hidden flex items-center gap-3 px-5 py-4 rounded-[14px] bg-[linear-gradient(135deg,rgba(245,158,11,0.12),rgba(217,119,6,0.04))] backdrop-blur-[20px] border border-[rgba(245,158,11,0.25)] text-[#ffedd5] text-[13.5px] leading-[1.5] warning-pulse-card"
               style={{
                 marginBottom: 24,
               }}
@@ -278,6 +278,7 @@ export function Layout({ children }: Props) {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="warning-icon-pulse"
                 style={{
                   color: '#f59e0b',
                   flexShrink: 0,
