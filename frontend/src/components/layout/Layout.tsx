@@ -160,7 +160,7 @@ export function Layout({ children }: Props) {
                     : 'radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, rgba(59, 130, 246, 0.05) 50%, transparent 100%)',
               }}
             />
-            <header className="relative z-10 overflow-hidden border border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900/45 backdrop-blur-xl rounded-xl md:rounded-[20px] shadow-sm md:shadow-lg shadow-slate-200/50 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
+            <header className="relative z-10 overflow-hidden border border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900/60 backdrop-blur-xl rounded-xl md:rounded-[20px] shadow-sm md:shadow-lg shadow-slate-200/50 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
               {/* Gradient accent bar (flowing) */}
               <div className="flowing-gradient-line" aria-hidden="true" />
 
