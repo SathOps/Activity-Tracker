@@ -45,7 +45,8 @@ export default {
       },
       animation: {
         'pulse-border': 'pulse-border 2s infinite ease-in-out',
-        'light-sweep': 'background-light-sweep 22s cubic-bezier(0.22, 1, 0.36, 1) infinite',
+        'light-sweep':
+          'background-light-sweep 22s cubic-bezier(0.22, 1, 0.36, 1) infinite',
       },
     },
   },

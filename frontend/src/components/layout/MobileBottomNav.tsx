@@ -71,7 +71,7 @@ export function MobileBottomNav({
 
         <div className="flex-1 w-0 flex items-center justify-center relative -top-5 h-[60px]">
           <button
-            className="w-[54px] h-[54px] bg-gradient-to-r from-blue-600 to-indigo-600 border-none rounded-full text-white flex items-center justify-center cursor-pointer shadow-[0_4px_16px_rgba(37,99,235,0.45)] hover:scale-105 active:scale-95 transition-all duration-200 shrink-0"
+            className="w-[54px] h-[54px] bg-blue-500/15 dark:bg-blue-950/45 text-blue-700 dark:text-blue-400 border border-blue-500/35 dark:border-blue-500/20 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/15 dark:shadow-[0_8px_32px_rgba(30,58,138,0.25)] transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md shrink-0"
             onClick={onRecordClick}
             title="Record Standup"
           >

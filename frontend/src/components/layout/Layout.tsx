@@ -153,10 +153,8 @@ export function Layout({ children }: Props) {
     <div className="flex h-screen overflow-hidden">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <main className="flex-1 overflow-y-auto relative bg-slate-50 dark:bg-[#090e1a] transition-colors duration-300">
-
-
         {/* Spaced dot grid pattern (subtle and clean) */}
-        <div className="fixed inset-0 md:left-[300px] pointer-events-none bg-[radial-gradient(rgba(148,163,184,0.18)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:24px_24px] z-0" />
+        <div className="fixed inset-0 md:left-[300px] pointer-events-none bg-[radial-gradient(rgba(59,130,246,.32)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(255,255,255,0.22)_1px,transparent_1px)] [background-size:24px_24px] z-0" />
 
         <div
           className={`relative z-10 px-4 pt-3 pb-6 md:px-8 md:py-6 max-w-[1200px] mx-auto min-w-0 ${isStandupMode ? 'pb-24 md:pb-6' : ''}`}
@@ -273,7 +271,7 @@ export function Layout({ children }: Props) {
                 className={`w-full h-full flex items-center transition-all duration-500 ${
                   isIslandCollapsed
                     ? 'bg-transparent border-transparent backdrop-blur-none shadow-none justify-center'
-                    : 'bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 backdrop-blur-xl shadow-lg dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] px-8 justify-between rounded-full [mask-image:radial-gradient(circle_at_50%_0,transparent_34px,black_35px)] [-webkit-mask-image:radial-gradient(circle_at_50%_0,transparent_34px,black_35px)]'
+                    : 'bg-blue-500/15 dark:bg-slate-900/45 border border-blue-500/35 dark:border-blue-500/20 backdrop-blur-xl shadow-lg shadow-blue-500/15 dark:shadow-[0_8px_32px_rgba(30,58,138,0.25)] px-8 justify-between rounded-full [mask-image:radial-gradient(circle_at_50%_0,transparent_34px,black_35px)] [-webkit-mask-image:radial-gradient(circle_at_50%_0,transparent_34px,black_35px)]'
                 }`}
                 onClick={
                   isIslandCollapsed
@@ -294,10 +292,10 @@ export function Layout({ children }: Props) {
                 title={isIslandCollapsed ? 'Expand Panel' : undefined}
               >
                 {isIslandCollapsed ? (
-                  <div className="flex items-center justify-center text-white animate-bounce cursor-pointer">
+                  <div className="flex items-center justify-center text-blue-500 dark:text-white animate-bounce cursor-pointer">
                     <ChevronUp
                       size={24}
-                      className="drop-shadow-[0_0_8px_#3b82f6] hover:drop-shadow-[0_0_15px_#6366f1] transition-all duration-300"
+                      className="drop-shadow-[0_0_8px_rgba(59,130,246,0.6)] hover:drop-shadow-[0_0_15px_rgba(59,130,246,0.8)] transition-all duration-300"
                     />
                   </div>
                 ) : (
@@ -407,7 +405,7 @@ export function Layout({ children }: Props) {
                 <button
                   type="button"
                   onClick={() => setIsRecordModalOpen(true)}
-                  className="w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30 transition-all duration-300 hover:scale-110 hover:shadow-blue-500/50 cursor-pointer border-none"
+                  className="w-14 h-14 bg-blue-500/15 dark:bg-blue-950/45 text-blue-700 dark:text-blue-400 border border-blue-500/35 dark:border-blue-500/20 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/15 dark:shadow-[0_8px_32px_rgba(30,58,138,0.25)] transition-all duration-300 hover:scale-110 hover:shadow-blue-500/30 cursor-pointer backdrop-blur-md"
                   title="Record Standup"
                 >
                   <Mic size={20} />
@@ -423,13 +421,13 @@ export function Layout({ children }: Props) {
                       e.stopPropagation();
                       setIsIslandCollapsed(true);
                     }}
-                    className="text-white cursor-pointer border-none bg-transparent hover:scale-110 active:scale-95 transition-all duration-300 animate-bounce flex items-center justify-center w-full h-full"
+                    className="text-blue-500 dark:text-white cursor-pointer border-none bg-transparent hover:scale-110 active:scale-95 transition-all duration-300 animate-bounce flex items-center justify-center w-full h-full"
                     title="Collapse Panel"
                   >
                     <ChevronDown
                       size={24}
                       strokeWidth={2}
-                      className="drop-shadow-[0_0_8px_#3b82f6] hover:drop-shadow-[0_0_15px_#6366f1] transition-all duration-300"
+                      className="drop-shadow-[0_0_8px_rgba(59,130,246,0.6)] hover:drop-shadow-[0_0_15px_rgba(59,130,246,0.8)] transition-all duration-300"
                     />
                   </button>
                 </div>

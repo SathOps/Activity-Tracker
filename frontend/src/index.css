@@ -150,6 +150,7 @@
   );
   border: 1px solid rgba(59, 130, 246, 0.15);
   -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
   animation: border-glow-pulse 6s infinite ease-in-out;
   transition:
     transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
@@ -217,19 +218,24 @@
 
 /* GitLab Shimmering Button */
 .gitlab-shimmer-btn {
-  @apply relative overflow-hidden inline-flex items-center gap-2.5 border-none font-display font-bold cursor-pointer px-[26px] py-3 rounded-xl text-sm tracking-[0.02em];
-  background: linear-gradient(135deg, #e24329 0%, #fc6d26 50%, #fca326 100%);
+  @apply relative overflow-hidden inline-flex items-center gap-2.5 border border-white/20 font-display font-bold cursor-pointer px-[26px] py-3 rounded-xl text-sm tracking-[0.02em] backdrop-blur-md;
+  background: linear-gradient(
+    135deg,
+    rgba(226, 67, 41, 0.75) 0%,
+    rgba(252, 109, 38, 0.75) 50%,
+    rgba(252, 163, 38, 0.75) 100%
+  );
   background-size: 200% auto;
   color: white !important;
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 15px rgba(240, 74, 32, 0.35);
+  box-shadow: 0 4px 15px rgba(240, 74, 32, 0.25);
 }
 
 .gitlab-shimmer-btn:hover {
   @apply -translate-y-0.5 scale-[1.03];
   box-shadow:
-    0 10px 25px rgba(240, 74, 32, 0.5),
-    0 0 15px rgba(252, 109, 38, 0.3);
+    0 10px 25px rgba(240, 74, 32, 0.45),
+    0 0 15px rgba(252, 109, 38, 0.25);
   background-position: right center;
 }
 
@@ -253,19 +259,24 @@
 
 /* GitLab Blue Shimmering Button */
 .gitlab-blue-shimmer-btn {
-  @apply relative overflow-hidden inline-flex items-center gap-2.5 border-none font-display font-bold cursor-pointer px-4 py-2.5 rounded-xl text-xs tracking-[0.02em];
-  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #1d4ed8 100%);
+  @apply relative overflow-hidden inline-flex items-center gap-2.5 border border-white/15 font-display font-bold cursor-pointer px-4 py-2.5 rounded-xl text-xs tracking-[0.02em] backdrop-blur-md;
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.75) 0%,
+    rgba(59, 130, 246, 0.75) 50%,
+    rgba(29, 78, 216, 0.75) 100%
+  );
   background-size: 200% auto;
   color: white !important;
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
 }
 
 .gitlab-blue-shimmer-btn:hover {
   @apply -translate-y-0.5 scale-[1.015];
   box-shadow:
-    0 8px 20px rgba(37, 99, 235, 0.35),
-    0 0 12px rgba(59, 130, 246, 0.2);
+    0 8px 20px rgba(37, 99, 235, 0.3),
+    0 0 12px rgba(59, 130, 246, 0.15);
   background-position: right center;
 }
 
@@ -313,6 +324,7 @@
   background: rgba(255, 255, 255, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.22);
   -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
   box-shadow:
     0 8px 32px rgba(15, 23, 42, 0.06),
     0 1px 0 rgba(255, 255, 255, 0.5) inset;
@@ -385,6 +397,7 @@
   background: rgba(255, 255, 255, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.25);
   -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   box-shadow:
     0 8px 32px rgba(15, 23, 42, 0.05),
     0 1px 0 rgba(255, 255, 255, 0.4) inset;
@@ -435,6 +448,7 @@
   background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.45);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
 }
 
 [data-theme='dark'] .team-status-card-overlay {
@@ -479,15 +493,15 @@
 
 @layer components {
   .primary-button {
-    @apply inline-flex items-center justify-center gap-2 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-semibold text-[13.5px] px-5 py-2.5 rounded-xl cursor-pointer transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(59,130,246,0.18)] hover:shadow-[0_6px_16px_rgba(59,130,246,0.28)] hover:-translate-y-[1px] active:translate-y-0;
+    @apply inline-flex items-center justify-center gap-2 bg-blue-600/80 hover:bg-blue-600/90 dark:bg-blue-500/75 dark:hover:bg-blue-500/85 text-white font-semibold text-[13.5px] px-5 py-2.5 rounded-xl cursor-pointer transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-md border border-blue-400/40 dark:border-blue-400/20 shadow-[0_4px_14px_rgba(59,130,246,0.22)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.32)] hover:-translate-y-[1px] active:translate-y-0;
   }
 
   .secondary-button {
-    @apply inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 font-semibold text-[13.5px] px-5 py-2.5 rounded-xl cursor-pointer transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-[1px] active:translate-y-0;
+    @apply inline-flex items-center justify-center gap-2 bg-white/40 hover:bg-white/60 dark:bg-slate-900/40 dark:hover:bg-slate-900/60 border border-slate-300/40 dark:border-slate-800/50 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 font-semibold text-[13.5px] px-5 py-2.5 rounded-xl cursor-pointer transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-md shadow-[0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.2)] hover:-translate-y-[1px] active:translate-y-0;
   }
 
   .ghost-button {
-    @apply inline-flex items-center justify-center gap-2 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-semibold text-[13.5px] px-5 py-2.5 rounded-xl cursor-pointer transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 bg-transparent hover:bg-slate-500/[0.08] dark:hover:bg-white/5 border border-transparent hover:border-slate-500/[0.15] dark:hover:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-semibold text-[13.5px] px-5 py-2.5 rounded-xl cursor-pointer transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:backdrop-blur-md;
   }
 }
 
