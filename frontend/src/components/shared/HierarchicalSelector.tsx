@@ -118,41 +118,55 @@ function MultiSelectDropdown<T extends { id: number; name: string }>({
         </button>
 
         {open && !disabled && items.length > 0 && (
-          <div className="absolute inset-x-0 top-[calc(100%+4px)] z-50 max-h-[240px] overflow-y-auto rounded-xl border border-white/20 dark:border-white/10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-xl shadow-black/10 text-slate-800 dark:text-slate-100">
-            {/* Select all */}
-            <label className="flex cursor-pointer items-center gap-2.5 border-b border-slate-100/30 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/40 px-3.5 py-[9px]">
-              <input
-                type="checkbox"
-                checked={selectedCount === items.length && items.length > 0}
-                onChange={toggleAll}
-                className="accent-blue-500"
-              />
-              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Select all ({items.length})
-              </span>
-            </label>
-
-            {items.map((item) => (
-              <label
-                key={item.id}
-                className="flex cursor-pointer items-center gap-2.5 border-b border-slate-100/10 dark:border-slate-850 px-3.5 py-[9px] hover:bg-slate-50/50 dark:hover:bg-slate-950/30"
-              >
+          <div className="absolute inset-x-0 top-[calc(100%+4px)] z-50 flex flex-col rounded-xl border border-blue-200/50 dark:border-blue-500/20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl shadow-black/15 text-slate-800 dark:text-slate-100 overflow-hidden">
+            {/* Scrollable items list */}
+            <div className="max-h-[190px] overflow-y-auto">
+              {/* Select all */}
+              <label className="flex cursor-pointer items-center gap-2.5 border-b border-slate-100/30 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/40 px-3.5 py-[9px]">
                 <input
                   type="checkbox"
-                  checked={selected.has(item.id)}
-                  onChange={() => toggle(item.id)}
+                  checked={selectedCount === items.length && items.length > 0}
+                  onChange={toggleAll}
                   className="accent-blue-500"
                 />
-                <span className="flex-1 truncate text-[13px] text-slate-750 dark:text-slate-200">
-                  {renderItem ? renderItem(item) : item.name}
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Select all ({items.length})
                 </span>
               </label>
-            ))}
+
+              {items.map((item) => (
+                <label
+                  key={item.id}
+                  className="flex cursor-pointer items-center gap-2.5 border-b border-slate-100/10 dark:border-slate-850 px-3.5 py-[9px] hover:bg-slate-50/50 dark:hover:bg-slate-950/30"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected.has(item.id)}
+                    onChange={() => toggle(item.id)}
+                    className="accent-blue-500"
+                  />
+                  <span className="flex-1 truncate text-[13px] text-slate-750 dark:text-slate-200">
+                    {renderItem ? renderItem(item) : item.name}
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            {/* Bottom action panel */}
+            <div className="border-t border-slate-100/30 dark:border-slate-800 bg-white/20 dark:bg-slate-950/35 p-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-500/10 active:scale-95 transition-all cursor-pointer border-none outline-none"
+              >
+                Done
+              </button>
+            </div>
           </div>
         )}
 
         {open && !disabled && !isLoading && items.length === 0 && (
-          <div className="absolute inset-x-0 top-[calc(100%+4px)] z-50 rounded-xl border border-white/20 dark:border-white/10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-3.5 py-3 text-[13px] text-slate-400 dark:text-slate-500 shadow-xl shadow-black/10">
+          <div className="absolute inset-x-0 top-[calc(100%+4px)] z-50 rounded-xl border border-blue-200/50 dark:border-blue-500/20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl px-3.5 py-3 text-[13px] text-slate-400 dark:text-slate-500 shadow-xl shadow-black/10">
             {emptyPlaceholder ?? 'None available'}
           </div>
         )}
@@ -269,7 +283,7 @@ export function HierarchicalSelector({
     '[color-scheme:light] dark:[color-scheme:dark]';
 
   return (
-    <div className="flex flex-col gap-[18px] rounded-[24px] bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.37)] px-6 py-5 transition-all">
+    <div className="relative z-10 flex flex-col gap-[18px] rounded-[24px] bg-white/45 dark:bg-slate-900/45 border border-blue-200/80 dark:border-blue-500/25 backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.37)] px-6 py-5 transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/50 dark:hover:border-blue-400/40 hover:shadow-xl dark:hover:shadow-blue-900/10">
       {/* Empty state for no batches */}
       {!selectorQuery.isLoading && batches.length === 0 && (
         <p className="py-3 text-center text-[13px] text-slate-400 dark:text-slate-500">

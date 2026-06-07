@@ -395,7 +395,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                         ${
                           isActive
                             ? 'bg-blue-500/15 dark:bg-blue-500/15 text-blue-100 dark:text-blue-100 font-semibold'
-                            : 'bg-transparent text-slate-450 dark:text-slate-450 hover:bg-slate-800/20 dark:hover:bg-slate-800/20 hover:text-slate-200 dark:hover:text-slate-200'
+                            : 'bg-transparent text-white dark:text-slate-450 hover:bg-slate-800/20 dark:hover:bg-slate-800/20 hover:text-slate-200 dark:hover:text-slate-200'
                         }
                       `}
                     >

@@ -20,6 +20,7 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
   const { t } = useTranslation();
   const [listSearchQuery, setListSearchQuery] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showWarning, setShowWarning] = useState(true);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -44,6 +45,27 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
 
   return (
     <div className="w-full flex flex-col gap-6">
+      {/* Roster edits permission warning pop-up */}
+      {showWarning && !canManageInterns && (
+        <div className="relative overflow-hidden flex items-start justify-between gap-3 px-5 py-4 rounded-[20px] border border-amber-400/20 bg-gradient-to-br from-amber-400/[0.08] to-amber-400/[0.02] text-amber-800 dark:text-amber-300 text-[13px] leading-relaxed shadow-sm animate-fadeInUp">
+          <div className="flex items-center gap-3">
+            <span className="text-base shrink-0">⚠</span>
+            <span>
+              Intern list is visible here, but roster edits require
+              admin-granted standup edit permission.
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowWarning(false)}
+            className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-[10px] font-bold transition-colors cursor-pointer border-none bg-transparent outline-none shrink-0"
+            aria-label="Dismiss warning"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* ── Left: Interns List ── */}
       <section className="w-full bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 rounded-3xl p-6 backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
         <header className="flex flex-col gap-4 mb-4">
@@ -62,12 +84,7 @@ const InternsDashboard: React.FC<InternsDashboardProps> = ({
               >
                 + Add Intern
               </button>
-            ) : (
-              <span className="text-xs text-slate-400 dark:text-slate-500 italic max-w-[420px] text-right">
-                Intern list is visible here, but roster edits require
-                admin-granted standup edit permission.
-              </span>
-            )}
+            ) : null}
           </div>
 
           <input
