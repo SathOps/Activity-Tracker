@@ -75,7 +75,7 @@ const TeamStatusRing: React.FC<TeamStatusRingProps> = ({
   }, [normalizedStatuses]);
 
   return (
-    <article className="team-status-card group grid gap-4 p-5 sm:p-6">
+    <article className="relative overflow-hidden rounded-[20px] bg-white border border-[var(--border)] shadow-[var(--shadow-soft)] transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-[var(--shadow-hover)] dark:bg-slate-900/35 dark:border-white/5 dark:backdrop-blur-md dark:shadow-[0_8px_32px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.03)] dark:hover:border-blue-500/40 dark:hover:shadow-[0_20px_48px_rgba(0,0,0,0.5),0_0_30px_rgba(59,130,246,0.18),inset_0_1px_0_rgba(255,255,255,0.05)] group grid gap-4 p-5 sm:p-6">
       <div
         className="h-[min(192px,50vw)] w-[min(192px,50vw)] p-[clamp(11px,1.2vw,15px)] justify-self-center rounded-full"
         style={
@@ -84,7 +84,7 @@ const TeamStatusRing: React.FC<TeamStatusRingProps> = ({
           } as React.CSSProperties
         }
       >
-        <div className="team-status-ring-inner flex items-center justify-center rounded-full h-full w-full p-2.5 text-center">
+        <div className="transition-all duration-300 bg-[var(--surface-0)] border border-[var(--border)] flex items-center justify-center rounded-full h-full w-full p-2.5 text-center">
           <strong className="text-[var(--text-main)] text-[clamp(0.85rem,1.4vw,1rem)] leading-tight">
             {teamName}
           </strong>
@@ -133,7 +133,10 @@ const TeamStatusRing: React.FC<TeamStatusRingProps> = ({
         ))}
       </div>
 
-      <div className="team-status-card-overlay" role="presentation">
+      <div
+        className="absolute inset-0 flex flex-col gap-2.5 p-5 pt-6 sm:p-6 sm:pt-7 pointer-events-none opacity-0 translate-y-3 backdrop-blur-[20px] text-[var(--text-main)] transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] bg-white/88 border border-white/45 group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 dark:text-slate-100 dark:bg-slate-900/90 dark:border-white/5"
+        role="presentation"
+      >
         <p className="border-b border-black/10 dark:border-white/10 text-inherit text-xs font-bold tracking-wider m-0 pb-1.5 uppercase">
           {t('dashboard.teamMembers')}
         </p>

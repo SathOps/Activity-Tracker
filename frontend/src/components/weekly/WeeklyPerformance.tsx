@@ -122,7 +122,7 @@ function HourCell({
           hasEvents ? 'cursor-pointer' : 'cursor-default',
           active
             ? 'bg-green-500 dark:bg-green-600 border-green-600 dark:border-green-700 text-white shadow-[0_1px_4px_rgba(34,197,94,0.4)] hover:opacity-90'
-            : 'bg-white/30 dark:bg-slate-950/15 border-slate-200/50 dark:border-white/5 text-slate-400 dark:text-slate-600 hover:bg-white/50 dark:hover:bg-slate-800/30 backdrop-blur-[2px]'
+            : 'bg-white dark:bg-slate-950/15 border border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/30 backdrop-blur-[2px]'
         )}
       >
         {active && events.length > 0 && (
@@ -135,7 +135,7 @@ function HourCell({
 
       {/* Popover */}
       {open && hasEvents && (
-        <div className="absolute z-50 left-0 top-10 w-72 rounded-xl border border-white/20 dark:border-white/5 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl shadow-xl p-3 space-y-1.5">
+        <div className="absolute z-50 left-0 top-10 w-72 rounded-xl border border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900/85 backdrop-blur-xl shadow-xl p-3 space-y-1.5">
           <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
             {HOUR_LABELS[hour]} · {events.length} event
             {events.length > 1 ? 's' : ''}
@@ -146,7 +146,7 @@ function HourCell({
               href={e.url || '#'}
               target="_blank"
               rel="noreferrer"
-              className="flex items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-white/50 dark:hover:bg-slate-800/50 group"
+              className="flex items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 group"
               title={e.title}
             >
               <span
@@ -199,7 +199,7 @@ function MediaRecord({
         href={url}
         target="_blank"
         rel="noreferrer"
-        className="flex items-center gap-2 rounded-lg border border-purple-200/50 dark:border-purple-500/20 bg-purple-500/5 dark:bg-purple-950/15 px-3 py-2 text-xs text-purple-800 dark:text-purple-300 hover:bg-purple-500/10 dark:hover:bg-purple-950/25 transition-colors group backdrop-blur-sm"
+        className="flex items-center gap-2 rounded-lg border border-purple-200 dark:border-purple-500/20 bg-purple-50 dark:bg-purple-950/15 px-3 py-2 text-xs text-purple-800 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-950/25 transition-colors group backdrop-blur-sm"
         title={label}
       >
         <Video size={12} className="flex-shrink-0 text-purple-500" />
@@ -237,7 +237,7 @@ function MediaRecord({
   }
 
   return (
-    <div className="rounded-lg border border-indigo-200/50 dark:border-indigo-500/20 bg-indigo-500/5 dark:bg-indigo-950/15 px-3 py-2 space-y-1.5 backdrop-blur-sm">
+    <div className="rounded-lg border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50 dark:bg-indigo-950/15 px-3 py-2 space-y-1.5 backdrop-blur-sm">
       {/* Title + open-in-browser link */}
       <div className="flex items-center gap-2">
         <Mic
@@ -336,7 +336,7 @@ function DayRow({
         'rounded-xl border p-4 space-y-3 transition-colors backdrop-blur-md shadow-sm',
         hasActivity
           ? 'border-green-500/20 dark:border-green-500/15 bg-green-500/5 dark:bg-green-950/15 shadow-green-500/5'
-          : 'border-slate-200/50 dark:border-white/5 bg-white/45 dark:bg-slate-900/45 shadow-black/5'
+          : 'border border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900/45 shadow-black/5'
       )}
     >
       {/* Date header */}
@@ -442,7 +442,7 @@ function DayRow({
 
       {/* Media records */}
       {mediaRecords.length > 0 && (
-        <div className="pt-2 border-t border-slate-200/50 dark:border-white/5 space-y-2">
+        <div className="pt-2 border-t border-slate-200 dark:border-white/5 space-y-2">
           <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
             Recordings ({mediaRecords.length})
           </p>
@@ -454,7 +454,7 @@ function DayRow({
 
       {/* Commits */}
       {commits.length > 0 && (
-        <div className="pt-2 border-t border-slate-200/50 dark:border-white/5 space-y-1">
+        <div className="pt-2 border-t border-slate-200 dark:border-white/5 space-y-1">
           <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
             Commits ({commits.length})
           </p>
@@ -464,7 +464,7 @@ function DayRow({
               href={c.web_url || '#'}
               target="_blank"
               rel="noreferrer"
-              className="flex items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-white/50 dark:hover:bg-slate-800/30 group"
+              className="flex items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/30 group"
             >
               <GitCommit
                 size={10}
@@ -653,7 +653,7 @@ export function WeeklyPerformance() {
                     'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors backdrop-blur-sm',
                     i === activeTab
                       ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'border border-slate-200/50 dark:border-white/5 bg-white/35 dark:bg-slate-900/35 text-slate-600 dark:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-850/50'
+                      : 'border border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900/35 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-850/50'
                   )}
                 >
                   {r.intern_name || r.gitlab_username}
@@ -696,7 +696,7 @@ export function WeeklyPerformance() {
                       `weekly_${activeResult.gitlab_username}.json`
                     )
                   }
-                  className="flex items-center gap-1.5 rounded-lg border border-slate-200/50 dark:border-white/10 bg-white/30 dark:bg-slate-900/30 px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-white/55 dark:hover:bg-slate-800/50 transition-colors backdrop-blur-sm shadow-sm"
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/30 px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors backdrop-blur-sm shadow-sm"
                 >
                   <Download size={13} /> Export JSON
                 </button>
@@ -705,7 +705,7 @@ export function WeeklyPerformance() {
               <SummaryCards activity={activeResult} />
 
               {/* Legend */}
-              <div className="flex flex-wrap items-center gap-4 rounded-lg bg-white/25 dark:bg-slate-950/15 border border-white/20 dark:border-white/5 backdrop-blur-md px-4 py-2.5 text-[10px] text-slate-500 dark:text-slate-400 shadow-sm shadow-black/5">
+              <div className="flex flex-wrap items-center gap-4 rounded-lg bg-white dark:bg-slate-950/15 border border-slate-200 dark:border-white/5 backdrop-blur-md px-4 py-2.5 text-[10px] text-slate-500 dark:text-slate-400 shadow-sm shadow-black/5">
                 <span className="font-semibold text-slate-600 dark:text-slate-300">
                   Legend:
                 </span>

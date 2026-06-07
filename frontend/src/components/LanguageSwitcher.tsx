@@ -41,11 +41,10 @@ export default function LanguageSwitcher() {
             onClick={() => changeLanguage(code)}
             className="
               h-9 min-w-[42px] px-2.5
-              rounded-full border-none
+              rounded-full border border-slate-200/50 dark:border-transparent
               text-[11px] font-bold cursor-pointer whitespace-nowrap
-              bg-white/[0.07] text-white/55
-              hover:bg-white/[0.13] hover:text-white/85 hover:scale-[1.04]
-              dark:bg-white/[0.07] dark:text-white/55
+              bg-slate-100 text-slate-650 hover:bg-slate-200/80 hover:text-slate-800
+              dark:bg-white/[0.07] dark:text-white/55 dark:hover:bg-white/[0.13] dark:hover:text-white/85 dark:hover:scale-[1.04]
               transition-all duration-200
             "
           >
@@ -64,10 +63,8 @@ export default function LanguageSwitcher() {
           h-9 min-w-[42px] px-2.5
           rounded-full
           text-[11px] font-bold cursor-pointer whitespace-nowrap
-          bg-[rgba(65,120,255,0.25)] text-[#7eb8ff]
-          border border-[rgba(65,120,255,0.4)]
-          shadow-[0_0_10px_rgba(65,120,255,0.15)]
-          hover:bg-[rgba(65,120,255,0.35)] hover:text-[#a8d0ff]
+          bg-gradient-to-r from-blue-600 to-indigo-600 text-white border border-blue-500/20 shadow-[0_4px_12px_rgba(37,99,235,0.2)] hover:from-blue-700 hover:to-indigo-700 hover:shadow-[0_6px_16px_rgba(37,99,235,0.3)]
+          dark:bg-[rgba(65,120,255,0.25)] dark:text-[#7eb8ff] dark:border dark:border-[rgba(65,120,255,0.4)] dark:shadow-[0_0_10px_rgba(65,120,255,0.15)] dark:hover:bg-[rgba(65,120,255,0.35)] dark:hover:text-[#a8d0ff]
           transition-all duration-200
         "
       >

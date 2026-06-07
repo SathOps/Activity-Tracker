@@ -52,27 +52,7 @@ export function Layout({ children }: Props) {
         setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'))
       }
       type="button"
-      style={{
-        width: 58,
-        height: 32,
-        borderRadius: 99,
-        background:
-          themeMode === 'dark'
-            ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.35), rgba(79, 70, 229, 0.25))'
-            : 'rgba(0, 0, 0, 0.05)',
-        border: 'none',
-        padding: 4,
-        display: 'flex',
-        alignItems: 'center',
-        cursor: 'pointer',
-        position: 'relative',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow:
-          themeMode === 'dark'
-            ? 'inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 10px rgba(59, 130, 246, 0.15)'
-            : 'inset 0 2px 4px rgba(0, 0, 0, 0.05)',
-        outline: 'none',
-      }}
+      className="w-[58px] h-8 rounded-full p-1 flex items-center cursor-pointer relative outline-none transition-all duration-300 bg-gradient-to-br from-sky-100 to-blue-50 border border-blue-200/60 shadow-[inset_0_2px_4px_rgba(37,99,235,0.03),0_2px_8px_rgba(37,99,235,0.04)] hover:border-blue-300/80 hover:shadow-[inset_0_2px_4px_rgba(37,99,235,0.06),0_4px_12px_rgba(37,99,235,0.08)] dark:bg-gradient-to-br dark:from-blue-600/35 dark:to-indigo-500/25 dark:border-white/5 dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.3),0_0_10px_rgba(59,130,246,0.15)]"
     >
       {/* Background Icons */}
       <div
@@ -107,24 +87,9 @@ export function Layout({ children }: Props) {
 
       {/* Sliding Handle */}
       <div
-        style={{
-          width: 22,
-          height: 22,
-          borderRadius: '50%',
-          background:
-            themeMode === 'dark'
-              ? 'linear-gradient(135deg, #ffffff, #cbd5e1)'
-              : 'linear-gradient(135deg, #ffffff, #f1f5f9)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
-          transform:
-            themeMode === 'dark' ? 'translateX(26px)' : 'translateX(0px)',
-          transition:
-            'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s',
-          zIndex: 2,
-        }}
+        className={`w-[22px] h-[22px] rounded-full flex items-center justify-center transition-all duration-300 z-10 bg-gradient-to-br from-white to-slate-50 shadow-[0_3px_8px_rgba(37,99,235,0.18),0_1px_2px_rgba(37,99,235,0.08)] dark:from-white dark:to-slate-300 dark:shadow-[0_2px_6px_rgba(0,0,0,0.4)]
+          ${themeMode === 'dark' ? 'translate-x-[26px]' : 'translate-x-0'}
+        `}
       >
         {themeMode === 'dark' ? (
           <Moon size={11} className="text-indigo-600 fill-indigo-600" />
@@ -152,9 +117,17 @@ export function Layout({ children }: Props) {
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <main className="flex-1 overflow-y-auto relative bg-slate-50 dark:bg-[#090e1a] transition-colors duration-300">
+      <main
+        style={{
+          background:
+            themeMode === 'dark'
+              ? '#090e1a'
+              : 'radial-gradient(1000px 420px at 100% -10%, var(--body-glow-1) 0%, transparent 70%), radial-gradient(700px 320px at -10% 10%, var(--body-glow-2) 0%, transparent 68%), var(--body-gradient)',
+        }}
+        className="flex-1 overflow-y-auto relative transition-colors duration-300"
+      >
         {/* Spaced dot grid pattern (subtle and clean) */}
-        <div className="fixed inset-0 md:left-[300px] pointer-events-none bg-[radial-gradient(rgba(148,163,184,0.18)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:24px_24px] z-0" />
+        <div className="fixed inset-0 md:left-[300px] pointer-events-none bg-[radial-gradient(rgba(37,99,235,0.08)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:24px_24px] z-0" />
 
         <div
           className={`relative z-10 px-4 pt-3 pb-6 md:px-8 md:py-6 max-w-[1200px] mx-auto min-w-0 ${isStandupMode ? 'pb-24 md:pb-6' : ''}`}
@@ -187,7 +160,7 @@ export function Layout({ children }: Props) {
                     : 'radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, rgba(59, 130, 246, 0.05) 50%, transparent 100%)',
               }}
             />
-            <header className="relative z-10 overflow-hidden border border-white/20 dark:border-white/5 bg-white/45 dark:bg-slate-900/45 backdrop-blur-xl rounded-xl md:rounded-[20px] shadow-sm md:shadow-lg shadow-slate-200/50 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
+            <header className="relative z-10 overflow-hidden border border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900/45 backdrop-blur-xl rounded-xl md:rounded-[20px] shadow-sm md:shadow-lg shadow-slate-200/50 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
               {/* Gradient accent bar (flowing) */}
               <div className="flowing-gradient-line" aria-hidden="true" />
 
@@ -233,7 +206,18 @@ export function Layout({ children }: Props) {
           </div>
 
           {isComplianceMode && !gitlabConnected && (
-            <div className="relative overflow-hidden flex items-center gap-3 px-5 py-4 rounded-[14px] bg-[linear-gradient(135deg,rgba(245,158,11,0.12),rgba(217,119,6,0.04))] backdrop-blur-[20px] border border-[rgba(245,158,11,0.25)] text-[#ffedd5] text-[13.5px] leading-[1.5] warning-pulse-card mb-6">
+            <div
+              style={{
+                background:
+                  themeMode === 'dark'
+                    ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(217, 119, 6, 0.04))'
+                    : '#eff6ff',
+                borderColor:
+                  themeMode === 'dark' ? 'rgba(245, 158, 11, 0.25)' : '#bfdbfe',
+                color: themeMode === 'dark' ? '#ffedd5' : '#1e40af',
+              }}
+              className="relative overflow-hidden flex items-center gap-3 px-5 py-4 rounded-[14px] border text-[13.5px] leading-[1.5] warning-pulse-card mb-6"
+            >
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -241,7 +225,10 @@ export function Layout({ children }: Props) {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="warning-icon-pulse text-[#f59e0b] shrink-0 w-[18px] h-[18px]"
+                style={{
+                  color: themeMode === 'dark' ? '#f59e0b' : '#2563eb',
+                }}
+                className="warning-icon-pulse shrink-0 w-[18px] h-[18px]"
               >
                 <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
                 <line x1="12" y1="9" x2="12" y2="13" />
@@ -249,7 +236,13 @@ export function Layout({ children }: Props) {
               </svg>
               <span>
                 GitLab account not connected. Use the{' '}
-                <strong className="text-[#fbbf24]">Connect with GitLab</strong>{' '}
+                <strong
+                  style={{
+                    color: themeMode === 'dark' ? '#fbbf24' : '#1d4ed8',
+                  }}
+                >
+                  Connect with GitLab
+                </strong>{' '}
                 button to enable compliance features.
               </span>
             </div>
@@ -271,7 +264,7 @@ export function Layout({ children }: Props) {
                 className={`w-full h-full flex items-center transition-all duration-500 ${
                   isIslandCollapsed
                     ? 'bg-transparent border-transparent backdrop-blur-none shadow-none justify-center'
-                    : 'bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 backdrop-blur-xl shadow-lg dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] px-8 justify-between rounded-full [mask-image:radial-gradient(circle_at_50%_0,transparent_34px,black_35px)] [-webkit-mask-image:radial-gradient(circle_at_50%_0,transparent_34px,black_35px)]'
+                    : 'bg-white dark:bg-slate-900/45 border border-slate-200 dark:border-white/5 backdrop-blur-xl shadow-lg dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] px-8 justify-between rounded-full [mask-image:radial-gradient(circle_at_50%_0,transparent_34px,black_35px)] [-webkit-mask-image:radial-gradient(circle_at_50%_0,transparent_34px,black_35px)]'
                 }`}
                 onClick={
                   isIslandCollapsed

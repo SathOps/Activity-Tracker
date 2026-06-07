@@ -15,17 +15,17 @@ const ROLE_OPTIONS: UserRole[] = ['intern', 'mentor', 'admin'];
 /* ── Shared glass card style ─────────────────────────────── */
 const glassCard =
   'relative z-10 rounded-[24px] backdrop-blur-xl ' +
-  'bg-white/45 dark:bg-slate-900/45 border border-white/20 dark:border-white/5 ' +
+  'bg-white dark:bg-slate-900/45 border border-slate-200 dark:border-white/5 ' +
   'shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.37)] ' +
   'transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 ' +
-  'hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-xl dark:hover:shadow-blue-900/10';
+  'hover:bg-slate-50 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-xl dark:hover:shadow-blue-900/10';
 
 const blueGlassCard =
   'relative z-10 rounded-[24px] backdrop-blur-xl ' +
-  'bg-white/45 dark:bg-slate-900/45 border border-blue-200/80 dark:border-blue-500/25 ' +
+  'bg-white dark:bg-slate-900/45 border border-blue-200 dark:border-blue-500/25 ' +
   'shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.37)] ' +
   'transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 ' +
-  'hover:bg-white/60 dark:hover:bg-slate-900/55 hover:border-blue-500/50 dark:hover:border-blue-400/40 hover:shadow-xl dark:hover:shadow-blue-900/10';
+  'hover:bg-slate-50 dark:hover:bg-slate-900/55 hover:border-blue-500/50 dark:hover:border-blue-400/40 hover:shadow-xl dark:hover:shadow-blue-900/10';
 
 export function RolesPage() {
   const qc = useQueryClient();
@@ -89,7 +89,7 @@ export function RolesPage() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search users"
-            className="w-full max-w-sm px-4 py-2 bg-white/30 dark:bg-slate-950/20 border border-slate-300/60 dark:border-white/10 rounded-xl text-slate-800 dark:text-slate-100 text-sm backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 cursor-pointer"
+            className="w-full max-w-sm px-4 py-2 bg-white dark:bg-slate-950/20 border border-slate-200 dark:border-white/10 rounded-xl text-slate-800 dark:text-slate-100 text-sm backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 cursor-pointer"
           />
           <div className="relative w-40">
             <select
@@ -97,7 +97,7 @@ export function RolesPage() {
               onChange={(event) =>
                 setSelectedRole(event.target.value as UserRole | 'all')
               }
-              className="w-full appearance-none pr-10 pl-4 py-2 bg-white/30 dark:bg-slate-950/20 border border-slate-300/60 dark:border-white/10 rounded-xl text-slate-800 dark:text-slate-100 text-sm backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 cursor-pointer"
+              className="w-full appearance-none pr-10 pl-4 py-2 bg-white dark:bg-slate-950/20 border border-slate-200 dark:border-white/10 rounded-xl text-slate-800 dark:text-slate-100 text-sm backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 cursor-pointer"
             >
               <option
                 value="all"
