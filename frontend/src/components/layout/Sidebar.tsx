@@ -272,23 +272,23 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                       navigate(item.path);
                       onClose?.();
                     }}
-                    className={`flex items-center gap-3.5 w-full p-3 rounded-xl border-none cursor-pointer text-left transition-all duration-300 relative group hover:scale-[1.015] hover:-translate-y-[1px]
+                    className={`flex items-center gap-3.5 w-full p-3 rounded-xl cursor-pointer text-left transition-all duration-300 relative group hover:scale-[1.012] hover:-translate-y-[0.5px]
                       ${
                         isActive
-                          ? 'bg-gradient-to-r from-blue-500/20 via-blue-500/15 to-indigo-500/10 dark:from-blue-600/30 dark:via-blue-600/20 dark:to-indigo-600/15 text-blue-700 dark:text-blue-50 shadow-[0_4px_16px_rgba(37,99,235,0.08)] hover:shadow-[0_8px_20px_rgba(37,99,235,0.14)] border border-blue-500/20 dark:border-blue-500/30'
+                          ? 'bg-blue-600/10 dark:bg-blue-500/10 text-white shadow-[0_4px_20px_rgba(0,0,0,0.2)] border border-blue-400/40 dark:border-blue-400/30 backdrop-blur-md'
                           : 'bg-transparent text-slate-600 dark:text-slate-455 hover:bg-slate-100/50 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-slate-200 border border-transparent'
                       }
                     `}
                   >
                     {isActive && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-gradient-to-b from-blue-500 to-indigo-600" />
+                      <div className="absolute -left-px top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-gradient-to-b from-blue-400 to-indigo-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
                     )}
                     <span
-                      className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 border
                         ${
                           isActive
-                            ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 dark:shadow-blue-500/45'
-                            : 'bg-slate-100/80 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200/80 dark:group-hover:bg-slate-800/80 group-hover:text-slate-700 dark:group-hover:text-slate-200'
+                            ? 'bg-blue-600/20 dark:bg-blue-600/15 text-white border-blue-500/30 dark:border-blue-500/20 shadow-inner brightness-105'
+                            : 'bg-slate-100/80 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-transparent group-hover:bg-slate-200/80 dark:group-hover:bg-slate-800/80 group-hover:text-slate-700 dark:group-hover:text-slate-200'
                         }
                       `}
                     >
