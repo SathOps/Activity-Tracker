@@ -41,12 +41,11 @@ export default function LanguageSwitcher() {
             onClick={() => changeLanguage(code)}
             className="
               h-9 min-w-[42px] px-2.5
-              rounded-full border border-transparent
+              rounded-full border-none
               text-[11px] font-bold cursor-pointer whitespace-nowrap
-              bg-slate-500/[0.06] text-slate-500
-              hover:bg-slate-500/[0.12] hover:text-slate-850 hover:scale-[1.04]
+              bg-white/[0.07] text-white/55
+              hover:bg-white/[0.13] hover:text-white/85 hover:scale-[1.04]
               dark:bg-white/[0.07] dark:text-white/55
-              dark:hover:bg-white/[0.13] dark:hover:text-white/85
               transition-all duration-200
             "
           >
@@ -65,9 +64,10 @@ export default function LanguageSwitcher() {
           h-9 min-w-[42px] px-2.5
           rounded-full
           text-[11px] font-bold cursor-pointer whitespace-nowrap
-          bg-blue-500/10 text-blue-700 border border-blue-500/35 shadow-sm shadow-blue-500/10
-          dark:bg-blue-400/10 dark:text-blue-400 dark:border-blue-400/25 dark:shadow-none
-          hover:bg-blue-500/20 dark:hover:bg-blue-400/20 hover:scale-[1.02]
+          bg-[rgba(65,120,255,0.25)] text-[#7eb8ff]
+          border border-[rgba(65,120,255,0.4)]
+          shadow-[0_0_10px_rgba(65,120,255,0.15)]
+          hover:bg-[rgba(65,120,255,0.35)] hover:text-[#a8d0ff]
           transition-all duration-200
         "
       >

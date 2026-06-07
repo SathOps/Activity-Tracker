@@ -962,10 +962,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <button
                 key={viewKey}
                 onClick={() => setStatusView(viewKey)}
-                className={`flex items-center gap-1.5 px-5 py-2.5 rounded-full text-xs font-bold cursor-pointer transition-all duration-300 border ${
+                className={`flex items-center gap-1.5 px-5 py-2.5 border-none rounded-full text-xs font-semibold cursor-pointer transition-all duration-300 ${
                   isActive
-                    ? 'bg-blue-500/15 dark:bg-blue-950/45 border-blue-500/35 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 shadow-sm shadow-blue-500/10'
-                    : 'bg-transparent border-transparent text-[var(--text-subtle)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_4px_15px_rgba(59,130,246,0.25)]'
+                    : 'bg-transparent text-[var(--text-subtle)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'
                 }`}
                 type="button"
               >
@@ -1051,7 +1051,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           {user?.role === 'intern' ? (
             <section className="grid gap-5 sm:gap-6 md:gap-4">
               {/* 4 Tabs for Standups */}
-              <div className="flex gap-2 p-1 bg-blue-50/40 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-900/30 rounded-2xl max-w-lg backdrop-blur-md shadow-[0_8px_25px_rgba(59,130,246,0.12)] dark:shadow-[0_8px_30px_rgba(30,58,138,0.25)]">
+              <div className="flex gap-2 p-1 bg-slate-900/50 border border-slate-800/60 rounded-2xl max-w-lg">
                 {(['S1', 'S2', 'S3', 'S4'] as const).map((slotId) => {
                   const timeLabel = getSlotTimeLabel(slotId);
                   const isActive = activeSlotTab === slotId;
@@ -1059,10 +1059,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     <button
                       key={slotId}
                       onClick={() => setActiveSlotTab(slotId)}
-                      className={`flex-1 py-2 px-3 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer border outline-none ${
+                      className={`flex-1 py-2 px-3 text-xs font-semibold rounded-xl transition-all duration-200 cursor-pointer border-none outline-none ${
                         isActive
-                          ? 'bg-blue-500/15 dark:bg-blue-950/45 border-blue-500/35 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 shadow-sm shadow-blue-500/10'
-                          : 'border-transparent text-blue-700/60 hover:text-blue-900 hover:bg-blue-100/30 dark:text-blue-300/60 dark:hover:text-blue-100 dark:hover:bg-blue-900/20 bg-transparent'
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/10'
+                          : 'text-slate-400 hover:text-slate-200 bg-transparent'
                       }`}
                       type="button"
                     >
@@ -1210,7 +1210,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                         className={getWeeklyDayClasses(dayStatus.standupCount)}
                       >
                         <strong
-                          className="cursor-help text-xs font-bold"
+                          className="text-[var(--text-main)] cursor-help text-xs"
                           title={formatContributorTooltip(
                             dayStatus.contributorDetails,
                             t('dashboard.noUploadsForSelection')
@@ -1218,10 +1218,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                         >
                           {dayStatus.dayLabel}
                         </strong>
-                        <span className="opacity-80 text-[11px] font-semibold">
+                        <span className="text-[var(--text-subtle)] text-[11px]">
                           {dayStatus.fullDateLabel}
                         </span>
-                        <span className="text-xs font-bold">
+                        <span className="text-[var(--text-main)] text-xs">
                           {dayStatus.standupCount}/
                           {dayStatus.requiredStandupCount}
                         </span>
@@ -1526,10 +1526,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
               return (
                 <button
-                  className={`px-5 py-2 border rounded-full text-[13px] font-bold cursor-pointer transition-all duration-200 ${
+                  className={`px-5 py-2 border border-transparent rounded-full text-[13px] font-semibold cursor-pointer transition-all duration-200 ${
                     isActive
-                      ? 'bg-blue-500/15 dark:bg-blue-950/45 border-blue-500/35 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 shadow-sm shadow-blue-500/10'
-                      : 'border-transparent bg-transparent text-[var(--text-subtle)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm'
+                      : 'bg-transparent text-[var(--text-subtle)] hover:text-[var(--text-main)] hover:bg-black/5 dark:hover:bg-white/5'
                   }`}
                   key={item.key}
                   onClick={() => setActiveView(item.key)}
@@ -2592,9 +2592,9 @@ function formatContributorTooltip(
 }
 
 function getFilterButtonClass(isActive: boolean): string {
-  return `glass border text-[13px] font-bold px-4 py-2 rounded-full transition-all duration-200 cursor-pointer ${
+  return `glass border text-[13px] font-semibold px-4 py-2 rounded-full transition-all duration-200 cursor-pointer ${
     isActive
-      ? 'bg-blue-500/15 dark:bg-blue-950/45 border-blue-500/35 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 shadow-sm shadow-blue-500/10'
+      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-transparent shadow-sm'
       : 'bg-white/10 dark:bg-black/10 border-white/10 dark:border-white/5 text-[var(--text-subtle)] hover:text-[var(--text-main)]'
   }`;
 }
@@ -2829,35 +2829,34 @@ function resolveUploadedDateKey(
 
 function getWeeklyDayClasses(count: number): string {
   const base =
-    'relative overflow-hidden grid gap-1 px-3 py-2.5 rounded-[14px] border ' +
-    'backdrop-blur-md transition-all duration-300 ' +
-    'hover:-translate-y-0.5 hover:scale-[1.02] active:scale-95 cursor-pointer ' +
-    'shadow-sm ';
+    'relative overflow-hidden grid gap-1 px-3 py-2.5 rounded-[14px] ' +
+    'backdrop-blur-[20px] transition-all duration-[450ms] ' +
+    'border bg-transparent text-[#ffedd5] [animation:border-glow-breathing_4s_infinite_ease-in-out] ' +
+    'hover:-translate-y-1 hover:[box-shadow:0_15px_35px_rgba(59,130,246,0.08),inset_0_1px_0_rgba(255,255,255,0.04)]';
 
   if (count >= 4) {
     return (
       base +
-      'bg-emerald-500/10 dark:bg-emerald-500/15 border-emerald-500/20 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-300 shadow-emerald-500/5'
+      ' !border-emerald-400/40 shadow-[inset_0_0_0_1px_rgba(34,197,94,0.08)]'
     );
   }
 
   if (count === 3) {
     return (
       base +
-      'bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/20 dark:border-amber-500/30 text-amber-600 dark:text-amber-300 shadow-amber-500/5'
+      ' !border-yellow-400/40 shadow-[inset_0_0_0_1px_rgba(250,204,21,0.08)]'
     );
   }
 
   if (count === 2) {
     return (
       base +
-      'bg-orange-500/10 dark:bg-orange-500/15 border-orange-500/20 dark:border-orange-500/30 text-orange-600 dark:text-orange-300 shadow-orange-500/5'
+      ' !border-orange-400/40 shadow-[inset_0_0_0_1px_rgba(249,115,22,0.08)]'
     );
   }
 
   return (
-    base +
-    'bg-rose-500/10 dark:bg-rose-500/15 border-rose-500/20 dark:border-rose-500/30 text-rose-500 dark:text-rose-300 shadow-rose-500/5'
+    base + ' !border-red-400/40 shadow-[inset_0_0_0_1px_rgba(248,113,113,0.08)]'
   );
 }
 

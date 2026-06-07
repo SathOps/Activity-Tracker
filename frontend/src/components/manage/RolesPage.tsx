@@ -160,10 +160,10 @@ export function RolesPage() {
                         })
                       }
                       disabled={active || assignMutation.isPending}
-                      className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer disabled:cursor-not-allowed border ${
+                      className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer disabled:cursor-not-allowed ${
                         active
-                          ? 'bg-blue-500/15 dark:bg-blue-950/45 border-blue-500/35 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 shadow-sm shadow-blue-500/10'
-                          : 'bg-slate-500/5 dark:bg-white/5 border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-500/10 dark:hover:bg-white/10 hover:border-slate-400 dark:hover:border-slate-700 border-transparent'
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border border-transparent shadow-md shadow-blue-500/20'
+                          : 'bg-slate-500/5 dark:bg-white/5 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-500/10 dark:hover:bg-white/10 hover:border-slate-400 dark:hover:border-slate-700'
                       }`}
                     >
                       {role}
