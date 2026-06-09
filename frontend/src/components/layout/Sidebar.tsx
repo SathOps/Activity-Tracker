@@ -193,6 +193,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           backdrop-blur-[24px]
           shadow-[18px_0_48px_rgba(0,0,0,0.55)]
           dark:shadow-[18px_0_48px_rgba(0,0,0,0.55)]
+          text-slate-300
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
@@ -276,7 +277,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                       ${
                         isActive
                           ? 'bg-blue-500/10 dark:bg-blue-500/10 text-white shadow-[0_4px_20px_rgba(0,0,0,0.2)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] border border-blue-400/30 dark:border-blue-400/30 backdrop-blur-md'
-                          : 'bg-transparent text-slate-400 dark:text-slate-455 hover:bg-slate-800/40 dark:hover:bg-slate-800/40 hover:text-slate-200 dark:hover:text-slate-200 border border-transparent'
+                          : 'bg-transparent text-slate-400 dark:text-slate-400 hover:bg-slate-800/40 dark:hover:bg-slate-800/40 hover:text-slate-200 dark:hover:text-slate-200 border border-transparent'
                       }
                     `}
                   >
@@ -297,7 +298,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     <div>
                       <p
                         className={`m-0 text-[13px] font-semibold font-display tracking-tight transition-colors
-                        ${isActive ? 'text-slate-50 dark:text-slate-50' : 'text-slate-350 dark:text-slate-350'}
+                        ${isActive ? 'text-slate-50 dark:text-slate-50' : 'text-slate-300 dark:text-slate-300'}
                       `}
                       >
                         {item.label}
@@ -395,13 +396,13 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                         ${
                           isActive
                             ? 'bg-blue-500/15 dark:bg-blue-500/15 text-blue-100 dark:text-blue-100 font-semibold'
-                            : 'bg-transparent text-white dark:text-slate-450 hover:bg-slate-800/20 dark:hover:bg-slate-800/20 hover:text-slate-200 dark:hover:text-slate-200'
+                            : 'bg-transparent text-white dark:text-slate-400 hover:bg-slate-800/20 dark:hover:bg-slate-800/20 hover:text-slate-200 dark:hover:text-slate-200'
                         }
                       `}
                     >
                       <span
                         className={`transition-transform duration-250 flex items-center group-hover:scale-110
-                        ${isActive ? 'text-blue-400 dark:text-blue-400 opacity-100' : 'text-slate-550 dark:text-slate-550 opacity-70 group-hover:opacity-100'}
+                        ${isActive ? 'text-blue-400 dark:text-blue-400 opacity-100' : 'text-slate-400 dark:text-slate-400 opacity-70 group-hover:opacity-100'}
                       `}
                       >
                         {item.icon}
