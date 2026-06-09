@@ -5,6 +5,8 @@ import { useConfigStore } from '../../stores/configStore';
 import { useQueryClient } from '@tanstack/react-query';
 import { Eye, EyeOff } from 'lucide-react';
 
+let introAlreadyShown = false;
+
 export function CorpusLoginPage() {
   const setCorpusToken = useConfigStore((state) => state.setCorpusToken);
   const setAccessToken = useConfigStore((state) => state.setAccessToken);
@@ -18,6 +20,19 @@ export function CorpusLoginPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [showAbout, setShowAbout] = useState(false);
 
+  const [showIntro, setShowIntro] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth <= 800;
+      const prefersReduced = window.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
+      return isMobile && !introAlreadyShown && !prefersReduced;
+    }
+    return false;
+  });
+  const [isSwipingUp, setIsSwipingUp] = useState(false);
+  const [revealForm, setRevealForm] = useState(false);
+
   // Show any error from GitLab OIDC redirect (/login?error=...)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -27,6 +42,45 @@ export function CorpusLoginPage() {
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
+
+  // Gesture tracking states for manual swipe up
+  const [startY, setStartY] = useState<number | null>(null);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleStart = (y: number, preventDefault?: () => void) => {
+    if (preventDefault) preventDefault();
+    setStartY(y);
+    setIsDragging(true);
+  };
+
+  const handleMove = (y: number) => {
+    if (!isDragging || startY === null || isSwipingUp) return;
+    const diff = startY - y;
+    if (diff > 0) {
+      setDragOffset(diff);
+    } else {
+      setDragOffset(0);
+    }
+  };
+
+  const handleEnd = () => {
+    if (!isDragging || isSwipingUp) return;
+    setIsDragging(false);
+    setStartY(null);
+
+    const threshold = window.innerHeight * 0.15; // 15% height threshold
+    if (dragOffset > threshold) {
+      setIsSwipingUp(true);
+      setRevealForm(true);
+      setTimeout(() => {
+        setShowIntro(false);
+        introAlreadyShown = true;
+      }, 800);
+    } else {
+      setDragOffset(0);
+    }
+  };
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -64,6 +118,60 @@ export function CorpusLoginPage() {
 
   return (
     <main className="relative flex h-screen w-screen items-center justify-center overflow-hidden p-0 font-body bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.15),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(139,92,246,0.12),transparent_40%),radial-gradient(circle_at_60%_10%,rgba(14,165,233,0.1),transparent_30%),linear-gradient(135deg,#eef0fa_0%,#e8ecf5_40%,#eff0fa_100%)] bg-[size:200%_200%] animate-[login-gradient-shift_15s_ease_infinite] max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:items-center max-[800px]:overflow-y-auto max-[800px]:bg-slate-50">
+      {showIntro && (
+        <div
+          role="presentation"
+          /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */
+          className={`mobile-intro-overlay ${isSwipingUp ? 'swipe-up' : ''} select-none`}
+          style={{
+            transform: isSwipingUp
+              ? 'translateY(-100%)'
+              : isDragging
+                ? `translateY(${-dragOffset}px)`
+                : 'translateY(0)',
+            transition: isDragging
+              ? 'none'
+              : 'transform 800ms cubic-bezier(0.22, 1, 0.36, 1)',
+          }}
+          onTouchStart={(e) => handleStart(e.touches[0].clientY)}
+          onTouchMove={(e) => {
+            if (e.cancelable) e.preventDefault();
+            handleMove(e.touches[0].clientY);
+          }}
+          onTouchEnd={handleEnd}
+          onMouseDown={(e) => handleStart(e.clientY, () => e.preventDefault())}
+          onMouseMove={(e) => {
+            if (e.buttons === 1) handleMove(e.clientY);
+          }}
+          onMouseUp={handleEnd}
+          onMouseLeave={handleEnd}
+        >
+          <div className="mobile-intro-glow" />
+          <div className="mobile-intro-ember absolute -bottom-5 left-[10%] w-[6px] h-[6px] rounded-full pointer-events-none opacity-0 blur-[1.5px] will-change-[transform,opacity] bg-[radial-gradient(circle,rgba(147,197,253,0.8)_0%,rgba(56,189,248,0.3)_55%,transparent_100%)] animate-[floatEmber_12s_infinite_linear] [animation-delay:0.5s]" />
+          <div className="mobile-intro-ember absolute -bottom-5 left-[25%] w-[8px] h-[8px] rounded-full pointer-events-none opacity-0 blur-[1.5px] will-change-[transform,opacity] bg-[radial-gradient(circle,rgba(147,197,253,0.8)_0%,rgba(56,189,248,0.3)_55%,transparent_100%)] animate-[floatEmber_16s_infinite_linear] [animation-delay:3s]" />
+          <div className="mobile-intro-ember absolute -bottom-5 left-[40%] w-[5px] h-[5px] rounded-full pointer-events-none opacity-0 blur-[1.5px] will-change-[transform,opacity] bg-[radial-gradient(circle,rgba(147,197,253,0.8)_0%,rgba(56,189,248,0.3)_55%,transparent_100%)] animate-[floatEmber_10s_infinite_linear] [animation-delay:1.5s]" />
+          <div className="mobile-intro-ember absolute -bottom-5 left-[55%] w-[10px] h-[10px] rounded-full pointer-events-none opacity-0 blur-[1.5px] will-change-[transform,opacity] bg-[radial-gradient(circle,rgba(147,197,253,0.8)_0%,rgba(56,189,248,0.3)_55%,transparent_100%)] animate-[floatEmber_20s_infinite_linear] [animation-delay:5s]" />
+          <div className="mobile-intro-ember absolute -bottom-5 left-[70%] w-[7px] h-[7px] rounded-full pointer-events-none opacity-0 blur-[1.5px] will-change-[transform,opacity] bg-[radial-gradient(circle,rgba(147,197,253,0.8)_0%,rgba(56,189,248,0.3)_55%,transparent_100%)] animate-[floatEmber_14s_infinite_linear] [animation-delay:2.5s]" />
+          <div className="mobile-intro-ember absolute -bottom-5 left-[85%] w-[9px] h-[9px] rounded-full pointer-events-none opacity-0 blur-[1.5px] will-change-[transform,opacity] bg-[radial-gradient(circle,rgba(147,197,253,0.8)_0%,rgba(56,189,248,0.3)_55%,transparent_100%)] animate-[floatEmber_18s_infinite_linear] [animation-delay:4s]" />
+          <div className="mobile-intro-ember absolute -bottom-5 left-[18%] w-[6px] h-[6px] rounded-full pointer-events-none opacity-0 blur-[1.5px] will-change-[transform,opacity] bg-[radial-gradient(circle,rgba(147,197,253,0.8)_0%,rgba(56,189,248,0.3)_55%,transparent_100%)] animate-[floatEmber_11s_infinite_linear] [animation-delay:6.5s]" />
+          <div className="mobile-intro-ember absolute -bottom-5 left-[60%] w-[8px] h-[8px] rounded-full pointer-events-none opacity-0 blur-[1.5px] will-change-[transform,opacity] bg-[radial-gradient(circle,rgba(147,197,253,0.8)_0%,rgba(56,189,248,0.3)_55%,transparent_100%)] animate-[floatEmber_15s_infinite_linear] [animation-delay:8s]" />
+          <div className="mobile-intro-content">
+            <p className="text-[#b7ccf6] font-display text-xs font-bold tracking-[0.18em] uppercase m-0 mb-4 text-center mobile-intro-label">
+              INTERNSHIP ACTIVITY TRACKER
+            </p>
+            <h1 className="text-white font-display text-2xl font-bold tracking-[-0.03em] leading-tight m-0 mb-4 text-center max-w-[15ch] mobile-intro-headline">
+              One portal for standup operations and Git compliance review.
+            </h1>
+            <p className="text-[rgba(228,238,255,0.9)] text-sm leading-relaxed m-0 text-center max-w-[28ch] mobile-intro-description">
+              Sign in with Corpus to enter a unified workspace.
+            </p>
+          </div>
+          <div className="mobile-intro-indicator">
+            <div className="indicator-line" />
+            <span className="indicator-text">Swipe up to Login</span>
+          </div>
+        </div>
+      )}
       <div
         className="absolute inset-0 pointer-events-none bg-[linear-gradient(135deg,rgba(15,23,42,0.05),transparent_40%),linear-gradient(315deg,rgba(37,99,235,0.08),transparent_38%)]"
         aria-hidden="true"
@@ -145,7 +253,9 @@ export function CorpusLoginPage() {
         </div>
 
         <section className="absolute right-0 top-0 w-screen h-full z-10 flex flex-col items-center justify-center pl-[68vw] pr-[4vw] py-0 bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_40%,#f1f5f9_100%)] overflow-hidden max-[1024px]:min-[801px]:pl-[68vw] max-[1024px]:min-[801px]:pr-[4vw] max-[800px]:relative max-[800px]:w-full max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:flex max-[800px]:items-center max-[800px]:justify-center max-[800px]:px-5 max-[800px]:py-9 max-[800px]:bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] max-[800px]:overflow-visible">
-          <div className="w-full max-w-[380px] flex flex-col gap-0 animate-[panel-fade-in_0.6s_cubic-bezier(0.16,1,0.3,1)_both] max-[800px]:max-w-[440px] max-[800px]:py-0 max-[800px]:my-0 max-[800px]:mx-auto">
+          <div
+            className={`w-full max-w-[380px] flex flex-col gap-0 animate-[panel-fade-in_0.6s_cubic-bezier(0.16,1,0.3,1)_both] max-[800px]:max-w-[440px] max-[800px]:py-0 max-[800px]:my-0 max-[800px]:mx-auto mobile-login-reveal-container ${showIntro && !revealForm ? 'form-hidden' : ''} ${showIntro && revealForm ? 'form-reveal' : ''}`}
+          >
             {/* Mobile Brand Header */}
             <div className="hidden max-[800px]:flex flex-col items-center text-center mb-6">
               <div className="w-12 h-12 rounded-2xl bg-[linear-gradient(135deg,#4f46e5_0%,#3b82f6_100%)] flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-3 animate-[pulse-border_2s_infinite_ease-in-out]">
