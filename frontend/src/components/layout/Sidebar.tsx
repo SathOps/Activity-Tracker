@@ -233,8 +233,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         {/* Logo / Header */}
         <div className="py-7 px-6 relative z-10 flex items-center justify-between">
           <div>
-            <h1 className="m-0 text-xl font-extrabold font-display text-slate-50 dark:text-slate-50 tracking-tight leading-none">
-              Activity Tracker
+            <h1 className="m-0 text-xl font-extrabold font-display text-slate-50 dark:text-slate-50 tracking-tight leading-none uppercase">
+              ACTIVITY TRACKER
             </h1>
             <p className="m-0 mt-1.5 text-[10.5px] font-bold font-display uppercase tracking-[0.14em] text-slate-500 dark:text-slate-500">
               Internship workspace
