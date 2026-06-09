@@ -922,7 +922,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <input
               aria-label={t('dashboard.standupVerificationDate')}
               onChange={handleSelectedDateChange}
-              className="w-full bg-blue-50/30 dark:bg-slate-950/20 border border-blue-200 dark:border-white/10 rounded-xl text-[var(--text-main)] text-sm px-4 py-3 backdrop-blur-sm transition-all duration-200 outline-none hover:border-blue-400/50 focus:border-blue-500/50 focus:shadow-[0_0_15px_rgba(59,130,246,0.12)] cursor-pointer"
+              className="w-full bg-white dark:bg-slate-950/20 border border-slate-200 dark:border-white/10 rounded-xl text-[var(--text-main)] text-sm px-4 py-3 backdrop-blur-sm transition-all duration-200 outline-none hover:border-blue-500/35 focus:border-blue-500/50 focus:shadow-[0_0_15px_rgba(59,130,246,0.12)] cursor-pointer"
               type="date"
               value={selectedDateKey}
               style={{
@@ -943,7 +943,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </span>
             <input
               aria-label={t('common.search')}
-              className="w-full bg-blue-50/30 dark:bg-slate-950/20 border border-blue-200 dark:border-white/10 rounded-xl text-[var(--text-main)] text-sm px-4 py-3 backdrop-blur-sm transition-all duration-200 outline-none hover:border-blue-400/50 focus:border-blue-500/50 focus:shadow-[0_0_15px_rgba(59,130,246,0.12)] cursor-pointer"
+              className="w-full bg-white dark:bg-slate-950/20 border border-slate-200 dark:border-white/10 rounded-xl text-[var(--text-main)] text-sm px-4 py-3 backdrop-blur-sm transition-all duration-200 outline-none hover:border-blue-500/35 focus:border-blue-500/50 focus:shadow-[0_0_15px_rgba(59,130,246,0.12)] cursor-pointer"
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder="Search by team name..."
               type="text"
@@ -953,8 +953,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         )}
       </section>
 
-      <section className="flex flex-wrap items-center justify-between gap-4 py-3 border-t border-blue-200 dark:border-white/5 mt-2">
-        <div className="flex p-1 bg-blue-50/50 dark:bg-slate-950/20 border border-blue-200 dark:border-white/10 rounded-full backdrop-blur-md">
+      <section className="flex flex-wrap items-center justify-between gap-4 py-3 border-t border-slate-500/5 dark:border-white/5 mt-2">
+        <div className="flex p-1 bg-slate-100 dark:bg-slate-950/20 border border-slate-200 dark:border-white/10 rounded-full backdrop-blur-md">
           {(['DAILY', 'WEEKLY'] as const).map((viewKey) => {
             const isActive = statusView === viewKey;
 
@@ -997,7 +997,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       </section>
 
       {statusLoading ? (
-        <p className="text-blue-600/80 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-blue-200 dark:border-slate-800 rounded-2xl bg-blue-50/50 dark:bg-slate-950/10">
+        <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
           {t('dashboard.loadingTeamStatus')}
         </p>
       ) : null}
@@ -1014,7 +1014,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       showDailyChart &&
       filteredDailyStatusRows.length > 0 ? (
         <section
-          className="relative overflow-hidden rounded-3xl p-[28px_24px_24px] bg-blue-50/45 border border-blue-200/70 shadow-[var(--shadow-soft)] transition-all duration-[350ms] hover:bg-blue-50/65 hover:border-blue-500/50 dark:bg-slate-900/45 dark:border-white/5 dark:backdrop-blur-2xl dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.04)] dark:hover:border-blue-500/30 dark:hover:shadow-[0_12px_48px_rgba(0,0,0,0.5),0_0_30px_rgba(59,130,246,0.08),inset_0_1px_0_rgba(255,255,255,0.06)]"
+          className="relative overflow-hidden rounded-3xl p-[28px_24px_24px] bg-white border border-[var(--border-strong)] shadow-[var(--shadow-soft)] transition-all duration-[350ms] hover:border-[var(--accent)] hover:shadow-[var(--shadow-hover)] dark:bg-slate-900/45 dark:border-white/5 dark:backdrop-blur-2xl dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.04)] dark:hover:border-blue-500/30 dark:hover:shadow-[0_12px_48px_rgba(0,0,0,0.5),0_0_30px_rgba(59,130,246,0.08),inset_0_1px_0_rgba(255,255,255,0.06)]"
           aria-label={t('dashboard.atAGlanceStatisticsAria')}
         >
           {/* Flowing Gradient Line */}
@@ -1056,7 +1056,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           {user?.role === 'intern' ? (
             <section className="grid gap-5 sm:gap-6 md:gap-4">
               {/* 4 Tabs for Standups */}
-              <div className="flex gap-2 p-1 bg-blue-50/50 dark:bg-slate-900/50 border border-blue-200 dark:border-slate-800/60 rounded-2xl max-w-lg">
+              <div className="flex gap-2 p-1 bg-slate-900/50 border border-slate-800/60 rounded-2xl max-w-lg">
                 {(['S1', 'S2', 'S3', 'S4'] as const).map((slotId) => {
                   const timeLabel = getSlotTimeLabel(slotId);
                   const isActive = activeSlotTab === slotId;
@@ -1067,7 +1067,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       className={`flex-1 py-2 px-3 text-xs font-semibold rounded-xl transition-all duration-200 cursor-pointer border-none outline-none ${
                         isActive
                           ? 'bg-blue-600 text-white shadow-md shadow-blue-600/10'
-                          : 'bg-transparent text-slate-500 hover:text-slate-800 hover:bg-blue-100/40 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-transparent'
+                          : 'text-slate-400 hover:text-slate-200 bg-transparent'
                       }`}
                       type="button"
                     >
@@ -1080,7 +1080,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {/* Roster of members showing their status for the active slot tab */}
               <div className="grid gap-5 sm:gap-6 md:gap-3">
                 {displayTeams[0]?.interns.length === 0 ? (
-                  <p className="text-blue-600/80 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-blue-200 dark:border-slate-800 rounded-2xl bg-blue-50/50 dark:bg-slate-950/10">
+                  <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
                     No team members available.
                   </p>
                 ) : (
@@ -1094,7 +1094,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     return (
                       <article
                         key={intern.internId}
-                        className="p-4 sm:p-5 flex items-center justify-between gap-4 bg-blue-50/45 dark:bg-slate-900/45 border border-blue-200 dark:border-white/5 rounded-2xl backdrop-blur-xl shadow-md shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-blue-50/65 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-lg transition-all duration-300"
+                        className="p-4 sm:p-5 flex items-center justify-between gap-4 bg-white dark:bg-slate-900/45 border border-slate-200 dark:border-white/5 rounded-2xl backdrop-blur-xl shadow-md shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-slate-50 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-lg transition-all duration-300"
                       >
                         <div className="flex flex-col gap-0.5">
                           <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 m-0">
@@ -1128,7 +1128,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               </div>
             </section>
           ) : filteredDailyStatusRows.length === 0 ? (
-            <p className="text-blue-600/80 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-blue-200 dark:border-slate-800 rounded-2xl bg-blue-50/50 dark:bg-slate-950/10">
+            <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
               {teamDailyStatusRows.length === 0
                 ? t('dashboard.noTeamsForStatusTracking')
                 : 'No matching teams found.'}
@@ -1137,7 +1137,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <section className="grid gap-5 sm:gap-6 md:gap-4">
               {filteredDailyStatusRows.map((row) => (
                 <article
-                  className="p-4 sm:p-5 md:p-6 relative overflow-hidden bg-blue-50/45 dark:bg-slate-900/45 border border-blue-200 dark:border-blue-500/25 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-blue-50/65 dark:hover:bg-slate-900/55 hover:border-blue-500/50 dark:hover:border-blue-400/40 hover:shadow-xl transition-all duration-300"
+                  className="p-4 sm:p-5 md:p-6 relative overflow-hidden bg-white dark:bg-slate-900/45 border border-blue-200 dark:border-blue-500/25 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-slate-50 dark:hover:bg-slate-900/55 hover:border-blue-500/50 dark:hover:border-blue-400/40 hover:shadow-xl transition-all duration-300"
                   key={row.teamId}
                 >
                   <header className="flex items-start justify-between gap-2">
@@ -1186,7 +1186,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {!statusLoading && !statusError && statusView === 'WEEKLY' ? (
         <section className="grid gap-5 sm:gap-6 md:gap-3.5">
           {filteredWeeklyStatusRows.length === 0 ? (
-            <p className="text-blue-600/80 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-blue-200 dark:border-slate-800 rounded-2xl bg-blue-50/50 dark:bg-slate-950/10">
+            <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
               {teamWeeklyStatusRows.length === 0
                 ? t('dashboard.noTeamsForWeeklyStatusTracking')
                 : 'No matching teams found.'}
@@ -1195,7 +1195,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <section className="grid gap-5 sm:gap-6 md:gap-4">
               {filteredWeeklyStatusRows.map((row) => (
                 <article
-                  className="p-4 sm:p-5 md:p-6 relative overflow-hidden bg-blue-50/45 dark:bg-slate-900/45 border border-blue-200 dark:border-white/5 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-blue-50/65 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-xl transition-all duration-300"
+                  className="p-4 sm:p-5 md:p-6 relative overflow-hidden bg-white dark:bg-slate-900/45 border border-slate-200 dark:border-white/5 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-slate-50 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-xl transition-all duration-300"
                   key={row.teamId}
                 >
                   <header className="mb-2.5">
@@ -1251,7 +1251,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </section>
           )}
 
-          <section className="p-6 relative overflow-hidden bg-blue-50/45 dark:bg-slate-900/45 border border-blue-200 dark:border-white/5 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
+          <section className="p-6 relative overflow-hidden bg-white dark:bg-slate-900/45 border border-slate-200 dark:border-white/5 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
             <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 m-0 mb-2">
               {t('dashboard.weeklyPendingSummary')}
             </h3>
@@ -1300,14 +1300,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <span>{t('dashboard.customDate')}</span>
               <input
                 aria-label={t('dashboard.customDate')}
-                className="px-4 py-2 bg-blue-50/50 dark:bg-slate-950/20 border border-blue-200 dark:border-slate-800 rounded-xl text-blue-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-400/50 transition-all duration-200 cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
+                className="px-4 py-2 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 hover:border-blue-500/50 transition-all duration-200 cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
                 onChange={handleSelectedDateChange}
                 type="date"
                 value={selectedDateKey}
               />
             </label>
             <button
-              className="flex items-center gap-2 px-4 py-2 bg-blue-50/50 dark:bg-slate-950/20 border border-blue-200 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-200 text-sm font-semibold hover:border-blue-400/50 dark:hover:border-slate-700 hover:bg-blue-100/60 dark:hover:bg-slate-950/30 transition-all duration-200 active:scale-95 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-200 text-sm font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:bg-slate-500/10 dark:hover:bg-slate-950/30 transition-all duration-200 active:scale-95 cursor-pointer"
               onClick={() => handleShiftAnalyticsRange(-30)}
               type="button"
             >
@@ -1315,7 +1315,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <span>{t('dashboard.previousRange')}</span>
             </button>
             <button
-              className="flex items-center gap-2 px-4 py-2 bg-blue-50/50 dark:bg-slate-950/20 border border-blue-200 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-200 text-sm font-semibold hover:border-blue-400/50 dark:hover:border-slate-700 hover:bg-blue-100/60 dark:hover:bg-slate-950/30 transition-all duration-200 active:scale-95 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-200 text-sm font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:bg-slate-500/10 dark:hover:bg-slate-950/30 transition-all duration-200 active:scale-95 cursor-pointer"
               onClick={() => handleShiftAnalyticsRange(30)}
               type="button"
             >
@@ -1323,7 +1323,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <ChevronRight size={16} />
             </button>
             <button
-              className="flex items-center gap-2 px-4 py-2 bg-blue-50/50 dark:bg-slate-950/20 border border-blue-200 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-200 text-sm font-semibold hover:border-blue-400/50 dark:hover:border-slate-700 hover:bg-blue-100/60 dark:hover:bg-slate-950/30 transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-500/5 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-200 text-sm font-semibold hover:border-slate-400 dark:hover:border-slate-700 hover:bg-slate-500/10 dark:hover:bg-slate-950/30 transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
               disabled={analyticsLoading}
               onClick={() => {
                 void loadAnalytics();
@@ -1344,7 +1344,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </header>
 
         {analyticsLoading ? (
-          <p className="text-blue-600/80 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-blue-200 dark:border-slate-800 rounded-2xl bg-blue-50/50 dark:bg-slate-950/10">
+          <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
             {t('dashboard.loadingAnalytics')}
           </p>
         ) : null}
@@ -1354,7 +1354,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           </p>
         ) : null}
         {!analyticsLoading && !analyticsError ? (
-          <section className="p-4 sm:p-5 md:p-6 relative overflow-hidden bg-blue-50/45 dark:bg-slate-900/45 border border-blue-200 dark:border-blue-500/25 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:border-blue-500/50 dark:hover:border-blue-400/40 transition-all duration-300 overflow-x-hidden">
+          <section className="p-4 sm:p-5 md:p-6 relative overflow-hidden bg-white dark:bg-slate-900/45 border border-blue-200 dark:border-blue-500/25 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:border-blue-500/50 dark:hover:border-blue-400/40 transition-all duration-300 overflow-x-hidden">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div className="grid gap-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -1433,7 +1433,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {!isInlineStatusView && (
         <div className={`grid ${gridColsClass} gap-5 sm:gap-6 md:gap-4 mb-6`}>
           {showTotalTeams && (
-            <div className="p-4 sm:p-5 flex flex-col justify-between bg-blue-50/50 border border-blue-200/80 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.015),0_1px_1px_rgb(0,0,0,0.005)] hover:bg-blue-50/80 hover:border-blue-500/30 hover:shadow-[0_20px_40px_-15px_rgba(37,99,235,0.12),0_0_0_1px_rgba(37,99,235,0.05)] hover:-translate-y-[2px] dark:bg-slate-900/45 dark:border-white/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] dark:hover:bg-slate-900/55 dark:hover:border-blue-500/35 dark:hover:shadow-xl transition-all duration-300">
+            <div className="p-4 sm:p-5 flex flex-col justify-between bg-white border border-slate-200/80 rounded-3xl shadow-lg shadow-black/[0.02] hover:bg-slate-50/55 hover:border-blue-500/30 hover:shadow-[0_20px_40px_-15px_rgba(37,99,235,0.12),0_0_0_1px_rgba(37,99,235,0.05)] hover:-translate-y-[2px] dark:bg-slate-900/45 dark:border-white/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] dark:hover:bg-slate-900/55 dark:hover:border-blue-500/35 dark:hover:shadow-xl transition-all duration-300">
               <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
                 {t('dashboard.totalTeams', 'Total Teams')}
               </span>
@@ -1448,7 +1448,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </div>
           )}
           {showTotalInterns && (
-            <div className="p-4 sm:p-5 flex flex-col justify-between bg-blue-50/50 border border-blue-200/80 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.015),0_1px_1px_rgb(0,0,0,0.005)] hover:bg-blue-50/80 hover:border-blue-500/30 hover:shadow-[0_20px_40px_-15px_rgba(37,99,235,0.12),0_0_0_1px_rgba(37,99,235,0.05)] hover:-translate-y-[2px] dark:bg-slate-900/45 dark:border-white/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] dark:hover:bg-slate-900/55 dark:hover:border-blue-500/35 dark:hover:shadow-xl transition-all duration-300">
+            <div className="p-4 sm:p-5 flex flex-col justify-between bg-white border border-slate-200/80 rounded-3xl shadow-lg shadow-black/[0.02] hover:bg-slate-50/55 hover:border-blue-500/30 hover:shadow-[0_20px_40px_-15px_rgba(37,99,235,0.12),0_0_0_1px_rgba(37,99,235,0.05)] hover:-translate-y-[2px] dark:bg-slate-900/45 dark:border-white/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] dark:hover:bg-slate-900/55 dark:hover:border-blue-500/35 dark:hover:shadow-xl transition-all duration-300">
               <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
                 {t('dashboard.totalInterns', 'Total Interns')}
               </span>
@@ -1462,7 +1462,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               </div>
             </div>
           )}
-          <div className="p-4 sm:p-5 flex flex-col justify-between bg-blue-50/50 border border-blue-200/80 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.015),0_1px_1px_rgb(0,0,0,0.005)] hover:bg-blue-50/80 hover:border-blue-500/30 hover:shadow-[0_20px_40px_-15px_rgba(37,99,235,0.12),0_0_0_1px_rgba(37,99,235,0.05)] hover:-translate-y-[2px] dark:bg-slate-900/45 dark:border-white/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] dark:hover:bg-slate-900/55 dark:hover:border-blue-500/35 dark:hover:shadow-xl transition-all duration-300">
+          <div className="p-4 sm:p-5 flex flex-col justify-between bg-white border border-slate-200/80 rounded-3xl shadow-lg shadow-black/[0.02] hover:bg-slate-50/55 hover:border-blue-500/30 hover:shadow-[0_20px_40px_-15px_rgba(37,99,235,0.12),0_0_0_1px_rgba(37,99,235,0.05)] hover:-translate-y-[2px] dark:bg-slate-900/45 dark:border-white/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] dark:hover:bg-slate-900/55 dark:hover:border-blue-500/35 dark:hover:shadow-xl transition-all duration-300">
             <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-soft)]">
               {t('dashboard.standupCompletionRate', 'Completion Rate')}
             </span>
@@ -1701,7 +1701,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           {activeView !== 'TEAMS' ? (
             <section className="grid gap-5 sm:gap-6 md:gap-4">
               {filteredInternRows.length === 0 ? (
-                <p className="text-blue-600/80 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-blue-200 dark:border-slate-800 rounded-2xl bg-blue-50/50 dark:bg-slate-950/10">
+                <p className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
                   {activeView === 'COMPLETED'
                     ? t('dashboard.noCompletedInternsFound')
                     : t('dashboard.noInternsForCurrentSearch')}
@@ -1709,7 +1709,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               ) : (
                 filteredInternRows.map((intern) => (
                   <article
-                    className="p-4 sm:p-5 md:p-6 relative overflow-hidden bg-blue-50/45 dark:bg-slate-900/45 border border-blue-200 dark:border-white/5 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-blue-50/65 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-xl transition-all duration-300"
+                    className="p-4 sm:p-5 md:p-6 relative overflow-hidden bg-white dark:bg-slate-900/45 border border-slate-200 dark:border-white/5 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-slate-50 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-xl transition-all duration-300"
                     key={intern.internId}
                   >
                     {user?.role !== 'intern' && (
@@ -1933,7 +1933,7 @@ function renderTeamHeatmap(
 
   if (rows.length === 0 || dateKeys.length === 0) {
     return (
-      <div className="text-blue-600/80 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-blue-200 dark:border-slate-800 rounded-2xl bg-blue-50/50 dark:bg-slate-950/10">
+      <div className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
         {noActivityLabel}
       </div>
     );
@@ -2023,7 +2023,7 @@ function renderInternHeatmap(
 
   if (members.length === 0 || dateKeys.length === 0) {
     return (
-      <div className="text-blue-600/80 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-blue-200 dark:border-slate-800 rounded-2xl bg-blue-50/50 dark:bg-slate-950/10">
+      <div className="text-slate-400 dark:text-slate-500 text-sm font-medium py-12 text-center border border-dashed border-slate-300 dark:border-slate-800 rounded-2xl bg-slate-500/5 dark:bg-slate-950/10">
         {noActivityLabel}
       </div>
     );
