@@ -5,6 +5,7 @@ import { getAudioRecordUrl } from '../../services/corpus/corpusService';
 import type { StandupSlotResult } from '../../utils/verification';
 import StandupAudioPlayer from '../audio/StandupAudioPlayer';
 import { useAuth } from '../../contexts/AuthContext';
+import { cn } from '../../lib/utils';
 
 export type SubmissionStatus = 'COMPLETED' | 'PENDING';
 
@@ -23,6 +24,7 @@ export interface InternCardProps {
   pendingApproval?: 'ADD' | 'REMOVE';
   onApprovePending?: (internId: string) => void;
   onRejectPending?: (internId: string) => void;
+  noBackground?: boolean;
 }
 
 export const InternCard: React.FC<InternCardProps> = ({
@@ -40,6 +42,7 @@ export const InternCard: React.FC<InternCardProps> = ({
   pendingApproval,
   onApprovePending,
   onRejectPending,
+  noBackground = false,
 }) => {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -125,7 +128,14 @@ export const InternCard: React.FC<InternCardProps> = ({
   };
 
   return (
-    <article className="p-5 sm:p-6 relative overflow-hidden bg-white dark:bg-slate-900/45 border border-slate-200 dark:border-white/5 rounded-2xl backdrop-blur-xl shadow-md shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-slate-50 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-lg transition-all duration-300 grid gap-4">
+    <article
+      className={cn(
+        'grid gap-4 transition-all duration-300',
+        noBackground
+          ? 'bg-transparent dark:bg-transparent border border-transparent dark:border-transparent p-0 shadow-none dark:shadow-none'
+          : 'p-5 sm:p-6 relative overflow-hidden bg-white dark:bg-slate-900/45 border border-slate-200 dark:border-white/5 rounded-2xl backdrop-blur-xl shadow-md shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-slate-50 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-lg'
+      )}
+    >
       <div className="flex justify-between items-start">
         <div className="grid gap-1">
           <div className="text-slate-800 dark:text-slate-100 text-sm font-semibold flex flex-wrap items-center gap-2">

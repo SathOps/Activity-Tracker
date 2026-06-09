@@ -419,7 +419,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
         {/* Floating Footer Section */}
         <div className="px-4 pb-4 pt-2 mt-auto relative z-10">
-          <div className="p-4 rounded-2xl border bg-white border-slate-200/80 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05),0_8px_10px_-6px_rgba(0,0,0,0.05)] hover:border-slate-300 hover:shadow-[0_20px_25px_-5px_rgba(0,0,0,0.08),0_10px_10px_-5px_rgba(0,0,0,0.04)] dark:border-white/5 dark:bg-slate-900/40 dark:backdrop-blur-md dark:shadow-[0_12px_32px_rgba(0,0,0,0.35)] dark:hover:shadow-[0_16px_40px_rgba(0,0,0,0.45)] dark:hover:border-white/10 hover:scale-[1.01] transition-all duration-300">
+          <div className="p-4 rounded-2xl border bg-blue-50/60 border-blue-200/80 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05),0_8px_10px_-6px_rgba(0,0,0,0.05)] hover:bg-blue-100/40 hover:border-blue-300/80 hover:shadow-[0_20px_25px_-5px_rgba(0,0,0,0.08),0_10px_10px_-5px_rgba(0,0,0,0.04)] dark:border-white/5 dark:bg-slate-900/40 dark:backdrop-blur-md dark:shadow-[0_12px_32px_rgba(0,0,0,0.35)] dark:hover:shadow-[0_16px_40px_rgba(0,0,0,0.45)] dark:hover:border-white/10 hover:scale-[1.01] transition-all duration-300">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <button
@@ -457,7 +457,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               <button
                 type="button"
                 onClick={handleCorpusLogout}
-                className="flex items-center justify-center p-2 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 hover:text-rose-700 dark:bg-rose-500/5 dark:hover:bg-rose-500/15 dark:border-rose-500/20 dark:text-rose-500 dark:hover:text-rose-400 cursor-pointer transition-all duration-200 active:scale-95"
+                className="flex items-center justify-center p-2 rounded-lg bg-white border border-blue-200/80 text-blue-600 hover:bg-blue-50 dark:bg-rose-500/5 dark:hover:bg-rose-500/15 dark:border-rose-500/20 dark:text-rose-500 dark:hover:text-rose-400 cursor-pointer transition-all duration-200 active:scale-95"
                 title="Logout"
               >
                 <LogOut size={15} />

@@ -52,6 +52,10 @@
   }
 }
 
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 @keyframes float-blob-1 {
   0%,
   100% {

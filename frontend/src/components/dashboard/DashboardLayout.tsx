@@ -1709,13 +1709,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               ) : (
                 filteredInternRows.map((intern) => (
                   <article
-                    className="p-4 sm:p-5 md:p-6 relative overflow-hidden bg-white dark:bg-slate-900/45 border border-slate-200 dark:border-white/5 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-slate-50 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-xl transition-all duration-300"
+                    className="p-4 sm:p-5 md:p-6 relative overflow-hidden bg-white dark:bg-slate-900/45 border border-slate-200 dark:border-white/5 rounded-3xl backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] hover:bg-slate-50 dark:hover:bg-slate-900/55 hover:border-blue-500/35 hover:shadow-xl hover:-translate-y-1 hover:scale-[1.005] animate-fadeInUp transition-all duration-300"
                     key={intern.internId}
                   >
                     {user?.role !== 'intern' && (
                       <header className="mb-3">
                         <div>
-                          <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-450 m-0 uppercase tracking-wider">
+                          <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-455 m-0 uppercase tracking-wider">
                             {intern.teamName}
                           </h3>
                         </div>
@@ -1724,6 +1724,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     <InternCard
                       internId={intern.internId}
                       internName={intern.internName}
+                      noBackground={mode === 'logs'}
                       onDeleteIntern={
                         canManageStandup ? handleDeleteIntern : undefined
                       }
@@ -2861,7 +2862,8 @@ function getWeeklyDayClasses(count: number): string {
   }
 
   return (
-    base + ' !border-red-400/40 shadow-[inset_0_0_0_1px_rgba(248,113,113,0.08)]'
+    base +
+    ' !border-red-400/40 shadow-[inset_0_0_0_1px_rgba(248,113,113,0.08)] bg-red-200/70 dark:bg-transparent'
   );
 }
 

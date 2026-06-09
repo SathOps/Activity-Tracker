@@ -193,9 +193,7 @@ function AppContent() {
 export default function App() {
   return (
     <>
-      <Inspector keys={['control', 'shift', 'command', 'c']}>
-        <AppContent />
-      </Inspector>
+      <AppContent />
       <Toaster />
     </>
   );
