@@ -49,7 +49,7 @@ export function MobileBottomNav({
   }, [isIntern]);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-[76px] bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-xl border-t border-slate-800/60 dark:border-slate-800/40 shadow-[0_-8px_30px_rgba(0,0,0,0.4)] z-50 flex items-center justify-center px-4 transition-colors duration-300">
+    <nav className="fixed bottom-0 left-0 right-0 h-[76px] bg-blue-50/90 dark:bg-slate-950/95 backdrop-blur-xl border-t border-blue-200/50 dark:border-slate-800/40 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.4)] z-50 flex items-center justify-center px-4 transition-colors duration-300">
       <div className="flex w-full max-w-[480px] items-center justify-between relative h-full">
         {navItems.slice(0, 2).map((item) => (
           <button
@@ -57,8 +57,8 @@ export function MobileBottomNav({
             className={cn(
               'flex-1 w-0 flex flex-col items-center justify-center gap-1 bg-transparent border-none cursor-pointer py-2 rounded-xl transition-all duration-200 h-full',
               activeStandupPanel === item.id
-                ? 'text-blue-500 font-semibold drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'text-blue-600 dark:text-blue-500 font-semibold drop-shadow-[0_0_8px_rgba(59,130,246,0.15)] dark:drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]'
+                : 'text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-slate-200'
             )}
             onClick={() => setActiveStandupPanel(item.id)}
           >
@@ -85,8 +85,8 @@ export function MobileBottomNav({
             className={cn(
               'flex-1 w-0 flex flex-col items-center justify-center gap-1 bg-transparent border-none cursor-pointer py-2 rounded-xl transition-all duration-200 h-full',
               activeStandupPanel === item.id
-                ? 'text-blue-500 font-semibold drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'text-blue-600 dark:text-blue-500 font-semibold drop-shadow-[0_0_8px_rgba(59,130,246,0.15)] dark:drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]'
+                : 'text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-slate-200'
             )}
             onClick={() => setActiveStandupPanel(item.id)}
           >

@@ -137,7 +137,7 @@ export function Layout({ children }: Props) {
             <button
               type="button"
               onClick={() => setIsSidebarOpen(true)}
-              className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/40 rounded-xl transition-all border border-slate-200 dark:border-slate-800/40 flex items-center justify-center shrink-0 bg-transparent"
+              className="p-2 text-blue-600 bg-blue-50/50 border border-blue-200/60 hover:bg-blue-100/50 hover:text-blue-700 dark:bg-transparent dark:border-slate-800/40 dark:text-slate-400 dark:hover:bg-slate-800/40 dark:hover:text-white rounded-xl transition-all flex items-center justify-center shrink-0"
               aria-label="Open Sidebar"
             >
               <Menu size={20} />
@@ -444,10 +444,10 @@ export function Layout({ children }: Props) {
                   onClick={() => setIsIslandCollapsed(false)}
                   title="Expand Panel"
                 >
-                  <div className="w-full h-full rounded-full bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-xl border border-slate-800/60 dark:border-slate-800/40 shadow-[0_4px_20px_rgba(0,0,0,0.35)] flex items-center justify-center cursor-pointer animate-bounce">
+                  <div className="w-full h-full rounded-full bg-blue-50/90 dark:bg-slate-950/90 backdrop-blur-xl border border-blue-200/50 dark:border-slate-800/40 shadow-[0_4px_20px_rgba(37,99,235,0.15)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.35)] flex items-center justify-center cursor-pointer animate-bounce">
                     <ChevronUp
                       size={24}
-                      className="text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                      className="text-blue-600 dark:text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.2)] dark:drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
                     />
                   </div>
                 </button>
@@ -462,13 +462,13 @@ export function Layout({ children }: Props) {
                         e.stopPropagation();
                         setIsIslandCollapsed(true);
                       }}
-                      className="text-white cursor-pointer border-none bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-md rounded-full hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center w-8 h-8 shadow-[0_2px_10px_rgba(0,0,0,0.25)] border border-slate-800/60 dark:border-slate-800/40"
+                      className="text-blue-600 cursor-pointer border-none bg-blue-50/90 dark:bg-slate-950/90 backdrop-blur-md rounded-full hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center w-8 h-8 shadow-[0_2px_10px_rgba(37,99,235,0.15)] dark:shadow-[0_2px_10px_rgba(0,0,0,0.25)] border border-blue-200/50 dark:border-slate-800/40"
                       title="Collapse Panel"
                     >
                       <ChevronDown
                         size={18}
                         strokeWidth={2.5}
-                        className="text-blue-500 drop-shadow-[0_0_6px_rgba(59,130,246,0.4)]"
+                        className="text-blue-600 dark:text-blue-500 drop-shadow-[0_0_6px_rgba(59,130,246,0.2)] dark:drop-shadow-[0_0_6px_rgba(59,130,246,0.4)]"
                       />
                     </button>
                   </div>
