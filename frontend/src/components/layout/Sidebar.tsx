@@ -171,7 +171,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           flex
           flex-col
           shrink-0
-          z-50
+          z-[110]
           transition-transform
           duration-300
           ease-in-out
@@ -181,17 +181,17 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           md:relative
           md:translate-x-0
           bg-gradient-to-b
-          from-[#182647]
-          via-[#111c34]
-          to-[#0c1222]
+          from-slate-50
+          via-white
+          to-slate-50
           dark:from-[#182647]
           dark:via-[#111c34]
           dark:to-[#0c1222]
           border-r
-          border-white/5
+          border-blue-100
           dark:border-white/5
           backdrop-blur-[24px]
-          shadow-[18px_0_48px_rgba(0,0,0,0.55)]
+          shadow-[18px_0_32px_rgba(37,99,235,0.06),4px_0_12px_rgba(0,0,0,0.04)]
           dark:shadow-[18px_0_48px_rgba(0,0,0,0.55)]
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
@@ -233,10 +233,10 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         {/* Logo / Header */}
         <div className="py-7 px-6 relative z-10 flex items-center justify-between">
           <div>
-            <h1 className="m-0 text-xl font-extrabold font-display text-slate-50 dark:text-slate-50 tracking-tight leading-none uppercase">
-              ACTIVITY TRACKER
+            <h1 className="m-0 text-xl font-extrabold font-display uppercase text-slate-900 dark:text-slate-50 tracking-tight leading-none">
+              Activity Tracker
             </h1>
-            <p className="m-0 mt-1.5 text-[10.5px] font-bold font-display uppercase tracking-[0.14em] text-slate-500 dark:text-slate-500">
+            <p className="m-0 mt-1.5 text-[10.5px] font-bold font-display uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
               Internship workspace
             </p>
           </div>
@@ -244,21 +244,21 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             <button
               type="button"
               onClick={onClose}
-              className="md:hidden p-1.5 text-slate-400 dark:text-slate-400 hover:text-white dark:hover:text-white rounded-lg hover:bg-slate-800/40 dark:hover:bg-slate-800/40 border border-transparent transition-all flex items-center justify-center shrink-0"
+              className="md:hidden p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/40 border border-transparent transition-all flex items-center justify-center shrink-0"
               aria-label="Close Sidebar"
             >
               <X size={18} />
             </button>
           )}
           {/* Solid light blue separator line */}
-          <div className="absolute bottom-0 left-6 right-6 h-[1.5px] bg-blue-400/20 dark:bg-blue-400/20" />
+          <div className="absolute bottom-0 left-6 right-6 h-[1.5px] bg-blue-200 dark:bg-blue-400/20" />
         </div>
 
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-6 relative z-10 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [-webkit-overflow-scrolling:touch]">
           {/* Workspace section */}
           <div>
-            <p className="font-display tracking-[0.16em] uppercase text-[10px] font-bold text-slate-500 dark:text-slate-500 m-0 mb-3.5 ml-2">
+            <p className="font-display tracking-[0.16em] uppercase text-[10px] font-bold text-slate-400 dark:text-slate-500 m-0 mb-3.5 ml-2">
               Workspaces
             </p>
             <nav className="flex flex-col gap-2">
@@ -275,20 +275,20 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     className={`flex items-center gap-3.5 w-full p-3 rounded-xl cursor-pointer text-left transition-all duration-300 relative group hover:scale-[1.012] hover:-translate-y-[0.5px]
                       ${
                         isActive
-                          ? 'bg-blue-500/10 dark:bg-blue-500/10 text-white shadow-[0_4px_20px_rgba(0,0,0,0.2)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] border border-blue-400/30 dark:border-blue-400/30 backdrop-blur-md'
-                          : 'bg-transparent text-slate-400 dark:text-slate-455 hover:bg-slate-800/40 dark:hover:bg-slate-800/40 hover:text-slate-200 dark:hover:text-slate-200 border border-transparent'
+                          ? 'bg-blue-500/10 dark:bg-blue-500/10 text-slate-900 dark:text-white shadow-[0_4px_20px_rgba(37,99,235,0.1)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] border border-blue-300/60 dark:border-blue-400/30 backdrop-blur-md'
+                          : 'bg-transparent text-slate-500 dark:text-slate-455 hover:bg-blue-50 dark:hover:bg-slate-800/40 hover:text-slate-800 dark:hover:text-slate-200 border border-transparent hover:border-blue-100 dark:hover:border-transparent'
                       }
                     `}
                   >
                     {isActive && (
-                      <div className="absolute -left-px top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-gradient-to-b from-blue-400 to-indigo-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[4.5px] h-[30px] rounded-r-full bg-gradient-to-b from-blue-400 via-blue-500 to-violet-500 shadow-[0_0_12px_rgba(99,102,241,0.7),0_0_4px_rgba(59,130,246,0.9)]" />
                     )}
                     <span
                       className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 border
                         ${
                           isActive
-                            ? 'bg-blue-600/15 dark:bg-blue-600/15 text-white border-blue-500/20 dark:border-blue-500/20 shadow-inner brightness-105'
-                            : 'bg-slate-800/50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-400 border-transparent group-hover:bg-slate-800/80 dark:group-hover:bg-slate-800/80 group-hover:text-slate-200 dark:group-hover:text-slate-200'
+                            ? 'bg-blue-600/15 dark:bg-blue-600/15 text-blue-600 dark:text-white border-blue-400/30 dark:border-blue-500/20 shadow-inner brightness-105'
+                            : 'bg-slate-100 dark:bg-slate-800/50 text-slate-400 dark:text-slate-400 border-slate-200/60 dark:border-transparent group-hover:bg-blue-50 dark:group-hover:bg-slate-800/80 group-hover:text-blue-600 dark:group-hover:text-slate-200'
                         }
                       `}
                     >
@@ -297,14 +297,14 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     <div>
                       <p
                         className={`m-0 text-[13px] font-semibold font-display tracking-tight transition-colors
-                        ${isActive ? 'text-slate-50 dark:text-slate-50' : 'text-slate-350 dark:text-slate-350'}
+                        ${isActive ? 'text-slate-900 dark:text-slate-50' : 'text-slate-600 dark:text-slate-350'}
                       `}
                       >
                         {item.label}
                       </p>
                       <p
                         className={`m-0 mt-0.5 text-[11px] font-medium transition-colors
-                        ${isActive ? 'text-blue-300/80 dark:text-blue-300/80' : 'text-slate-500 dark:text-slate-500'}
+                        ${isActive ? 'text-blue-500 dark:text-blue-300/80' : 'text-slate-400 dark:text-slate-500'}
                       `}
                       >
                         {item.desc}
@@ -319,20 +319,20 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           {/* GitLab section */}
           {activeWorkspace === 'compliance' ? (
             <section className="mb-2">
-              <p className="font-display tracking-[0.16em] uppercase text-[10px] font-bold text-slate-500 dark:text-slate-500 m-0 mb-2.5 ml-2">
+              <p className="font-display tracking-[0.16em] uppercase text-[10px] font-bold text-slate-400 dark:text-slate-500 m-0 mb-2.5 ml-2">
                 GitLab Access
               </p>
-              <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/15 dark:border-blue-500/15 backdrop-blur-md flex flex-col gap-3 shadow-none dark:shadow-none">
+              <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-500/5 border border-blue-200/80 dark:border-blue-500/15 backdrop-blur-md flex flex-col gap-3 shadow-none dark:shadow-none">
                 {/* Status row */}
                 <div className="flex items-center gap-2">
                   <span
                     className={`w-2 h-2 rounded-full shrink-0 animate-pulse
-                    ${gitlabConnected ? 'bg-emerald-500 shadow-sm shadow-emerald-500/50' : 'bg-slate-500 dark:bg-slate-500'}
+                    ${gitlabConnected ? 'bg-emerald-500 shadow-sm shadow-emerald-500/50' : 'bg-slate-400 dark:bg-slate-500'}
                   `}
                   />
                   <span
                     className={`text-xs font-semibold tracking-tight
-                    ${gitlabConnected ? 'text-emerald-400 dark:text-emerald-450' : 'text-slate-400 dark:text-slate-400'}
+                    ${gitlabConnected ? 'text-emerald-600 dark:text-emerald-450' : 'text-slate-500 dark:text-slate-400'}
                   `}
                   >
                     {gitlabConnected ? 'Connected' : 'Not connected'}
@@ -346,7 +346,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   </p>
                 ) : (
                   <>
-                    <p className="m-0 text-[11px] text-slate-500 dark:text-slate-500 leading-relaxed font-sans font-medium">
+                    <p className="m-0 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-sans font-medium">
                       Connect your GitLab account via OAuth to enable compliance
                       features.
                     </p>
@@ -377,7 +377,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           {/* Sub-navigation */}
           {subnavItems.length > 0 ? (
             <section>
-              <p className="font-display tracking-[0.16em] uppercase text-[10px] font-bold text-slate-500 dark:text-slate-500 m-0 mb-2.5 ml-2">
+              <p className="font-display tracking-[0.16em] uppercase text-[10px] font-bold text-slate-400 dark:text-slate-500 m-0 mb-2.5 ml-2">
                 Navigation
               </p>
               <nav className="flex flex-col gap-1">
@@ -394,14 +394,14 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                       className={`flex items-center gap-3.5 w-full px-3.5 py-2.5 rounded-xl border-none cursor-pointer text-left transition-all duration-200 group
                         ${
                           isActive
-                            ? 'bg-blue-500/15 dark:bg-blue-500/15 text-blue-100 dark:text-blue-100 font-semibold'
-                            : 'bg-transparent text-white dark:text-slate-450 hover:bg-slate-800/20 dark:hover:bg-slate-800/20 hover:text-slate-200 dark:hover:text-slate-200'
+                            ? 'bg-blue-100/80 dark:bg-blue-500/15 text-blue-700 dark:text-blue-100 font-semibold'
+                            : 'bg-transparent text-slate-600 dark:text-slate-450 hover:bg-blue-50 dark:hover:bg-slate-800/20 hover:text-slate-900 dark:hover:text-slate-200'
                         }
                       `}
                     >
                       <span
                         className={`transition-transform duration-250 flex items-center group-hover:scale-110
-                        ${isActive ? 'text-blue-400 dark:text-blue-400 opacity-100' : 'text-slate-550 dark:text-slate-550 opacity-70 group-hover:opacity-100'}
+                        ${isActive ? 'text-blue-600 dark:text-blue-400 opacity-100' : 'text-slate-400 dark:text-slate-550 opacity-70 group-hover:opacity-100'}
                       `}
                       >
                         {item.icon}
@@ -466,7 +466,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           </div>
 
           {/* Version text */}
-          <p className="m-0 mt-3 text-[9px] font-sans font-medium text-slate-600 dark:text-slate-600 tracking-wider text-center">
+          <p className="m-0 mt-3 text-[9px] font-sans font-medium text-slate-400 dark:text-slate-600 tracking-wider text-center">
             Activity Tracker v2.0
           </p>
         </div>

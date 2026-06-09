@@ -18,6 +18,7 @@ import StandupWorkspace from './features/standup/StandupWorkspace';
 import { MyProfilePage } from './components/profile/MyProfilePage';
 import { DEFAULT_ROUTE_BY_ROLE, getRouteMeta } from './lib/appRoutes';
 import { useRouter } from './lib/router';
+import { Inspector } from 'react-dev-inspector';
 
 function ComplianceRoute({ children }: { children: React.ReactNode }) {
   return (
@@ -192,7 +193,9 @@ function AppContent() {
 export default function App() {
   return (
     <>
-      <AppContent />
+      <Inspector keys={['control', 'shift', 'command', 'c']}>
+        <AppContent />
+      </Inspector>
       <Toaster />
     </>
   );

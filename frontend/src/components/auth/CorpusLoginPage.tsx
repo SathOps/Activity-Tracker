@@ -63,13 +63,13 @@ export function CorpusLoginPage() {
   }
 
   return (
-    <main className="relative flex h-screen w-screen items-center justify-center overflow-hidden p-0 font-body bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.15),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(139,92,246,0.12),transparent_40%),radial-gradient(circle_at_60%_10%,rgba(14,165,233,0.1),transparent_30%),linear-gradient(135deg,#eef0fa_0%,#e8ecf5_40%,#eff0fa_100%)] bg-[size:200%_200%] animate-[login-gradient-shift_15s_ease_infinite] max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:items-start max-[800px]:overflow-y-auto max-[800px]:bg-[linear-gradient(180deg,#0b1220_0%,#102a57_40%,#f8fafc_40%,#f8fafc_100%)]">
+    <main className="relative flex h-screen w-screen items-center justify-center overflow-hidden p-0 font-body bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.15),transparent_40%),radial-gradient(circle_at_80%_80%,rgba(139,92,246,0.12),transparent_40%),radial-gradient(circle_at_60%_10%,rgba(14,165,233,0.1),transparent_30%),linear-gradient(135deg,#eef0fa_0%,#e8ecf5_40%,#eff0fa_100%)] bg-[size:200%_200%] animate-[login-gradient-shift_15s_ease_infinite] max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:items-center max-[800px]:overflow-y-auto max-[800px]:bg-slate-50">
       <div
         className="absolute inset-0 pointer-events-none bg-[linear-gradient(135deg,rgba(15,23,42,0.05),transparent_40%),linear-gradient(315deg,rgba(37,99,235,0.08),transparent_38%)]"
         aria-hidden="true"
       />
       <div className="relative w-screen h-screen overflow-hidden z-10 max-[800px]:flex max-[800px]:flex-col max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:w-full max-[800px]:overflow-visible">
-        <section className="absolute left-0 top-0 w-[65vw] h-full z-20 flex flex-col justify-center gap-12 p-[60px_48px] text-[#f8fbff] [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)] bg-[linear-gradient(145deg,#0b1220,#112d5c)] overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1024px]:min-[801px]:w-[65vw] max-[1024px]:min-[801px]:p-[50px_36px] max-[800px]:relative max-[800px]:left-auto max-[800px]:top-auto max-[800px]:h-auto max-[800px]:min-h-[44vh] max-[800px]:w-full max-[800px]:justify-start max-[800px]:gap-0 max-[800px]:p-[28px_22px_42px] max-[800px]:[clip-path:none] max-[800px]:bg-[radial-gradient(circle_at_78%_12%,rgba(59,130,246,0.3),transparent_28%),linear-gradient(155deg,#07111f_0%,#102a57_100%)] max-[800px]:overflow-hidden">
+        <section className="absolute left-0 top-0 w-[65vw] h-full z-20 flex flex-col justify-center gap-12 p-[60px_48px] text-[#f8fbff] [clip-path:polygon(0_0,100%_0,80%_100%,0_100%)] bg-[linear-gradient(145deg,#0b1220,#112d5c)] overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1024px]:min-[801px]:w-[65vw] max-[1024px]:min-[801px]:p-[50px_36px] max-[800px]:hidden">
           <div className="relative z-10 pr-[12%] max-[800px]:pr-0 max-[800px]:pt-6">
             <p className="text-[#b7ccf6] font-display text-xs font-bold tracking-[0.18em] uppercase m-0 mb-2 max-w-[600px]">
               Internship Activity Tracker
@@ -124,7 +124,7 @@ export function CorpusLoginPage() {
         </section>
 
         <div
-          className="relative z-30 hidden h-1.5 w-full bg-[linear-gradient(90deg,#1e40af_0%,#3b82f6_35%,#0ea5e9_50%,#3b82f6_65%,#1e40af_100%)] shadow-[0_0_18px_rgba(14,165,233,0.8)] max-[800px]:block"
+          className="relative z-30 hidden h-1.5 w-full bg-[linear-gradient(90deg,#1e40af_0%,#3b82f6_35%,#0ea5e9_50%,#3b82f6_65%,#1e40af_100%)] shadow-[0_0_18px_rgba(14,165,233,0.8)] max-[800px]:hidden"
           aria-hidden="true"
         />
 
@@ -144,10 +144,10 @@ export function CorpusLoginPage() {
           <div className="w-full h-full bg-[linear-gradient(to_bottom,#1e40af_0%,#3b82f6_20%,#0ea5e9_40%,#60a5fa_50%,#0ea5e9_60%,#3b82f6_80%,#1e40af_100%)] bg-[size:100%_200%] animate-[slit-glow-shimmer_4s_linear_infinite] [clip-path:polygon(calc(65vw_-_3px)_0,calc(65vw_+_3px)_0,calc(52vw_+_3px)_100%,calc(52vw_-_3px)_100%)]" />
         </div>
 
-        <section className="absolute right-0 top-0 w-screen h-full z-10 flex flex-col items-center justify-center pl-[68vw] pr-[4vw] py-0 bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_40%,#f1f5f9_100%)] overflow-hidden max-[1024px]:min-[801px]:pl-[68vw] max-[1024px]:min-[801px]:pr-[4vw] max-[800px]:relative max-[800px]:w-full max-[800px]:h-auto max-[800px]:min-h-0 max-[800px]:flex max-[800px]:items-center max-[800px]:justify-start max-[800px]:px-5 max-[800px]:py-9 max-[800px]:bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] max-[800px]:overflow-visible">
+        <section className="absolute right-0 top-0 w-screen h-full z-10 flex flex-col items-center justify-center pl-[68vw] pr-[4vw] py-0 bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_40%,#f1f5f9_100%)] overflow-hidden max-[1024px]:min-[801px]:pl-[68vw] max-[1024px]:min-[801px]:pr-[4vw] max-[800px]:relative max-[800px]:w-full max-[800px]:h-auto max-[800px]:min-h-screen max-[800px]:flex max-[800px]:items-center max-[800px]:justify-center max-[800px]:px-5 max-[800px]:py-9 max-[800px]:bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] max-[800px]:overflow-visible">
           <div className="w-full max-w-[380px] flex flex-col gap-0 animate-[panel-fade-in_0.6s_cubic-bezier(0.16,1,0.3,1)_both] max-[800px]:max-w-[440px] max-[800px]:py-0 max-[800px]:my-0 max-[800px]:mx-auto">
             {/* Mobile Brand Header */}
-            <div className="hidden flex-col items-center text-center mb-6">
+            <div className="hidden max-[800px]:flex flex-col items-center text-center mb-6">
               <div className="w-12 h-12 rounded-2xl bg-[linear-gradient(135deg,#4f46e5_0%,#3b82f6_100%)] flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-3 animate-[pulse-border_2s_infinite_ease-in-out]">
                 <svg
                   className="text-white"

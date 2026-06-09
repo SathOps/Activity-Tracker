@@ -1056,7 +1056,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           {user?.role === 'intern' ? (
             <section className="grid gap-5 sm:gap-6 md:gap-4">
               {/* 4 Tabs for Standups */}
-              <div className="flex gap-2 p-1 bg-slate-900/50 border border-slate-800/60 rounded-2xl max-w-lg">
+              <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-950/20 border border-slate-200 dark:border-white/10 rounded-2xl max-w-lg">
                 {(['S1', 'S2', 'S3', 'S4'] as const).map((slotId) => {
                   const timeLabel = getSlotTimeLabel(slotId);
                   const isActive = activeSlotTab === slotId;
@@ -1067,7 +1067,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       className={`flex-1 py-2 px-3 text-xs font-semibold rounded-xl transition-all duration-200 cursor-pointer border-none outline-none ${
                         isActive
                           ? 'bg-blue-600 text-white shadow-md shadow-blue-600/10'
-                          : 'text-slate-400 hover:text-slate-200 bg-transparent'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-250 hover:bg-black/5 dark:hover:bg-white/5 bg-transparent'
                       }`}
                       type="button"
                     >

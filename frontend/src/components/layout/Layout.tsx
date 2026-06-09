@@ -101,7 +101,7 @@ export function Layout({ children }: Props) {
   );
 
   const modeMeta = getRouteMeta(pathname);
-  const isStandupMode = modeMeta.workspace === 'standup';
+  const _isStandupMode = modeMeta.workspace === 'standup';
   const isComplianceMode = modeMeta.workspace === 'compliance';
 
   useEffect(() => {
@@ -130,7 +130,7 @@ export function Layout({ children }: Props) {
         <div className="fixed inset-0 md:left-[300px] pointer-events-none bg-[radial-gradient(rgba(37,99,235,0.08)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:24px_24px] z-0" />
 
         <div
-          className={`relative z-10 px-4 pt-3 pb-6 md:px-8 md:py-6 max-w-[1200px] mx-auto min-w-0 ${isStandupMode ? 'pb-24 md:pb-6' : ''}`}
+          className={`relative z-10 px-4 pt-3 pb-6 md:px-8 md:py-6 max-w-[1200px] mx-auto min-w-0 ${pathname === '/standup' ? 'pb-24 md:pb-6' : ''}`}
         >
           {/* Mobile top controls bar (Outside of card) */}
           <div className="flex items-center justify-between md:hidden w-full mb-3 px-1">
@@ -211,13 +211,20 @@ export function Layout({ children }: Props) {
                 background:
                   themeMode === 'dark'
                     ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(217, 119, 6, 0.04))'
-                    : '#eff6ff',
+                    : 'linear-gradient(135deg, rgba(245, 158, 11, 0.10), rgba(251, 191, 36, 0.04))',
                 borderColor:
-                  themeMode === 'dark' ? 'rgba(245, 158, 11, 0.25)' : '#bfdbfe',
-                color: themeMode === 'dark' ? '#ffedd5' : '#1e40af',
+                  themeMode === 'dark'
+                    ? 'rgba(245, 158, 11, 0.25)'
+                    : 'rgba(245, 158, 11, 0.35)',
+                color: themeMode === 'dark' ? '#ffedd5' : '#92400e',
               }}
               className="relative overflow-hidden flex items-center gap-3 px-5 py-4 rounded-[14px] border text-[13.5px] leading-[1.5] warning-pulse-card mb-6"
             >
+              {/* Shimmer sweep overlay */}
+              <div
+                aria-hidden="true"
+                className="absolute top-0 w-1/2 h-full pointer-events-none left-[-100%] bg-gradient-to-r from-transparent via-white/15 to-transparent skew-x-[-25deg] animate-[shimmer-sweep_4s_infinite_ease-in-out]"
+              />
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -226,7 +233,7 @@ export function Layout({ children }: Props) {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 style={{
-                  color: themeMode === 'dark' ? '#f59e0b' : '#2563eb',
+                  color: themeMode === 'dark' ? '#f59e0b' : '#d97706',
                 }}
                 className="warning-icon-pulse shrink-0 w-[18px] h-[18px]"
               >
@@ -238,7 +245,7 @@ export function Layout({ children }: Props) {
                 GitLab account not connected. Use the{' '}
                 <strong
                   style={{
-                    color: themeMode === 'dark' ? '#fbbf24' : '#1d4ed8',
+                    color: themeMode === 'dark' ? '#fbbf24' : '#b45309',
                   }}
                 >
                   Connect with GitLab
@@ -250,7 +257,7 @@ export function Layout({ children }: Props) {
           <div className="min-w-0">{children}</div>
         </div>
 
-        {isStandupMode && (
+        {pathname === '/standup' && (
           <>
             {/* Desktop Floating Island Navigation */}
             {/* Desktop Floating Island Navigation Container */}
@@ -285,7 +292,7 @@ export function Layout({ children }: Props) {
                 title={isIslandCollapsed ? 'Expand Panel' : undefined}
               >
                 {isIslandCollapsed ? (
-                  <div className="flex items-center justify-center text-white animate-bounce cursor-pointer">
+                  <div className="flex items-center justify-center text-blue-600 dark:text-white animate-bounce cursor-pointer">
                     <ChevronUp
                       size={24}
                       className="drop-shadow-[0_0_8px_#3b82f6] hover:drop-shadow-[0_0_15px_#6366f1] transition-all duration-300"
@@ -414,7 +421,7 @@ export function Layout({ children }: Props) {
                       e.stopPropagation();
                       setIsIslandCollapsed(true);
                     }}
-                    className="text-white cursor-pointer border-none bg-transparent hover:scale-110 active:scale-95 transition-all duration-300 animate-bounce flex items-center justify-center w-full h-full"
+                    className="text-blue-600 dark:text-white cursor-pointer border-none bg-transparent hover:scale-110 active:scale-95 transition-all duration-300 animate-bounce flex items-center justify-center w-full h-full"
                     title="Collapse Panel"
                   >
                     <ChevronDown

@@ -339,19 +339,7 @@ export function BatchesPage() {
                     <button
                       type="button"
                       onClick={() => setEditingId(null)}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        padding: '8px 14px',
-                        borderRadius: 10,
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        background: 'rgba(255,255,255,0.06)',
-                        color: 'rgba(203,213,232,0.8)',
-                        fontSize: 13,
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                      }}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[10px] border border-slate-300 dark:border-white/10 bg-white/60 dark:bg-white/[0.06] text-slate-600 dark:text-[rgba(203,213,232,0.8)] text-[13px] font-medium cursor-pointer transition-all duration-200 hover:bg-slate-100 dark:hover:bg-white/10"
                     >
                       <X size={13} />
                       Cancel
@@ -373,16 +361,7 @@ export function BatchesPage() {
                     >
                       {batch.name}
                     </h3>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: 12,
-                        color: 'rgba(148,163,184,0.75)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 5,
-                      }}
-                    >
+                    <p className="m-0 text-[12px] text-slate-400 dark:text-[rgba(148,163,184,0.75)] flex items-center gap-[5px]">
                       <Calendar size={11} style={{ flexShrink: 0 }} />
                       {batch.start_date && batch.end_date
                         ? `${batch.start_date} → ${batch.end_date}`
@@ -402,17 +381,7 @@ export function BatchesPage() {
                             end_date: batch.end_date || '',
                           });
                         }}
-                        style={{
-                          padding: '6px 12px',
-                          borderRadius: 8,
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          background: 'rgba(255,255,255,0.06)',
-                          color: 'rgba(203,213,232,0.85)',
-                          fontSize: 12,
-                          fontWeight: 500,
-                          cursor: 'pointer',
-                          transition: 'all 0.2s',
-                        }}
+                        className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-white/10 bg-white/60 dark:bg-white/[0.06] text-slate-600 dark:text-[rgba(203,213,232,0.85)] text-xs font-medium cursor-pointer transition-all duration-200 hover:bg-blue-50 dark:hover:bg-white/10 hover:border-blue-300 dark:hover:border-white/20"
                       >
                         Edit
                       </button>

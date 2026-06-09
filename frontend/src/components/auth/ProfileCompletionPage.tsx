@@ -100,14 +100,14 @@ export function ProfileCompletionPage() {
 
   const pageContent = (
     <section className="w-full">
-      <div className="border-b border-[rgba(215,226,242,0.9)] mb-6 pb-5">
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#6c85a9] mb-2.5 font-display">
+      <div className="border-b border-[rgba(215,226,242,0.9)] dark:border-slate-700/60 mb-6 pb-5">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#6c85a9] dark:text-blue-400/80 mb-2.5 font-display">
           Edit Profile
         </p>
-        <h2 className="text-[28px] sm:text-[34px] font-bold tracking-[-0.03em] text-[#13233f] mb-2.5 font-display">
+        <h2 className="text-[28px] sm:text-[34px] font-bold tracking-[-0.03em] text-[#13233f] dark:text-slate-100 mb-2.5 font-display">
           Update your details
         </h2>
-        <p className="text-[15px] leading-[1.75] text-[#5a6b87] m-0">
+        <p className="text-[15px] leading-[1.75] text-[#5a6b87] dark:text-slate-400 m-0">
           Update your GitLab username and optional details below. Fields
           auto-filled from Corpus cannot be changed here.
         </p>
@@ -115,7 +115,7 @@ export function ProfileCompletionPage() {
 
       <form className="grid gap-[18px]" onSubmit={handleSubmit}>
         <label
-          className="grid gap-2 text-[#243752]"
+          className="grid gap-2 text-[#243752] dark:text-slate-300"
           htmlFor="profile-gitlab-username"
         >
           <span className="text-xs font-semibold tracking-[0.03em]">
@@ -129,7 +129,7 @@ export function ProfileCompletionPage() {
             type="text"
             value={gitlabUsername}
             onChange={(e) => setGitlabUsername(e.target.value)}
-            className="w-full min-h-[56px] px-4 rounded-2xl bg-[#f7faff]/95 border border-[#bed0e9]/95 text-[#13233f] text-[15px] placeholder-[#8b9bb4] focus:bg-white focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/16 focus:outline-none transition-all duration-200"
+            className="w-full min-h-[56px] px-4 rounded-2xl bg-[#f7faff]/95 dark:bg-slate-800/60 border border-[#bed0e9]/95 dark:border-slate-700/60 text-[#13233f] dark:text-slate-100 text-[15px] placeholder-[#8b9bb4] dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/16 focus:outline-none transition-all duration-200"
             placeholder="your_gitlab_username"
             required
             autoComplete="username"
@@ -137,7 +137,7 @@ export function ProfileCompletionPage() {
         </label>
 
         <label
-          className="grid gap-2 text-[#243752]"
+          className="grid gap-2 text-[#243752] dark:text-slate-300"
           htmlFor="profile-global-username"
         >
           <span className="text-xs font-semibold tracking-[0.03em]">
@@ -148,13 +148,13 @@ export function ProfileCompletionPage() {
             type="text"
             value={globalUsername}
             onChange={(e) => setGlobalUsername(e.target.value)}
-            className="w-full min-h-[56px] px-4 rounded-2xl bg-[#f7faff]/95 border border-[#bed0e9]/95 text-[#13233f] text-[15px] placeholder-[#8b9bb4] focus:bg-white focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/16 focus:outline-none transition-all duration-200"
+            className="w-full min-h-[56px] px-4 rounded-2xl bg-[#f7faff]/95 dark:bg-slate-800/60 border border-[#bed0e9]/95 dark:border-slate-700/60 text-[#13233f] dark:text-slate-100 text-[15px] placeholder-[#8b9bb4] dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/16 focus:outline-none transition-all duration-200"
             placeholder="e.g. GitHub handle"
           />
         </label>
 
         <label
-          className="grid gap-2 text-[#243752]"
+          className="grid gap-2 text-[#243752] dark:text-slate-300"
           htmlFor="profile-global-email"
         >
           <span className="text-xs font-semibold tracking-[0.03em]">
@@ -165,13 +165,13 @@ export function ProfileCompletionPage() {
             type="email"
             value={globalEmail}
             onChange={(e) => setGlobalEmail(e.target.value)}
-            className="w-full min-h-[56px] px-4 rounded-2xl bg-[#f7faff]/95 border border-[#bed0e9]/95 text-[#13233f] text-[15px] placeholder-[#8b9bb4] focus:bg-white focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/16 focus:outline-none transition-all duration-200"
+            className="w-full min-h-[56px] px-4 rounded-2xl bg-[#f7faff]/95 dark:bg-slate-800/60 border border-[#bed0e9]/95 dark:border-slate-700/60 text-[#13233f] dark:text-slate-100 text-[15px] placeholder-[#8b9bb4] dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/16 focus:outline-none transition-all duration-200"
             placeholder="you@personal.com"
           />
         </label>
 
         <label
-          className="grid gap-2 text-[#243752]"
+          className="grid gap-2 text-[#243752] dark:text-slate-300"
           htmlFor="profile-date-of-joining"
         >
           <span className="text-xs font-semibold tracking-[0.03em]">
@@ -182,7 +182,7 @@ export function ProfileCompletionPage() {
             type="date"
             value={dateOfJoining}
             onChange={(e) => setDateOfJoining(e.target.value)}
-            className="w-full min-h-[56px] px-4 rounded-2xl bg-[#f7faff]/95 border border-[#bed0e9]/95 text-[#13233f] text-[15px] placeholder-[#8b9bb4] focus:bg-white focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/16 focus:outline-none transition-all duration-200"
+            className="w-full min-h-[56px] px-4 rounded-2xl bg-[#f7faff]/95 dark:bg-slate-800/60 border border-[#bed0e9]/95 dark:border-slate-700/60 text-[#13233f] dark:text-slate-100 text-[15px] placeholder-[#8b9bb4] dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/16 focus:outline-none transition-all duration-200 [color-scheme:light] dark:[color-scheme:dark]"
           />
         </label>
 
@@ -195,7 +195,7 @@ export function ProfileCompletionPage() {
           <p className="text-[13px] text-green-600 m-0">{successMsg}</p>
         )}
         {!error && !successMsg && (
-          <p className="text-[#6b7f9d] text-[13px] leading-[1.6] m-0">
+          <p className="text-[#6b7f9d] dark:text-slate-500 text-[13px] leading-[1.6] m-0">
             Name, email and institution are managed by Corpus and cannot be
             edited here.
           </p>
@@ -690,12 +690,14 @@ export function ProfileCompletionPage() {
   return (
     <div className="max-w-[560px] mx-auto">
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-slate-800">Edit Profile</h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+          Edit Profile
+        </h2>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Update your editable profile fields.
         </p>
       </div>
-      <div className="bg-white border border-slate-200 rounded-2xl p-7 sm:p-8 shadow-sm">
+      <div className="bg-white dark:bg-[#0d1525] border border-slate-200 dark:border-blue-500/15 rounded-2xl p-7 sm:p-8 shadow-sm dark:shadow-[0_8px_48px_rgba(0,0,0,0.5)] dark:backdrop-blur-2xl">
         {pageContent}
       </div>
     </div>
