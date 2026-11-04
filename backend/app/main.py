@@ -22,7 +22,7 @@ for _path in (_BACKEND_DIR, _SRC_DIR):
 load_dotenv(os.path.join(_BACKEND_DIR, ".env"))
 
 from app.dependencies import get_current_user, get_gitlab_identity
-from app.routers import auth, batches, compliance, leaderboard, me, mentor_access, selector, standup, teams, users, weekly_performance
+from app.routers import auth, batches, compliance, corpus, leaderboard, me, mentor_access, selector, standup, teams, users, weekly_performance
 from internship_activity_tracker.infrastructure import database as db
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s - %(message)s")
@@ -57,6 +57,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 
 
 app.include_router(auth.router, prefix="/api")
+app.include_router(corpus.router, prefix="/api/corpus")
 app.include_router(me.router, prefix="/api/me")
 app.include_router(batches.router, prefix="/api/batches")
 app.include_router(teams.router, prefix="/api/teams")
