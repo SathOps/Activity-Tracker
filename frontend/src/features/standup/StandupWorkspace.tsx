@@ -9,6 +9,7 @@ import { getStandupWorkspace } from '../../services/api/standup';
 import { useAuth } from '../../contexts/AuthContext';
 import { configureCorpusService } from '../../services/corpus';
 import { useConfigStore } from '../../stores/configStore';
+import { createCorpusMockFetcher } from '../../services/mockData';
 
 const CORPUS_PROXY_BASE = `${getCorpusRuntimeBaseUrl()}/corpus/proxy`;
 
@@ -22,6 +23,7 @@ export default function StandupWorkspace() {
       baseUrl: CORPUS_PROXY_BASE,
       useMock: false,
       authToken: '',
+      fetcher: createCorpusMockFetcher(CORPUS_PROXY_BASE),
     });
   }, [authToken]);
 

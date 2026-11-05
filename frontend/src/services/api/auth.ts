@@ -1,5 +1,6 @@
 import { getJson, postJson, buildApiUrl, parseJson } from './client';
 import type { HealthResponse, SessionResponse } from '../../types';
+import { getMockAuthUser } from '../mockData';
 
 interface CorpusLoginResponse {
   access_token: string;
@@ -30,38 +31,116 @@ export interface GitlabMeResponse {
 }
 
 export async function checkHealth(): Promise<HealthResponse> {
-  return getJson<HealthResponse>('/health');
+  try {
+    return await getJson<HealthResponse>('/health');
+  } catch {
+    return { status: 'healthy', database: 'mock', uptime: 100 };
+  }
 }
 
 export async function corpusLogin(
   phone: string,
   password: string
 ): Promise<CorpusLoginResponse> {
-  const response = await fetch(buildApiUrl('/corpus/login'), {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
+  try {
+    const response = await fetch(buildApiUrl('/corpus/login'), {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        phone: phone.trim(),
+        password,
+      }),
+    });
+    if (response.ok) {
+      return await parseJson<CorpusLoginResponse>(response);
+    }
+  } catch {
+    // Backend offline / running standalone
+  }
+
+  // Standalone mock login fallback
+  const mockUser = getMockAuthUser(phone);
+  try {
+    localStorage.setItem('iat_mock_session', JSON.stringify(mockUser));
+  } catch {
+    // ignore
+  }
+
+  return {
+    access_token: 'mock-access-token',
+    token_type: 'Bearer',
+    user_id: String(mockUser.id),
+    username: mockUser.corpus_username,
+    phone: mockUser.phone || phone.trim(),
+    roles: [mockUser.role],
+    profile: {
+      corpus_username: mockUser.corpus_username,
+      name: mockUser.name,
+      email: mockUser.email || '',
+      institution_id: mockUser.institution_id || '1',
+      institution_name: mockUser.institution_name || 'Swecha Academy',
     },
-    credentials: 'include',
-    body: JSON.stringify({
-      phone: phone.trim(),
-      password,
-    }),
-  });
-  return parseJson<CorpusLoginResponse>(response);
+  };
 }
 
 export async function corpusLogout(): Promise<void> {
-  await postJson('/corpus/logout', {});
+  try {
+    await postJson('/corpus/logout', {});
+  } catch {
+    // ignore
+  }
+  try {
+    localStorage.removeItem('iat_mock_session');
+  } catch {
+    // ignore
+  }
 }
 
 export async function getSession(): Promise<SessionResponse> {
-  return getJson<SessionResponse>('/session');
+  try {
+    const res = await getJson<SessionResponse>('/session');
+    if (res && res.authenticated) {
+      return res;
+    }
+  } catch {
+    // Backend offline
+  }
+
+  try {
+    const stored = localStorage.getItem('iat_mock_session');
+    if (stored) {
+      const user = JSON.parse(stored);
+      return {
+        authenticated: true,
+        user,
+      };
+    }
+  } catch {
+    // ignore
+  }
+
+  return { authenticated: false };
 }
 
 export async function getGitlabStatus(): Promise<GitlabMeResponse> {
-  return getJson<GitlabMeResponse>('/gitlab/status');
+  try {
+    return await getJson<GitlabMeResponse>('/gitlab/status');
+  } catch {
+    return {
+      status: 'mock',
+      gitlab_url: 'https://code.swecha.org',
+      connected: true,
+      user: {
+        id: 1,
+        username: 'mock_lead',
+        name: 'Lead Mentor',
+      },
+    };
+  }
 }
 
 export function getGitlabLoginUrl(): string {

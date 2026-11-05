@@ -414,6 +414,30 @@ export function CorpusLoginPage() {
                   </>
                 )}
               </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  setLoading(true);
+                  setError(null);
+                  setStatusMessage('Launching Demo / Mock Mode...');
+                  try {
+                    const response = await corpusLogin('9876543210', 'demo123');
+                    setAccessToken(response.access_token);
+                    setCorpusToken('session', response.username || 'mock_lead');
+                    queryClient.invalidateQueries({ queryKey: ['session'] });
+                    navigate('/standup');
+                  } catch (err) {
+                    setError('Demo login failed');
+                    setLoading(false);
+                    setStatusMessage(null);
+                  }
+                }}
+                disabled={loading}
+                className="mt-3 w-full py-2.5 px-4 rounded-xl border border-indigo-200/80 bg-indigo-50/70 hover:bg-indigo-100/80 text-indigo-700 text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm disabled:opacity-50"
+              >
+                <span>⚡ Continue with Demo / Mock Account</span>
+              </button>
             </form>
 
             <div className="mt-6">
