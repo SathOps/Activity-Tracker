@@ -112,6 +112,7 @@ export function Layout({ children }: Props) {
     }
 
     document.documentElement.setAttribute('data-theme', themeMode);
+    document.documentElement.classList.toggle('dark', themeMode === 'dark');
   }, [themeMode]);
 
   return (
@@ -495,7 +496,7 @@ export function Layout({ children }: Props) {
 
 function readStoredThemeMode(): ThemeMode {
   if (typeof window === 'undefined') {
-    return 'light';
+    return 'dark';
   }
 
   const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
@@ -504,7 +505,7 @@ function readStoredThemeMode(): ThemeMode {
     return stored;
   }
 
-  return 'light';
+  return 'dark';
 }
 
 function persistThemeMode(mode: ThemeMode): void {

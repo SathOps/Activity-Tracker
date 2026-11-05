@@ -12,7 +12,6 @@
   --radius-sm: 10px;
 }
 
-:root,
 [data-theme='light'] {
   color-scheme: light;
 
@@ -112,6 +111,7 @@
   --focus-ring: 0 0 0 4px rgba(37, 99, 235, 0.15);
 }
 
+:root,
 [data-theme='dark'] {
   color-scheme: dark;
 
