@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vp dev",
-    "build": "vp build",
+    "build": "vite build",
     "preview": "vp preview",
     "lint": "vp lint .",
     "format": "vp fmt --write .",
