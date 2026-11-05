@@ -207,7 +207,7 @@ export function getMockStandupWorkspace(): StandupWorkspaceResponse {
 
   return {
     data: {
-      scope: 'lead',
+      scope: 'mentor',
       dashboard: {},
       analytics: {},
       team: teamRecords[0] || null,
@@ -222,7 +222,7 @@ export function getMockAuthUser(phone?: string): MockUserSession {
     id: 1,
     corpus_username: 'lead_mentor',
     name: 'Lead Mentor',
-    role: 'lead',
+    role: 'mentor',
     phone: phone || '9876543210',
     email: 'mentor@swecha.org',
     institution_id: '1',

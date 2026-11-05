@@ -16,5 +16,6 @@
       "react-hot-toast": ["./src/shims/react-hot-toast"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
 }

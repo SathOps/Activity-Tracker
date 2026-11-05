@@ -34,7 +34,16 @@ export async function checkHealth(): Promise<HealthResponse> {
   try {
     return await getJson<HealthResponse>('/health');
   } catch {
-    return { status: 'healthy', database: 'mock', uptime: 100 };
+    return {
+      status: 'ok',
+      gitlab_url: 'https://code.swecha.org',
+      role: 'mentor',
+      user: {
+        id: 1,
+        username: 'lead_mentor',
+        name: 'Lead Mentor',
+      },
+    };
   }
 }
 
@@ -117,13 +126,22 @@ export async function getSession(): Promise<SessionResponse> {
       return {
         authenticated: true,
         user,
+        gitlab_connected: true,
+        needs_profile_setup: false,
+        needs_batch_selection: false,
       };
     }
   } catch {
     // ignore
   }
 
-  return { authenticated: false };
+  return {
+    authenticated: false,
+    user: null,
+    gitlab_connected: false,
+    needs_profile_setup: false,
+    needs_batch_selection: false,
+  };
 }
 
 export async function getGitlabStatus(): Promise<GitlabMeResponse> {
