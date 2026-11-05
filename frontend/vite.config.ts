@@ -1,6 +1,5 @@
 /// <reference types="vitest" />
-import { configDefaults, defineConfig } from 'vite-plus';
-import { loadEnv } from 'vite-plus';
+import { defineConfig, loadEnv } from 'vite';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -243,7 +242,7 @@ export default defineConfig({
       'src/**/*.{test,spec}.{ts,tsx}',
     ],
     exclude: [
-      ...configDefaults.exclude,
+      'node_modules/**',
       'builds/**',
       'dist/**',
       'coverage/**',
