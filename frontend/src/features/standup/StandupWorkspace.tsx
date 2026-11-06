@@ -30,7 +30,7 @@ export default function StandupWorkspace() {
   const standupQuery = useQuery({
     queryKey: ['standup-workspace'],
     queryFn: getStandupWorkspace,
-    enabled: !!authToken,
+    enabled: true,
     retry: false,
     staleTime: 2 * 60 * 1000,
   });

@@ -8,28 +8,48 @@ import {
   parseJson,
 } from './client';
 import type { UserRecord } from '../../types';
+import { ALL_MOCK_USERS, searchMockInterns } from '../mockData';
 
 export async function getUsers(): Promise<UserRecord[]> {
-  const payload = await getJson<{ users: UserRecord[] }>('/users/');
-  return payload.users;
+  try {
+    const payload = await getJson<{ users: UserRecord[] }>('/users/');
+    return payload.users;
+  } catch {
+    return ALL_MOCK_USERS;
+  }
 }
 
 export async function getUsersByTeamIds(
   teamIds: number[]
 ): Promise<UserRecord[]> {
-  const params = new URLSearchParams();
-  params.set('team_ids', teamIds.join(','));
-  const payload = await getJson<{ users: UserRecord[] }>(
-    `/users/?${params.toString()}`
-  );
-  return payload.users;
+  try {
+    const params = new URLSearchParams();
+    params.set('team_ids', teamIds.join(','));
+    const payload = await getJson<{ users: UserRecord[] }>(
+      `/users/?${params.toString()}`
+    );
+    return payload.users;
+  } catch {
+    const teamSet = new Set(teamIds);
+    return ALL_MOCK_USERS.filter((u) => u.team_id && teamSet.has(u.team_id));
+  }
 }
 
 export async function searchUsers(query: string): Promise<UserRecord[]> {
-  const payload = await getJson<{ users: UserRecord[] }>(
-    `/users/?q=${encodeURIComponent(query)}`
-  );
-  return payload.users;
+  try {
+    const payload = await getJson<{ users: UserRecord[] }>(
+      `/users/?q=${encodeURIComponent(query)}`
+    );
+    return payload.users;
+  } catch {
+    const q = query.toLowerCase().trim();
+    if (!q) return ALL_MOCK_USERS;
+    return ALL_MOCK_USERS.filter(
+      (u) =>
+        u.name.toLowerCase().includes(q) ||
+        u.corpus_username.toLowerCase().includes(q)
+    );
+  }
 }
 
 export async function createUser(payload: {

@@ -6,10 +6,15 @@ import {
   getApiBaseUrl,
 } from './client';
 import type { BatchRecord } from '../../types';
+import { getMockBatches } from '../mockData';
 
 export async function getBatches(): Promise<BatchRecord[]> {
-  const payload = await getJson<{ batches: BatchRecord[] }>('/batches/');
-  return payload.batches;
+  try {
+    const payload = await getJson<{ batches: BatchRecord[] }>('/batches/');
+    return payload.batches;
+  } catch {
+    return getMockBatches();
+  }
 }
 
 export async function createBatch(
